@@ -1,13 +1,18 @@
+#!/usr/bin/perl
 ## $Id$
 use strict;
 use warnings;
 
+use lib qw( ../lib );
+
 use File::Spec;
+
+use DataSource::DB;
 
 my @run = @ARGV;
 if (@run) {
     my $start_time = time();
-    my $data_source = DBSource->new();
+    my $data_source = DataSource::DB->new();
 
     fix_containers($data_source);
     my $missing_resources = check_resources($data_source);
@@ -130,141 +135,3 @@ sub fix_containers {
 
 
 
-package DBSource;
-
-use DBI;
-use Sesame::Unified::Client;
-use Sesame::Unified::ClientProperties;
-
-sub new {
-    my ($class) = @_;
-
-    return bless {
-        'dbh' => get_connection(),
-        'statements' => [],
-        'affected_clients' => {},
-    }, $class;
-}
-
-sub get_statements {
-    my ($self) = @_;
-
-    return [ sort @{ $self->{'statements'} } ];
-}
-
-sub get_affected_clients {
-    my ($self) = @_;
-
-    return [ sort keys %{ $self->{'affected_clients'} } ];
-}
-
-sub remove_resource {
-    my ($self, $guid) = @_;
-
-    push(
-        @{ $self->{'statements'} },
-        "DELETE FROM srm.resources WHERE id=" .
-            $self->{'dbh'}->quote($guid)." LIMIT 1",
-    );
-}
-
-sub remove_guid_from_email_settings {
-    my ($self, $client_ref, $guid) = @_;
-
-    my $table_name = ( $client_ref->get_client_type() eq 'ortho' ? 'properties' : 'profile' );
-    push(
-        @{ $self->{'statements'} },
-        "UPDATE email_messaging.reminder_settings SET image_guid='' WHERE client_id=" .
-            $self->{'dbh'}->quote($client_ref->get_id())." AND image_guid=" .
-            $self->{'dbh'}->quote($guid),
-    );
-    $self->{'affected_clients'}{ $client_ref->get_db_name() } = 1;
-}
-
-sub remove_guid_from_properties {
-    my ($self, $client_ref, $param, $guid) = @_;
-
-    my $table_name = ( $client_ref->get_client_type() eq 'ortho' ? 'properties' : 'profile' );
-    push(
-        @{ $self->{'statements'} },
-        "UPDATE ".$client_ref->get_db_name().".$table_name SET SVal=NULL " .
-            "WHERE PKey=".$self->{'dbh'}->quote($param)." AND SVal=" .
-            $self->{'dbh'}->quote($guid),
-    );
-    $self->{'affected_clients'}{ $client_ref->get_db_name() } = 1;
-}
-
-sub get_srm_resources {
-    my ($self) = @_;
-
-    return $self->{'dbh'}->selectall_arrayref(
-        "SELECT id, container, path_from, date FROM srm.resources",
-        { 'Slice' => {} },
-    );
-}
-
-sub get_client_property {
-    my ($self, $client_ref, $param) = @_;
-
-    $self->{'dbh'}->do("USE ".$client_ref->get_db_name());
-    my $client_prop = Sesame::Unified::ClientProperties->new(
-        $client_ref->get_client_type(),
-        $self->{'dbh'},
-    );
-
-    return $client_prop->get_property($param);
-}
-
-sub client_by_db {
-    my ($self, $db) = @_;
-
-    return Sesame::Unified::Client->new('db_name', $db);
-}
-
-sub get_clients {
-    my ($self) = @_;
-
-    return Sesame::Unified::Client->get_all_clients();
-}
-
-sub get_email_messaging_guids {
-    my ($self, $client_id) = @_;
-
-    return {
-        map {@$_}
-        grep {defined $_->[0] && length $_->[0]}
-        @{
-            $self->{'dbh'}->selectall_arrayref(
-                "SELECT image_guid, count(*) FROM email_messaging.reminder_settings WHERE client_id=? GROUP BY 1",
-                undef,
-                $client_id,
-            )
-        }
-    };
-}
-
-## static
-sub is_client_exists {
-    my ($class, $db_name) = @_;
-
-    my $dbh = get_connection();
-    my $db = $dbh->selectrow_array("SHOW DATABASES LIKE ?", undef, $db_name);
-    return defined $db && $db eq $db_name;
-}
-
-sub get_connection {
-    my ($db_name) = @_;
-
-    $db_name ||= '';
-
-    return DBI->connect(
-        "DBI:mysql:host=$ENV{SESAME_DB_SERVER}".($db_name?";database=$db_name":""),
-        'admin',
-        'higer4',
-        {
-            'RaiseError' => 1,
-            'ShowErrorStatement' => 1,
-            'PrintError' => 0,
-        }
-    );
-}
