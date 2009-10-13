@@ -24,6 +24,17 @@ sub get_statements {
     return [ sort @{ $self->{'statements'} } ];
 }
 
+sub save_sql_commands_to_file {
+	my ($self, $file_name) = @_;
+	
+	open(my $fh, '>', $file_name) or die "can't write [$file_name]: $!";
+	print $fh "-- $file_name\n";
+	for my $sql_cmd (sort @{ $self->{'statements'} }) {
+		print $fh "$sql_cmd;\n";
+	}
+	close($fh);
+} 
+
 sub get_affected_clients {
     my ($self) = @_;
 

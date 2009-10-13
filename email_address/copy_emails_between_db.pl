@@ -1,17 +1,38 @@
 #!/usr/bin/perl
+## $Id$
 
 use strict;
 
 use lib qw( ../lib );
 
+use CandidateManager;
 use DataSource::DB;
 
 my ($db_from, $db_to) = @ARGV;
 
 if (defined $db_to) {
+	printf("coping emails from [%s] to [%s]\n", $db_from, $db_to);
 	my $data_source = DataSource::DB->new();
 	my $client_data_from = $data_source->get_client_data_by_db($db_from);
 	my $client_data_to   = $data_source->get_client_data_by_db($db_to);
+	
+	my %candidate_selectors = (
+		'ortho_resp' => {
+			'ortho_resp' => \&select_candidate_resp_resp,
+		},
+		'ortho_pat' => {
+			'ortho_resp' => \&select_candidate_pat_resp,
+		},
+	);
+	my $candidate_selector = 
+		$candidate_selectors{
+			$client_data_from->get_full_type() 
+		}{
+			$client_data_to->get_full_type() 
+		};
+	unless (defined $candidate_selector) {
+		die "can't convert data from [".$client_data_from->get_full_type()."] to [".$client_data_to->get_full_type()."]";
+	}
 	
 	my $from_emails = $client_data_from->get_all_emails();
 	my $added_count = 0;
@@ -23,72 +44,26 @@ if (defined $db_to) {
 				'by_resp' => 3,
 			}
 		);
-		if ($from_email->{'RId'}) {
-			my $from_responsible = $client_data_from->get_responsible_by_id(
-				$from_email->{'RId'},
-			);
-			my $to_responsibles = $client_data_to->get_responsible_ids_by_name( 
-				$from_responsible->{'FName'}, 
-				$from_responsible->{'LName'}, 
-			);
-			for my $to_responsible (@$to_responsibles) {
-#				print $from_email->{Email}." - ".$from_responsible->{'RId'}." - ".$to_responsible->{'RId'}."\n";
-				if ($from_email->{'PId'}) {
-					my $from_patient = $client_data_from->get_patient_by_id(
-						$from_email->{'PId'},
-					);
-					my $to_patients_ids = $client_data_to->get_patient_ids_by_responsible(
-						$to_responsible->{'RId'},
-					);
-					my $to_patients = $client_data_to->get_patients_by_name_and_ids( 
-						$from_patient->{'FName'}, 
-						$from_patient->{'LName'},
-						$to_patients_ids,
-					);
-					for my $to_patient (@$to_patients) {
-						$candidate_manager->add_candidate(
-							'by_pat_resp',
-							{
-								'patient' => $to_patient,
-								'responsible' => $to_responsible,
-							},
-						);
-					}
-					if ($from_patient->{'Phone'}) {
-						my $to_patients_with_phone = $client_data_to->get_patients_by_name_and_phone_and_ids( 
-							$from_patient->{'FName'}, 
-							$from_patient->{'LName'},
-							$from_patient->{'Phone'},
-							$to_patients_ids,
-						);
-						for my $to_patient (@$to_patients_with_phone) {
-							$candidate_manager->add_candidate(
-								'by_pat_resp_with_phone',
-								{
-									'patient' => $to_patient,
-									'responsible' => $to_responsible,
-								},
-							);
-						}
-					}
-				}
-				else {
-					$candidate_manager->add_candidate(
-						'by_resp',
-						{
-							'patient' => undef,
-							'responsible' => $to_responsible,
-						},
-					);
-				}
-			}
-		}
+		
+		$candidate_selector->(
+			$from_email, 
+			$client_data_from, 
+			$client_data_to, 
+			$candidate_manager,
+		);
+
 		my $candidate = $candidate_manager->get_single_candidate();
 		if (defined $candidate) {
-			my $email_exists = $client_data_to->email_exists_by_rid(
-				$from_email->{'Email'},
-				$candidate->{'responsible'}{'RId'},
-			);
+			my $email_exists;
+			if ($client_data_to->get_full_type() eq 'ortho_resp') {
+				$email_exists = $client_data_to->email_exists_by_rid(
+					$from_email->{'Email'},
+					$candidate->{'responsible'}{'RId'},
+				);
+			}
+			else {
+				die "email exists not implemented for [".$client_data_to->get_full_type()."] type";
+			}
 			if ($email_exists) {
 				printf(
 					"SKIP: email [%s] is already added\n", 
@@ -120,9 +95,12 @@ if (defined $db_to) {
 			);
 		}
 	}
-    for my $sql (@{ $data_source->get_statements() }) {
-        print "$sql;\n";
-    }
+#    for my $sql (@{ $data_source->get_statements() }) {
+#        print "$sql;\n";
+#    }
+	my $result_sql_fn = '_new_email.'.$db_to.'.sql';
+	printf("write sql commands to [$result_sql_fn]\n");
+	$data_source->save_sql_commands_to_file($result_sql_fn);
 	printf("[%d] emails added\n", $added_count);
 }
 else {
@@ -130,60 +108,114 @@ else {
 	exit(1);
 }
 
-package CandidateManager;
 
-sub new {
-	my ($class, $priorities) = @_;
+sub select_candidate_resp_resp {
+	my ($from_email, $client_data_from, $client_data_to, $candidate_manager) = @_;
 	
-	return bless {
-		'candidates' => {},
-		'priorities' => $priorities,
-	}, $class;
+	if ($from_email->{'RId'}) {
+		my $from_responsible = $client_data_from->get_responsible_by_id(
+			$from_email->{'RId'},
+		);
+		my $to_responsibles = $client_data_to->get_responsible_ids_by_name( 
+			$from_responsible->{'FName'}, 
+			$from_responsible->{'LName'}, 
+		);
+		for my $to_responsible (@$to_responsibles) {
+			if ($from_email->{'PId'}) {
+				select_candidate_for_patient(
+					$client_data_from, 
+					$client_data_to, 
+					$to_responsible, 
+					$from_email->{'PId'}, 
+					$candidate_manager,
+				);
+			}
+			else {
+				$candidate_manager->add_candidate(
+					'by_resp',
+					{
+						'patient' => undef,
+						'responsible' => $to_responsible,
+					},
+				);
+			}
+		}
+	}
 }
 
-sub add_candidate {
-	my ($self, $priority, $params) = @_;
+sub select_candidate_for_patient {
+	my ($client_data_from, $client_data_to, $to_responsible, $from_pid, $candidate_manager) = @_;
 	
-	unless (exists $self->{'priorities'}{$priority}) {
-		die "unknow priority [$priority]";
-	}
-	
-	push(
-		@{ $self->{'candidates'}{$priority} },
-		$params,	
+	my $from_patient = $client_data_from->get_patient_by_id(
+		$from_pid,
 	);
+	my $to_patients_ids = $client_data_to->get_patient_ids_by_responsible(
+		$to_responsible->{'RId'},
+	);
+	my $to_patients = $client_data_to->get_patients_by_name_and_ids( 
+		$from_patient->{'FName'}, 
+		$from_patient->{'LName'},
+		$to_patients_ids,
+	);
+	for my $to_patient (@$to_patients) {
+		$candidate_manager->add_candidate(
+			'by_pat_resp',
+			{
+				'patient' => $to_patient,
+				'responsible' => $to_responsible,
+			},
+		);
+	}
+	if ($from_patient->{'Phone'}) {
+		my $to_patients_with_phone = $client_data_to->get_patients_by_name_and_phone_and_ids( 
+			$from_patient->{'FName'}, 
+			$from_patient->{'LName'},
+			$from_patient->{'Phone'},
+			$to_patients_ids,
+		);
+		for my $to_patient (@$to_patients_with_phone) {
+			$candidate_manager->add_candidate(
+				'by_pat_resp_with_phone',
+				{
+					'patient' => $to_patient,
+					'responsible' => $to_responsible,
+				},
+			);
+		}
+	}
 }
 
-sub candidates_count_str {
-	my ($self) = @_;
+sub select_candidate_pat_resp {
+	my ($from_email, $client_data_from, $client_data_to, $candidate_manager) = @_;
 	
-	my $priorities = $self->_get_candidate_priorities();
-	if (@$priorities) {
-		return join(', ', map {"$_ -> ".@{ $self->{'candidates'}{$_} }.' variants' } @$priorities);
-	}
-	else {
-		return 'no variants';
+	if ($from_email->{'PId'}) {
+		my $from_patient = $client_data_from->get_patient_by_id($from_email->{'PId'});
+		my $from_responsibles;
+		if ($from_email->{'RId'}) {
+			$from_responsibles = [ $from_email->{'RId'} ];
+		}
+		else {
+			$from_responsibles = $client_data_from->get_responsible_ids_by_patient($from_email->{'PId'});
+		}
+		
+		for my $from_responsible_id (@$from_responsibles) {
+			my $from_responsible = $client_data_from->get_responsible_by_id($from_responsible_id);
+
+			my $to_responsibles = $client_data_to->get_responsible_ids_by_name( 
+				$from_responsible->{'FName'}, 
+				$from_responsible->{'LName'}, 
+			);
+			for my $to_responsible (@$to_responsibles) {
+				select_candidate_for_patient(
+					$client_data_from, 
+					$client_data_to, 
+					$to_responsible, 
+					$from_email->{'PId'}, 
+					$candidate_manager,
+				);
+			}
+		}
 	}
 }
 
-sub _get_candidate_priorities {
-	my ($self) = @_;
-	
-	return [ 
-		sort { $self->{'priorities'}{$a} <=> $self->{'priorities'}{$b} } 
-		keys %{ $self->{'candidates'} } 
-	];	
-}
 
-sub get_single_candidate {
-	my ($self) = @_;
-	
-	my @priorities = 
-		grep {1 == @{ $self->{'candidates'}{$_} }} 
-		@{ $self->_get_candidate_priorities() };
-	if (@priorities) {
-		my $min_priority = $priorities[0];
-		return $self->{'candidates'}{$min_priority}[0];		
-	}
-	return undef;
-}

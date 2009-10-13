@@ -4,6 +4,12 @@ use strict;
 
 use base qw( ClientData::DB );
 
+sub get_full_type {
+	my ($class) = @_;
+	
+	return 'dental';
+}
+
 sub get_appointment_columns {
     my ($self) = @_;
 

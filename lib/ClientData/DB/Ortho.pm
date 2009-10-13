@@ -167,6 +167,16 @@ sub get_patient_ids_by_responsible {
     );
 }
 
+sub get_responsible_ids_by_patient {
+    my ($self, $pid) = @_;
+
+    return $self->{'dbh'}->selectcol_arrayref(
+        "SELECT RId FROM prlinks WHERE PId=?",
+        undef,
+        $pid,
+    );
+}
+
 sub add_email {
     my ($self, $pid, $rid, $email, $belongs_to, $name, $status, $source) = @_;
 
