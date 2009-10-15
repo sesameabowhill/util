@@ -8,14 +8,16 @@ use DateTime::Format::MySQL;
 use Hash::Util qw( lock_keys );
 
 {
-    my $sending_date = '2009-10-13'; #Set to today's date
-    my $skip_date = '2009-10-13'; #set to yesterday
-    my $sending_datetime = "2009-10-14 08:00:00";# set time to NOW+30 min. +
+    my $sending_date = '2009-10-14'; #Set to today's date
+    my $skip_date = '2009-10-14'; #set to yesterday
+    my $sending_datetime = "2009-10-15 08:00:00";# set time to NOW+30 min. +
     my $dbi = connect1();
     my $calls = $dbi->selectall_arrayref(<<SQL, { Slice => {} }, "$sending_date 00:00:00", "$sending_date 23:59:59", "$skip_date%");
-select * from MessageHistory
-where sent_type='transient' and time2send >= ? and time2send <= ? and unique_key not like ?
-limit 3000
+SELECT * FROM MessageHistory
+WHERE 
+	sent_type='transient' AND time2send >= ? AND time2send <= ? AND 
+	unique_key not like ? AND event_datetime > NOW()
+LIMIT 3000
 SQL
     printf "going to resend [%d] calls\n", scalar @$calls;
         my $insert_q = $dbi->prepare(<<SQL);
@@ -50,27 +52,27 @@ SQL
 sub connect1 {
 
     return DBI->connect(
-                "DBI:mysql:database=voice;host=$ENV{SESAME_DB_SERVER}",
-                'admin',
-                'higer4',
-                {
-            RaiseError => 1,
-            ShowErrorStatement => 1,
-                        PrintError => 0,
-        });
+		"DBI:mysql:database=voice;host=$ENV{SESAME_DB_SERVER}",
+		'admin',
+		'higer4',
+		{
+			'RaiseError' => 1,
+			'ShowErrorStatement' => 1,
+			'PrintError' => 0,
+		}
+	);
 }
 
 sub get_randomized_time_to_send {
-        my $time_to_send_ref = shift;
+    my $time_to_send_ref = shift;
 
-        my $minutes_interval
-                = ( int rand 2 )
-                        ? -( int rand 15 + 1)
-                        : int rand 16;
+    my $minutes_interval = ( int rand 2 ) ?
+        -( int rand 15 + 1) :
+         int rand 16;
 
-        my $duration_ref = DateTime::Duration->new(
-        minutes => $minutes_interval,
-        );
+    my $duration_ref = DateTime::Duration->new(
+        'minutes' => $minutes_interval,
+    );
 
-        return $time_to_send_ref + $duration_ref;
+    return $time_to_send_ref + $duration_ref;
 }
