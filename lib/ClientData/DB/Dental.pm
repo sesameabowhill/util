@@ -109,6 +109,16 @@ sub email_exists_by_rid {
     return $count;
 }
 
+sub email_is_used {
+    my ($self, $email) = @_;
+
+    return scalar $self->{'dbh'}->selectrow_array(
+        "SELECT count(*) FROM Mails WHERE Address=?",
+        undef,
+        $email,
+    );
+}
+
 
 sub get_patient_ids_by_name {
     my ($self, $fname, $lname) = @_;

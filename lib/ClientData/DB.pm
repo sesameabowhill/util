@@ -47,6 +47,11 @@ SQL
     return $self;
 }
 
+sub set_strict_level {
+	my ($self, $level) = @_;
+	
+	$self->{'strict_search'} = $level;
+}
 
 sub _search_by_name {
     my ($self, $fields, $table, $fname, $lname, $where) = @_;
@@ -54,18 +59,37 @@ sub _search_by_name {
 	if (defined $where) {
 		$where = " AND $where";
 	}
-    my $result = $self->{'dbh'}->selectall_arrayref(
-        "SELECT $fields FROM $table WHERE FName=? AND LName=?$where",
-        { 'Slice' => {} },
-        $fname, $lname
-    );
+    my $result;
+    if (defined $lname) {
+    	$result = $self->{'dbh'}->selectall_arrayref(
+	        "SELECT $fields FROM $table WHERE FName=? AND LName=?$where",
+	        { 'Slice' => {} },
+	        $fname, $lname
+	    );
+    }
+    else {
+    	$result = $self->{'dbh'}->selectall_arrayref(
+	        "SELECT $fields FROM $table WHERE CONCAT(FName, ' ', LName)=?$where",
+	        { 'Slice' => {} },
+	        $fname
+	    );
+    }
     unless ($self->{'strict_search'}) {
 	    unless (@$result) {
-	        $result = $self->{'dbh'}->selectall_arrayref(
-	            "SELECT $fields FROM $table WHERE CONCAT(FName, ' ', LName) LIKE ?$where",
-	            { 'Slice' => {} },
-	            $self->_string_to_like("$fname $lname"),
-	        );
+		    if (defined $lname) {
+	    	    $result = $self->{'dbh'}->selectall_arrayref(
+	        	    "SELECT $fields FROM $table WHERE CONCAT(FName, ' ', LName) LIKE ?$where",
+	            	{ 'Slice' => {} },
+	            	$self->_string_to_like("$fname $lname"),
+		        );
+		    }
+		    else {
+	    	    $result = $self->{'dbh'}->selectall_arrayref(
+	        	    "SELECT $fields FROM $table WHERE ? LIKE CONCAT('%', FName, ' ', LName,'%')$where",
+	            	{ 'Slice' => {} },
+	            	$fname,
+		        );
+		    }
 	    }
     }
     return $result;

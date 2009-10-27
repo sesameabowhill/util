@@ -104,6 +104,15 @@ sub email_exists_by_rid {
     return $count;
 }
 
+sub email_is_used {
+    my ($self, $email) = @_;
+
+    return scalar $self->{'dbh'}->selectrow_array(
+        "SELECT count(*) FROM maillist WHERE ml_email=?",
+        undef,
+        $email,
+    );
+}
 
 sub get_patients_by_name {
     my ($self, $fname, $lname) = @_;
