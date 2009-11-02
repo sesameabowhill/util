@@ -5,6 +5,7 @@ use strict;
 
 use DBI;
 
+use Sesame::Config;
 use Sesame::Unified::Client;
 use Sesame::Unified::ClientProperties;
 
@@ -16,6 +17,12 @@ sub new {
         'statements' => [],
         'affected_clients' => {},
     }, $class;
+}
+
+sub read_config {
+	my ($self, $file_name) = @_;
+	
+	return Sesame::Config->read_file($file_name);
 }
 
 sub get_statements {
@@ -137,6 +144,41 @@ sub get_email_messaging_guids {
             )
         }
     };
+}
+
+sub get_voice_clients {
+	my ($self) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id as voice_client_id, db_name as cl_mysql FROM voice.Clients",
+        { 'Slice' => {} },
+    );
+}
+
+sub get_voice_end_messages_by_voice_client {
+	my ($self, $voice_client_id) = @_;
+	
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id, guid, name, voice_type FROM voice.EndMessage WHERE cid=?",
+        { 'Slice' => {} },
+        $voice_client_id,
+    );
+}
+
+sub add_voice_end_message {
+	my ($self, $voice_client_id, $title, $text, $guid, $voice_type, $status) = @_;	
+	
+	return $self->{'dbh'}->do(
+		"INSERT INTO voice.EndMessage (id, cid, name, value, guid, updated, voice_type, status) " .
+		"VALUES (NULL, ?, ?, ?, ?, NOW(), ?, ?)",
+		undef,
+		$voice_client_id,
+		$title,
+		$text,
+		$guid,
+		$voice_type, 
+		$status,
+	);
 }
 
 ## static

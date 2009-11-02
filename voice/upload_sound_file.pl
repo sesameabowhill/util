@@ -17,11 +17,12 @@ use MIME::Base64;
 
 	if (defined $first_filename) {
 		for my $filename (@ARGV) {
+			print "processing [$filename]\n";
 			my $file_data = read_file($filename);
 			( my $file_id = $filename ) =~ s/\.wav$//;
 			my $result = upload_file($file_data, $file_id);
 			if ($result->{'success'}) {
-				print "uploaded [$file_id]: length ".$result->{'length'}." seconds\n";
+				print "uploaded [$file_id]: duration ".$result->{'length'}." seconds\n";
 			}
 			else {
 				print "error while uploading [$file_id]: ".$result->{'error_message'}."\n";
