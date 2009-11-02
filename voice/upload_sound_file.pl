@@ -13,21 +13,23 @@ use MIME::Base64;
 # SELECT PKey, IVal, SVal FROM properties WHERE PKey IN ('Voice.VoiceID', 'Voice.TTSrate') ORDER BY PKey;
 
 {
-	my ($filename) = @ARGV;
+	my ($first_filename) = @ARGV;
 
-	if (defined $filename) {
-		my $file_data = read_file($filename);
-		( my $file_id = $filename ) =~ s/\.wav$//;
-		my $result = upload_file($file_data, $file_id);
-		if ($result->{'success'}) {
-			print "uploaded [$file_id]: length ".$result->{'length'}." seconds\n";
-		}
-		else {
-			print "error while uploading [$file_id]: ".$result->{'error_message'}."\n";
+	if (defined $first_filename) {
+		for my $filename (@ARGV) {
+			my $file_data = read_file($filename);
+			( my $file_id = $filename ) =~ s/\.wav$//;
+			my $result = upload_file($file_data, $file_id);
+			if ($result->{'success'}) {
+				print "uploaded [$file_id]: length ".$result->{'length'}." seconds\n";
+			}
+			else {
+				print "error while uploading [$file_id]: ".$result->{'error_message'}."\n";
+			}
 		}
 	}
 	else {
-		print "Usage: $0 <file_name>\n";
+		print "Usage: $0 <file_name> ...\n";
 		exit(1);
 	}
 }
