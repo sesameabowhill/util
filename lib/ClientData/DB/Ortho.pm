@@ -14,6 +14,46 @@ sub get_reverse_remap {
 	);
 }
 
+sub add_remap {
+	my ($self, $table_id, $id, $orig_id) = @_;
+	
+	$self->{'dbh'}->do(
+		"INSERT INTO remap (table_id, id, orig_id) VALUES (?, ?, ?)",
+		undef,
+		$table_id,
+		$id,
+		$orig_id,
+	);
+}
+
+sub get_all_remap_tables {
+	my ($self) = @_;
+	
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT id, name FROM sesameweb.remap_tables",
+		{ 'Slice' => {} },
+	);
+}
+
+sub get_all_ids_by_table_name {
+	my ($self, $table_name) = @_;
+	
+	my %known_ids = (
+		'procedures' => {
+			'table' => 'procedures',
+			'id'    => 'ProcId',
+		},
+	);
+	if (exists $known_ids{$table_name}) {
+		return $self->{'dbh'}->selectcol_arrayref(
+			"SELECT ".$known_ids{$table_name}{'id'}." FROM ".$known_ids{$table_name}{'table'},
+		);
+	}
+	else {
+		die "unknown table [$table_name]";
+	}
+}
+
 sub get_emails_by_responsible {
 	my ($self, $rid) = @_;
 
