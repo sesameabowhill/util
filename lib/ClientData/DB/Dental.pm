@@ -49,7 +49,7 @@ sub get_appointments {
 sub get_visited_offices_by_pid {
 	my ($self, $pid) = @_;
 	
-    return $self->{'dbh'}->selectcol_arrayref(
+    return $self->{'dbh'}->selectall_arrayref(
         "SELECT OfficeId, count(*) AS Count FROM AppointmentsHistory WHERE PId=? GROUP BY 1",
 		{ 'Slice' => {} },
         $pid,
