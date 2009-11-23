@@ -14,7 +14,7 @@ my @clients = @ARGV;
 if (@clients) {
 	my $data_source = DataSource::DB->new();
     my $start_time = time();
-    my $result_file = 'result.csv';
+    my $result_file = '_result.csv';
     printf "writing result to [%s]\n", $result_file;
     my $output = CSVWriter->new(
     	$result_file, 
