@@ -206,6 +206,44 @@ sub get_patient_by_id {
 	);
 }
 
+sub get_patients {
+    my ($self) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT PId, FName, LName, BDate, Phone, Status AS Active FROM patients ORDER BY 3,2",
+		{ 'Slice' => {} },
+    );
+}
+
+sub get_addresses_by_pid {
+	my ($self, $pid) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT PId, Zip, State, City, Street FROM addresses WHERE PId=?",
+		{ 'Slice' => {} },
+		$pid,
+    );
+}
+
+sub get_visited_offices_by_pid {
+	my ($self, $pid) = @_;
+	
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT OfficeId, count(*) AS Count FROM ah_app_history WHERE PId=? GROUP BY 1",
+		{ 'Slice' => {} },
+        $pid,
+    );	
+}
+
+sub get_offices {
+	my ($self) = @_;
+	
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT OfficeId, OfficeName, OfficeLocation FROM offices",
+		{ 'Slice' => {} },
+	);
+}
+
 sub get_patient_ids_by_responsible {
     my ($self, $rid) = @_;
 

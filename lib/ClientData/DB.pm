@@ -42,9 +42,16 @@ SQL
         'dbh' => $dbi,
         'data_source' => $data_source,
         'strict_search' => 1,
+        'db_name' => $db_name,
     }, $class;
     
     return $self;
+}
+
+sub get_db_name {
+	my ($self) = @_;
+	
+	return $self->{'db_name'};
 }
 
 sub set_strict_level {

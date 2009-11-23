@@ -25,6 +25,16 @@ sub get_patients {
     );
 }
 
+sub get_addresses_by_pid {
+	my ($self, $pid) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT PId, RId, StreetAddress AS Street, City, State, Zipcode AS Zip FROM Addresses WHERE PId=?",
+		{ 'Slice' => {} },
+		$pid,
+    );
+}
+
 sub get_appointments {
     my ($self, $pid, $order, $number) = @_;
 
@@ -34,6 +44,25 @@ sub get_appointments {
         $pid,
         $number,
     );
+}
+
+sub get_visited_offices_by_pid {
+	my ($self, $pid) = @_;
+	
+    return $self->{'dbh'}->selectcol_arrayref(
+        "SELECT OfficeId, count(*) AS Count FROM AppointmentsHistory WHERE PId=? GROUP BY 1",
+		{ 'Slice' => {} },
+        $pid,
+    );	
+}
+
+sub get_offices {
+	my ($self) = @_;
+	
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT OfficeId, Name AS OfficeName, CONCAT(StreetAddress, ' ', City, ', ', State, ' ', Zipcode) AS OfficeLocation FROM Offices",
+		{ 'Slice' => {} },
+	);
 }
 
 sub get_patient_appointment {
