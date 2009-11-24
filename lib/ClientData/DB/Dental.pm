@@ -46,13 +46,12 @@ sub get_appointments {
     );
 }
 
-sub get_visited_offices_by_pid {
-	my ($self, $pid) = @_;
+sub get_visited_offices {
+	my ($self) = @_;
 	
     return $self->{'dbh'}->selectall_arrayref(
-        "SELECT OfficeId, count(*) AS Count FROM AppointmentsHistory WHERE PId=? GROUP BY 1",
+        "SELECT PId, OfficeId, count(*) AS Count FROM AppointmentsHistory GROUP BY 1, 2",
 		{ 'Slice' => {} },
-        $pid,
     );	
 }
 

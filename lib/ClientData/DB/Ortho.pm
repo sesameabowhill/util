@@ -225,13 +225,12 @@ sub get_addresses_by_pid {
     );
 }
 
-sub get_visited_offices_by_pid {
-	my ($self, $pid) = @_;
+sub get_visited_offices {
+	my ($self) = @_;
 	
     return $self->{'dbh'}->selectall_arrayref(
-        "SELECT OfficeId, count(*) AS Count FROM ah_app_history WHERE PId=? GROUP BY 1",
+        "SELECT PId, OfficeId, count(*) AS Count FROM ah_app_history GROUP BY 1, 2",
 		{ 'Slice' => {} },
-        $pid,
     );	
 }
 
