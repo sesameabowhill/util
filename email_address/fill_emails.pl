@@ -2,84 +2,119 @@
 use strict;
 use warnings;
 
-use Text::CSV_XS;
-
 use lib qw( ../lib );
 
 use CandidateManager;
+use CSVReader;
 use DataSource::DB;
 
 
 my @files = @ARGV;
 if (@files) {
-    my $start_time = time();
-    my $add_email_count = 0;
-    my $total_email_count = 0;
+	my $start_time = time();
+	my $add_email_count = 0;
+	my $total_email_count = 0;
 
-	my %implemented_candidates = (
+	my %implemented = (
 		'patient_emails' => {
-			'ortho_resp' => \&find_patient_ortho_resp,
+			'ortho_resp' => {
+				'candidate' => \&find_patient_ortho_resp,
+				'file_format' => ['name', 'email'],
+			},
 #			'dental' => \&add_email_to_patients_dental,
 		},
 		'responsible_emails' => {
-			'ortho_resp' => \&find_responsible_ortho_resp,
+			'ortho_resp' => {
+				'candidate' => \&find_responsible_ortho_resp,
+				'file_format' => ['name', 'email'],
+			}
 #			'dental' => \&add_email_to_responsibles_dental,
+		},
+		'pms_referrings' => {
+			'ortho_resp' => {
+				'function' => \&add_pms_referrings,
+				'sep_char' => '|',
+			},
+			'ortho_pat' => {
+				'function' => \&add_pms_referrings,
+				'sep_char' => '|',
+			},
+			'dental' => {
+				'function' => \&add_pms_referrings,
+				'sep_char' => '|',
+			},
 		},
 	);
 
 	my $data_source = DataSource::DB->new();
 	my $last_client_db = undef;
-    for my $file_name (@files) {
-        if ($file_name =~ m/^(.*)\.(.*)\.(.*)$/) {
-            my ($client_db, $type, $ext) = ($1, $2, $3);
-            $last_client_db = $client_db;
+	for my $file_name (@files) {
+		if ($file_name =~ m/^(.*)\.(.*)\.(.*)$/) {
+			my ($client_db, $type, $ext) = ($1, $2, $3);
+			$client_db =~ s/^_//;
+			$last_client_db = $client_db;
 
 			my $client_data = $data_source->get_client_data_by_db($client_db);
 			$client_data->set_strict_level(0);
-            printf "database source: client [%s]\n", $client_db;
-            
-            my $client_full_type = $client_data->get_full_type();
-            if (exists $implemented_candidates{$type}{$client_full_type}) {
-				my $import_func = $implemented_candidates{$type}{$client_full_type};
-				my $emails = read_csv($file_name, ['name', 'email']);
-				$total_email_count += @$emails;
-				$add_email_count += fill_emails(
-					$emails,
-					$client_data,
-					$implemented_candidates{$type}{$client_full_type},
+			printf "database source: client [%s]\n", $client_db;
+
+			my $client_full_type = $client_data->get_full_type();
+			if (exists $implemented{$type}{$client_full_type}) {
+				my $params = $implemented{$type}{$client_full_type};
+				my $reader = CSVReader->new(
+					$file_name,
+					$params->{'file_format'},
+					$params->{'sep_char'},
 				);
-            }
-            else {
-            	die "importing [$type] is not implemented for [$client_full_type]";
-            }
-            
-        }
-        else {
-            die "unknown file name [$file_name]";
-        }
-    }
-    if ($last_client_db) {
+				my $emails = $reader->get_all_data();
+				$total_email_count += @$emails;
+				if (exists $params->{'function'}) {
+					$add_email_count += $params->{'function'}->(
+						$emails,
+						$client_data,
+					);
+
+				}
+				else {
+					$add_email_count += fill_emails(
+						$emails,
+						$client_data,
+						$params->{'candidate'},
+					);
+				}
+			}
+			else {
+				die "importing [$type] is not implemented for [$client_full_type]";
+			}
+
+		}
+		else {
+			die "unknown file name [$file_name]";
+		}
+	}
+	if ($last_client_db) {
 		my $result_sql_fn = '_new_email.'.$last_client_db.'.sql';
 		printf("write sql commands to [$result_sql_fn]\n");
 		$data_source->save_sql_commands_to_file($result_sql_fn);
-    }
+	}
 
-    print "$add_email_count/$total_email_count emails added\n";
-    printf "done: %.2f minutes\n", (time() - $start_time) / 60;
+	print "$add_email_count/$total_email_count emails added\n";
+	printf "done: %.2f minutes\n", (time() - $start_time) / 60;
 } else {
-    print <<USAGE;
+	print <<USAGE;
 Usage: $0 <file1> [files...]
 File names:
-    patient_emails.<drname>.csv
-    responsible_emails.<drname>.csv
+	<drname>.patient_emails.csv
+	<drname>.responsible_emails.csv
+	<drname>.pms_referrings.csv
 USAGE
-    exit(1);
+	exit(1);
 }
 
 sub fill_emails {
 	my ($emails, $client_data, $candidate_selector) = @_;
-	
-    my $add_email_count = 0;
+
+	my $add_email_count = 0;
 	for my $email_row (@$emails) {
 		my $candidate_manager = CandidateManager->new(
 			{
@@ -89,23 +124,23 @@ sub fill_emails {
 			}
 		);
 		my $name = $email_row->{'name'};
-        my $email = $email_row->{'email'};
-        my $is_email_exists = $client_data->email_is_used($email);
+		my $email = $email_row->{'email'};
+		my $is_email_exists = $client_data->email_is_used($email);
 		if ($is_email_exists) {
 			print "SKIP [$email]: is already database\n";
 		}
 		else {
 			$candidate_selector->(
 				$name,
-				$client_data, 
+				$client_data,
 				$candidate_manager,
 			);
-	
+
 			my $candidate = $candidate_manager->get_single_candidate();
 			if (defined $candidate) {
 				printf(
-					"ADD: %s\n", 
-					$email, 
+					"ADD: %s\n",
+					$email,
 				);
 				$client_data->add_email(
 					(defined $candidate->{'patient'} ? $candidate->{'patient'}{'PId'} : 0 ),
@@ -120,8 +155,8 @@ sub fill_emails {
 			}
 			else {
 				printf(
-					"SKIP: %s - %s\n", 
-					$email, 
+					"SKIP: %s - %s\n",
+					$email,
 					$candidate_manager->candidates_count_str(),
 				);
 			}
@@ -132,7 +167,7 @@ sub fill_emails {
 
 sub find_patient_ortho_resp {
 	my ($name, $client_data, $candidate_manager) = @_;
-	
+
 	my $patients = $client_data->get_patients_by_name($name);
 	for my $patient (@$patients) {
 		my $responsible_ids = $client_data->get_responsible_ids_by_patient(
@@ -148,13 +183,13 @@ sub find_patient_ortho_resp {
 			);
 		}
 	}
-	
+
 }
 
 
 sub find_responsible_ortho_resp {
 	my ($name, $client_data, $candidate_manager) = @_;
-	
+
 	my $responsibles = $client_data->get_responsible_ids_by_name($name);
 	for my $responsible (@$responsibles) {
 		$candidate_manager->add_candidate(
@@ -167,8 +202,8 @@ sub find_responsible_ortho_resp {
 		my $patients_ids = $client_data->get_patient_ids_by_responsible(
 			$responsible->{'RId'},
 		);
-		my $patients = $client_data->get_patients_by_name_and_ids( 
-			$name, 
+		my $patients = $client_data->get_patients_by_name_and_ids(
+			$name,
 			undef,
 			$patients_ids,
 		);
@@ -187,8 +222,37 @@ sub find_responsible_ortho_resp {
 #	}
 }
 
+sub add_pms_referrings {
+	my ($colleagues, $client_data) = @_;
+
+	my $add_count = 0;
+	for my $colleague (@$colleagues) {
+		my $colleague_email = $colleague->{'Email'};
+		if ($colleague_email =~ m/@/) {
+			my $is_colleague_exists = $client_data->email_exists_by_colleague($colleague_email);
+			if ($is_colleague_exists) {
+				print "SKIP [$colleague_email]: already exists in database\n";
+			}
+			else {
+	            print "ADD [$colleague_email]\n";
+				$client_data->add_colleague(
+					$colleague->{'FName'},
+					$colleague->{'LName'},
+					$colleague_email,
+					generate_password(),
+				);
+				$add_count++;
+			}
+		}
+		else {
+			print "SKIP [$colleague_email]: is not email\n";
+		}
+	}
+	return $add_count;
+}
+
 #sub add_colleagues {
-#    my ($client_data, $colleagues) = @_;
+#    my ($colleagues, $client_data) = @_;
 #
 #    my $add_count = 0;
 #    for my $colleague (@$colleagues) {
@@ -344,56 +408,36 @@ sub find_responsible_ortho_resp {
 
 
 
-sub read_csv {
-    my ($fn, $columns) = @_;
-
-    my $csv = Text::CSV_XS->new(
-        {
-            'escape_char' => '"',
-            'sep_char' => ',',
-            'quote_char' => '"',
-        }
-    );
-    $csv->column_names(@$columns);
-
-    my @data;
-    open(my $f, "<", $fn) or die "can't read [$fn]: $!";
-    while (my $line = $csv->getline_hr($f)) {
-        push(@data, $line);
-    }
-    close($f);
-    return \@data;
-}
 
 sub get_name_parts {
-    my ($name) = @_;
+	my ($name) = @_;
 
-    $name =~ s/^dr\.?\s+//i;
-    my @parts = split(/\s+/, $name);
-    if (@parts != 2 && $name =~ m/\|/) {
-        @parts = split(/\|/, $name);
-    }
-    if (@parts == 2) {
-        return map {trim($_)} @parts;
-    }
-    else {
-        return;
-    }
+	$name =~ s/^dr\.?\s+//i;
+	my @parts = split(/\s+/, $name);
+	if (@parts != 2 && $name =~ m/\|/) {
+		@parts = split(/\|/, $name);
+	}
+	if (@parts == 2) {
+		return map {trim($_)} @parts;
+	}
+	else {
+		return;
+	}
 }
 
 sub trim {
-    my ($str) = @_;
+	my ($str) = @_;
 
-    $str =~ s/^\s+//;
-    $str =~ s/\s+$//;
-    return $str;
+	$str =~ s/^\s+//;
+	$str =~ s/\s+$//;
+	return $str;
 }
 
-#sub generate_password {
-#    my @symbols = split(//, "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ123456789");
-#
-#    return join('', map {$symbols[int(rand()*@symbols)]} 0..7);
-#}
+sub generate_password {
+    my @symbols = split(//, "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ123456789");
+
+    return join('', map {$symbols[int(rand()*@symbols)]} 0..7);
+}
 
 
 
@@ -439,23 +483,6 @@ sub trim {
 #    push( @{ $self->{'insert_commands'} }, $insert_cmd );
 #}
 #
-#sub add_colleague {
-#    my ($self, $fname, $lname, $email, $password) = @_;
-#
-#    my $new_id = 1 + $self->{'dbh'}->selectrow_array("SELECT max(id) FROM referring_contacts");
-#
-#    my $insert_cmd = "INSERT INTO ".$self->{'db_name'}.".referring_contacts (id, fname, lname, practice_name, email, speciality) VALUES (".$self->{'dbh'}->quote($new_id).", ".$self->{'dbh'}->quote($fname).", ".$self->{'dbh'}->quote($lname).", NULL, ".$self->{'dbh'}->quote($email).", NULL)";
-#
-#    $self->_insert($insert_cmd);
-#
-#    my $si_insert_cmd = "INSERT INTO ".$self->{'db_name'}.".SI_Doctor (FName, LName, Status, Password, Deleted, WelcomeSent, PrivacyAccepted, ref_contact_id, AutoNotify) VALUES (NULL, NULL, 1, ".$self->{'dbh'}->quote($password).", 0, 0, 0, ".$self->{'dbh'}->quote($new_id).", 0)";
-#
-#    $self->_insert($si_insert_cmd);
-#
-#    my $ref_insert_cmd = "INSERT INTO ".$self->{'db_name'}.".referrings (ref_fname, ref_lname, ref_email, ref_contact_id) VALUES (".$self->{'dbh'}->quote($fname).", ".$self->{'dbh'}->quote($lname).", ".$self->{'dbh'}->quote($email).", ".$self->{'dbh'}->quote($new_id).")";
-#
-#    $self->_insert($ref_insert_cmd);
-#}
 #
 #sub get_patients_by_responsible {
 #    my ($self, $rid) = @_;
@@ -503,46 +530,8 @@ sub trim {
 #    return $responsibles;
 #}
 #
-#sub add_email {
-#    my ($self, $pid, $rid, $email) = @_;
-#
-#    push(
-#        @{ $self->{'insert_commands'} },
-#        "INSERT INTO ".$self->{'db_name'}.".Mails (PId, RId, Address, EntryDate, Status, FName, LName, Source) VALUES (".$self->{'dbh'}->quote($pid).", ".$self->{'dbh'}->quote($rid).", ".$self->{'dbh'}->quote($email).", NOW(), 0, NULL, NULL, 4)",
-#    );
-#
-#    $self->{'dbh'}->do(
-#        <<SQL,
-#INSERT INTO Mails (PId, RId, Address, EntryDate, Status, FName, LName, Source)
-#VALUES (?, ?, ?, NOW(), 0, NULL, NULL, 4)
-#SQL
-#        undef,
-#        $pid,
-#        $rid,
-#        $email,
-#    );
-#}
 
-#sub is_email_exists {
-#    my ($self, $email) = @_;
-#
-#    return scalar $self->{'dbh'}->selectrow_array(
-#        "SELECT count(*) FROM Mails WHERE Address=?",
-#        undef,
-#        $email,
-#    );
-#}
 
-#sub is_colleague_exists {
-#    my ($self, $email) = @_;
-#
-#    return scalar $self->{'dbh'}->selectrow_array(
-#        "SELECT count(*) FROM referring_contacts WHERE email=?",
-#        undef,
-#        $email,
-#    );
-#}
-#
 #sub count_ledgers_by_patient {
 #    my ($self, $pid) = @_;
 #
