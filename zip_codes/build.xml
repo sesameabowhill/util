@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="utils">
+
+	<property environment="env" />
+
+	<property file="download.zipcodes.properties" />
+
+	<target name="download.zip_codes" depends="download.zip.usa" />
+
+	<target name="download.zip.usa">
+		<exec failonerror="true" executable="wget">
+			<arg value="${zipcode.url.usa}" />
+			<arg value="--quiet" />
+			<arg value="--output-document=${zipcode.file.usa}" />
+			<arg value="--post-data=login=${zipcodeworld.login}&amp;password=${zipcodeworld.password}&amp;btnDownload=Download" />
+		</exec>
+	</target>
+
+	<target name="download.zip.canada">
+		<exec failonerror="true" executable="wget">
+			<arg value="${zipcode.url.canada}" />
+			<arg value="--quiet" />
+			<arg value="--output-document=${zipcode.file.canada}" />
+			<arg value="--post-data=login=${zipcodeworld.login}&amp;password=${zipcodeworld.password}&amp;btnDownload=Download" />
+		</exec>
+	</target>
+
+</project>

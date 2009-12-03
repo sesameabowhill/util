@@ -35,12 +35,21 @@ sub new {
 	}, $class;
 }
 
+sub get_next_item {
+	my ($self) = @_;
+
+	my $line = $self->{'csv'}->getline_hr( $self->{'fh'} );
+	if (defined $line) {
+    	lock_keys(%$line);
+	}
+    return $line;
+}
+
 sub get_all_data {
     my ($self) = @_;
 
     my @data;
-    while (my $line = $self->{'csv'}->getline_hr( $self->{'fh'} )) {
-    	lock_keys(%$line);
+    while (my $line = $self->get_next_item()) {
         push(@data, $line);
     }
     return \@data;
