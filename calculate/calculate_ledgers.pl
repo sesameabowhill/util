@@ -226,34 +226,34 @@ BEGIN {
     }
 }
 
-sub get_db_name {
-    my ($self) = @_;
+#sub get_db_name {
+#    my ($self) = @_;
+#
+#    return $self->{'db_name'};
+#}
 
-    return $self->{'db_name'};
-}
-
-sub get_opse_payments {
-    my ($self, $fname, $lname, $from, $to) = @_;
-
-    return $self->{'dbh'}->selectall_arrayref(
-        "SELECT Time AS DateTime, Provider, FName, LName, -Amount AS Amount, PaymentType AS Type FROM opse.payment_log WHERE FName=? AND LName=? AND Time BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 00:00:00') - INTERVAL 1 SECOND AND if(Provider='PRI', TResult='OK', Provider='Malse') ORDER BY Time",
-		{ 'Slice' => {} },
-        $fname,
-        $lname,
-        $from,
-        $to,
-    );
-}
+#sub get_opse_payments {
+#    my ($self, $fname, $lname, $from, $to) = @_;
+#
+#    return $self->{'dbh'}->selectall_arrayref(
+#        "SELECT Time AS DateTime, Provider, FName, LName, -Amount AS Amount, PaymentType AS Type FROM opse.payment_log WHERE FName=? AND LName=? AND Time BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 00:00:00') - INTERVAL 1 SECOND AND if(Provider='PRI', TResult='OK', Provider='Malse') ORDER BY Time",
+#		{ 'Slice' => {} },
+#        $fname,
+#        $lname,
+#        $from,
+#        $to,
+#    );
+#}
 
 
-sub get_unique_patient_names {
-    my ($self) = @_;
-
-    return $self->{'dbh'}->selectall_arrayref(
-        "SELECT FName, LName, PId FROM Patients GROUP BY 1,2 HAVING COUNT(*)=1",
-		{ 'Slice' => {} },
-    );
-}
+#sub get_unique_patient_names {
+#    my ($self) = @_;
+#
+#    return $self->{'dbh'}->selectall_arrayref(
+#        "SELECT FName, LName, PId FROM Patients GROUP BY 1,2 HAVING COUNT(*)=1",
+#		{ 'Slice' => {} },
+#    );
+#}
 
 sub get_patients_by_responsible {
     my ($self, $rid) = @_;
@@ -266,24 +266,24 @@ sub get_patients_by_responsible {
 }
 
 
-sub get_responsibles {
-    my ($self) = @_;
+#sub get_responsibles {
+#    my ($self) = @_;
+#
+#    return $self->{'dbh'}->selectall_arrayref(
+#        "SELECT RId, FName, LName FROM Responsibles ORDER BY 3,2",
+#		{ 'Slice' => {} },
+#    );
+#}
 
-    return $self->{'dbh'}->selectall_arrayref(
-        "SELECT RId, FName, LName FROM Responsibles ORDER BY 3,2",
-		{ 'Slice' => {} },
-    );
-}
-
-sub get_appointments {
-    my ($self, $pid) = @_;
-
-    return $self->{'dbh'}->selectall_arrayref(
-        "SELECT Date FROM ".$self->{'tables'}->{'appointment_history'}." WHERE PId=? AND Why='moved' GROUP BY Date ORDER BY Date",
-		{ 'Slice' => {} },
-        $pid,
-    );
-}
+#sub get_appointments {
+#    my ($self, $pid) = @_;
+#
+#    return $self->{'dbh'}->selectall_arrayref(
+#        "SELECT Date FROM ".$self->{'tables'}->{'appointment_history'}." WHERE PId=? AND Why='moved' GROUP BY Date ORDER BY Date",
+#		{ 'Slice' => {} },
+#        $pid,
+#    );
+#}
 
 sub get_ledgers_responsibles {
     my ($self) = @_;
@@ -294,25 +294,25 @@ sub get_ledgers_responsibles {
 
 }
 
-sub get_ledgers_date_interval {
-    my ($self) = @_;
+#sub get_ledgers_date_interval {
+#    my ($self) = @_;
+#
+#    return $self->{'dbh'}->selectrow_hashref(
+#        "SELECT LEFT(MAX(DateTime), 10) as max, LEFT(MIN(DateTime), 10) as min FROM Ledgers",
+#    );
+#}
 
-    return $self->{'dbh'}->selectrow_hashref(
-        "SELECT LEFT(MAX(DateTime), 10) as max, LEFT(MIN(DateTime), 10) as min FROM Ledgers",
-    );
-}
-
-sub get_ledgers {
-    my ($self, $rid, $from, $to) = @_;
-
-    return $self->{'dbh'}->selectall_arrayref(
-        "SELECT DateTime, Amount, Description, Type FROM Ledgers WHERE RId=? AND DateTime BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 00:00:00') - INTERVAL 1 SECOND ORDER BY DateTime",
-		{ 'Slice' => {} },
-        $rid,
-        $from,
-        $to,
-    );
-}
+#sub get_ledgers {
+#    my ($self, $rid, $from, $to) = @_;
+#
+#    return $self->{'dbh'}->selectall_arrayref(
+#        "SELECT DateTime, Amount, Description, Type FROM Ledgers WHERE RId=? AND DateTime BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 00:00:00') - INTERVAL 1 SECOND ORDER BY DateTime",
+#		{ 'Slice' => {} },
+#        $rid,
+#        $from,
+#        $to,
+#    );
+#}
 
 
 ## static

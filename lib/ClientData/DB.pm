@@ -42,7 +42,7 @@ SQL
 		'dbh' => $dbi,
 		'data_source' => $data_source,
 		'strict_search' => 1,
-		'db_name' => $db_name,
+		'client_ref' => $client_ref,
 	}, $class;
 
 	return $self;
@@ -51,7 +51,7 @@ SQL
 sub get_db_name {
 	my ($self) = @_;
 
-	return $self->{'db_name'};
+	return $self->{'client_ref'}->get_db_name();
 }
 
 sub set_strict_level {
@@ -138,6 +138,12 @@ sub email_exists_by_colleague {
 	);
 }
 
+sub is_active {
+	my ($self) = @_;
+
+	return $self->{'client_ref'}->is_active();
+}
+
 sub get_unsubscribed_emails {
 	my ($self) = @_;
 
@@ -147,5 +153,62 @@ sub get_unsubscribed_emails {
 	);
 }
 
+sub get_email_reminder_settings {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT id, is_enabled, type, subject, body, response_options, design_id, image_guid, image_title FROM email_messaging.reminder_settings WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->{'client_ref'}->get_id(),
+	);
+}
+
+sub get_ccp_id {
+	my ($self) = @_;
+
+	unless ($self->{'ccp_id'}) {
+		my ($type, $id) = ($self->{'client_ref'}->get_id() =~ m/^(\w)(\d+)$/);
+
+		$self->{'ccp_id'} = $self->{'dbh'}->selectrow_array(
+			"SELECT CID FROM opse.clients WHERE Category=? AND OuterId=?",
+			undef,
+			($type eq 'd' ? 'Dental' : 'Ortho'),
+			$id,
+		);
+	}
+	return $self->{'ccp_id'};
+}
+
+sub get_complete_cc_payments {
+    my ($self) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT Time AS DateTime, Provider, FName, LName, Email, Comment, Amount, PaymentType AS Type FROM opse.payment_log WHERE CID=? AND if(Provider='PRI', TResult='OK', Provider='Malse') ORDER BY Time",
+		{ 'Slice' => {} },
+		$self->get_ccp_id(),
+    );
+}
+
+sub get_sent_emails_by_pid_type {
+	my ($self, $pid, $type) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id, sml_resp_id AS RId, sml_pat_id AS PId, sml_email as Email, sml_date AS DateTime, sml_belongsto, sml_name, sml_mail_type, sml_mail_id, sml_body, sml_body_hash FROM sent_mail_log WHERE sml_mail_type=? AND sml_pat_id=? ORDER BY sml_date",
+		{ 'Slice' => {} },
+        $type,
+        $pid,
+    );
+}
+
+sub count_sent_emails_by_type {
+	my ($self, $type) = @_;
+
+    return scalar $self->{'dbh'}->selectrow_array(
+        "SELECT count(*) FROM sent_mail_log WHERE sml_mail_type=?",
+        undef,
+		$type,
+    );
+
+}
 
 1;

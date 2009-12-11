@@ -54,6 +54,38 @@ sub get_all_ids_by_table_name {
 	}
 }
 
+sub get_appointments_by_pid {
+    my ($self, $pid) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT PId, Date, MIN(Time) AS Time, OfficeID, ProcID, LastNotified, Notified, Registered, Removed, Why, Status, StatusChanged FROM ah_app_history WHERE PId=? AND Why='moved' GROUP BY Date ORDER BY Date",
+		{ 'Slice' => {} },
+        $pid,
+    );
+}
+
+sub get_ledgers_date_interval {
+    my ($self) = @_;
+
+    return $self->{'dbh'}->selectrow_hashref(
+        "SELECT LEFT(MAX(DateTime), 10) as max, LEFT(MIN(DateTime), 10) as min FROM ledgers",
+    );
+}
+
+sub get_ledgers_by_account_date_interval {
+    my ($self, $account, $from, $to) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT DateTime, Amount, Description, Type FROM ledgers WHERE AccountId=? AND DateTime BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 00:00:00') - INTERVAL 1 SECOND ORDER BY DateTime",
+		{ 'Slice' => {} },
+        $account,
+        $from,
+        $to,
+    );
+}
+
+
+
 sub get_emails_by_responsible {
 	my ($self, $rid) = @_;
 
@@ -244,6 +276,13 @@ sub get_patient_by_id {
 sub get_patients {
     my ($self) = @_;
 
+	warn "depricated function [get_patients]";
+	return $self->get_all_patients();
+}
+
+sub get_all_patients {
+    my ($self) = @_;
+
     return $self->{'dbh'}->selectall_arrayref(
         "SELECT PId, FName, LName, BDate, Phone, Status AS Active FROM patients ORDER BY 3,2",
 		{ 'Slice' => {} },
@@ -259,6 +298,26 @@ sub get_addresses_by_pid {
 		$pid,
     );
 }
+
+sub get_all_accounts {
+	my ($self) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+		"SELECT AccountId, PId, RId, IId, CntTotal, InitFee, InitFeeMult, CDue , CntBalance, NextPmntDate, NextPmntAmount FROM accounts",
+		{ 'Slice' => {} },
+    );
+}
+
+sub get_accounts_by_pid {
+	my ($self, $pid) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+		"SELECT AccountId, PId, RId, IId, CntTotal, InitFee, InitFeeMult, CDue , CntBalance, NextPmntDate, NextPmntAmount FROM accounts WHERE PId=?",
+		{ 'Slice' => {} },
+		$pid,
+    );
+}
+
 
 sub get_visited_offices {
 	my ($self) = @_;
@@ -320,6 +379,37 @@ SQL
 	$sql =~ s/\s+/ /g;
 	$self->{'dbh'}->do($sql);
 	$self->{'data_source'}->add_statement($sql);
+}
+
+sub get_feature_status {
+	my ($self, $feature) = @_;
+
+	my %feature_ids = (
+		'ccp' => 7,
+	);
+	unless (exists $feature_ids{$feature}) {
+		die "unknown feature [$feature]";
+	}
+
+	my ($type, $id) = ($self->{'client_ref'}->get_id() =~ m/^(\w)(\d+)$/);
+
+	return scalar $self->{'dbh'}->selectrow_array(
+		"SELECT status FROM sesameweb.feature_settings WHERE cl_id=? AND feature_id=?",
+		undef,
+		$id,
+		$feature_ids{$feature},
+	);
+}
+
+sub get_unique_ledgers_description_by_type {
+    my ($self, $type) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT Description, count(*) AS Count FROM ledgers WHERE Type=? GROUP BY 1",
+		{ 'Slice' => {} },
+        $type,
+    );
+
 }
 
 
