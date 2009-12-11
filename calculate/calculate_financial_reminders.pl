@@ -27,23 +27,23 @@ if (@clients) {
 		[
 			'username',
 			'is active',
-			'financial reminder',
-			'online payment',
-			'apps paid by insurance',
-			'apps paid by card',
-			'apps paid by check',
-			'apps paid by other',
-			'apps paid online',
-			'apps with financial reminder',
-			'paid online before reminder',
-			'paid online reminder day',
-			'paid online 1 day after rem',
-			'paid online 2 days after rem',
-			'paid online 3 days after rem',
-			'paid online 4 days after rem',
-			'paid online 5 days after rem',
-			'paid online later',
-			'paid online without reminder',
+			'financial reminder enabled',
+			'online payment enabled',
+			'patient id',
+			'patient is active',
+			'patient email count',
+			'appointment',
+			'app paid online',
+			'app paid insurance',
+			'app paid card',
+			'app paid check',
+			'app paid other',
+			'app with financial reminder',
+			'paid online N days after rem',
+			'first online payment date',
+			'last online payment date',
+			'first financial reminder date',
+			'last financial reminder date',
 		],
 	);
 	for my $client_identity (@clients) {
@@ -97,7 +97,7 @@ sub get_report {
 	my ($client_data) = @_;
 
 	my $reminder_settings = $client_data->get_email_reminder_settings();
-	my $financial_reminder = first { $_->{'type'} eq 'financial' } @$reminder_settings;
+	my $financial_reminder_setting = first { $_->{'type'} eq 'financial' } @$reminder_settings;
 	my $ccp_id = $client_data->get_ccp_id();
 
 	my %unique_patient_names;
@@ -118,8 +118,6 @@ sub get_report {
     }
 
 	my @payment_priority = ('online', 'insurance', 'card', 'check', 'money');
-	my %appointments_stat = map {$_ => 0} (@payment_priority, 'financial');
-	my %paid_only_after   = map {$_ => 0} ('-', 0..5, '+', 'no-financial');
 
 	my $count_financial_reminder_sent = $client_data->count_sent_emails_by_type(FINANCIAL_REMINDER_TYPE);
 	printf "[%d] financial reminders sent\n", $count_financial_reminder_sent;
@@ -129,8 +127,10 @@ sub get_report {
 #	$patients = [];
 #	$appointments_stat{'financial'} = $count_financial_reminder_sent;
 
+	my @data;
 	my $processed_patients = 0;
 	for my $patient (@$patients) {
+		my $email_count = $client_data->count_emails_by_pid($patient->{'PId'});
 		my $appointments_intervals = get_appointments_intervals(
 			$client_data,
 			$patient->{'PId'},
@@ -158,60 +158,62 @@ sub get_report {
 			{}
 		);
 		for my $interval (@$appointments_intervals) {
+			my %appointments_stat = map {$_ => ''} (@payment_priority);
+
+			my $cc_payment         = $cc_payments->{ $interval->{'Date'} };
+			my $financial_reminder = $financial_reminders->{ $interval->{'Date'} };
+			my $diff_days = '';
+
 			my $payment_type = $payments->{ $interval->{'Date'} };
-			if (exists $cc_payments->{ $interval->{'Date'} }) {
-				my $cc_payment = $cc_payments->{ $interval->{'Date'} };
+			if (defined $cc_payment) {
+				## online payment found
 				$payment_type->{'online'} = $cc_payment->{'Count'};
-
-				if (exists $financial_reminders->{ $interval->{'Date'} }) {
-					my $reminder = $financial_reminders->{ $interval->{'Date'} };
-					$appointments_stat{'financial'} ++;
-
-					my $diff_days = DateUtils->date_diff_in_days(
-						$cc_payment->{'FirstDate'},
-						$reminder->{'FirstDate'},
-					);
-					if ($diff_days < 0) {
-						$paid_only_after{'-'} ++;
-					}
-					elsif ($diff_days <= 5) {
-						$paid_only_after{$diff_days} ++;
-					}
-					else {
-						$paid_only_after{'+'} ++;
-					}
-#					printf(
-#						"APP [%s]-[%s]: financial [%s] -> online [%s] (%d)\n",
-#						$patient->{'PId'},
-#						$interval->{'Date'},
-#						$reminder->{'FirstDate'},
-#						$cc_payment->{'FirstDate'},
-#						$diff_days,
-#					);
-				}
-				else {
-					my $email_count = $client_data->count_emails_by_pid($patient->{'PId'});
-					if ($email_count) {
-						## patient have email but didn't receive financial reminder
-						$paid_only_after{'no-financial'} ++;
-					}
-				}
-			}
-			else {
-				if (exists $financial_reminders->{ $interval->{'Date'} }) {
-					my $reminder = $financial_reminders->{ $interval->{'Date'} };
-					$appointments_stat{'financial'} ++;
-				}
-				else {
-
-				}
 			}
 			for my $type (@payment_priority) {
 				if ($payment_type->{$type}) {
-					$appointments_stat{$type} ++;
+					$appointments_stat{$type} = 1;
 					last;
 				}
 			}
+
+			if (defined $financial_reminder) {
+				if (defined $cc_payment) {
+					$diff_days = DateUtils->date_diff_in_days(
+						$cc_payment->{'FirstDate'},
+						$financial_reminder->{'FirstDate'},
+					);
+				}
+				else {
+					## no online payment
+				}
+			}
+			else {
+				## no financial reminder
+			}
+			push(
+				@data,
+				{
+					'username'                       => $client_data->get_db_name(),
+					'is active'                      => $client_data->is_active(),
+					'financial reminder enabled'     => (defined $financial_reminder_setting ? $financial_reminder_setting->{'is_enabled'} : 0),
+					'online payment enabled'         => ($ccp_id ? 1 : 0),
+					'patient id'                     => $patient->{'PId'},
+					'patient is active'              => $patient->{'Active'},
+					'patient email count'            => $email_count,
+					'appointment'                    => $interval->{'Date'},
+					'app paid online'                => $appointments_stat{'online'},
+					'app paid insurance'             => $appointments_stat{'insurance'},
+					'app paid card'                  => $appointments_stat{'card'},
+					'app paid check'                 => $appointments_stat{'check'},
+					'app paid other'                 => $appointments_stat{'money'},
+					'app with financial reminder'    => defined $financial_reminder,
+					'paid online N days after rem'   => $diff_days,
+					'first online payment date'      => (defined $cc_payment ? $cc_payment->{'FirstDate'} : ''),
+					'last online payment date'       => (defined $cc_payment ? $cc_payment->{'LastDate'} : ''),
+					'first financial reminder date'  => (defined $financial_reminder ? $financial_reminder->{'FirstDate'} : ''),
+					'last financial reminder date'   => (defined $financial_reminder ? $financial_reminder->{'LastDate'} : ''),
+				}
+			);
 		}
 		if (!(++$processed_patients%1000)) {
 			printf "[%d] patients processed\n", $processed_patients;
@@ -219,29 +221,7 @@ sub get_report {
 	}
 	printf "[%d] patients processed\n", $processed_patients;
 
-	return [
-		{
-			'username'                      => $client_data->get_db_name(),
-			'is active'                     => $client_data->is_active(),
-			'financial reminder'            => (defined $financial_reminder ? $financial_reminder->{'is_enabled'} : 0),
-			'online payment'                => ( $ccp_id ? 1 : 0 ),
-			'apps paid by insurance'        => $appointments_stat{'insurance'},
-			'apps paid by card'             => $appointments_stat{'card'},
-			'apps paid by check'            => $appointments_stat{'check'},
-			'apps paid by other'            => $appointments_stat{'money'},
-			'apps with financial reminder'  => $appointments_stat{'financial'},
-			'apps paid online'              => $appointments_stat{'online'},
-			'paid online before reminder'   => $paid_only_after{'-'},
-			'paid online reminder day'      => $paid_only_after{'0'},
-			'paid online 1 day after rem'   => $paid_only_after{'1'},
-			'paid online 2 days after rem'  => $paid_only_after{'2'},
-			'paid online 3 days after rem'  => $paid_only_after{'3'},
-			'paid online 4 days after rem'  => $paid_only_after{'4'},
-			'paid online 5 days after rem'  => $paid_only_after{'5'},
-			'paid online later'             => $paid_only_after{'+'},
-			'paid online without reminder'  => $paid_only_after{'no-financial'},
-		}
-	];
+	return \@data;
 }
 
 sub get_financial_reminders_within_intervals {
