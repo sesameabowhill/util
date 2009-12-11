@@ -419,7 +419,7 @@ sub get_cc_payments_within_interval {
 sub get_patient_candidates_for_payment {
 	my ($client_data, $payment, $candidate_manager) = @_;
 
-	my $comment = $payment->{'Comment'};
+	my $comment = ($payment->{'Comment'} || '');
 	$comment =~ s/\s+$//;
 	if (length $comment) {
 		for my $patient (@{ $client_data->get_patients_by_name($comment) }) {
