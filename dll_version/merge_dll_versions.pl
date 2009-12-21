@@ -73,7 +73,7 @@ sub print_data {
 	my $max_version_size = max(map {length $files->{$_}{'version'}} @names);
 	for my $file (@names) {
 		printf(
-			qq(<module name="%s"%s  version="%s"%s  url="%s" />\n),
+			qq(<module name="%s"%s  version="%s"%s  url="%s" %s/>\n),
 			$files->{$file}{'name'},
 			" " x ($max_name_size - length $files->{$file}{'name'}),
 			$files->{$file}{'version'},
@@ -82,6 +82,10 @@ sub print_data {
 				'https://www4.orthosesame.com/extractor-updates/new_core/' :
 				'https://www4.orthosesame.com/extractor-updates/'
 			) . $files->{$file}{'name'},
+			( $file eq 'sesameupgrade.exe' ?
+				'force="1" ' :
+				''
+			)
 		);
 	}
 }
