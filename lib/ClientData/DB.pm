@@ -43,6 +43,7 @@ SQL
 		'data_source' => $data_source,
 		'strict_search' => 1,
 		'client_ref' => $client_ref,
+		'cached_data' => {},
 	}, $class;
 
 	return $self;
@@ -209,6 +210,15 @@ sub count_sent_emails_by_type {
 		$type,
     );
 
+}
+
+sub get_cached_data {
+	my ($self, $key, $generate_cache_sub) = @_;
+
+	unless (exists $self->{'cached_data'}{$key}) {
+		$self->{'cached_data'}{$key} = $generate_cache_sub->();
+	}
+	return $self->{'cached_data'}{$key};
 }
 
 1;

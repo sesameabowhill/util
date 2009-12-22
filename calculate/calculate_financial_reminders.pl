@@ -379,13 +379,13 @@ sub get_cc_payments_within_interval {
 	return \%payments;
 }
 
-{
-	my $all_cc_payments;
-	sub get_cc_payments_by_pid {
-		my ($client_data, $pid) = @_;
+sub get_cc_payments_by_pid {
+	my ($client_data, $pid) = @_;
 
-		unless (defined $all_cc_payments) {
-			$all_cc_payments = {};
+	my $patient_cc_payment = $client_data->get_cached_data(
+		'patient_cc_payment',
+		sub {
+			my %patient_payments;
 			my $payments = $client_data->get_complete_cc_payments();
 			for my $payment (@$payments) {
 				my $candidate_manager = CandidateManager->new(
@@ -402,18 +402,31 @@ sub get_cc_payments_within_interval {
 				);
 				my $pid = $candidate_manager->get_single_candidate();
 				if (defined $pid) {
+#					printf(
+#						"patient payment found [%s]\n",
+#						$pid,
+#					);
 					push(
-						@{ $all_cc_payments->{ $pid } },
+						@{ $patient_payments{ $pid } },
 						$payment,
 					);
 				}
 				else {
-					print "can't find patient by payment [".join('-', @$payment{'Comment', 'Email'})."]\n";
+					printf(
+						"can't find patient by payment [%s]\n",
+						join('-',
+							map {$payment->{$_}}
+							grep {$payment->{$_}}
+							('FName', 'LName', 'Comment', 'Email')
+						),
+					);
 				}
 			}
+			return \%patient_payments;
 		}
-		return $all_cc_payments->{$pid};
-	}
+	);
+
+	return $patient_cc_payment->{$pid};
 }
 
 sub get_patient_candidates_for_payment {
