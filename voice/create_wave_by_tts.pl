@@ -5,6 +5,7 @@ use strict;
 use warnings;
 
 use File::Temp qw( tempfile );
+use Digest::MD5 qw( md5_hex );
 use HTTP::Headers;
 use HTTP::Request;
 use LWP::UserAgent;
@@ -12,6 +13,7 @@ use MIME::Base64;
 use URI::Escape;
 
 my $MAX_SOX_FILES = 32;
+my $MAX_FILENAME_LENGTH = 100;
 
 #use Sesame::Config;
 # SELECT PKey, IVal, SVal FROM properties WHERE PKey IN ('Voice.VoiceID', 'Voice.TTSrate') ORDER BY PKey;
@@ -131,10 +133,14 @@ sub concat_sound_files {
 sub make_cache_file_name {
 	my ($text) = @_;
 
-	my $cache_file = '_cache.'.uri_escape($text, "^A-Za-z0-9\-_.~()").'.wav';
+	my $cache_file = '_cache.'.uri_escape($text, "^A-Za-z0-9\-_.~()");
 	$cache_file =~ s/\s/_/g;
 	$cache_file =~ s/%//g;
-	return $cache_file;
+	if (length $cache_file > $MAX_FILENAME_LENGTH) {
+		my $fn_checksum = md5_hex($cache_file);
+		$cache_file = substr($cache_file, 0, $MAX_FILENAME_LENGTH - 32).$fn_checksum;
+	}
+	return $cache_file.'.wav';
 }
 
 sub download_sound_fragment {
