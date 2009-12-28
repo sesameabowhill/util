@@ -167,17 +167,56 @@ sub get_email_reminder_settings {
 sub get_ccp_id {
 	my ($self) = @_;
 
-	unless ($self->{'ccp_id'}) {
-		my ($type, $id) = ($self->{'client_ref'}->get_id() =~ m/^(\w)(\d+)$/);
+	return $self->get_cached_data(
+		'_ccp_id',
+		sub {
+			my ($type, $id) = ($self->{'client_ref'}->get_id() =~ m/^(\w)(\d+)$/);
 
-		$self->{'ccp_id'} = $self->{'dbh'}->selectrow_array(
-			"SELECT CID FROM opse.clients WHERE Category=? AND OuterId=?",
-			undef,
-			($type eq 'd' ? 'Dental' : 'Ortho'),
-			$id,
-		);
-	}
-	return $self->{'ccp_id'};
+			return scalar $self->{'dbh'}->selectrow_array(
+				"SELECT CID FROM opse.clients WHERE Category=? AND OuterId=?",
+				undef,
+				($type eq 'd' ? 'Dental' : 'Ortho'),
+				$id,
+			);
+		}
+	);
+}
+
+sub get_voice_id {
+	my ($self) = @_;
+
+	return $self->get_cached_data(
+		'_voice_id',
+		sub {
+			return scalar $self->{'dbh'}->selectrow_array(
+				"SELECT id FROM voice.Clients WHERE db_name=?",
+				undef,
+				$self->{'client_ref'}->get_db_name(),
+			);
+		}
+	);
+}
+
+sub get_all_voice_queued_calls {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id, cid, rec_id, rec_phone, xml_request, message_type, time2send, unique_key, event_datetime FROM voice.Queue WHERE cid=?",
+		{ 'Slice' => {} },
+		$self->get_voice_id(),
+    );
+}
+
+sub set_voice_queued_call_time {
+	my ($self, $call_id, $time_to_sent, $xml_request) = @_;
+
+	$self->{'dbh'}->do(
+		"UPDATE voice.Queue SET time2send=?, xml_request=? WHERE id=?",
+		undef,
+		$time_to_sent,
+		$xml_request,
+		$call_id,
+	);
 }
 
 sub get_complete_cc_payments {
