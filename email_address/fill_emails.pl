@@ -18,7 +18,13 @@ if (@files) {
 	my %implemented = (
 		'patient_emails' => {
 			'ortho_resp' => {
-				'candidate' => \&find_patient_ortho_resp,
+				'candidate'   => \&find_patient_ortho_resp,
+				'adder'       => \&add_email_with_responsible_patient,
+				'file_format' => ['name', 'email'],
+			},
+			'sesame' => {
+				'candidate'   => \&find_patient_by_name,
+				'adder'       => \&add_email_to_visitor,
 				'file_format' => ['name', 'email'],
 			},
 #			'dental' => \&add_email_to_patients_dental,
@@ -26,8 +32,14 @@ if (@files) {
 		'responsible_emails' => {
 			'ortho_resp' => {
 				'candidate' => \&find_responsible_ortho_resp,
+				'adder' => \&add_email_with_responsible_patient,
 				'file_format' => ['name', 'email'],
-			}
+			},
+			'sesame' => {
+				'candidate'   => \&find_responsible_by_name,
+				'adder'       => \&add_email_to_visitor,
+				'file_format' => ['name', 'email'],
+			},
 #			'dental' => \&add_email_to_responsibles_dental,
 		},
 		'pms_referrings' => {
@@ -49,7 +61,7 @@ if (@files) {
 	my $data_source = DataSource::DB->new();
 	my $last_client_db = undef;
 	for my $file_name (@files) {
-		if ($file_name =~ m/^(.*)\.(.*)\.(.*)$/) {
+		if ($file_name =~ m/^_?(.*)\.(.*)\.(.*)$/) {
 			my ($client_db, $type, $ext) = ($1, $2, $3);
 			$client_db =~ s/^_//;
 			$last_client_db = $client_db;
@@ -80,6 +92,7 @@ if (@files) {
 						$emails,
 						$client_data,
 						$params->{'candidate'},
+						$params->{'adder'},
 					);
 				}
 			}
@@ -99,7 +112,8 @@ if (@files) {
 	}
 
 	print "$add_email_count/$total_email_count emails added\n";
-	printf "done: %.2f minutes\n", (time() - $start_time) / 60;
+	my $work_time = time() - $start_time;
+	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
 } else {
 	print <<USAGE;
 Usage: $0 <file1> [files...]
@@ -112,7 +126,7 @@ USAGE
 }
 
 sub fill_emails {
-	my ($emails, $client_data, $candidate_selector) = @_;
+	my ($emails, $client_data, $candidate_selector, $adder) = @_;
 
 	my $add_email_count = 0;
 	for my $email_row (@$emails) {
@@ -142,15 +156,7 @@ sub fill_emails {
 					"ADD: %s\n",
 					$email,
 				);
-				$client_data->add_email(
-					(defined $candidate->{'patient'} ? $candidate->{'patient'}{'PId'} : 0 ),
-					$candidate->{'responsible'}{'RId'},
-					$email,
-					(defined $candidate->{'patient'} ? 0 : 4 ),
-					'',
-					0,
-					'other',
-				);
+				$adder->($email, $candidate, $client_data);
 				$add_email_count++;
 			}
 			else {
@@ -163,6 +169,34 @@ sub fill_emails {
 		}
 	}
 	return $add_email_count;
+}
+
+sub add_email_with_responsible_patient {
+	my ($email, $candidate, $client_data) = @_;
+
+	$client_data->add_email(
+		(defined $candidate->{'patient'} ? $candidate->{'patient'}{'PId'} : 0 ),
+		$candidate->{'responsible'}{'RId'},
+		$email,
+		(defined $candidate->{'patient'} ? 0 : 4 ),
+		'',
+		0,
+		'other',
+	);
+}
+
+sub add_email_to_visitor {
+	my ($email, $candidate, $client_data) = @_;
+
+	my $visitor = $candidate;
+	$client_data->add_email(
+		$visitor->{'id'},
+		$email,
+		'other',
+		join(' ', @$visitor{'FName', 'LName'}),
+		'false',
+		'other',
+	);
 }
 
 sub find_patient_ortho_resp {
@@ -186,6 +220,29 @@ sub find_patient_ortho_resp {
 
 }
 
+sub find_patient_by_name {
+	my ($name, $client_data, $candidate_manager) = @_;
+
+	my $patients = $client_data->get_patients_by_name($name);
+	for my $patient (@$patients) {
+		$candidate_manager->add_candidate(
+			'by_name_patient',
+			$patient,
+		);
+	}
+}
+
+sub find_responsible_by_name {
+	my ($name, $client_data, $candidate_manager) = @_;
+
+	my $responsibles = $client_data->get_responsibles_by_name($name);
+	for my $responsible (@$responsibles) {
+		$candidate_manager->add_candidate(
+			'by_name_resp',
+			$responsible,
+		);
+	}
+}
 
 sub find_responsible_ortho_resp {
 	my ($name, $client_data, $candidate_manager) = @_;

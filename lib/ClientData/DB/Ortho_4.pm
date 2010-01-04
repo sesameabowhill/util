@@ -1,7 +1,7 @@
 ## $Id$
-package ClientData::DB::Ortho;
+package ClientData::DB::Ortho_4;
 
-use base qw( ClientData::DB );
+use base qw( ClientData::DB::Sesame_4 );
 
 sub get_reverse_remap {
 	my ($self, $table_id, $id) = @_;

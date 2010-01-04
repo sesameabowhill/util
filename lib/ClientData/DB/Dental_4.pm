@@ -1,12 +1,12 @@
-package ClientData::DB::Dental;
+package ClientData::DB::Dental_4;
 
 use strict;
 
-use base qw( ClientData::DB );
+use base qw( ClientData::DB::Sesame_4 );
 
 sub get_full_type {
 	my ($class) = @_;
-	
+
 	return 'dental';
 }
 
@@ -48,16 +48,16 @@ sub get_appointments {
 
 sub get_visited_offices {
 	my ($self) = @_;
-	
+
     return $self->{'dbh'}->selectall_arrayref(
         "SELECT PId, OfficeId, count(*) AS Count FROM AppointmentsHistory GROUP BY 1, 2",
 		{ 'Slice' => {} },
-    );	
+    );
 }
 
 sub get_offices {
 	my ($self) = @_;
-	
+
 	return $self->{'dbh'}->selectall_arrayref(
 		"SELECT OfficeId, Name AS OfficeName, CONCAT(StreetAddress, ' ', City, ', ', State, ' ', Zipcode) AS OfficeLocation FROM Offices",
 		{ 'Slice' => {} },

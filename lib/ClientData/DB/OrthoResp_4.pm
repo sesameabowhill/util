@@ -1,7 +1,7 @@
 ## $Id$
-package ClientData::DB::OrthoResp;
+package ClientData::DB::OrthoResp_4;
 
-use base qw( ClientData::DB::Ortho );
+use base qw( ClientData::DB::Ortho_4 );
 
 sub get_full_type {
 	my ($class) = @_;
