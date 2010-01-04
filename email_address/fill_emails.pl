@@ -114,7 +114,8 @@ if (@files) {
 	print "$add_email_count/$total_email_count emails added\n";
 	my $work_time = time() - $start_time;
 	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
-} else {
+}
+else {
 	print <<USAGE;
 Usage: $0 <file1> [files...]
 File names:

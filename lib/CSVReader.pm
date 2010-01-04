@@ -4,13 +4,13 @@ package CSVReader;
 use strict;
 use warnings;
 
-use Text::CSV_XS;
+use Text::CSV;
 use Hash::Util qw( lock_keys );
 
 sub new {
 	my ($class, $file_name, $columns, $sep_char) = @_;
 
-    my $csv = Text::CSV_XS->new(
+    my $csv = Text::CSV->new(
         {
             'escape_char' => '"',
             'sep_char' => (defined $sep_char ? $sep_char : ','),
