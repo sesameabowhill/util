@@ -75,8 +75,8 @@ sub client_by_db {
 sub get_client_data_by_db {
     my ($self, $db) = @_;
 
-    require ClientData::DB;
-    return ClientData::DB->new($self, $db);
+    require ClientData::DB::Sesame_4;
+    return ClientData::DB::Sesame_4->new($self, $db);
 }
 
 sub get_clients {
@@ -146,3 +146,4 @@ sub is_client_exists {
 
 
 
+1;

@@ -12,7 +12,7 @@ sub new {
 
 	my $self = $class->SUPER::new($data_source, $db_name);
 
-	my $self->{'dbi'} = $data_source->get_connection( $db_name );
+	$self->{'dbh'} = $data_source->get_connection( $db_name );
 
 	my $client_type = $self->{'client_ref'}->get_client_type();
 	if ($client_type eq 'dental') {
@@ -20,7 +20,7 @@ sub new {
 		require ClientData::DB::Dental_4;
 	}
 	else {
-		my $context = $self->{'dbi'}->selectrow_array(<<'SQL', undef ,$db_name);
+		my $context = $self->{'dbh'}->selectrow_array(<<'SQL', undef ,$db_name);
 SELECT s.dbs_context
 FROM sesameweb.clients cl
 LEFT JOIN sesameweb.udbf_software s ON (s.dbs_id=cl.cl_pms)
@@ -39,7 +39,7 @@ SQL
 		}
 	}
 
-	return $self;
+	return bless($self, $class);
 }
 
 

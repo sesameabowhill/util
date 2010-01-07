@@ -56,6 +56,9 @@ sub _search_with_fields_by_name {
 	if (defined $where) {
 		$where = " AND $where";
 	}
+	else {
+		$where = '';
+	}
 	my $result;
 	if (defined $lname) {
 		$result = $self->{'dbh'}->selectall_arrayref(

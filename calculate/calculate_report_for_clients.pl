@@ -15,51 +15,134 @@ use DateUtils;
 
 use constant 'FINANCIAL_REMINDER_TYPE' => 2;
 
-my @clients = @ARGV;
-if (@clients) {
-	my $data_source = DataSource::DB->new();
-	my $start_time = time();
-	my $result_file = '_result.csv';
-	printf "writing result to [%s]\n", $result_file;
-	my $output = CSVWriter->new(
-		$result_file,
-#		[ 'username', 'description', 'type', 'count' ],
-		[
-			'username',
-			'is active',
-			'financial reminder enabled',
-			'online payment enabled',
-			'patient id',
-			'patient is active',
-			'patient email count',
-			'appointment',
-			'app paid online',
-			'app paid insurance',
-			'app paid card',
-			'app paid check',
-			'app paid other',
-			'app with financial reminder',
-			'paid online N days after rem',
-			'first online payment date',
-			'last online payment date',
-			'first financial reminder date',
-			'last financial reminder date',
-		],
+{
+	my %reports = (
+		'patients_by_zip_codes' => {
+			'columns' => [ 'type', 'username', 'office', 'zip', 'patients' ],
+			'get_data' => \&get_patients_by_zip_data,
+		},
+		'financial_reminders' => {
+			'columns' => [
+				'username',
+				'is active',
+				'financial reminder enabled',
+				'online payment enabled',
+				'patient id',
+				'patient is active',
+				'patient email count',
+				'appointment',
+				'app paid online',
+				'app paid insurance',
+				'app paid card',
+				'app paid check',
+				'app paid other',
+				'app with financial reminder',
+				'paid online N days after rem',
+				'first online payment date',
+				'last online payment date',
+				'first financial reminder date',
+				'last financial reminder date',
+			],
+			'get_data' => \&get_financial_reminders_report,
+		},
 	);
-	for my $client_identity (@clients) {
-		my $client_data = $data_source->get_client_data_by_db($client_identity);
-		printf "database source: client [%s]\n", $client_identity;
-#		my $data = get_unique_description($client_data);
-		my $data = get_report($client_data);
-		$output->write_data($data);
+	my ($report_type, @clients) = @ARGV;
+	if (@clients) {
+		if (exists $reports{$report_type}) {
+			my $data_source = DataSource::DB->new();
+		    my $start_time = time();
+		    my $result_file = '_'.$report_type.'.csv';
+		    printf "writing result to [%s]\n", $result_file;
+		    my $output = CSVWriter->new(
+		    	$result_file,
+		    	$reports{$report_type}{'columns'},
+		    );
+		    for my $client_identity (@clients) {
+				my $client_data = $data_source->get_client_data_by_db($client_identity);
+				printf "database source: client [%s]\n", $client_identity;
+		    	my $data = $reports{$report_type}{'get_data'}->($client_data);
+		    	$output->write_data($data);
+		    }
+		    my $work_time = time() - $start_time;
+		    printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
+		}
+		else {
+			die "unknown report type [$report_type]";
+		}
 	}
-	my $work_time = time() - $start_time;
-	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
+	else {
+		my @reports = sort keys %reports;
+	    print "Usage: $0 <".join('|', @reports)."> <database1> [database2...]\n";
+	    exit(1);
+	}
 }
-else {
-	print "Usage: $0 <database1> [database2...]\n";
-	exit(1);
+
+
+
+
+############### patients by zip codes
+
+sub get_patients_by_zip_data {
+    my ($client_data) = @_;
+
+    my $patients = $client_data->get_patients();
+    my $all_visited_offices = get_all_visited_offices($client_data);
+
+    my %zip_patients;
+    for my $patient (@$patients) {
+    	if (exists $all_visited_offices->{ $patient->{'PId'} }) {
+    		my $visited_office = $all_visited_offices->{ $patient->{'PId'} };
+	    	my $addresses = $client_data->get_addresses_by_pid( $patient->{'PId'} );
+	    	for my $address (@$addresses) {
+	    		$zip_patients{ $visited_office->{'OfficeId'} }{ $address->{'Zip'} }{ $patient->{'PId'} } = $patient;
+	    	}
+    	}
+    	else {
+    		## skip patient without appointments
+    	}
+    }
+    my %office = map { $_->{'OfficeId'} => $_ } @{ $client_data->get_offices() };
+    my @data;
+    for my $office_id (keys %zip_patients) {
+    	for my $zip (sort { $a cmp $b } keys %{ $zip_patients{$office_id} }) {
+    		my $patients_count = $zip_patients{$office_id}{$zip};
+    		push(
+    			@data,
+    			{
+    				'type'     => $client_data->get_full_type(),
+    				'username' => $client_data->get_db_name(),
+    				'office'   => ( $office{$office_id}{'OfficeLocation'} || $office{$office_id}{'OfficeName'} ),
+    				'zip'      => $zip,
+    				'patients' => scalar keys %$patients_count,
+    			}
+    		);
+    	}
+    }
+    return \@data;
 }
+
+sub get_all_visited_offices {
+	my ($client_data) = @_;
+
+	my %all_visited;
+	my $visited_offices = $client_data->get_visited_offices();
+	for my $office (@$visited_offices) {
+		push(
+			@{ $all_visited{ $office->{'PId'} } },
+			$office,
+		);
+	}
+	my %offices;
+	while (my ($pid, $offices) = each %all_visited) {
+		@$offices = sort { $b->{'Count'} <=> $a->{'Count'} } @$offices;
+		$offices{ $pid } = $offices->[0];
+	}
+	return \%offices;
+}
+
+
+
+############### financial reminders
 
 sub get_unique_description {
 	my ($client_data) = @_;
@@ -93,7 +176,7 @@ sub get_unique_description {
 
 
 
-sub get_report {
+sub get_financial_reminders_report {
 	my ($client_data) = @_;
 
 	my $reminder_settings = $client_data->get_email_reminder_settings();
@@ -575,4 +658,3 @@ sub get_ledgers_stat {
         'first_payment_date' => \%first_payment_date,
     };
 }
-

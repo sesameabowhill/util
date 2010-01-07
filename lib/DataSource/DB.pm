@@ -89,7 +89,7 @@ sub get_connection {
     $db_name ||= '';
 
     return DataSource::DB::DBI->connect(
-        "DBI:mysql:host=".$self->{'db'}{'host'}.':'.$self->{'db'}{'port'}.($db_name?";database=$db_name":""),
+        "DBI:mysql:host=".$self->{'db'}{'host'}.';port='.$self->{'db'}{'port'}.($db_name?";database=$db_name":""),
         $self->{'db'}{'user'},
         $self->{'db'}{'password'},
         {
