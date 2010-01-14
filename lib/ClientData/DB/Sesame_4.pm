@@ -6,15 +6,28 @@ use warnings;
 
 use base qw( ClientData::DB );
 
+our %CLIENTS_TABLE_NAME = (
+	'ortho' => 'sesameweb.clients',
+	'dental' => 'dentists.clients',
+);
+
+my $COMMON_CLIENT_PARAMS = 'cl_id AS id, cl_mysql AS db_name, cl_pathw AS web_folder, cl_status AS status, cl_timezone AS timezone, rule_id';
+my $ORTHO_CLIENT_PARAMS  = "$COMMON_CLIENT_PARAMS, 'ortho' AS type, cl_username AS username, cl_pms AS pms_id";
+my $DENTAL_CLIENT_PARAMS = "$COMMON_CLIENT_PARAMS, 'dental' AS type, cl_mysql AS username, cl_db AS pms_id";
+
 
 sub new {
 	my ($class, $data_source, $db_name) = @_;
 
 	my $self = $class->SUPER::new($data_source, $db_name);
 
-	$self->{'dbh'} = $data_source->get_connection( $db_name );
+	$self->{'dbh'} = $data_source->get_connection($db_name);
+	$self->{'client'} = _get_client_params($self->{'dbh'}, $db_name);
+	unless (defined $self->{'client'}) {
+		die "can't find client by [$db_name]";
+	}
 
-	my $client_type = $self->{'client_ref'}->get_client_type();
+	my $client_type = $self->{'client'}{'type'};
 	if ($client_type eq 'dental') {
 		$class = 'ClientData::DB::Dental_4';
 		require ClientData::DB::Dental_4;
@@ -40,6 +53,27 @@ SQL
 	}
 
 	return bless($self, $class);
+}
+
+sub _get_client_params {
+	my ($dbh, $db_name) = @_;
+
+	my $params = $dbh->selectrow_hashref(<<SQL, undef, $db_name);
+SELECT $ORTHO_CLIENT_PARAMS
+FROM $CLIENTS_TABLE_NAME{'ortho'}
+WHERE cl_mysql=?
+SQL
+	unless ($params) {
+		$params = $dbh->selectrow_hashref(<<SQL, undef, $db_name);
+SELECT $DENTAL_CLIENT_PARAMS
+FROM $CLIENTS_TABLE_NAME{'dental'}
+WHERE cl_mysql=?
+SQL
+		unless ($params) {
+			return undef;
+		}
+	}
+	return $params;
 }
 
 
@@ -100,7 +134,7 @@ sub get_email_reminder_settings {
 	return $self->{'dbh'}->selectall_arrayref(
 		"SELECT id, is_enabled, type, subject, body, response_options, design_id, image_guid, image_title FROM email_messaging.reminder_settings WHERE client_id=?",
 		{ 'Slice' => {} },
-		$self->{'client_ref'}->get_id(),
+		$self->_get_id(),
 	);
 }
 
@@ -110,7 +144,7 @@ sub get_ccp_id {
 	return $self->get_cached_data(
 		'_ccp_id',
 		sub {
-			my ($type, $id) = ($self->{'client_ref'}->get_id() =~ m/^(\w)(\d+)$/);
+			my ($type, $id) = ($self->_get_id() =~ m/^(\w)(\d+)$/);
 
 			return scalar $self->{'dbh'}->selectrow_array(
 				"SELECT CID FROM opse.clients WHERE Category=? AND OuterId=?",
@@ -131,7 +165,7 @@ sub get_voice_id {
 			return scalar $self->{'dbh'}->selectrow_array(
 				"SELECT id FROM voice.Clients WHERE db_name=?",
 				undef,
-				$self->{'client_ref'}->get_db_name(),
+				$self->get_db_name(),
 			);
 		}
 	);
@@ -190,5 +224,19 @@ sub count_sent_emails_by_type {
     );
 
 }
+
+
+sub get_db_name {
+	my ($self) = @_;
+
+	return $self->{'client'}{'db_name'};
+}
+
+sub is_active {
+	my ($self) = @_;
+
+	return $self->{'client'}{'status'} == 1;
+}
+
 
 1;

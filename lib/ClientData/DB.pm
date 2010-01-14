@@ -4,18 +4,13 @@ package ClientData::DB;
 use strict;
 use warnings;
 
-use Sesame::Unified::Client;
-
-
 sub new {
-	my ($class, $data_source, $db_name) = @_;
-
-	my $client_ref = Sesame::Unified::Client->new('db_name', $db_name);
+	my ($class, $data_source, $db_name, $unified_client_ref) = @_;
 
 	my $self = bless {
 		'data_source' => $data_source,
 		'strict_search' => 1,
-		'client_ref' => $client_ref,
+		'client_ref' => $unified_client_ref,
 		'cached_data' => {},
 	}, $class;
 
@@ -23,11 +18,6 @@ sub new {
 }
 
 
-sub get_db_name {
-	my ($self) = @_;
-
-	return $self->{'client_ref'}->get_db_name();
-}
 
 sub set_strict_level {
 	my ($self, $level) = @_;
@@ -35,11 +25,6 @@ sub set_strict_level {
 	$self->{'strict_search'} = $level;
 }
 
-sub is_active {
-	my ($self) = @_;
-
-	return $self->{'client_ref'}->is_active();
-}
 
 sub get_cached_data {
 	my ($self, $key, $generate_cache_sub) = @_;

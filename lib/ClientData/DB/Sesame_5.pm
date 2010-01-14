@@ -8,12 +8,24 @@ use base qw( ClientData::DB );
 
 
 sub new {
-	my ($class, $data_source, $db_name, $dbh) = @_;
+	my ($class, $data_source, $db_name, $dbh, $unified_client_ref) = @_;
 
-	my $self = $class->SUPER::new($data_source, $db_name);
+	my $self = $class->SUPER::new($data_source, $db_name, $unified_client_ref);
 	$self->{'client_id'} = $self->{'client_ref'}->get_id();
 	$self->{'dbh'} = $dbh;
 	return $self;
+}
+
+sub get_db_name {
+	my ($self) = @_;
+
+	return $self->{'client_ref'}->get_db_name();
+}
+
+sub is_active {
+	my ($self) = @_;
+
+	return $self->{'client_ref'}->is_active();
 }
 
 sub get_full_type {

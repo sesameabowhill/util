@@ -391,7 +391,7 @@ sub get_feature_status {
 		die "unknown feature [$feature]";
 	}
 
-	my ($type, $id) = ($self->{'client_ref'}->get_id() =~ m/^(\w)(\d+)$/);
+	my ($type, $id) = ($self->_get_id() =~ m/^(\w)(\d+)$/);
 
 	return scalar $self->{'dbh'}->selectrow_array(
 		"SELECT status FROM sesameweb.feature_settings WHERE cl_id=? AND feature_id=?",
@@ -412,6 +412,11 @@ sub get_unique_ledgers_description_by_type {
 
 }
 
+sub _get_id {
+	my ($self) = @_;
+
+	return 'o'.$self->{'client'}{'id'};
+}
 
 
 1;

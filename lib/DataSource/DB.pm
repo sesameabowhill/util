@@ -9,7 +9,7 @@ use DBI;
 use Sesame::Config;
 
 sub new {
-    my ($class) = @_;
+    my ($class, $is_sesame_5) = @_;
 
     my $self = {
         'statements' => [],
@@ -17,31 +17,64 @@ sub new {
     };
 
     my $core_config = $class->read_config('sesame_core.conf');
-    if (exists $core_config->{'database_access'}{'database_name'}) {
-    	$self->{'db'} = {
-    		'user'     => $core_config->{'database_access'}{'user'},
-    		'host'     => $core_config->{'database_access'}{'server_address'},
-    		'port'     => $core_config->{'database_access'}{'server_port'},
-    		'password' => $core_config->{'database_access'}{'password'},
-    		'database' => $core_config->{'database_access'}{'database_name'},
-    	};
+    my $detect_sesame_5 = exists $core_config->{'database_access'}{'database_name'};
+    unless (defined $is_sesame_5) {
+    	$is_sesame_5 = $detect_sesame_5;
+    }
+    if ($is_sesame_5) {
+    	if ($detect_sesame_5) {
+	    	$self->{'db'} = {
+	    		'user'     => $core_config->{'database_access'}{'user'},
+	    		'host'     => $core_config->{'database_access'}{'server_address'},
+	    		'port'     => $core_config->{'database_access'}{'server_port'},
+	    		'password' => $core_config->{'database_access'}{'password'},
+	    		'database' => $core_config->{'database_access'}{'database_name'},
+	    	};
+    	}
+    	else {
+    		die "can't access sesame5 from sesame4";
+    	}
     	require DataSource::DB::Sesame_5;
     	$class = 'DataSource::DB::Sesame_5';
     }
     else {
-    	$self->{'db'} = {
-    		'user'     => $core_config->{'database_access'}{'user'},
-    		'host'     => $ENV{'SESAME_DB_SERVER'},
-    		'port'     => 3306,
-    		'password' => $core_config->{'database_access'}{'password'},
-    		'database' => '',
-    	};
+    	if ($detect_sesame_5) {
+    		## use hardcoded params to access sesame4 from sesame5
+	    	$self->{'db'} = {
+	    		'user'     => 'admin',
+	    		'host'     => 'digger',
+	    		'port'     => 3306,
+	    		'password' => 'higer4',
+	    		'database' => '',
+	    	};
+    	}
+    	else {
+	    	$self->{'db'} = {
+	    		'user'     => $core_config->{'database_access'}{'user'},
+	    		'host'     => $ENV{'SESAME_DB_SERVER'},
+	    		'port'     => 3306,
+	    		'password' => $core_config->{'database_access'}{'password'},
+	    		'database' => '',
+	    	};
+    	}
     	require DataSource::DB::Sesame_4;
     	$class = 'DataSource::DB::Sesame_4';
     }
     $self->{'dbh'} = get_connection($self, $self->{'db'}{'database'});
 
     return bless $self, $class;
+}
+
+sub new_4 {
+	my ($class) = @_;
+
+	return $class->new(0);
+}
+
+sub new_5 {
+	my ($class) = @_;
+
+	return $class->new(1);
 }
 
 sub read_config {

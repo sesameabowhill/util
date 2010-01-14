@@ -177,4 +177,10 @@ sub add_email {
     $insert_q->execute($pid, $rid, $email);
 }
 
+sub _get_id {
+	my ($self) = @_;
+
+	return 'd'.$self->{'client'}{'id'};
+}
+
 1;
