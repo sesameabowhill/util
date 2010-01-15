@@ -504,22 +504,6 @@ sub generate_password {
 #use DBI;
 #
 #
-#sub new {
-#    my ($class, $db_name) = @_;
-#
-#    require Sesame::Unified::Client;
-#
-#    my $client_ref = Sesame::Unified::Client->new('db_name', $db_name);
-#
-#    my $dbh = get_connection( $db_name );
-#    my ($type, $id) = ( $client_ref->get_id() =~ m/(\w)(\d+)/ );
-#
-#    return bless {
-#        'dbh'     => $dbh,
-#        'db_name' => $db_name,
-#        'insert_commands' => [],
-#    }, $class;
-#}
 #
 #sub get_insert_commands {
 #    my ($self) = @_;
