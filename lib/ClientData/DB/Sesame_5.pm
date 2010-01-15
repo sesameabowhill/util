@@ -6,10 +6,14 @@ use warnings;
 
 use base qw( ClientData::DB );
 
+use Sesame::Unified::Client;
 
 sub new {
 	my ($class, $data_source, $db_name, $dbh, $unified_client_ref) = @_;
 
+	unless (defined $unified_client_ref) {
+		$unified_client_ref = Sesame::Unified::Client->new('db_name', $db_name);
+	}
 	my $self = $class->SUPER::new($data_source, $db_name, $unified_client_ref);
 	$self->{'client_id'} = $self->{'client_ref'}->get_id();
 	$self->{'dbh'} = $dbh;
@@ -19,7 +23,13 @@ sub new {
 sub get_db_name {
 	my ($self) = @_;
 
-	return $self->{'client_ref'}->get_db_name();
+	return $self->get_username();
+}
+
+sub get_username {
+	my ($self) = @_;
+
+	return $self->{'client_ref'}->get_username();
 }
 
 sub is_active {
@@ -102,6 +112,28 @@ SQL
 	$sql =~ s/\s+/ /g;
 	$self->{'dbh'}->do($sql);
 	$self->{'data_source'}->add_statement($sql);
+}
+
+
+sub get_all_si_images {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT ImageId, PatId, FileName FROM si_image WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+    );
+}
+
+sub get_si_patient_by_id {
+	my ($self, $pat_id) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT FName, LName, BDate FROM si_patient WHERE PatId=? AND client_id=?",
+		{ 'Slice' => {} },
+		$pat_id,
+		$self->{'client_id'},
+    )->[0];
 }
 
 

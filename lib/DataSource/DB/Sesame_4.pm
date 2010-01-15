@@ -136,11 +136,29 @@ sub add_voice_end_message {
 	);
 }
 
-sub is_client_exists {
+sub is_database_exists {
     my ($self, $db_name) = @_;
 
 	my $db = $self->{'dbh'}->selectrow_array("SHOW DATABASES LIKE ?", undef, $db_name);
     return defined $db && $db eq $db_name;
+}
+
+sub get_database_by_username {
+	my ($self, $username) = @_;
+
+	my $db_name = $self->{'dbh'}->selectrow_array(
+		"SELECT cl_mysql FROM sesameweb.clients WHERE cl_username=?",
+		undef,
+		$username,
+	);
+	unless ($db_name) {
+		$db_name = $self->{'dbh'}->selectrow_array(
+			"SELECT cl_mysql FROM dentists.clients WHERE cl_mysql=?",
+			undef,
+			$username,
+		);
+	}
+	return $db_name;
 }
 
 

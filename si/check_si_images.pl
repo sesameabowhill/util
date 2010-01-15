@@ -1,89 +1,114 @@
+#!/usr/bin/perl
 ## $Id$
+
 use strict;
+use warnings;
 
-use DBI;
+use File::Spec;
 
-use Sesame::Config;
-use Sesame::Unified::Client;
-use Sesame::Constants qw( :config );
+use lib '../lib';
+
+use CSVWriter;
+use DataSource::DB;
+
 
 #/home/sites/site2/web/image_systems/jyavari/si/images
 
-my $client = Sesame::Unified::Client->new('db_name', $ARGV[0]);
-
-my $dbh = get_connection( $client->get_db_name() );
-
-my $qr = $dbh->prepare("SELECT ImageId, PatId, FileName FROM SI_Images");
-$qr->execute();
-my $counter = 0;
-my $total = $qr->rows();
-my %invalid_patients;
-while (my $r = $qr->fetchrow_hashref()) {
-    my $full_filename = sprintf(
-        '%s/image_systems/%s/si/images/%s',
-        $ENV{'SESAME_WEB'},
-        $client->get_db_name(), ## TODO replace with username or ???
-        $r->{'FileName'}
+my @clients = @ARGV;
+if (@clients) {
+	my $data_access = DataSource::DB->new();
+	my $start_time = time();
+    my $result_file = '_si_patients_without_images.csv';
+    printf "writing result to [%s]\n", $result_file;
+    my $output = CSVWriter->new(
+    	$result_file,
+    	[
+    		'client',
+    		'fname',
+    		'lname',
+    		'birthday',
+    		'broken img count',
+    		'pid',
+    	],
     );
-    $counter++;
-    if (-f $full_filename) {
-        unless ($counter % 5000) {
-            print "$counter/$total: [$full_filename] - OK\n";
-        }
-    } else {
-        print "$counter/$total: [$full_filename] - not found\n";
-        $invalid_patients{ $r->{'PatId'} } ++;
-    }
+
+	for my $client_db (@clients) {
+		my $client_data = $data_access->get_client_data_by_db($client_db);
+		printf "database source: client [%s]\n", $client_db;
+		my $data = find_broken_images($client_data);
+		$output->write_data($data);
+	}
+	my $work_time = time() - $start_time;
+	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
+}
+else {
+	print "Usage: $0 <client_db> ...\n";
+	exit(1);
 }
 
+sub find_broken_images {
+	my ($client_data) = @_;
 
-print "-"x50, "\n";
-if (keys %invalid_patients) {
-    print "Images for following patients are missing:\n";
-    print "Doctor;Patient FName;Patient LName;BirthDay;Broken Img Count;PID\n";
-    for my $pid (keys %invalid_patients) {
-        my $patient = get_si_patient_name($dbh, $pid);
-        printf(
-            "%s;%s;%s;%s;%d;%s\n",
-            $client->get_db_name(),
-            $patient->{'FName'},
-            $patient->{'LName'},
-            $patient->{'BDate'},
-            $invalid_patients{$pid},
-            $pid
-        );
-    }
-} else {
-    print "All images are found\n"
+	my $counter = 0;
+	my $images = $client_data->get_all_si_images();
+	if (@$images) {
+		printf "client [%s]: %d images to process\n", $client_data->get_username(), scalar @$images;
+		my $total = @$images;
+		my $missing = 0;
+		my %invalid_patients;
+		my $image_path = ( $client_data->get_full_type() eq 'sesame' ?
+			File::Spec->join(
+		    	$ENV{'SESAME_COMMON'},
+		    	'image-systems',
+		    	$client_data->get_username(),
+		    	'si',
+		    	'images',
+		    ) :
+			File::Spec->join(
+		    	$ENV{'SESAME_WEB'},
+		    	'image_systems',
+		    	$client_data->get_username(),
+		    	'si',
+		    	'images',
+		    )
+		);
+		for my $r (@$images) {
+		    my $full_filename = File::Spec->join($image_path, $r->{'FileName'});
+		    $counter++;
+		    if (-f $full_filename) {
+		        unless ($counter % 5000) {
+		            print "$counter/$total: [$full_filename] - OK\n";
+		        }
+		    } else {
+		    	$missing++;
+		        print "$counter/$total: [$full_filename] - not found\n";
+		        $invalid_patients{ $r->{'PatId'} } ++;
+		    }
+		}
+
+		printf "client [%s]: %d of %d images are missing\n", $client_data->get_username(), $missing, scalar @$images;
+
+
+		my @data;
+	    for my $pid (keys %invalid_patients) {
+	        my $patient = $client_data->get_si_patient_by_id($pid);
+	        push(
+	        	@data,
+	        	{
+		    		'client'   => $client_data->get_username(),
+		    		'fname'    => $patient->{'FName'},
+		    		'lname'    => $patient->{'LName'},
+		    		'birthday' => $patient->{'BDate'},
+		            'pid'      => $pid,
+		            'broken img count' => $invalid_patients{$pid},
+	        	}
+	        );
+	    }
+		return \@data;
+	}
+	else {
+		printf "client [%s]: no si images\n", $client_data->get_username();
+		return [];
+	}
 }
 
-
-sub get_si_patient_name {
-    my ($dbh, $pid) = @_;
-
-    return $dbh->selectall_arrayref(
-        "SELECT FName, LName, BDate FROM SI_Patients WHERE PatId=?",
-        { 'Slice' => {} },
-        $pid
-    )->[0];
-}
-
-
-sub get_connection {
-    my ($db_name) = @_;
-
-    $db_name ||= '';
-
-    my $config = Sesame::Config->read_file(CONFIG_FILE_SESAME_CORE);
-
-    return DBI->connect(
-            "DBI:mysql:host=$ENV{SESAME_DB_SERVER}".($db_name?";database=$db_name":""),
-            $config->{'database_access'}->{'user'},
-            $config->{'database_access'}->{'password'},
-            {
-                    RaiseError => 1,
-                    ShowErrorStatement => 1,
-                    PrintError => 0,
-            }
-    );
-}

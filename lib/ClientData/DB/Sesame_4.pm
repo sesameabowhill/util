@@ -76,6 +76,25 @@ SQL
 	return $params;
 }
 
+sub get_db_name {
+	my ($self) = @_;
+
+	return $self->{'client'}{'db_name'};
+}
+
+sub get_username {
+	my ($self) = @_;
+
+	return $self->{'client'}{'username'};
+}
+
+
+sub is_active {
+	my ($self) = @_;
+
+	return $self->{'client'}{'status'} == 1;
+}
+
 
 sub _search_by_name {
 	my ($self, $fields, $table, $fname, $lname, $where) = @_;
@@ -225,18 +244,25 @@ sub count_sent_emails_by_type {
 
 }
 
-
-sub get_db_name {
+sub get_all_si_images {
 	my ($self) = @_;
 
-	return $self->{'client'}{'db_name'};
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT ImageId, PatId, FileName FROM SI_Images",
+		{ 'Slice' => {} },
+    );
 }
 
-sub is_active {
-	my ($self) = @_;
+sub get_si_patient_by_id {
+	my ($self, $pat_id) = @_;
 
-	return $self->{'client'}{'status'} == 1;
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT FName, LName, BDate FROM SI_Patients WHERE PatId=?",
+		{ 'Slice' => {} },
+		$pat_id,
+    )->[0];
 }
+
 
 
 1;
