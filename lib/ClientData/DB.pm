@@ -4,6 +4,14 @@ package ClientData::DB;
 use strict;
 use warnings;
 
+my %PROFILE_COLUMN_TYPE_ID = (
+	'1'  => 'SVal',
+	'2'  => 'IVal',
+	'4'  => 'RVal',
+	'8'  => 'DVal',
+	'16' => 'TVal',
+);
+
 sub new {
 	my ($class, $data_source, $db_name, $unified_client_ref) = @_;
 
@@ -86,6 +94,22 @@ sub _string_to_like {
 	$str =~ s/\b/ /g;
 	$str =~ s/\s+/%/g;
 	return $str;
+}
+
+sub _get_profile_value {
+	my ($self, $key, $table, $where) = @_;
+
+	my $value = $self->{'dbh'}->selectall_arrayref(
+		"SELECT	Type, SVal, IVal, RVal, DVal, TVal FROM $table WHERE PKey=? $where",
+		{ 'Slice' => {} },
+		$key,
+	)->[0];
+	if (defined $value) {
+		return $value->{ $PROFILE_COLUMN_TYPE_ID{ $value->{'Type'} } };
+	}
+	else {
+		return undef;
+	}
 }
 
 1;

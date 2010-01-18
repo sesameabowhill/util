@@ -263,6 +263,40 @@ sub get_si_patient_by_id {
     )->[0];
 }
 
+sub get_hhf_id {
+	my ($self) = @_;
 
+	return $self->get_cached_data(
+		'_hhf_id',
+		sub {
+			return $self->get_profile_value('HHF->GUID');
+		}
+	);
+}
+
+sub get_hhf_user_id {
+	my ($self) = @_;
+
+	return $self->get_cached_data(
+		'_hhf_user_id',
+		sub {
+			return scalar $self->{'dbh'}->selectrow_array(
+		        "SELECT id FROM hhf.clients WHERE guid=?",
+				{ 'Slice' => {} },
+				$self->get_hhf_id(),
+		    );
+		}
+	);
+}
+
+sub get_all_hhf_forms {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id, filldate, fname, lname, birthdate, note, signature, body FROM hhf.applications WHERE cl_id=?",
+		{ 'Slice' => {} },
+		$self->get_hhf_user_id(),
+    );
+}
 
 1;

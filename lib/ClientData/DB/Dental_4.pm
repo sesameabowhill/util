@@ -177,10 +177,17 @@ sub add_email {
     $insert_q->execute($pid, $rid, $email);
 }
 
+sub get_profile_value {
+	my ($self, $key) = @_;
+
+	return $self->_get_profile_value($key, 'profile', '');
+}
+
 sub _get_id {
 	my ($self) = @_;
 
 	return 'd'.$self->{'client'}{'id'};
 }
+
 
 1;

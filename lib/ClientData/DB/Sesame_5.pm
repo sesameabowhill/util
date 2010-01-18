@@ -38,6 +38,12 @@ sub is_active {
 	return $self->{'client_ref'}->is_active();
 }
 
+sub get_id {
+	my ($self) = @_;
+
+	return $self->{'client_ref'}->get_id();
+}
+
 sub get_full_type {
 	my ($class) = @_;
 
@@ -134,6 +140,55 @@ sub get_si_patient_by_id {
 		$pat_id,
 		$self->{'client_id'},
     )->[0];
+}
+
+sub get_hhf_id {
+	my ($self) = @_;
+
+	return scalar $self->{'dbh'}->selectrow_array(
+		"SELECT guid FROM hhf_client_settings WHERE client_id=?",
+		undef,
+		$self->{'client_id'},
+	);
+}
+
+sub get_profile_value {
+	my ($self, $key) = @_;
+
+	return $self->_get_profile_value(
+		$key,
+		'client_setting',
+		'client_id=' . $self->{'dbh'}->quote( $self->{'client_id'} ),
+	);
+}
+
+sub get_all_hhf_forms {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id, filldate, fname, lname, birthdate, note, signature, body FROM hhf_applications WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->get_id(),
+    );
+}
+
+sub add_hhf_form {
+	my ($self, $filldate, $fname, $lname, $birthdate, $note, $signature, $body) = @_;
+
+	$self->{'dbh'}->do(<<'SQL',
+INSERT INTO hhf_applications (client_id, filldate, fname, lname, birthdate, note, signature, body)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+SQL
+		undef,
+		$self->{'client_id'},
+		$filldate,
+		$fname,
+		$lname,
+		$birthdate,
+		$note,
+		$signature,
+		$body,
+	);
 }
 
 

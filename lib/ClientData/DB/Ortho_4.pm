@@ -412,6 +412,12 @@ sub get_unique_ledgers_description_by_type {
 
 }
 
+sub get_profile_value {
+	my ($self, $key) = @_;
+
+	return $self->_get_profile_value($key, 'properties', '');
+}
+
 sub _get_id {
 	my ($self) = @_;
 
