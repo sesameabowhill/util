@@ -71,9 +71,9 @@ sub _search_with_fields_by_name {
 		unless (@$result) {
 			if (defined $lname) {
 				$result = $self->{'dbh'}->selectall_arrayref(
-					"SELECT $fields FROM $table WHERE CONCAT($fname_field, ' ', $lname_field) LIKE ?$where",
+					"SELECT $fields FROM $table WHERE CONCAT($fname_field, ' ', $lname_field) RLIKE ?$where",
 					{ 'Slice' => {} },
-					$self->_string_to_like("$fname $lname"),
+					$self->_string_to_rlike("$fname $lname"),
 				);
 			}
 			else {
@@ -88,11 +88,12 @@ sub _search_with_fields_by_name {
 	return $result;
 }
 
-sub _string_to_like {
+sub _string_to_rlike {
 	my ($self, $str) = @_;
 
 	$str =~ s/\b/ /g;
-	$str =~ s/\s+/%/g;
+	$str =~ s/\s+/.*/g;
+	$str =~ s/\b(?=\w)/[[:<:]]/g;
 	return $str;
 }
 
