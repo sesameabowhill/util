@@ -17,7 +17,7 @@ sub new {
 
 	my $self = bless {
 		'data_source' => $data_source,
-		'strict_search' => 1,
+		'approx_search' => 0,
 		'client_ref' => $unified_client_ref,
 		'cached_data' => {},
 	}, $class;
@@ -27,10 +27,10 @@ sub new {
 
 
 
-sub set_strict_level {
+sub set_approx_search {
 	my ($self, $level) = @_;
 
-	$self->{'strict_search'} = $level;
+	$self->{'approx_search'} = $level;
 }
 
 
@@ -67,7 +67,7 @@ sub _search_with_fields_by_name {
 			$fname
 		);
 	}
-	unless ($self->{'strict_search'}) {
+	if ($self->{'approx_search'} > 0) {
 		unless (@$result) {
 			if (defined $lname) {
 				$result = $self->{'dbh'}->selectall_arrayref(

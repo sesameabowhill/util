@@ -4,8 +4,8 @@ package DataSource::DB::Sesame_5;
 use strict;
 use warnings;
 
-use Sesame::Unified::Client;
-use Sesame::Unified::ClientProperties;
+#use Sesame::Unified::Client;
+#use Sesame::Unified::ClientProperties;
 
 use base qw( DataSource::DB );
 

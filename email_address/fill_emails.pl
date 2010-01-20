@@ -67,7 +67,7 @@ if (@files) {
 			$last_client_db = $client_db;
 
 			my $client_data = $data_source->get_client_data_by_db($client_db);
-			$client_data->set_strict_level(0);
+			$client_data->set_approx_search(1);
 			printf "database source: client [%s]\n", $client_db;
 
 			my $client_full_type = $client_data->get_full_type();

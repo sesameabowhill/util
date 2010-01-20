@@ -66,6 +66,7 @@ sub get_patients_by_name {
     my ($self, $fname, $lname) = @_;
 
     return $self->_get_visitors_by_name(
+    	'id AS PId',
     	$fname,
     	$lname,
     	'type="patient"',
@@ -76,6 +77,7 @@ sub get_responsibles_by_name {
     my ($self, $fname, $lname) = @_;
 
     return $self->_get_visitors_by_name(
+    	'id AS RId',
     	$fname,
     	$lname,
     	'type="responsible"',
@@ -83,10 +85,10 @@ sub get_responsibles_by_name {
 }
 
 sub _get_visitors_by_name {
-    my ($self, $fname, $lname, $where) = @_;
+    my ($self, $id_column, $fname, $lname, $where) = @_;
 
     return $self->_search_with_fields_by_name(
-    	'id, address_id, type, first_name AS FName, last_name AS LName, birthday AS BDate, blocked, blocked_source, privacy, password, no_email, active, active_in_pms',
+    	$id_column.', '.$self->_get_visitor_columns(),
     	'first_name',
     	'last_name',
     	'visitor',
@@ -94,6 +96,98 @@ sub _get_visitors_by_name {
     	$lname,
     	'client_id='.$self->{'dbh'}->quote($self->{'client_id'}).' AND '.$where,
     );
+}
+
+sub _get_visitor_columns {
+    my ($self) = @_;
+
+    return 'id, address_id, type, first_name AS FName, last_name AS LName, birthday AS BDate, blocked, blocked_source, privacy, password, no_email, active, active_in_pms';
+}
+
+sub get_all_patients {
+    my ($self) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id AS PId, ".$self->_get_visitor_columns()." FROM visitor WHERE type='patient' AND client_id=?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+    );
+}
+
+sub _get_invisalign_client_ids {
+	my ($self) = @_;
+
+	return $self->get_cached_data(
+		'_invisalign_client_ids',
+		sub {
+			return $self->{'dbh'}->selectcol_arrayref(
+				"SELECT id FROM invisalign_client WHERE client_id=?",
+				undef,
+				$self->{'client_id'},
+			);
+		}
+	);
+}
+
+sub get_invisalign_patients_by_name {
+	my ($self, $fname, $lname) = @_;
+
+	my $inv_client_ids = $self->_get_invisalign_client_ids();
+
+	if (@$inv_client_ids) {
+		return $self->_search_with_fields_by_name(
+	    	$self->_get_invisalign_patient_columns(),
+	    	'fname',
+	    	'lname',
+	    	'invisalign_patient',
+	    	$fname,
+	    	$lname,
+	    	"invisalign_client_id IN (".join(
+	        	", ",
+	        	map { $self->{'dbh'}->quote($_) } @$inv_client_ids
+	        ).")",
+	    );
+	}
+	else {
+		return [];
+	}
+}
+
+sub get_all_invisalign_patients {
+	my ($self) = @_;
+
+	my $inv_client_ids = $self->_get_invisalign_client_ids();
+
+	if (@$inv_client_ids) {
+		return $self->{'dbh'}->selectall_arrayref(
+	        "SELECT ".$self->_get_invisalign_patient_columns()." FROM invisalign_patient
+	        WHERE invisalign_client_id IN (".join(
+	        	", ",
+	        	map { $self->{'dbh'}->quote($_) } @$inv_client_ids
+	        ).")",
+			{ 'Slice' => {} },
+	    );
+	}
+	else {
+		return [];
+	}
+}
+
+sub set_sesame_patient_for_invisalign_patient {
+	my ($self, $case_number, $sesame_patient_id) = @_;
+
+	$self->{'dbh'}->do(
+		"UPDATE invisalign_patient SET patient_id=? WHERE case_num=?",
+		undef,
+		$sesame_patient_id,
+		$case_number,
+	);
+}
+
+sub _get_invisalign_patient_columns {
+	my ($self) = @_;
+
+	return 'case_num AS case_number, invisalign_client_id, fname, lname, post_date, start_date, transfer_date, retire_date, stages, img_available, patient_id, refine, deleted';
 }
 
 sub add_email {
