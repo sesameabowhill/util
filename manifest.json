@@ -1,0 +1,12 @@
+{
+  "name": "Sesame Support Helper",
+  "version": "1.0",
+  "background_page": "background.html",
+  "permissions": [
+	"http://www.remindergenie.com/"
+  ],
+  "browser_action": {
+      "name": "Sesame 4 upload queue size",
+      "default_icon": "icon.png"
+  }
+}

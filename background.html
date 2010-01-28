@@ -1,0 +1,67 @@
+<html>
+<head>
+<script>
+	var url = "http://www.remindergenie.com/tech_support/upload_queue.cgi?action=get_data&queue_id=1";
+	var refreshInterval = 10*1000;
+ 	
+  	function refreshUploadQueueSize() {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", url, true);
+		xhr.send();
+		xhr.onreadystatechange = function() {
+	    	//console.log("change");
+		  	if (xhr.readyState == 4) {
+		    	var resp = JSON.parse(xhr.responseText);
+		    	//chrome.browserAction.setTitle({"title": "test"});
+		    	//i++;
+		    	setUploadQueueSize(resp);
+		  	}
+		}
+
+    	//chrome.browserAction.setBadgeText({text:String(i)});
+  	}
+  	
+  	function setUploadQueueSize(resp) {
+    	var active_clients_count = 0;
+    	var inactive_clients_count = 0;
+    	for (var client_id in resp) {
+    		if (resp[client_id].is_active) {
+    			active_clients_count ++;
+    		}
+    		else {
+    			inactive_clients_count ++;
+    		}
+    	}
+    	var total_clients_count = active_clients_count+inactive_clients_count;
+    	chrome.browserAction.setBadgeText({"text": String(total_clients_count)});
+	  	chrome.browserAction.setBadgeBackgroundColor({"color": getBadgeColorByQueueSize(total_clients_count)});
+	  	var page_title;
+	  	if (active_clients_count) {
+	  		page_title = active_clients_count + " of " + total_clients_count + " client" + (total_clients_count==1?" is":"s are") + " processing";
+	  	}
+	  	else {
+	  		page_title = total_clients_count + " client" + (total_clients_count==1?" is":"s are") + " waiting in the queue";
+	  	}
+	  	chrome.browserAction.setTitle({"title": page_title});
+  	}
+  	
+  	function getBadgeColorByQueueSize(queue_size) {
+  		if (queue_size < 10) {
+ 			return [ 0, 132, 226, 255 ];
+ 		}
+ 		else if (queue_size < 50) {//50
+  			return [ 0, 205, 0, 255 ];
+  		}
+ 		else if (queue_size < 100) {//100
+  			return [ 226, 189, 0, 255 ];
+  		}
+ 		else {
+  			return [ 255, 0, 0, 255 ];
+  		}
+  	}
+
+  	window.setInterval(refreshUploadQueueSize, refreshInterval);
+  	refreshUploadQueueSize()
+</script>
+</head>
+</html>
