@@ -35,7 +35,7 @@ sub get_addresses_by_pid {
     );
 }
 
-sub get_appointments {
+sub get_appointments_by_pid {
     my ($self, $pid, $order, $number) = @_;
 
     return $self->{'dbh'}->selectall_arrayref(
@@ -43,6 +43,26 @@ sub get_appointments {
 		{ 'Slice' => {} },
         $pid,
         $number,
+    );
+}
+
+sub get_appointments_by_date_interval {
+    my ($self, $start_date, $end_date) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT PId, Date, ifnull(Status='confirmed', 0) AS Confirm, Duration FROM AppointmentsHistory WHERE Why='moved' AND Date BETWEEN ? AND ? ORDER BY Date",
+		{ 'Slice' => {} },
+        $start_date,
+        $end_date,
+    );
+}
+
+sub get_number_of_appointments_per_date {
+	my ($self) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT Date, count(*) as Count FROM AppointmentsHistory WHERE Why='moved' GROUP BY Date",
+		{ 'Slice' => {} },
     );
 }
 
@@ -137,6 +157,18 @@ sub email_exists_by_rid {
     return $count;
 }
 
+sub count_emails_by_pid {
+	my ($self, $pid) = @_;
+
+    my ($count) = $self->{'dbh'}->selectrow_array(
+        "SELECT COUNT(*) FROM Mails WHERE PId=?",
+        { 'Slice' => {} },
+        $pid,
+    );
+    return $count;
+}
+
+
 sub email_is_used {
     my ($self, $email) = @_;
 
@@ -181,6 +213,16 @@ sub get_profile_value {
 	my ($self, $key) = @_;
 
 	return $self->_get_profile_value($key, 'profile', '');
+}
+
+sub get_sales_resources {
+    my ($self) = @_;
+
+    return $self->{'dbh'}->selectrow_hashref(
+        "SELECT phone, address, city, metro_area, state, zip_code, respondents, reference, quote, doctors_count FROM dentists.sales_resource WHERE cl_id=?",
+        undef,
+        $self->{'client'}{'id'},
+    );
 }
 
 sub _get_id {

@@ -418,6 +418,10 @@ sub get_profile_value {
 	return $self->_get_profile_value($key, 'properties', '');
 }
 
+#sub get_sales_resources {
+#	select * from client_profiles where name='doctors count'
+#}
+
 sub _get_id {
 	my ($self) = @_;
 
