@@ -2,6 +2,7 @@
   "name": "Sesame Support Helper",
   "version": "1.0",
   "background_page": "background.html",
+  "popup": "popup.html",
   "permissions": [
 	"http://www.remindergenie.com/"
   ],

@@ -21,6 +21,7 @@
 			<fileset dir=".">
 				<include name="**/*" />
 				<exclude name="**/.svn/**/*" />
+				<exclude name="tests/**/*" />
 				<exclude name="build.xml" />
 				<exclude name="${build.extension_name}.*" />
 				<exclude name="*.properties" />
