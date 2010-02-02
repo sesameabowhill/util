@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../../jsunit/css/jsUnitStyle.css">
+    <script type="text/javascript" src="../../jsunit/app/jsUnitCore.js"></script>
+
+    <script type="text/javascript" src="../lib/data_graph.js"></script>
+    <script type="text/javascript">
+
+        function testConstruct() {
+        	var data_graph = new DataGraph()
+            assertNotNull("object created", data_graph);
+        }
+
+        function testAddPoints() {
+        	var data_graph = new DataGraph()
+        	data_graph.add_point(10, 100);
+        	data_graph.add_point(20, 200);
+        	assertEquals("BkDI", data_graph.get_chart_data(10));
+        }
+
+        function testGranularity() {
+        	{
+	        	var data_graph = new DataGraph()
+	        	data_graph.add_point(10, 100);
+	        	data_graph.add_point(12, 200);
+	        	data_graph.add_point(15, 100);
+	        	data_graph.add_point(17, 50);
+	        	assertEquals("DIBk", data_graph.get_chart_data(5));
+	        }
+        	{
+	        	var data_graph = new DataGraph()
+	        	data_graph.add_point(10, 100);
+	        	data_graph.add_point(20, 200);
+	        	data_graph.add_point(30, 100);
+	        	data_graph.add_point(40, 50);
+	        	assertEquals("BkAADIAABkAAAy", data_graph.get_chart_data(5));
+	        }
+        	{
+	        	var data_graph = new DataGraph()
+	        	data_graph.add_point(10, 100);
+	        	data_graph.add_point(20, 200);
+	        	assertEquals("BkAAAAAAAAAAAAAAAAAADI", data_graph.get_chart_data(1));
+	        }
+        }
+
+        function testGoogleChartEncode() {
+        	var data_graph = new DataGraph()
+        	assertEquals("encode 0", "AA", data_graph.google_chart_encode(0) );
+        	assertEquals("encode 0", "BA", data_graph.google_chart_encode(64) );
+        }
+
+    </script>
+</head>
+
+<body>
+<h1>Testing sesame_support_helper</h1>
+
+<p>This page contains failing and erroring tests. It exists for developers of the framework to experiment with.</p>
+</body>
+</html>

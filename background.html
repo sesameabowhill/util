@@ -1,8 +1,9 @@
 <html>
 <head>
+<script type="text/javascript" src="js/data_graph.js"></script> 
 <script>
 	var url = "http://www.remindergenie.com/tech_support/upload_queue.cgi?action=get_data&queue_id=1";
-	var refreshInterval = 10*1000;
+	var refreshInterval = 15*1000;
  	
   	function refreshUploadQueueSize() {
 		var xhr = new XMLHttpRequest();
@@ -24,25 +25,42 @@
   	function setUploadQueueSize(resp) {
     	var active_clients_count = 0;
     	var inactive_clients_count = 0;
+    	var total_waits = 0;
+    	var max_wait_time = 0;
+    	var max_inactive_wait_time = 0;
     	for (var client_id in resp) {
+    		total_waits += resp[client_id].waits;
     		if (resp[client_id].is_active) {
     			active_clients_count ++;
     		}
     		else {
     			inactive_clients_count ++;
+	    		if (resp[client_id].waits > max_inactive_wait_time) {
+	    			max_inactive_wait_time = resp[client_id].waits;
+	    		}
+    		}
+    		if (resp[client_id].waits > max_wait_time) {
+    			max_wait_time = resp[client_id].waits;
     		}
     	}
     	var total_clients_count = active_clients_count+inactive_clients_count;
     	chrome.browserAction.setBadgeText({"text": String(total_clients_count)});
 	  	chrome.browserAction.setBadgeBackgroundColor({"color": getBadgeColorByQueueSize(total_clients_count)});
-	  	var page_title;
-	  	if (active_clients_count) {
-	  		page_title = active_clients_count + " of " + total_clients_count + " client" + (total_clients_count==1?" is":"s are") + " processing";
-	  	}
-	  	else {
-	  		page_title = total_clients_count + " client" + (total_clients_count==1?" is":"s are") + " waiting in the queue";
-	  	}
-	  	chrome.browserAction.setTitle({"title": page_title});
+	  	var page_titles = [
+	  		total_clients_count + " client" + (total_clients_count==1?" is":"s are") + " in the queue"
+	  	];
+	  	
+	  	if (total_clients_count) {
+		  	if (active_clients_count) {
+		  		page_titles.push(active_clients_count + " client" + (total_clients_count==1?" is":"s are") + " processing");
+		  	}
+		  	page_titles.push("average waiting time: " + seconds_to_string(Math.round(total_waits/total_clients_count)));
+		  	page_titles.push("max waiting time: " + seconds_to_string(max_inactive_wait_time));
+		  	if (active_clients_count) {
+			  	page_titles.push("max processing time: " + seconds_to_string(max_wait_time));
+		  	}
+		}
+	  	chrome.browserAction.setTitle({"title": page_titles.join("\n")});
   	}
   	
   	function getBadgeColorByQueueSize(queue_size) {
@@ -59,6 +77,23 @@
   			return [ 255, 0, 0, 255 ];
   		}
   	}
+  	
+  	function seconds_to_string(seconds) {
+		var days = Math.floor(seconds / (3600*24));
+		seconds %= 3600*24;
+		var hours = Math.floor(seconds / 3600);
+		seconds %= 3600;
+		var minutes = Math.floor(seconds / 60);
+		seconds %= 60;
+		var arr = [];
+		if (days > 0) arr.push(days + "d");
+		if (hours > 0) arr.push(hours + "h");
+		if (minutes > 0) arr.push(minutes + "m");
+		if (seconds > 0) arr.push(seconds + "s");
+		if (arr.length > 2) arr = arr.slice(0, 2);
+		return arr.join(" ");
+	}
+
 
   	window.setInterval(refreshUploadQueueSize, refreshInterval);
   	refreshUploadQueueSize()

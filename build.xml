@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- $Id: build.xml 1471 2009-11-19 23:55:49Z ivan $ -->
+<project name="sztls" default="build">
+
+    <property environment="env" />
+
+    <property file="deploy.properties" prefix="deploy" />
+    <property file="build.properties" prefix="build" />
+    
+	<property name="tmpdir" value="${java.io.tmpdir}/chrome_extension" />
+
+	<target name="build" depends="build.create_temp_folder, build.copy_files, build.make_package" />
+
+	<target name="build.create_temp_folder">
+		<delete dir="${tmpdir}" />
+		<mkdir dir="${tmpdir}" />
+	</target>
+
+	<target name="build.copy_files">
+		<copy todir="${tmpdir}/${build.extension_name}">
+			<fileset dir=".">
+				<include name="**/*" />
+				<exclude name="**/.svn/**/*" />
+				<exclude name="build.xml" />
+				<exclude name="${build.extension_name}.*" />
+				<exclude name="*.properties" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="build.make_package">
+		<exec executable="${build.extension_packer}" failonerror="true">
+			<arg value="--pack-extension=${tmpdir}/${build.extension_name}" />
+			<arg value="--pack-extension-key=${basedir}/${build.extension_name}.pem" />
+			<!--arg value="- -no-message-box" /-->
+		</exec>
+	</target>
+
+</project>
