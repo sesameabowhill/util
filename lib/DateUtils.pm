@@ -16,6 +16,14 @@ sub now {
 	}, $class;
 }
 
+sub clone {
+	my ($self) = @_;
+
+	return bless {
+		'date' => $self->{'date'}->clone(),
+	}, ref $self;
+}
+
 sub parse_mysql_date {
 	my ($class, $mysql_date) = @_;
 

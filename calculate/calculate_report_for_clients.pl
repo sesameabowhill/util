@@ -13,12 +13,14 @@ use DataSource::DB;
 use Report::PatientsByZipCodes;
 use Report::FinancialReminders;
 use Report::CancelledMembers;
+use Report::MarketResearch;
 
 {
 	my %reports = (
 		'patients_by_zip_codes' => 'Report::PatientsByZipCodes',
 		'financial_reminders'   => 'Report::FinancialReminders',
 		'cancelled_members'     => 'Report::CancelledMembers',
+		'market_research'       => 'Report::MarketResearch',
 	);
 	my ($report_type, @clients) = @ARGV;
 	if (@clients) {

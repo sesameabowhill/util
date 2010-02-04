@@ -231,5 +231,54 @@ sub _get_id {
 	return 'd'.$self->{'client'}{'id'};
 }
 
+sub get_all_ppn_emails {
+	my ($self) = @_;
+
+	return $self->_get_all_ppn_emails('newsletters_dental.email_queue');
+}
+
+
+sub _get_invisalign_patient_columns {
+	my ($self) = @_;
+
+	return 'case_num AS case_number, client_id AS invisalign_client_id, fname, lname, post_date, start_treatment AS start_date, retire_treatment AS retire_date, stages, img_available, pat_id AS patient_id, refine, deleted';
+}
+
+sub get_all_invisalign_patients {
+	my ($self) = @_;
+
+	my $inv_client_ids = $self->_get_invisalign_client_ids();
+
+	if (@$inv_client_ids) {
+		return $self->{'dbh'}->selectall_arrayref(
+	        "SELECT ".$self->_get_invisalign_patient_columns()." FROM dentists.inv_patients
+	        WHERE client_id IN (".join(
+	        	", ",
+	        	map { $self->{'dbh'}->quote($_) } @$inv_client_ids
+	        ).")",
+			{ 'Slice' => {} },
+	    );
+	}
+	else {
+		return [];
+	}
+}
+
+
+sub _get_invisalign_client_ids {
+	my ($self) = @_;
+
+	return $self->get_cached_data(
+		'_invisalign_client_ids',
+		sub {
+			return $self->{'dbh'}->selectcol_arrayref(
+				"SELECT id FROM dentists.inv_clients WHERE dental_cl_id=?",
+				undef,
+				$self->{'client'}{'id'},
+			);
+		}
+	);
+}
+
 
 1;

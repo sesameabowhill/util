@@ -12,8 +12,8 @@ our %CLIENTS_TABLE_NAME = (
 );
 
 my $COMMON_CLIENT_PARAMS = 'cl_id AS id, cl_mysql AS db_name, cl_pathw AS web_folder, cl_status AS status, cl_timezone AS timezone, rule_id';
-my $ORTHO_CLIENT_PARAMS  = "$COMMON_CLIENT_PARAMS, 'ortho' AS type, cl_username AS username, cl_pms AS pms_id";
-my $DENTAL_CLIENT_PARAMS = "$COMMON_CLIENT_PARAMS, 'dental' AS type, cl_mysql AS username, cl_db AS pms_id";
+my $ORTHO_CLIENT_PARAMS  = "$COMMON_CLIENT_PARAMS, 'ortho' AS type, cl_username AS username, cl_pms AS pms_id, cl_start_date";
+my $DENTAL_CLIENT_PARAMS = "$COMMON_CLIENT_PARAMS, 'dental' AS type, cl_mysql AS username, cl_db AS pms_id, cl_install AS cl_start_date";
 
 
 sub new {
@@ -193,11 +193,31 @@ sub get_voice_id {
 sub get_all_voice_queued_calls {
 	my ($self) = @_;
 
-	return $self->{'dbh'}->selectall_arrayref(
-        "SELECT id, cid, rec_id, rec_phone, xml_request, message_type, time2send, unique_key, event_datetime FROM voice.Queue WHERE cid=?",
-		{ 'Slice' => {} },
-		$self->get_voice_id(),
-    );
+	if (defined $self->get_voice_id()) {
+		return $self->{'dbh'}->selectall_arrayref(
+	        "SELECT id, cid, rec_id, rec_phone, xml_request, message_type, time2send, unique_key, event_datetime FROM voice.Queue WHERE cid=?",
+			{ 'Slice' => {} },
+			$self->get_voice_id(),
+	    );
+	}
+	else {
+		return [];
+	}
+}
+
+sub get_all_voice_sent_calls {
+	my ($self) = @_;
+
+	if (defined $self->get_voice_id()) {
+		return $self->{'dbh'}->selectall_arrayref(
+	        "SELECT id, cid, rec_id, rec_phone, message_type, time2send, unique_key, event_datetime, sent_type, response_code, menu_code, sent_date, machine_answer FROM voice.MessageHistory WHERE cid=?",
+			{ 'Slice' => {} },
+			$self->get_voice_id(),
+	    );
+	}
+	else {
+		return [];
+	}
 }
 
 sub set_voice_queued_call_time {
@@ -253,6 +273,15 @@ sub get_all_si_images {
     );
 }
 
+sub count_all_si_images {
+	my ($self) = @_;
+
+	return scalar $self->{'dbh'}->selectrow_array(
+        "SELECT count(*) FROM SI_Images",
+		undef,
+    );
+}
+
 sub get_si_patient_by_id {
 	my ($self, $pat_id) = @_;
 
@@ -296,6 +325,22 @@ sub get_all_hhf_forms {
         "SELECT id, filldate, fname, lname, birthdate, note, signature, body FROM hhf.applications WHERE cl_id=?",
 		{ 'Slice' => {} },
 		$self->get_hhf_user_id(),
+    );
+}
+
+sub get_start_date {
+	my ($self) = @_;
+
+	return $self->{'client'}{'cl_start_date'};
+}
+
+sub _get_all_ppn_emails {
+	my ($self, $table) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id, letter_hash, is_send, send_to, recipient_count, dt, param, only_active_pats FROM $table WHERE cl_id=?",
+		{ 'Slice' => {} },
+		$self->{'client'}{'id'},
     );
 }
 
