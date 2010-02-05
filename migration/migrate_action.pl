@@ -8,12 +8,16 @@ use lib '../lib';
 
 use DataSource::DB;
 
+use Migrate::EmailReminderSettings;
+use Migrate::HHFForms;
+
 {
 	my $data_source_5 = DataSource::DB->new_5();
 	my $data_source_4 = DataSource::DB->new_4();
 
 	my %actions = (
-		'hhf_forms' => \&migrate_hhf_forms,
+		'hhf_forms' => 'Migrate::HHFForms',
+		'email_settings' => 'Migrate::EmailReminderSettings',
 	);
 
 	my ($action, @clients) = @ARGV;
@@ -27,7 +31,7 @@ use DataSource::DB;
 			my $db_name = $data_source_4->get_database_by_username($username);
 			if (defined $db_name) {
 				my $client_data_4 = $data_source_4->get_client_data_by_db($db_name);
-				$actions{$action}->($client_data_5, $client_data_4);
+				$actions{$action}->migrate($client_data_5, $client_data_4);
 			}
 			else {
 				printf "SKIP [%s]: client is not found sesame4\n";
@@ -43,40 +47,3 @@ use DataSource::DB;
 	}
 }
 
-sub migrate_hhf_forms {
-	my ($client_data_5, $client_data_4) = @_;
-
-	if ($client_data_5->get_hhf_id() eq $client_data_4->get_hhf_id()) {
-		my $hhf_id = $client_data_5->get_hhf_id();
-		printf "CLIENT [%s]: hhf id [%s]\n", $client_data_5->get_username(), $hhf_id;
-		my $forms_4 = $client_data_4->get_all_hhf_forms();
-		my %forms_5 = (
-			map {_generate_key($_) => $_}
-			@{ $client_data_5->get_all_hhf_forms() }
-		);
-		for my $form (@$forms_4) {
-			my $form_key_4 = _generate_key($form);
-			unless (exists $forms_5{$form_key_4}) {
-				printf "copy form [%s]\n", $form_key_4;
-				$client_data_5->add_hhf_form(
-					$form->{'filldate'},
-					$form->{'fname'},
-					$form->{'lname'},
-					$form->{'birthdate'},
-					$form->{'note'},
-					$form->{'signature'},
-					$form->{'body'},
-				);
-			}
-		}
-	}
-	else {
-		printf "ERROR [%s]: hhf has different guid\n", $client_data_5->get_username();
-	}
-}
-
-sub _generate_key {
-	my ($data) = @_;
-
-	return join('|', @$data{'filldate', 'fname', 'lname'});
-}

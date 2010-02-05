@@ -286,4 +286,37 @@ SQL
 }
 
 
+sub get_email_reminder_settings {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT id, is_enabled, type, subject, body, response_options, design_id, image_guid, image_title FROM email_reminder_settings WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+	);
+}
+
+
+sub add_new_reminder_setting {
+	my ($self, $params) = @_;
+
+	$self->{'dbh'}->do(
+		<<SQL,
+INSERT INTO email_reminder_settings
+	(client_id, is_enabled, type,
+	subject, body, response_options,
+	design_id, image_guid, image_title)
+VALUES (?,?,?, ?,?,?, ?,?,?)
+SQL
+		undef,
+		$self->{'client_id'},
+		@$params{
+			'is_enabled', 'type',
+			'subject', 'body', 'response_options',
+			'design_id', 'image_guid', 'image_title'
+		},
+	);
+	return $self->{'dbh'}->{'mysql_insertid'};
+}
+
 1;
