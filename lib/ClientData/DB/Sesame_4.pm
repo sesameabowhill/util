@@ -328,6 +328,16 @@ sub get_all_hhf_forms {
     );
 }
 
+sub get_all_srm_resources {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id, container, date, path_from, type, description FROM srm.resources WHERE container=?",
+		{ 'Slice' => {} },
+		$self->get_db_name(),
+    );
+}
+
 sub get_start_date {
 	my ($self) = @_;
 

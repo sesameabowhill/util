@@ -319,4 +319,35 @@ SQL
 	return $self->{'dbh'}->{'mysql_insertid'};
 }
 
+
+sub get_all_srm_resources {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id, container, date, path_from, type, description FROM srm_resource WHERE container=?",
+		{ 'Slice' => {} },
+		$self->get_username(),
+    );
+}
+
+sub add_new_srm_resource {
+	my ($self, $params) = @_;
+
+	$self->{'dbh'}->do(
+		<<SQL,
+INSERT INTO srm_resource
+	(container, id, date,
+	path_from, type, description)
+VALUES (?,?,?, ?,?,?)
+SQL
+		undef,
+		$self->get_username(),
+		@$params{
+			'id', 'date',
+			'path_from', 'type', 'description',
+		},
+	);
+	return $self->{'dbh'}->{'mysql_insertid'};
+}
+
 1;

@@ -10,14 +10,16 @@ use DataSource::DB;
 
 use Migrate::EmailReminderSettings;
 use Migrate::HHFForms;
+use Migrate::SRMResources;
 
 {
 	my $data_source_5 = DataSource::DB->new_5();
 	my $data_source_4 = DataSource::DB->new_4();
 
 	my %actions = (
-		'hhf_forms' => 'Migrate::HHFForms',
 		'email_settings' => 'Migrate::EmailReminderSettings',
+		'hhf_forms'      => 'Migrate::HHFForms',
+		'srm'            => 'Migrate::SRMResources',
 	);
 
 	my ($action, @clients) = @ARGV;

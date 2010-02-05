@@ -4,9 +4,6 @@ package DataSource::DB::Sesame_4;
 use strict;
 use warnings;
 
-#use Sesame::Unified::Client;
-#use Sesame::Unified::ClientProperties;
-
 use base qw( DataSource::DB );
 
 
@@ -43,27 +40,6 @@ sub remove_resource {
 #            $self->{'dbh'}->quote($guid),
 #    );
 #    $self->{'affected_clients'}{ $client_ref->get_db_name() } = 1;
-#}
-#
-#sub get_srm_resources {
-#    my ($self) = @_;
-#
-#    return $self->{'dbh'}->selectall_arrayref(
-#        "SELECT id, container, path_from, date FROM srm.resources",
-#        { 'Slice' => {} },
-#    );
-#}
-#
-#sub get_client_property {
-#    my ($self, $client_ref, $param) = @_;
-#
-#    $self->{'dbh'}->do("USE ".$client_ref->get_db_name());
-#    my $client_prop = Sesame::Unified::ClientProperties->new(
-#        $client_ref->get_client_type(),
-#        $self->{'dbh'},
-#    );
-#
-#    return $client_prop->get_property($param);
 #}
 #
 #sub client_by_db {
