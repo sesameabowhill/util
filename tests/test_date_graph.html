@@ -14,34 +14,58 @@
         }
 
         function testAddPoints() {
-        	var data_graph = new DataGraph()
+        	var data_graph = new DataGraph(10, 20)
         	data_graph.add_point(10, 100);
         	data_graph.add_point(20, 200);
-        	assertEquals("BkDI", data_graph.get_chart_data(10));
+        	assertEquals("BkDI", data_graph.get_chart_data());
         }
 
         function testGranularity() {
         	{
-	        	var data_graph = new DataGraph()
+	        	var data_graph = new DataGraph(5, 20)
 	        	data_graph.add_point(10, 100);
 	        	data_graph.add_point(12, 200);
 	        	data_graph.add_point(15, 100);
 	        	data_graph.add_point(17, 50);
-	        	assertEquals("DIBk", data_graph.get_chart_data(5));
+	        	assertEquals("DIBk", data_graph.get_chart_data());
 	        }
         	{
-	        	var data_graph = new DataGraph()
+	        	var data_graph = new DataGraph(5, 20)
 	        	data_graph.add_point(10, 100);
 	        	data_graph.add_point(20, 200);
 	        	data_graph.add_point(30, 100);
 	        	data_graph.add_point(40, 50);
-	        	assertEquals("BkAADIAABkAAAy", data_graph.get_chart_data(5));
+	        	assertEquals("Bk__DI__Bk__Ay", data_graph.get_chart_data());
 	        }
         	{
-	        	var data_graph = new DataGraph()
+	        	var data_graph = new DataGraph(1, 20)
 	        	data_graph.add_point(10, 100);
 	        	data_graph.add_point(20, 200);
-	        	assertEquals("BkAAAAAAAAAAAAAAAAAADI", data_graph.get_chart_data(1));
+	        	assertEquals("Bk__________________DI", data_graph.get_chart_data());
+	        }
+        }
+
+        function testMaxLength() {
+        	{
+	        	var data_graph = new DataGraph(2, 2)
+	        	data_graph.add_point(10, 100);
+	        	data_graph.add_point(12, 200);
+	        	data_graph.add_point(15, 100);
+	        	data_graph.add_point(17, 50);
+	        	assertEquals("BkAy", data_graph.get_chart_data());
+	        }
+        }
+
+        function testGetChartSettings() {
+        	{
+	        	var data_graph = new DataGraph(2, 2)
+	        	data_graph.add_point(10, 100);
+	        	data_graph.add_point(12, 200);
+	        	data_graph.add_point(15, 100);
+	        	data_graph.add_point(17, 50);
+	        	var settings = data_graph.get_chart_settings();
+	        	assertEquals(100, settings.max);
+	        	assertEquals("..f.", settings.data);
 	        }
         }
 
@@ -49,6 +73,7 @@
         	var data_graph = new DataGraph()
         	assertEquals("encode 0", "AA", data_graph.google_chart_encode(0) );
         	assertEquals("encode 0", "BA", data_graph.google_chart_encode(64) );
+        	assertEquals("encode 0", "-g", data_graph.google_chart_encode(4000) );
         }
 
     </script>

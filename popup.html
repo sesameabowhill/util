@@ -1,5 +1,55 @@
 <html>
 <head>
+<style>
+  input { width: 150px }
+  input, button { float: left }
+  #input_search_param { margin-right: 10px }
+  #errors { border: 1px black solid }
+  
+  body, form, input, select, table, textarea { color: #656b6f; font: 11px/18px tahoma, sans-serif }
+  button { background-color: #2FB0D1; color: #fff; font: 11px/18px tahoma, sans-serif; font-weight: bold; -webkit-border-radius: 5px; height: 22px; padding-top: -1px; }
+  input { height: 22px; }
+  
+  h2 { color: #A0B606; border-bottom: 1px dotted #000; padding-bottom: 0.5em; margin-top: 1em; clear: both; float: left; width: 100% }
+  h2:first-child { margin-top: 0 }
+  form { clear: both }
+  
+  a:link, a:visited { color: #009EC7 }
+</style>
+<script type="text/javascript">
+	function update_graph() {
+		var background = chrome.extension.getBackgroundPage();
+		document.getElementById("link_sesame4_queue").href = background.get_url('upload_queue');
+		var img_upload_queue = document.getElementById("img_upload_queue");
+		var chart = background.get_upload_queue_chart_settings();
+		img_upload_queue.src = 
+			"http://chart.apis.google.com/chart?chs=300x200&cht=lc&chxt=r&chxr=0,0,"+chart.max + 
+			"&chd=e:" + chart.data;
+		print(img_upload_queue.src);
+	}
+	
+	function print(msg) {
+		//document.getElementById("errors").innerHTML += msg+"<br/>"
+	}
+</script>
 </head>
-<body>Hello World!</body>
+<body onload="update_graph()">
+    <h2>Find client</h2>
+  	<form target="_blank">
+    <p>
+    <input name="search_param" id="input_search_param" />
+    <button onclick="this.form.action=chrome.extension.getBackgroundPage().get_url('fcs_5'); this.form.submit()">client5</button>
+    <button onclick="this.form.action=chrome.extension.getBackgroundPage().get_url('fcs_4'); this.form.submit()">client4</button>
+    </p>
+    </form>
+    <h2>Sesame4 Upload queue</h2>
+    <p>
+    <img
+    	id="img_upload_queue"
+    	src="http://devguru.com/images/masphost.jpg"
+    	alt="Sesame4 Upload queue size" />
+    </p>
+    <a href="" target="_blank" id="link_sesame4_queue">Go to list</a>
+  <!--div id="errors"></div-->
+
 </html>

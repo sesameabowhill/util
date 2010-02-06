@@ -1,13 +1,25 @@
 <html>
 <head>
-<script type="text/javascript" src="js/data_graph.js"></script> 
+<script type="text/javascript" src="lib/data_graph.js"></script> 
 <script>
-	var url = "http://www.remindergenie.com/tech_support/upload_queue.cgi?action=get_data&queue_id=1";
-	var refreshInterval = 15*1000;
+	var refreshInterval = 5*1000;
+	
+	var sesame4_upload_queue_data = new DataGraph(10, 120);
+	var time = 0;
+
+ 	function get_url(name) {
+ 		var urls = {
+ 			'fcs_5': "https://members.sesamecommunications.com/support-tools/sesame/fast_client_search/",
+ 			'fcs_4': "https://www4.orthosesame.com/internal/fast_client_search/",
+ 			'upload_queue': "http://www.remindergenie.com/tech_support/upload_queue.cgi?queue_id=1"
+ 		};
+ 		return urls[name];
+	}
+
  	
   	function refreshUploadQueueSize() {
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", url, true);
+		xhr.open("GET", get_url('upload_queue')+'&action=get_data', true);
 		xhr.send();
 		xhr.onreadystatechange = function() {
 	    	//console.log("change");
@@ -61,6 +73,9 @@
 		  	}
 		}
 	  	chrome.browserAction.setTitle({"title": page_titles.join("\n")});
+	  	
+	  	time += 5;
+	  	sesame4_upload_queue_data.add_point(time, total_clients_count);
   	}
   	
   	function getBadgeColorByQueueSize(queue_size) {
@@ -93,7 +108,15 @@
 		if (arr.length > 2) arr = arr.slice(0, 2);
 		return arr.join(" ");
 	}
+	
+	function getCurrentSeconds() {
+		var now = new Date();
+		return Math.floor(Date.UTC(now));
+	}
 
+	function get_upload_queue_chart_settings() {
+		return sesame4_upload_queue_data.get_chart_settings();
+	}
 
   	window.setInterval(refreshUploadQueueSize, refreshInterval);
   	refreshUploadQueueSize()
