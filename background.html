@@ -1,11 +1,11 @@
 <html>
 <head>
 <script type="text/javascript" src="lib/data_graph.js"></script> 
+<script type="text/javascript" src="lib/date_utils.js"></script> 
 <script>
-	var refreshInterval = 5*1000;
+	var refreshInterval = 15*1000;
 	
-	var sesame4_upload_queue_data = new DataGraph(10, 120);
-	var time = 0;
+	var sesame4_upload_queue_data = new DataGraph(60, 120);
 
  	function get_url(name) {
  		var urls = {
@@ -66,16 +66,15 @@
 		  	if (active_clients_count) {
 		  		page_titles.push(active_clients_count + " client" + (total_clients_count==1?" is":"s are") + " processing");
 		  	}
-		  	page_titles.push("average waiting time: " + seconds_to_string(Math.round(total_waits/total_clients_count)));
-		  	page_titles.push("max waiting time: " + seconds_to_string(max_inactive_wait_time));
+		  	page_titles.push("average waiting time: " + secondsToString(Math.round(total_waits/total_clients_count)));
+		  	page_titles.push("max waiting time: " + secondsToString(max_inactive_wait_time));
 		  	if (active_clients_count) {
-			  	page_titles.push("max processing time: " + seconds_to_string(max_wait_time));
+			  	page_titles.push("max processing time: " + secondsToString(max_wait_time));
 		  	}
 		}
 	  	chrome.browserAction.setTitle({"title": page_titles.join("\n")});
 	  	
-	  	time += 5;
-	  	sesame4_upload_queue_data.add_point(time, total_clients_count);
+	  	sesame4_upload_queue_data.add_point(getCurrentSeconds(), total_clients_count);
   	}
   	
   	function getBadgeColorByQueueSize(queue_size) {
@@ -93,26 +92,6 @@
   		}
   	}
   	
-  	function seconds_to_string(seconds) {
-		var days = Math.floor(seconds / (3600*24));
-		seconds %= 3600*24;
-		var hours = Math.floor(seconds / 3600);
-		seconds %= 3600;
-		var minutes = Math.floor(seconds / 60);
-		seconds %= 60;
-		var arr = [];
-		if (days > 0) arr.push(days + "d");
-		if (hours > 0) arr.push(hours + "h");
-		if (minutes > 0) arr.push(minutes + "m");
-		if (seconds > 0) arr.push(seconds + "s");
-		if (arr.length > 2) arr = arr.slice(0, 2);
-		return arr.join(" ");
-	}
-	
-	function getCurrentSeconds() {
-		var now = new Date();
-		return Math.floor(Date.UTC(now));
-	}
 
 	function get_upload_queue_chart_settings() {
 		return sesame4_upload_queue_data.get_chart_settings();
