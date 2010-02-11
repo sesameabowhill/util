@@ -1,0 +1,12 @@
+input { width: 150px }
+input, button { float: left }
+
+body, form, input, select, table, textarea { color: #656b6f; font: 11px/18px tahoma, sans-serif }
+button { background-color: #2FB0D1; color: #fff; font: 11px/18px tahoma, sans-serif; font-weight: bold; -webkit-border-radius: 5px; height: 22px; padding-top: -1px; }
+input { height: 22px; }
+
+h2 { color: #A0B606; border-bottom: 1px dotted #000; padding-bottom: 0.5em; margin-top: 1em; clear: both; float: left; width: 100% }
+h2:first-child { margin-top: 0 }
+form { clear: both }
+
+a:link, a:visited { color: #009EC7 }

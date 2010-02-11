@@ -3,7 +3,8 @@
 <script type="text/javascript" src="lib/data_graph.js"></script> 
 <script type="text/javascript" src="lib/date_utils.js"></script> 
 <script>
-	var refreshInterval = 15*1000;
+	var http_user = 'ptistaff';
+	var http_password = '';
 	
 	var sesame4_upload_queue_data = new DataGraph(60, 120);
 
@@ -15,11 +16,16 @@
  		};
  		return urls[name];
 	}
+	
+	function get_refresh_interval() {
+		return 15*1000;
+	}
 
  	
-  	function refreshUploadQueueSize() {
+  	function refresh_upload_queue_size() {
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", get_url('upload_queue')+'&action=get_data', true);
+		//xhr.setRequestHeader("Authorization", "Basic ".btoa( http_user + ":" + http_password ));
 		xhr.send();
 		xhr.onreadystatechange = function() {
 	    	//console.log("change");
@@ -27,14 +33,14 @@
 		    	var resp = JSON.parse(xhr.responseText);
 		    	//chrome.browserAction.setTitle({"title": "test"});
 		    	//i++;
-		    	setUploadQueueSize(resp);
+		    	set_upload_queue_size(resp);
 		  	}
 		}
 
     	//chrome.browserAction.setBadgeText({text:String(i)});
   	}
   	
-  	function setUploadQueueSize(resp) {
+  	function set_upload_queue_size(resp) {
     	var active_clients_count = 0;
     	var inactive_clients_count = 0;
     	var total_waits = 0;
@@ -57,7 +63,7 @@
     	}
     	var total_clients_count = active_clients_count+inactive_clients_count;
     	chrome.browserAction.setBadgeText({"text": String(total_clients_count)});
-	  	chrome.browserAction.setBadgeBackgroundColor({"color": getBadgeColorByQueueSize(total_clients_count)});
+	  	chrome.browserAction.setBadgeBackgroundColor({"color": get_badge_color_by_queue_size(total_clients_count)});
 	  	var page_titles = [
 	  		total_clients_count + " client" + (total_clients_count==1?" is":"s are") + " in the queue"
 	  	];
@@ -77,7 +83,7 @@
 	  	sesame4_upload_queue_data.add_point(getCurrentSeconds(), total_clients_count);
   	}
   	
-  	function getBadgeColorByQueueSize(queue_size) {
+  	function get_badge_color_by_queue_size(queue_size) {
   		if (queue_size < 10) {
  			return [ 0, 132, 226, 255 ];
  		}
@@ -97,8 +103,8 @@
 		return sesame4_upload_queue_data.get_chart_settings();
 	}
 
-  	window.setInterval(refreshUploadQueueSize, refreshInterval);
-  	refreshUploadQueueSize()
+  	window.setInterval(refresh_upload_queue_size, get_refresh_interval());
+  	refresh_upload_queue_size();
 </script>
 </head>
 </html>

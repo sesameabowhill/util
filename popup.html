@@ -1,31 +1,52 @@
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="sesame.css" />
 <style>
-  input { width: 150px }
-  input, button { float: left }
   #input_search_param { margin-right: 10px }
   #errors { border: 1px black solid }
-  
-  body, form, input, select, table, textarea { color: #656b6f; font: 11px/18px tahoma, sans-serif }
-  button { background-color: #2FB0D1; color: #fff; font: 11px/18px tahoma, sans-serif; font-weight: bold; -webkit-border-radius: 5px; height: 22px; padding-top: -1px; }
-  input { height: 22px; }
-  
-  h2 { color: #A0B606; border-bottom: 1px dotted #000; padding-bottom: 0.5em; margin-top: 1em; clear: both; float: left; width: 100% }
-  h2:first-child { margin-top: 0 }
-  form { clear: both }
-  
-  a:link, a:visited { color: #009EC7 }
 </style>
 <script type="text/javascript">
 	function update_graph() {
 		var background = chrome.extension.getBackgroundPage();
-		document.getElementById("link_sesame4_queue").href = background.get_url('upload_queue');
 		var img_upload_queue = document.getElementById("img_upload_queue");
 		var chart = background.get_upload_queue_chart_settings();
+		var labels = [
+			'-' + background.secondsToString(chart.time_interval),
+			'-' + background.secondsToString(Math.floor(chart.time_interval*0.75)),
+			'-' + background.secondsToString(Math.floor(chart.time_interval*0.5)),
+			'-' + background.secondsToString(Math.floor(chart.time_interval*0.25)),
+			''
+		];
 		img_upload_queue.src = 
-			"http://chart.apis.google.com/chart?chs=300x200&cht=lc&chxt=r&chxr=0,0,"+chart.max + 
+			"http://chart.apis.google.com/chart?chs=300x200&cht=lc&chxt=r,x&chxl=1:|" + labels.join('|') +
+			"&chxr=0,0," + chart.max + 
 			"&chd=e:" + chart.data;
-		print(img_upload_queue.src);
+		//print(img_upload_queue.src);
+	}
+	
+	function init_form() {
+		var background = chrome.extension.getBackgroundPage();
+		document.getElementById("search_form").action = background.get_url('fcs_5');
+		document.getElementById("link_sesame4_queue").href = background.get_url('upload_queue');
+		update_graph();
+		
+  		window.setInterval(update_graph, background.get_refresh_interval());
+	}
+	
+	function check_form_input() {
+		var input_search_param = document.getElementById("input_search_param");
+		if (input_search_param.value.length > 0) {
+			return true;
+		}
+		return false;
+	}
+	
+	function submit_form_to(url_key) {
+		var search_form = document.getElementById("search_form");
+		search_form.action = chrome.extension.getBackgroundPage().get_url(url_key);
+		if (check_form_input()) {
+			search_form.submit();
+		}
 	}
 	
 	function print(msg) {
@@ -33,13 +54,13 @@
 	}
 </script>
 </head>
-<body onload="update_graph()">
+<body onload="init_form()">
     <h2>Find client</h2>
-  	<form target="_blank">
+  	<form target="_blank" id="search_form" onsubmit="return check_form_input()">
     <p>
     <input name="search_param" id="input_search_param" />
-    <button onclick="this.form.action=chrome.extension.getBackgroundPage().get_url('fcs_5'); this.form.submit()">client5</button>
-    <button onclick="this.form.action=chrome.extension.getBackgroundPage().get_url('fcs_4'); this.form.submit()">client4</button>
+    <button type="button" onclick="submit_form_to('fcs_5')">client5</button>
+    <button type="button" onclick="submit_form_to('fcs_4')">client4</button>
     </p>
     </form>
     <h2>Sesame4 Upload queue</h2>
@@ -49,7 +70,7 @@
     	src="http://devguru.com/images/masphost.jpg"
     	alt="Sesame4 Upload queue size" />
     </p>
-    <a href="" target="_blank" id="link_sesame4_queue">Go to list</a>
+    <a href="" target="_blank" id="link_sesame4_queue">See full upload queue</a>
   <!--div id="errors"></div-->
 
 </html>

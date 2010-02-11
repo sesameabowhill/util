@@ -3,12 +3,18 @@
   "version": "1.0",
   "background_page": "background.html",
   "permissions": [
-	"http://www.remindergenie.com/",
-	"https://www4.orthosesame.com/"
+    "http://www.remindergenie.com/",
+    "https://www4.orthosesame.com/"
   ],
   "browser_action": {
-      "name": "Sesame 4 upload queue size",
-      "default_icon": "icon.png",
-      "popup": "popup.html"
-  }
+    "name": "Sesame 4 upload queue size",
+    "default_icon": "icon.png",
+    "popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://hippo.3treepoint.com:8080/"],
+      "js": ["jira_popup.js"]
+    }
+  ]
 }
