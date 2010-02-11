@@ -1,13 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="utils">
+<project name="utils" default="build">
 
 	<property environment="env" />
 
 	<property file="download.zipcodes.properties" />
 
-	<target name="download.zip_codes" depends="download.zip.usa" />
+	<target name="build" depends="download.zip.usa, download.zip.canada, unzip.usa, unzip.canada, build.result" />
 
-	<target name="download.zip.usa">
+	<target name="build.result">
+		<exec failonerror="true" executable="perl">
+			<arg value="csv_to_sql.pl"/>
+			<arg value="--input=${zipcode.csv.usa}"/>
+			<arg value="--input=${zipcode.csv.canada}"/>
+			<arg value="--output=${result.file.sesame4}"/>
+			<arg value="--table=${result.table.sesame4}"/>
+			<arg value="--output=${result.file.sesame5}"/>
+			<arg value="--table=${result.table.sesame5}"/>
+			<arg value="--important-zip=432"/>
+			<arg value="--important-zip=708"/>
+		</exec>
+	</target>
+
+	<target name="unzip.usa">
+		<unzip src="${zipcode.file.usa}" dest=".">
+			<patternset>
+				<include name="${zipcode.csv.usa}"/>
+			</patternset>
+		</unzip>
+	</target>
+
+	<target name="unzip.canada">
+		<unzip src="${zipcode.file.canada}" dest=".">
+			<patternset>
+				<include name="${zipcode.csv.canada}"/>
+			</patternset>
+		</unzip>
+	</target>
+
+	<target name="download.zip.usa" depends="ask.password">
 		<exec failonerror="true" executable="wget">
 			<arg value="${zipcode.url.usa}" />
 			<arg value="--quiet" />
@@ -16,13 +46,17 @@
 		</exec>
 	</target>
 
-	<target name="download.zip.canada">
+	<target name="download.zip.canada" depends="ask.password">
 		<exec failonerror="true" executable="wget">
 			<arg value="${zipcode.url.canada}" />
 			<arg value="--quiet" />
 			<arg value="--output-document=${zipcode.file.canada}" />
 			<arg value="--post-data=login=${zipcodeworld.login}&amp;password=${zipcodeworld.password}&amp;btnDownload=Download" />
 		</exec>
+	</target>
+
+	<target name="ask.password">
+		<input addproperty="zipcodeworld.password" message="ZipCodeWorld password" />
 	</target>
 
 </project>
