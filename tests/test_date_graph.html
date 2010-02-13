@@ -62,11 +62,19 @@
 	        	var data_graph = new DataGraph(2, 2)
 	        	data_graph.add_point(10, 100);
 	        	data_graph.add_point(12, 200);
-	        	data_graph.add_point(15, 100);
+	        	data_graph.add_point(15, 98);
 	        	data_graph.add_point(17, 50);
 	        	var settings = data_graph.get_chart_settings();
 	        	assertEquals(100, settings.max);
-	        	assertEquals("..f.", settings.data);
+	        	assertEquals("-tf.", settings.data);
+	        }
+        	{
+	        	var data_graph = new DataGraph(2, 2)
+	        	data_graph.add_point(10, 100);
+	        	data_graph.add_point(12, 200);
+	        	var settings = data_graph.get_chart_settings();
+	        	assertEquals(205, settings.max);
+	        	assertEquals("fN-b", settings.data);
 	        }
         }
 

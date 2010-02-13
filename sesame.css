@@ -1,8 +1,5 @@
-input { width: 150px }
-input, button { float: left }
-
 body, form, input, select, table, textarea { color: #656b6f; font: 11px/18px tahoma, sans-serif }
-button { background-color: #2FB0D1; color: #fff; font: 11px/18px tahoma, sans-serif; font-weight: bold; -webkit-border-radius: 5px; height: 22px; padding-top: -1px; }
+button { background-color: #2FB0D1; color: #fff; font: 11px/18px tahoma, sans-serif; font-weight: bold; height: 20px; }
 input { height: 22px; }
 
 h2 { color: #A0B606; border-bottom: 1px dotted #000; padding-bottom: 0.5em; margin-top: 1em; clear: both; float: left; width: 100% }
@@ -10,3 +7,22 @@ h2:first-child { margin-top: 0 }
 form { clear: both }
 
 a:link, a:visited { color: #009EC7 }
+
+
+button {
+	background: -webkit-gradient(
+		linear, 
+		0% 0%, 
+		0% 100%, 
+		from(#CFEDF4), 
+		color-stop(0.02, #3AB4D4), 
+		color-stop(0.5, #3AB4D4), 
+		color-stop(0.5, #009EC7)
+	);
+	border-left: solid #35A9C7 1px;
+	border-right: solid #35A9C7 1px;
+	border-bottom: solid #069FC7 1px;
+	border-top: solid #66B3C8 1px;
+	-webkit-box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 2px;
+	-webkit-border-radius: 4px;
+}

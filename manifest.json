@@ -2,9 +2,10 @@
   "name": "Sesame Support Helper",
   "version": "1.0",
   "background_page": "background.html",
+  "options_page": "options.html",
   "permissions": [
     "http://www.remindergenie.com/",
-    "https://www4.orthosesame.com/"
+    "https://members.sesamecommunications.com/"
   ],
   "browser_action": {
     "name": "Sesame 4 upload queue size",
@@ -13,7 +14,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://hippo.3treepoint.com:8080/"],
+      "matches": [ "http://hippo.3treepoint.com/browse/*", "http://jira.sesamecommunications.com/browse/*" ],
       "js": ["jira_popup.js"]
     }
   ]

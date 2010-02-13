@@ -2,6 +2,9 @@
 <head>
 <link rel="stylesheet" type="text/css" href="sesame.css" />
 <style>
+  input { width: 150px }
+  input, button { float: left }
+
   #input_search_param { margin-right: 10px }
   #errors { border: 1px black solid }
 </style>
@@ -30,7 +33,7 @@
 		document.getElementById("link_sesame4_queue").href = background.get_url('upload_queue');
 		update_graph();
 		
-  		window.setInterval(update_graph, background.get_refresh_interval());
+  		window.setInterval(update_graph, background.get_refresh_interval('upload_queue'));
 	}
 	
 	function check_form_input() {

@@ -1,0 +1,37 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="sesame.css" />
+<style>
+  input { width: 100px; margin-bottom: 10px }
+  input, button, label { float: left }
+  label, button { clear: left }
+  label { width: 70px; text-align: right; padding-right: 0.5em }
+</style>
+<script type="text/javascript">
+	function init_form() {
+		var username = localStorage["server_username"];
+		if (!username){
+			username = 'ptistaff';
+		}
+		document.getElementById("username").value = username;
+	}
+	function save_settings() {
+		localStorage["server_username"] = document.getElementById("username").value;
+		localStorage["server_password"] = btoa(document.getElementById("password").value);
+		
+		// Update status to let user know options were saved.
+		var status = document.getElementById("status");
+		status.innerHTML = "Settings Saved.";
+		setTimeout(function() {
+			status.innerHTML = "";
+		}, 750);
+	}
+</script>
+</head>
+<body onload="init_form()">
+    <h2>Server Access</h2>
+    <div id="status"></div>
+    <label for="username">Username:</label><input id="username" size="15" />
+    <label for="password">Password:</label><input id="password" size="15" type="password" />
+    <button type="button" onclick="save_settings()">Save</button>
+</html>

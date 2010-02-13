@@ -3,41 +3,93 @@
 <script type="text/javascript" src="lib/data_graph.js"></script> 
 <script type="text/javascript" src="lib/date_utils.js"></script> 
 <script>
-	var http_user = 'ptistaff';
-	var http_password = '';
 	
 	var sesame4_upload_queue_data = new DataGraph(60, 120);
+	var client_list;
 
  	function get_url(name) {
  		var urls = {
  			'fcs_5': "https://members.sesamecommunications.com/support-tools/sesame/fast_client_search/",
  			'fcs_4': "https://www4.orthosesame.com/internal/fast_client_search/",
- 			'upload_queue': "http://www.remindergenie.com/tech_support/upload_queue.cgi?queue_id=1"
+ 			'upload_queue': "http://www.remindergenie.com/tech_support/upload_queue.cgi?queue_id=1",
+ 			'client_api': "https://members.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=client_list"
  		};
  		return urls[name];
 	}
 	
-	function get_refresh_interval() {
-		return 15*1000;
+	function get_refresh_interval(name) {
+		var intervals = {
+			'upload_queue': 15*1000,
+			'client_list': 15*1000
+		};
+		return intervals[name];
 	}
 
- 	
-  	function refresh_upload_queue_size() {
+  	function get_json_data(url, processor) {
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", get_url('upload_queue')+'&action=get_data', true);
-		//xhr.setRequestHeader("Authorization", "Basic ".btoa( http_user + ":" + http_password ));
+		xhr.open("GET", url, true);
+		var http_user = localStorage["server_username"];
+		if (http_user) {
+			var http_password = atob(localStorage["server_password"]);
+			xhr.setRequestHeader("Authorization", "Basic " + btoa( http_user + ":" + http_password ));
+		}
 		xhr.send();
 		xhr.onreadystatechange = function() {
-	    	//console.log("change");
 		  	if (xhr.readyState == 4) {
 		    	var resp = JSON.parse(xhr.responseText);
-		    	//chrome.browserAction.setTitle({"title": "test"});
-		    	//i++;
-		    	set_upload_queue_size(resp);
+		    	processor(resp);
 		  	}
 		}
+  	}
 
-    	//chrome.browserAction.setBadgeText({text:String(i)});
+  	function refresh_upload_queue_size() {
+  		get_json_data(
+  			get_url('upload_queue')+'&action=get_data',
+  			set_upload_queue_size
+  		);
+  	}
+
+  	function refresh_client_list() {
+  		get_json_data(
+  			get_url('client_api'),
+  			function (clients) {
+  				var status_str = {
+  					"0": "inactive",
+  					"1": "active"
+  				};
+  				var type_str = {
+  					"s": "client",
+  					"o": "ortho",
+  					"d": "dental"
+  				};
+  				var version_str = {
+  					"s": "sesame5",
+  					"o": "sesame4",
+  					"d": "sesame4"
+  				};
+  				client_list = {};
+  				for (var i=0; i<clients.length; ++i) {
+  					var cl = clients[i];
+  					var new_cl;
+  					if (client_list[cl.u]) {
+  						if (cl.t == 's') {
+  							new_cl = cl;
+  						}
+  					}
+  					else {
+  						new_cl = cl;
+  					}
+  					if (new_cl) {
+	  					client_list[new_cl.u] = {
+	  						"search_url": (new_cl.t == "s" ? get_url("fcs_5") : get_url("fcs_4")) + "?search_param=" + new_cl.u,
+	  						"status": status_str[new_cl.s],
+	  						"type": type_str[new_cl.t],
+	  						"version": version_str[new_cl.t]
+	  					};
+	  				}
+  				}
+  			}
+  		);
   	}
   	
   	function set_upload_queue_size(resp) {
@@ -103,8 +155,23 @@
 		return sesame4_upload_queue_data.get_chart_settings();
 	}
 
-  	window.setInterval(refresh_upload_queue_size, get_refresh_interval());
+  	window.setInterval(refresh_upload_queue_size, get_refresh_interval('upload_queue'));
+  	window.setInterval(refresh_client_list, get_refresh_interval('client_list'));
   	refresh_upload_queue_size();
+  	refresh_client_list();
+  	
+  	chrome.extension.onRequest.addListener(
+		function(request, sender, sendResponse) {
+			if (request.action == "get_clients") {
+				sendResponse({
+					"clients": client_list
+				});
+			}
+			else {
+				sendResponse({}); // snub them.
+			}
+		}
+	);
 </script>
 </head>
 </html>
