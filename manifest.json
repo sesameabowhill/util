@@ -1,6 +1,6 @@
 {
   "name": "Sesame Support Helper",
-  "version": "@version@",
+  "version": "0.0.0.0",
   "background_page": "background.html",
   "options_page": "options.html",
   "update_url": "https://members.sesamecommunications.com/support-tools/sesame/support-helper/updates.xml",

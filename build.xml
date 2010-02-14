@@ -77,7 +77,7 @@
 
 	<target name="build.replace_version" depends="version.read">
 		<replace dir="${tmpdir}/${build.extension_name}" includes="manifest.json, installer/updates.xml" summary="true">
-			<replacefilter token="@version@" value="${version.last_version}"/>
+			<replacefilter token="0.0.0.0" value="${version.last_version}"/>
 		</replace>
 	</target>
 
