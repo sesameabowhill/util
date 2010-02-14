@@ -1,39 +1,96 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- $Id: build.xml 1471 2009-11-19 23:55:49Z ivan $ -->
-<project name="sztls" default="build">
+<project name="Sesame Support Helper extension" default="build">
 
     <property environment="env" />
 
-    <property file="deploy.properties" prefix="deploy" />
+    <property file="deploy.properties" prefix="server" />
     <property file="build.properties" prefix="build" />
     
 	<property name="tmpdir" value="${java.io.tmpdir}/chrome_extension" />
+	<property name="packer_script" value="packer.py" />
+	<property name="file.last_version" value="last_version.properties" />
 
-	<target name="build" depends="build.create_temp_folder, build.copy_files, build.make_package" />
+	<target name="build" depends="version.write, build.copy_files, build.replace_version, build.make_package, build.sign_package" />
+	<target name="deploy" depends="deploy.ask_password, deploy.installer_page, deploy.package" />
+	<target name="build_and_deploy" depends="build, deploy" />
+
+	<target name="deploy.ask_password">
+		<input message="enter server password for [${server.host}]" addproperty="server.password" />
+	</target>
+	
+	<target name="deploy.package">
+		<scp trust="true" remoteTofile="${server.user}:${server.password}@${server.host}:${server.folder}" file="${build.extension_name}.crx" />
+	</target>
+
+	<target name="deploy.installer_page" depends="build.copy_files, build.replace_version">
+		<scp trust="true" remoteTofile="${server.user}:${server.password}@${server.host}:${server.folder}">
+			<fileset dir="${tmpdir}/${build.extension_name}/installer">
+				<include name="**/*" />
+				<exclude name="**/.svn/**/*" />
+			</fileset>
+		</scp>
+	</target>
+	
+	<target name="version.get_last_revision_number">
+		<tempfile property="temp_file.revision" destdir="${tmpdir}" deleteonexit="true" />
+		<exec executable="svn" failonerror="true" output="${temp_file.revision}">
+			<arg value="log" />
+			<arg value="-l" />
+			<arg value="1" />
+			<arg value="-r" />
+			<arg value="HEAD:1" />
+			<arg value="--xml" />
+		</exec>
+		<xmlproperty file="${temp_file.revision}" collapseAttributes="true"/>
+		<property name="last_revision_number" value="${log.logentry.revision}" />
+		<echo>last_revision_number [${last_revision_number}]</echo>
+	</target>
+	
+	<target name="version.write" depends="version.get_last_revision_number">
+		<echo file="${file.last_version}">last_version=1.0.${last_revision_number}</echo>
+	</target>
+
+	<target name="version.read">
+	    <property file="${file.last_version}" prefix="version" />
+	</target>
 
 	<target name="build.create_temp_folder">
 		<delete dir="${tmpdir}" />
 		<mkdir dir="${tmpdir}" />
 	</target>
 
-	<target name="build.copy_files">
+	<target name="build.copy_files" depends="build.create_temp_folder">
 		<copy todir="${tmpdir}/${build.extension_name}">
 			<fileset dir=".">
 				<include name="**/*" />
 				<exclude name="**/.svn/**/*" />
+				<exclude name="tests" />
 				<exclude name="tests/**/*" />
 				<exclude name="build.xml" />
+				<exclude name="${packer_script}" />
 				<exclude name="${build.extension_name}.*" />
 				<exclude name="*.properties" />
 			</fileset>
 		</copy>
 	</target>
 
+	<target name="build.replace_version" depends="version.read">
+		<replace dir="${tmpdir}/${build.extension_name}" includes="manifest.json, installer/updates.xml" summary="true">
+			<replacefilter token="@version@" value="${version.last_version}"/>
+		</replace>
+	</target>
+
 	<target name="build.make_package">
-		<exec executable="${build.extension_packer}" failonerror="true">
-			<arg value="--pack-extension=${tmpdir}/${build.extension_name}" />
-			<arg value="--pack-extension-key=${basedir}/${build.extension_name}.pem" />
-			<!--arg value="- -no-message-box" /-->
+		<zip destfile="${build.extension_name}.zip" basedir="${tmpdir}/${build.extension_name}" includes="**/*" excludes="installer, installer/**/*" />
+	</target>
+
+	<target name="build.sign_package">
+		<exec executable="python" failonerror="true">
+			<arg value="${packer_script}" />
+			<arg value="${build.extension_name}.zip" />
+			<arg value="${build.extension_name}.pem" />
+			<arg value="${build.extension_name}.crx" />
 		</exec>
 	</target>
 

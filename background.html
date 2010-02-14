@@ -20,7 +20,7 @@
 	function get_refresh_interval(name) {
 		var intervals = {
 			'upload_queue': 15*1000,
-			'client_list': 15*1000
+			'client_list': 5*60*1000
 		};
 		return intervals[name];
 	}
@@ -33,13 +33,18 @@
 			var http_password = atob(localStorage["server_password"]);
 			xhr.setRequestHeader("Authorization", "Basic " + btoa( http_user + ":" + http_password ));
 		}
-		xhr.send();
 		xhr.onreadystatechange = function() {
+	  		if (xhr.status == 401) {
+	  			set_error_status("auth");
+	  		}
 		  	if (xhr.readyState == 4) {
-		    	var resp = JSON.parse(xhr.responseText);
-		    	processor(resp);
+		  		if (xhr.status == 200) {
+			    	var resp = JSON.parse(xhr.responseText);
+			    	processor(resp);
+			    }
 		  	}
 		}
+		xhr.send();
   	}
 
   	function refresh_upload_queue_size() {
@@ -134,7 +139,7 @@
 	  	
 	  	sesame4_upload_queue_data.add_point(getCurrentSeconds(), total_clients_count);
   	}
-  	
+
   	function get_badge_color_by_queue_size(queue_size) {
   		if (queue_size < 10) {
  			return [ 0, 132, 226, 255 ];
@@ -149,7 +154,11 @@
   			return [ 255, 0, 0, 255 ];
   		}
   	}
-  	
+
+  	function set_error_status(msg) {
+	   	chrome.browserAction.setBadgeText({"text": msg});
+	  	chrome.browserAction.setBadgeBackgroundColor({"color": [ 255, 0, 0, 255 ]});
+  	}
 
 	function get_upload_queue_chart_settings() {
 		return sesame4_upload_queue_data.get_chart_settings();

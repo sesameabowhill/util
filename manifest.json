@@ -1,8 +1,9 @@
 {
   "name": "Sesame Support Helper",
-  "version": "1.0",
+  "version": "@version@",
   "background_page": "background.html",
   "options_page": "options.html",
+  "update_url": "https://members.sesamecommunications.com/support-tools/sesame/support-helper/updates.xml",
   "permissions": [
     "http://www.remindergenie.com/",
     "https://members.sesamecommunications.com/"
