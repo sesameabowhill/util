@@ -12,7 +12,8 @@
 	function update_graph() {
 		var background = chrome.extension.getBackgroundPage();
 		var img_upload_queue = document.getElementById("img_upload_queue");
-		var chart = background.get_upload_queue_chart_settings();
+		var current_graph = background.get_current_graph_params();
+		var chart = current_graph.graph.get_chart_settings();
 		var labels = [
 			'-' + background.secondsToString(chart.time_interval),
 			'-' + background.secondsToString(Math.floor(chart.time_interval*0.75)),
@@ -29,11 +30,22 @@
 	
 	function init_form() {
 		var background = chrome.extension.getBackgroundPage();
+		var current_graph = background.get_current_graph_params();
 		document.getElementById("search_form").action = background.get_url('fcs_5');
-		document.getElementById("link_sesame4_queue").href = background.get_url('upload_queue');
+		document.getElementById("graph_header").innerHTML = current_graph.name;
+		document.getElementById("img_upload_queue").alt = current_graph.name;
+		if (current_graph.page_url) {
+			var link_elem = document.getElementById("link_queue_full_list");
+			link_elem.href = current_graph.page_url;
+			link_elem.style.display = "block";
+		}
+		else {
+			var link_elem = document.getElementById("link_queue_full_list");
+			link_elem.style.display = "none";
+		}
 		update_graph();
 		
-  		window.setInterval(update_graph, background.get_refresh_interval('upload_queue'));
+  		window.setInterval(update_graph, current_graph.refresh);
 	}
 	
 	function check_form_input() {
@@ -66,14 +78,13 @@
     <button type="button" onclick="submit_form_to('fcs_4')">client4</button>
     </p>
     </form>
-    <h2>Sesame4 Upload queue</h2>
+    <h2 id="graph_header"></h2>
     <p>
     <img
     	id="img_upload_queue"
-    	src="http://devguru.com/images/masphost.jpg"
-    	alt="Sesame4 Upload queue size" />
+    	src=""
     </p>
-    <a href="" target="_blank" id="link_sesame4_queue">See full upload queue</a>
+    <a href="" target="_blank" id="link_queue_full_list">See full list</a>
   <!--div id="errors"></div-->
 
 </html>

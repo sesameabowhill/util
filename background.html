@@ -3,19 +3,54 @@
 <script type="text/javascript" src="lib/data_graph.js"></script> 
 <script type="text/javascript" src="lib/date_utils.js"></script> 
 <script>
-	
-	var sesame4_upload_queue_data = new DataGraph(60, 120);
 	var client_list;
+	var last_graph;
+
+	function get_current_graph_params() {
+		if (! localStorage["graph_type"]) {
+			// set default graph_type
+			localStorage["graph_type"] = "upload_queue_4";
+		}
+		if (last_graph) {
+			if (last_graph.type != localStorage["graph_type"]) {
+				last_graph = null;
+			}
+		}
+		if (! last_graph) {
+			if (localStorage["graph_type"] == "upload_queue_5") {
+				last_graph = {
+					"type": localStorage["graph_type"],
+					"data_url": get_url("upload_queue_5"),
+					"refresh": get_refresh_interval("upload_queue"),
+					"name": "Sesame5 upload processing queue",
+					"graph": new DataGraph(60, 120)
+				};
+			}
+			else {
+				last_graph = {
+					"type": localStorage["graph_type"],
+					"data_url": get_url("upload_queue")+"&action=get_data",
+					"page_url": get_url("upload_queue"),
+					"refresh": get_refresh_interval("upload_queue"),
+					"name": "Sesame4 upload queue",
+					"graph": new DataGraph(60, 120)
+				};
+			}
+		}
+		return last_graph;
+	}
 
  	function get_url(name) {
  		var urls = {
  			'fcs_5': "https://members.sesamecommunications.com/support-tools/sesame/fast_client_search/",
  			'fcs_4': "https://www4.orthosesame.com/internal/fast_client_search/",
  			'upload_queue': "http://www.remindergenie.com/tech_support/upload_queue.cgi?queue_id=1",
+ 			'upload_queue_5': "https://members.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=upload_queue_5",
  			'client_api': "https://members.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=client_list"
  		};
  		return urls[name];
 	}
+
 	
 	function get_refresh_interval(name) {
 		var intervals = {
@@ -48,9 +83,12 @@
   	}
 
   	function refresh_upload_queue_size() {
+  		var current_graph = get_current_graph_params();
   		get_json_data(
-  			get_url('upload_queue')+'&action=get_data',
-  			set_upload_queue_size
+  			current_graph.data_url,
+  			function (resp) {
+  				set_upload_queue_size(resp, current_graph);
+  			}
   		);
   	}
 
@@ -97,13 +135,22 @@
   		);
   	}
   	
-  	function set_upload_queue_size(resp) {
+  	function set_upload_queue_size(resp, current_graph) {
+  		// normalize waits
+  		var base_waits = 0;
+    	for (var client_id in resp) {
+    		if (resp[client_id].waits < base_waits) {
+    			base_waits = resp[client_id].waits;
+    		}
+    	}
+
     	var active_clients_count = 0;
     	var inactive_clients_count = 0;
     	var total_waits = 0;
     	var max_wait_time = 0;
     	var max_inactive_wait_time = 0;
     	for (var client_id in resp) {
+    		resp[client_id].waits -= base_waits;
     		total_waits += resp[client_id].waits;
     		if (resp[client_id].is_active) {
     			active_clients_count ++;
@@ -122,6 +169,7 @@
     	chrome.browserAction.setBadgeText({"text": String(total_clients_count)});
 	  	chrome.browserAction.setBadgeBackgroundColor({"color": get_badge_color_by_queue_size(total_clients_count)});
 	  	var page_titles = [
+	  		current_graph.name + ":",
 	  		total_clients_count + " client" + (total_clients_count==1?" is":"s are") + " in the queue"
 	  	];
 	  	
@@ -130,14 +178,16 @@
 		  		page_titles.push(active_clients_count + " client" + (total_clients_count==1?" is":"s are") + " processing");
 		  	}
 		  	page_titles.push("average waiting time: " + secondsToString(Math.round(total_waits/total_clients_count)));
-		  	page_titles.push("max waiting time: " + secondsToString(max_inactive_wait_time));
+		  	if (inactive_clients_count) {
+		  		page_titles.push("max waiting time: " + secondsToString(max_inactive_wait_time));
+		  	}
 		  	if (active_clients_count) {
 			  	page_titles.push("max processing time: " + secondsToString(max_wait_time));
 		  	}
 		}
 	  	chrome.browserAction.setTitle({"title": page_titles.join("\n")});
 	  	
-	  	sesame4_upload_queue_data.add_point(getCurrentSeconds(), total_clients_count);
+	  	current_graph.graph.add_point(getCurrentSeconds(), total_clients_count);
   	}
 
   	function get_badge_color_by_queue_size(queue_size) {
@@ -160,9 +210,9 @@
 	  	chrome.browserAction.setBadgeBackgroundColor({"color": [ 255, 0, 0, 255 ]});
   	}
 
-	function get_upload_queue_chart_settings() {
-		return sesame4_upload_queue_data.get_chart_settings();
-	}
+	//function get_upload_queue_chart_settings() {
+	//	return sesame4_upload_queue_data.get_chart_settings();
+	//}
 
   	window.setInterval(refresh_upload_queue_size, get_refresh_interval('upload_queue'));
   	window.setInterval(refresh_client_list, get_refresh_interval('client_list'));
