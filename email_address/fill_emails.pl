@@ -68,9 +68,9 @@ if (@files) {
 
 			my $client_data = $data_source->get_client_data_by_db($client_db);
 			$client_data->set_approx_search(1);
-			printf "database source: client [%s]\n", $client_db;
 
 			my $client_full_type = $client_data->get_full_type();
+			printf "database source: client [%s] type [%s]\n", $client_db, $client_full_type;
 			if (exists $implemented{$type}{$client_full_type}) {
 				my $params = $implemented{$type}{$client_full_type};
 				my $reader = CSVReader->new(
@@ -136,6 +136,7 @@ sub fill_emails {
 				'by_name_pat_resp' => 1,
 				'by_name_resp' => 2,
 				'by_name_patient' => 3,
+				'by_resp_grouped_by_pats' => 4,
 			}
 		);
 		my $name = $email_row->{'name'};
@@ -162,8 +163,9 @@ sub fill_emails {
 			}
 			else {
 				printf(
-					"SKIP: %s - %s\n",
+					"SKIP: %s (%s) - %s\n",
 					$email,
+					$name,
 					$candidate_manager->candidates_count_str(),
 				);
 			}
@@ -249,6 +251,7 @@ sub find_responsible_ortho_resp {
 	my ($name, $client_data, $candidate_manager) = @_;
 
 	my $responsibles = $client_data->get_responsible_ids_by_name($name);
+	my %resp_grouped_by_patients;
 	for my $responsible (@$responsibles) {
 		$candidate_manager->add_candidate(
 			'by_name_resp',
@@ -274,7 +277,21 @@ sub find_responsible_ortho_resp {
 				},
 			);
 		}
+		my $patients_id_str = join('|', sort @$patients_ids);
+		$resp_grouped_by_patients{$patients_id_str} = $responsible;
 	}
+	## thread responsibles with same patients as same person
+	for my $responsible (values %resp_grouped_by_patients) {
+		$candidate_manager->add_candidate(
+			'by_resp_grouped_by_pats',
+			{
+				'patient' => undef,
+				'responsible' => $responsible,
+			}
+		);
+	}
+
+
 #	unless (defined $candidate_manager->get_single_candidate()) {
 #		find_patient_ortho_resp($name, $client_data, $candidate_manager);
 #	}
