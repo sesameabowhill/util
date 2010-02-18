@@ -62,6 +62,38 @@ sub email_is_used {
     );
 }
 
+sub get_emails_by_pid {
+	my ($self, $pid) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		$self->_get_emails_select()." FROM email WHERE visitor_id=? AND client_id=?",
+		{ 'Slice' => {} },
+		$pid,
+        $self->{'client_id'},
+	);
+}
+
+sub get_emails_by_responsible {
+	my ($self, $rid) = @_;
+
+	return $self->get_emails_by_pid($rid);
+}
+
+sub _get_emails_select {
+	my ($self) = @_;
+
+	return <<SQL;
+SELECT
+	id,
+	email AS Email,
+	responsible_type AS BelongsTo,
+	relative_name AS Name,
+    date AS Date,
+	welcome_sent='true' AS Status,
+	source AS Source
+SQL
+}
+
 sub get_patients_by_name {
     my ($self, $fname, $lname) = @_;
 
@@ -70,6 +102,17 @@ sub get_patients_by_name {
     	$fname,
     	$lname,
     	'type="patient"',
+    );
+}
+
+sub get_patients_by_name_and_ids {
+    my ($self, $fname, $lname, $ids) = @_;
+
+    return $self->_get_visitors_by_name(
+    	'id AS PId',
+    	$fname,
+    	$lname,
+    	'type="patient" AND id IN ('.join(', ', map {$self->{'dbh'}->quote($_)} @$ids).')',
     );
 }
 
@@ -109,6 +152,37 @@ sub get_all_patients {
 
     return $self->{'dbh'}->selectall_arrayref(
         "SELECT id AS PId, ".$self->_get_visitor_columns()." FROM visitor WHERE type='patient' AND client_id=?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+    );
+}
+
+sub get_patient_by_id {
+    my ($self, $pid) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id AS PId, ".$self->_get_visitor_columns()." FROM visitor WHERE type='patient' AND id=? AND client_id=?",
+		{ 'Slice' => {} },
+		$pid,
+		$self->{'client_id'},
+    );
+}
+
+sub get_patient_ids_by_responsible {
+    my ($self, $rid) = @_;
+
+    return $self->{'dbh'}->selectcol_arrayref(
+        "SELECT patient_id FROM responsible_patient WHERE responsible_id=?",
+        undef,
+        $rid,
+    );
+}
+
+sub get_all_responsibles {
+    my ($self) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id AS RId, ".$self->_get_visitor_columns()." FROM visitor WHERE type='responsible' AND client_id=?",
 		{ 'Slice' => {} },
 		$self->{'client_id'},
     );
