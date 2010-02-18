@@ -20,6 +20,8 @@
 				<exclude name="**/.svn/**/*" />
 				<exclude name="**/_*" />
 				<exclude name="*" />
+				<exclude name="zip_codes/*.csv" />
+				<exclude name="zip_codes/*.CSV" />
 				<exclude name=".**/*" />
 			</fileset>
 		</scp>
