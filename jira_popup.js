@@ -5,7 +5,7 @@ chrome.extension.sendRequest({"action": "get_clients"}, function(response) {
 		names.push(username);
 	}
 
-	var replace_re = new RegExp('\\b(' + names.join('|') + ')\\b', 'gi');
+	var replace_re = new RegExp('\\b(' + names.join('|') + ')\\b', 'g');
 
 	var issue_title_elements = document.getElementsByTagName("h3");
 	var header_element = issue_title_elements[0];
@@ -24,6 +24,7 @@ function replace_in_element(replace_re, clients, elem) {
 			return '<a title="Find client [' + username +
 				' - ' + clients[username].type +
 				' - ' + clients[username].status +
+				'] id [' + clients[username].id + 
 				'] (' + clients[username].version +
 				')" href="' + clients[username].search_url +
 				'" target="_blank">' + username +
