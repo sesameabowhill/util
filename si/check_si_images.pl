@@ -4,8 +4,6 @@
 use strict;
 use warnings;
 
-use File::Spec;
-
 use lib '../lib';
 
 use CSVWriter;
@@ -56,24 +54,8 @@ sub find_broken_images {
 		my $total = @$images;
 		my $missing = 0;
 		my %invalid_patients;
-		my $image_path = ( $client_data->get_full_type() eq 'sesame' ?
-			File::Spec->join(
-		    	$ENV{'SESAME_COMMON'},
-		    	'image-systems',
-		    	$client_data->get_username(),
-		    	'si',
-		    	'images',
-		    ) :
-			File::Spec->join(
-		    	$ENV{'SESAME_WEB'},
-		    	'image_systems',
-		    	$client_data->get_username(),
-		    	'si',
-		    	'images',
-		    )
-		);
 		for my $r (@$images) {
-		    my $full_filename = File::Spec->join($image_path, $r->{'FileName'});
+		    my $full_filename = $client_data->file_path_for_si_image($r->{'FileName'});
 		    $counter++;
 		    if (-f $full_filename) {
 		        unless ($counter % 5000) {

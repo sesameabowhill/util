@@ -512,4 +512,47 @@ sub _get_invisalign_client_ids {
 	);
 }
 
+sub file_path_for_invisalign_comment {
+	my ($self, $invisalign_client_id, $case_number) = @_;
+
+	return File::Spec->join(
+    	$ENV{'SESAME_WEB'},
+    	'invisalign_cases',
+    	$invisalign_client_id,
+    	$case_number.'.txt',
+    );
+}
+
+sub delete_invisalign_patient {
+	my ($self, $case_number) = @_;
+
+	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
+
+	if ($inv_client_ids) {
+		my $sql = "DELETE FROM invisalign.Patient WHERE client_id IN (" .
+			$inv_client_ids . ") AND case_num=" . $self->{'dbh'}->quote($case_number);
+
+		$self->{'data_source'}->add_statement($sql);
+		unless ($self->{'data_source'}->is_read_only()) {
+			$self->{'dbh'}->do($sql);
+		}
+	}
+}
+
+sub delete_invisalign_processing_patient {
+	my ($self, $case_number) = @_;
+
+	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
+
+	if ($inv_client_ids) {
+		my $sql = "DELETE FROM invisalign.icp_patients WHERE doctor_id IN (" .
+			$inv_client_ids . ") AND case_number=" . $self->{'dbh'}->quote($case_number);
+
+		$self->{'data_source'}->add_statement($sql);
+		unless ($self->{'data_source'}->is_read_only()) {
+			$self->{'dbh'}->do($sql);
+		}
+	}
+}
+
 1;

@@ -4,6 +4,8 @@ package ClientData::DB::Sesame_5;
 use strict;
 use warnings;
 
+use File::Spec;
+
 use base qw( ClientData::DB );
 
 use Sesame::Unified::Client;
@@ -449,5 +451,30 @@ sub delete_invisalign_processing_patient {
 		}
 	}
 }
+
+sub file_path_for_si_image {
+	my ($self, $file_name) = @_;
+
+	return File::Spec->join(
+    	$ENV{'SESAME_COMMON'},
+    	'image-systems',
+    	$self->get_username(),
+    	'si',
+    	'images',
+    	$file_name,
+    );
+}
+
+sub file_path_for_invisalign_comment {
+	my ($self, $invisalign_client_id, $case_number) = @_;
+
+	return File::Spec->join(
+    	$ENV{'SESAME_COMMON'},
+    	'invisalign-cases',
+    	$invisalign_client_id,
+    	$case_number.'.txt',
+    );
+}
+
 
 1;

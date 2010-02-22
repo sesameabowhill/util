@@ -4,6 +4,8 @@ package ClientData::DB::Sesame_4;
 use strict;
 use warnings;
 
+use File::Spec;
+
 use base qw( ClientData::DB );
 
 our %CLIENTS_TABLE_NAME = (
@@ -353,5 +355,19 @@ sub _get_all_ppn_emails {
 		$self->{'client'}{'id'},
     );
 }
+
+sub file_path_for_si_image {
+	my ($self, $file_name) = @_;
+
+	return File::Spec->join(
+    	$ENV{'SESAME_WEB'},
+    	'image_systems',
+    	$self->get_username(),
+    	'si',
+    	'images',
+    	$file_name,
+    );
+}
+
 
 1;

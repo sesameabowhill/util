@@ -59,11 +59,9 @@ sub find_broken_images {
 		my $missing = 0;
 #		my %invalid_patients;
 		for my $inv_patient (@$invisaling_patients) {
-			my $full_filename = File::Spec->join(
-		    	$ENV{'SESAME_COMMON'},
-		    	'invisalign-cases',
+			my $full_filename = $client_data->file_path_for_invisalign_comment(
 		    	$inv_patient->{'invisalign_client_id'},
-		    	$inv_patient->{'case_number'}.'.txt',
+		    	$inv_patient->{'case_number'},
 		    );
 
 		    $counter++;
