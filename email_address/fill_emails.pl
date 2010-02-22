@@ -238,11 +238,28 @@ sub find_patient_by_name {
 sub find_responsible_by_name {
 	my ($name, $client_data, $candidate_manager) = @_;
 
+	my %resp_grouped_by_patients;
 	my $responsibles = $client_data->get_responsibles_by_name($name);
 	for my $responsible (@$responsibles) {
 		$candidate_manager->add_candidate(
 			'by_name_resp',
 			$responsible,
+		);
+
+		my $patients_ids = $client_data->get_patient_ids_by_responsible(
+			$responsible->{'RId'},
+		);
+		my $patients_id_str = join('|', sort @$patients_ids);
+		$resp_grouped_by_patients{$patients_id_str} = $responsible;
+	}
+	## thread responsibles with same patients as same person
+	for my $responsible (values %resp_grouped_by_patients) {
+		$candidate_manager->add_candidate(
+			'by_resp_grouped_by_pats',
+			{
+				'patient' => undef,
+				'responsible' => $responsible,
+			}
 		);
 	}
 }
