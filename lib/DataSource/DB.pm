@@ -12,6 +12,7 @@ sub new {
     my ($class, $is_sesame_5) = @_;
 
     my $self = {
+    	'read_only' => 0,
         'statements' => [],
         'affected_clients' => {},
     };
@@ -83,6 +84,17 @@ sub read_config {
 	return Sesame::Config->read_file($file_name);
 }
 
+sub set_read_only {
+	my ($self, $flag) = @_;
+
+	$self->{'read_only'} = $flag;
+}
+
+sub is_read_only {
+	my ($self) = @_;
+
+	return $self->{'read_only'};
+}
 
 sub get_statements {
     my ($self) = @_;
@@ -132,6 +144,7 @@ sub get_connection {
         }
     );
 }
+
 
 package DataSource::DB::DBI;
 

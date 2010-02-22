@@ -113,4 +113,20 @@ sub _get_profile_value {
 	}
 }
 
+sub _get_invisalign_quotes_ids {
+	my ($self, $case_number) = @_;
+
+	my $inv_client_ids = $self->_get_invisalign_client_ids();
+
+	if (@$inv_client_ids) {
+		return join(
+        	", ",
+        	map { $self->{'dbh'}->quote($_) } @$inv_client_ids
+		);
+	}
+	else {
+		return "";
+	}
+}
+
 1;

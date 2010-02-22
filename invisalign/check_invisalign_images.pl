@@ -15,6 +15,7 @@ use DataSource::DB;
 my @clients = @ARGV;
 if (@clients) {
 	my $data_access = DataSource::DB->new();
+	$data_access->set_read_only(1);
 	my $start_time = time();
 #    my $result_file = '_si_patients_without_images.csv';
 #    printf "writing result to [%s]\n", $result_file;
@@ -37,6 +38,9 @@ if (@clients) {
 #		$output->write_data($data);
 	}
 	my $work_time = time() - $start_time;
+	my $fn = "_delete_missing_invisalign_images.sql";
+	printf "write delete commands to [$fn]\n";
+	$data_access->save_sql_commands_to_file($fn);
 	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
 }
 else {
@@ -82,6 +86,8 @@ sub find_broken_images {
 		        	$total,
 		        	$full_filename,
 		        );
+		        $client_data->delete_invisalign_patient($inv_patient->{'case_number'});
+		        $client_data->delete_invisalign_processing_patient($inv_patient->{'case_number'});
 		        #$invalid_patients{ $r->{'PatId'} } ++;
 		    }
 		}

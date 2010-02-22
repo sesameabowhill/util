@@ -206,9 +206,9 @@ sub _get_invisalign_client_ids {
 sub get_invisalign_patients_by_name {
 	my ($self, $fname, $lname) = @_;
 
-	my $inv_client_ids = $self->_get_invisalign_client_ids();
+	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
 
-	if (@$inv_client_ids) {
+	if ($inv_client_ids) {
 		return $self->_search_with_fields_by_name(
 	    	$self->_get_invisalign_patient_columns(),
 	    	'fname',
@@ -216,10 +216,7 @@ sub get_invisalign_patients_by_name {
 	    	'invisalign_patient',
 	    	$fname,
 	    	$lname,
-	    	"invisalign_client_id IN (".join(
-	        	", ",
-	        	map { $self->{'dbh'}->quote($_) } @$inv_client_ids
-	        ).")",
+	    	"invisalign_client_id IN (".$inv_client_ids.")",
 	    );
 	}
 	else {
@@ -230,15 +227,12 @@ sub get_invisalign_patients_by_name {
 sub get_all_invisalign_patients {
 	my ($self) = @_;
 
-	my $inv_client_ids = $self->_get_invisalign_client_ids();
+	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
 
-	if (@$inv_client_ids) {
+	if ($inv_client_ids) {
 		return $self->{'dbh'}->selectall_arrayref(
 	        "SELECT ".$self->_get_invisalign_patient_columns()." FROM invisalign_patient
-	        WHERE invisalign_client_id IN (".join(
-	        	", ",
-	        	map { $self->{'dbh'}->quote($_) } @$inv_client_ids
-	        ).")",
+	        WHERE invisalign_client_id IN (".$inv_client_ids.")",
 			{ 'Slice' => {} },
 	    );
 	}
@@ -422,6 +416,38 @@ SQL
 		},
 	);
 	return $self->{'dbh'}->{'mysql_insertid'};
+}
+
+sub delete_invisalign_patient {
+	my ($self, $case_number) = @_;
+
+	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
+
+	if ($inv_client_ids) {
+		my $sql = "DELETE FROM invisalign_patient WHERE invisalign_client_id IN (" .
+			$inv_client_ids . ") AND case_num=" . $self->{'dbh'}->quote($case_number);
+
+		$self->{'data_source'}->add_statement($sql);
+		unless ($self->{'data_source'}->is_read_only()) {
+			$self->{'dbh'}->do($sql);
+		}
+	}
+}
+
+sub delete_invisalign_processing_patient {
+	my ($self, $case_number) = @_;
+
+	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
+
+	if ($inv_client_ids) {
+		my $sql = "DELETE FROM invisalign_case_process_patient WHERE invisalign_client_id IN (" .
+			$inv_client_ids . ") AND case_number=" . $self->{'dbh'}->quote($case_number);
+
+		$self->{'data_source'}->add_statement($sql);
+		unless ($self->{'data_source'}->is_read_only()) {
+			$self->{'dbh'}->do($sql);
+		}
+	}
 }
 
 1;
