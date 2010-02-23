@@ -2,6 +2,7 @@
 <head>
 <script type="text/javascript" src="lib/data_graph.js"></script> 
 <script type="text/javascript" src="lib/date_utils.js"></script> 
+<script type="text/javascript" src="lib/client_stack.js"></script> 
 <script>
 	var client_list;
 	var last_graph;
@@ -23,7 +24,8 @@
 					"data_url": get_url("upload_queue_5"),
 					"refresh": get_refresh_interval("upload_queue"),
 					"name": "Sesame5 upload processing queue",
-					"graph": new DataGraph(60, 120)
+					"graph": new DataGraph(60, 120),
+					"client_stack": new ClientStack(20)
 				};
 			}
 			else {
@@ -33,7 +35,8 @@
 					"page_url": get_url("upload_queue"),
 					"refresh": get_refresh_interval("upload_queue"),
 					"name": "Sesame4 upload queue",
-					"graph": new DataGraph(60, 120)
+					"graph": new DataGraph(60, 120),
+					"client_stack": new ClientStack(20)
 				};
 			}
 		}
@@ -186,9 +189,15 @@
 			  	page_titles.push("max processing time: " + secondsToString(max_wait_time));
 		  	}
 		}
-	  	chrome.browserAction.setTitle({"title": page_titles.join("\n")});
 	  	
+  		current_graph.client_stack.add_processing_clients(getCurrentSeconds(), resp);
 	  	current_graph.graph.add_point(getCurrentSeconds(), total_clients_count);
+
+		var average_processing_time = current_graph.client_stack.get_average_processing_time();
+		if (null !== average_processing_time) {
+			page_titles.push("average processing time: " + secondsToString(average_processing_time));
+		}
+	  	chrome.browserAction.setTitle({"title": page_titles.join("\n")});
   	}
 
   	function get_badge_color_by_queue_size(queue_size) {

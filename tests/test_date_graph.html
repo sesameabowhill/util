@@ -6,6 +6,7 @@
     <script type="text/javascript" src="../../jsunit/app/jsUnitCore.js"></script>
 
     <script type="text/javascript" src="../lib/data_graph.js"></script>
+    <script type="text/javascript" src="../lib/client_stack.js"></script>
     <script type="text/javascript" src="../lib/date_utils.js"></script>
     <script type="text/javascript">
 
@@ -88,6 +89,85 @@
         function testGetCurrentSeconds() {
         	assert(getCurrentSeconds()>0);
         	//console.log(getCurrentSeconds());
+        }
+        
+        function testClientStack() {
+        	{
+        		var client_stack = new ClientStack(10);
+        		client_stack.add_processing_clients(
+        			10,
+        			{
+        				'o22': { 'is_active': 1 },
+        				'o45': { 'is_active': 0 }
+        			}
+        		);
+        		client_stack.add_processing_clients(
+        			20,
+        			{
+        				'o22': { 'is_active': 1 },
+        				'o45': { 'is_active': 1 }
+        			}
+        		);
+        		client_stack.add_processing_clients(
+        			30,
+        			{
+        			}
+        		);
+	        	assertEquals(
+	        		"client_stack: calculate processed list", 
+	        		"10,20", 
+	        		client_stack.get_all_processing_time_time().join(',')
+	        	);
+        	}
+        	{
+        		var client_stack = new ClientStack(10);
+        		client_stack.add_processing_clients(
+        			10,
+        			{
+        				'o22': { 'is_active': 1 },
+        				'o45': { 'is_active': 0 }
+        			}
+        		);
+        		client_stack.add_processing_clients(
+        			20,
+        			{
+        				'o22': { 'is_active': 0 },
+        				'o45': { 'is_active': 1 }
+        			}
+        		);
+	        	assertEquals(
+	        		"client_stack: mark processed client", 
+	        		"10", 
+	        		client_stack.get_all_processing_time_time().join(',')
+	        	);
+        	}
+        	{
+        		var client_stack = new ClientStack(1);
+        		client_stack.add_processing_clients(
+        			10,
+        			{
+        				'o22': { 'is_active': 1 },
+        				'o45': { 'is_active': 0 }
+        			}
+        		);
+        		client_stack.add_processing_clients(
+        			20,
+        			{
+        				'o22': { 'is_active': 0 },
+        				'o45': { 'is_active': 1 }
+        			}
+        		);
+        		client_stack.add_processing_clients(
+        			40,
+        			{
+        			}
+        		);
+	        	assertEquals(
+	        		"client_stack: limit number of processed clients", 
+	        		"20", 
+	        		client_stack.get_all_processing_time_time().join(',')
+	        	);
+        	}
         }
 
     </script>
