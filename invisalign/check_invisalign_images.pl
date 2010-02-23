@@ -58,6 +58,7 @@ sub find_broken_images {
 		my $total = @$invisaling_patients;
 		my $missing = 0;
 #		my %invalid_patients;
+		my @correct_case_numbers;
 		for my $inv_patient (@$invisaling_patients) {
 			my $full_filename = $client_data->file_path_for_invisalign_comment(
 		    	$inv_patient->{'invisalign_client_id'},
@@ -66,15 +67,16 @@ sub find_broken_images {
 
 		    $counter++;
 		    if (-f $full_filename) {
-		        #unless ($counter % 5000) {
-		        printf(
-		        	"%s: %d/%d: [%s] - OK\n",
-		        	$client_data->get_username(),
-		        	$counter,
-		        	$total,
-		        	$full_filename,
-		        );
-		        #}
+		        unless ($counter % 100) {
+			        printf(
+			        	"%s: %d/%d: [%s] - OK\n",
+			        	$client_data->get_username(),
+			        	$counter,
+			        	$total,
+			        	$full_filename,
+			        );
+		        }
+		        push(@correct_case_numbers, $inv_patient->{'case_number'});
 		    } else {
 		    	$missing++;
 		        printf(
@@ -89,7 +91,7 @@ sub find_broken_images {
 		        #$invalid_patients{ $r->{'PatId'} } ++;
 		    }
 		}
-
+		$client_data->delete_invisalign_processing_patient_not_in_list(\@correct_case_numbers);
 		printf(
 			"client [%s]: %d of %d images are missing\n",
 			$client_data->get_username(),
@@ -98,22 +100,7 @@ sub find_broken_images {
 		);
 
 
-		my @data;
-#	    for my $pid (keys %invalid_patients) {
-#	        my $patient = $client_data->get_si_patient_by_id($pid);
-#	        push(
-#	        	@data,
-#	        	{
-#		    		'client'   => $client_data->get_username(),
-#		    		'fname'    => $patient->{'FName'},
-#		    		'lname'    => $patient->{'LName'},
-#		    		'birthday' => $patient->{'BDate'},
-#		            'pid'      => $pid,
-#		            'broken img count' => $invalid_patients{$pid},
-#	        	}
-#	        );
-#	    }
-		return \@data;
+		return [];
 	}
 	else {
 		printf "client [%s]: no invisalign patients\n", $client_data->get_username();

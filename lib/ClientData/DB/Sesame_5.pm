@@ -452,6 +452,23 @@ sub delete_invisalign_processing_patient {
 	}
 }
 
+sub delete_invisalign_processing_patient_not_in_list {
+	my ($self, $case_numbers) = @_;
+
+	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
+
+	if ($inv_client_ids && @$case_numbers) {
+		my @list = map {$self->{'dbh'}->quote($_)} @$case_numbers;
+		my $sql = "DELETE FROM invisalign_case_process_patient WHERE invisalign_client_id IN (" .
+			$inv_client_ids . ") AND case_number NOT IN (" . join(', ', @list) . ")";
+
+		$self->{'data_source'}->add_statement($sql);
+		unless ($self->{'data_source'}->is_read_only()) {
+			$self->{'dbh'}->do($sql);
+		}
+	}
+}
+
 sub file_path_for_si_image {
 	my ($self, $file_name) = @_;
 
