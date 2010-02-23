@@ -5,7 +5,7 @@ chrome.extension.sendRequest({"action": "get_clients"}, function(response) {
 		names.push(username);
 	}
 
-	var replace_re = new RegExp('\\b(' + names.join('|') + ')\\b', 'g');
+	var replace_re = new RegExp('\\b(' + names.join('|') + ')\\b(?!<sup>)', 'g');
 
 	var issue_title_elements = document.getElementsByTagName("h3");
 	var header_element = issue_title_elements[0];
