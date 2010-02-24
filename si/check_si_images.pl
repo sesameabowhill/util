@@ -9,7 +9,7 @@ use lib '../lib';
 use CSVWriter;
 use DataSource::DB;
 
-
+$| = 1;
 #/home/sites/site2/web/image_systems/jyavari/si/images
 
 my @clients = @ARGV;
