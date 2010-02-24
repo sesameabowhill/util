@@ -63,7 +63,7 @@ sub match_invisalign_patients {
 			else {
 				$matched_patients{ $candidate->{'case_number'} }++;
 				printf(
-					"MATCH [%s %s]: to sesame [%s %s]\n",
+					"LINK [%s %s]: to sesame [%s %s]\n",
 					$candidate->{'fname'},
 					$candidate->{'lname'},
 					$sesame_patient->{'FName'},
@@ -84,7 +84,7 @@ sub match_invisalign_patients {
 #	}
 	printf(
 		"[%d] of [%d] patients matched\n",
-		scalar keys %matched_patients,
-		scalar @unmatched_invisalign_patients,
+		scalar(keys %matched_patients),
+		scalar(keys %matched_patients) + scalar(@unmatched_invisalign_patients),
 	);
 }

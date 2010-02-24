@@ -107,6 +107,17 @@ sub get_patients_by_name {
     );
 }
 
+sub get_patients_by_name_and_birth {
+    my ($self, $fname, $lname, $bdate) = @_;
+
+    return $self->_get_visitors_by_name(
+    	'id AS PId',
+    	$fname,
+    	$lname,
+    	'birthday='.$self->{'dbh'}->quote($bdate).' AND type="patient"',
+    );
+}
+
 sub get_patients_by_name_and_ids {
     my ($self, $fname, $lname, $ids) = @_;
 
@@ -295,11 +306,52 @@ sub get_all_si_images {
     );
 }
 
+sub get_all_si_patients {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT PatId, FName, LName, BDate, Link FROM si_patient WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+    );
+}
+
+sub link_si_patient {
+	my ($self, $sesame_patient_id, $si_patient_id) = @_;
+
+	my $insert_sql = "INSERT INTO si_patient_link (patient_id, si_patient_id, client_id) " .
+		"VALUES (" . $self->{'dbh'}->quote($sesame_patient_id) .
+		", " . $self->{'dbh'}->quote($si_patient_id) .
+		", " . $self->{'dbh'}->quote($self->{'client_id'}) . ")";
+	my $update_sql = "UPDATE si_patient SET Link=1 WHERE PatId=" .
+		$self->{'dbh'}->quote($si_patient_id) . " AND client_id=" .
+		$self->{'dbh'}->quote($self->{'client_id'}) . " LIMIT 1";
+
+	$self->{'data_source'}->add_statement($insert_sql);
+	$self->{'data_source'}->add_statement($update_sql);
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($insert_sql);
+		$self->{'dbh'}->do($update_sql);
+	}
+
+}
+
+sub get_patients_linked_to_si_patient {
+	my ($self, $pid) = @_;
+
+	return $self->{'dbh'}->selectcol_arrayref(
+        "SELECT patient_id FROM si_patient_link WHERE client_id=? AND si_patient_id=?",
+		undef,
+		$self->{'client_id'},
+		$pid,
+    );
+}
+
 sub get_si_patient_by_id {
 	my ($self, $pat_id) = @_;
 
 	return $self->{'dbh'}->selectall_arrayref(
-        "SELECT FName, LName, BDate FROM si_patient WHERE PatId=? AND client_id=?",
+        "SELECT FName, LName, BDate, Link FROM si_patient WHERE PatId=? AND client_id=?",
 		{ 'Slice' => {} },
 		$pat_id,
 		$self->{'client_id'},
