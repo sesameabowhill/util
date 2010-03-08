@@ -14,6 +14,7 @@ sub new {
     my $self = {
     	'read_only' => 0,
         'statements' => [],
+        'categories' => {},
         'affected_clients' => {},
     };
 
@@ -126,6 +127,18 @@ sub add_statement {
         @{ $self->{'statements'} },
         $sql,
 	);
+}
+
+sub add_category {
+	my ($self, $category) = @_;
+
+	$self->{'categories'}{$category} ++;
+}
+
+sub get_categories_stat {
+	my ($self) = @_;
+
+	return $self->{'categories'};
 }
 
 sub get_connection {

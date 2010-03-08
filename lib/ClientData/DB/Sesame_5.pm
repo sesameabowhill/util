@@ -11,15 +11,37 @@ use base qw( ClientData::DB );
 use Sesame::Unified::Client;
 
 sub new {
-	my ($class, $data_source, $db_name, $dbh, $unified_client_ref) = @_;
+	my ($class, $data_source, $db_name, $dbh) = @_;
 
-	unless (defined $unified_client_ref) {
-		$unified_client_ref = Sesame::Unified::Client->new('db_name', $db_name);
-	}
-	my $self = $class->SUPER::new($data_source, $db_name, $unified_client_ref);
-	$self->{'client_id'} = $self->{'client_ref'}->get_id();
+	return $class->_new_by($data_source, 'cl_username', $db_name, $dbh);
+}
+
+sub new_by_id {
+	my ($class, $data_source, $id, $dbh) = @_;
+
+	return $class->_new_by($data_source, 'id', $id, $dbh);
+}
+
+sub _new_by {
+	my ($class, $data_source, $column_name, $db_name, $dbh) = @_;
+
+	my $self = $class->SUPER::new($data_source, $db_name);
+	$self->{'client'} = _get_client_params($dbh, $column_name, $db_name);
+	$self->{'client_id'} = $self->get_id();
 	$self->{'dbh'} = $dbh;
 	return $self;
+}
+
+sub _get_client_params {
+	my($dbh, $columns_name, $db_name) = @_;
+
+	$dbh->selectrow_hashref(<<SQL, undef, $db_name);
+SELECT
+	id, cl_pathw AS web_folder, cl_status AS status,
+	cl_timezone AS timezone, cl_username AS username, cl_pathw AS web_folder
+FROM client
+WHERE $columns_name=?
+SQL
 }
 
 sub get_db_name {
@@ -31,19 +53,19 @@ sub get_db_name {
 sub get_username {
 	my ($self) = @_;
 
-	return $self->{'client_ref'}->get_username();
+	return $self->{'client'}{'username'};
 }
 
 sub is_active {
 	my ($self) = @_;
 
-	return $self->{'client_ref'}->is_active();
+	return $self->{'client'}{'status'} == 1;
 }
 
 sub get_id {
 	my ($self) = @_;
 
-	return $self->{'client_ref'}->get_id();
+	return $self->{'client'}{'id'};
 }
 
 sub get_full_type {
@@ -257,12 +279,13 @@ sub get_all_invisalign_patients {
 sub set_sesame_patient_for_invisalign_patient {
 	my ($self, $case_number, $sesame_patient_id) = @_;
 
-	$self->{'dbh'}->do(
-		"UPDATE invisalign_patient SET patient_id=? WHERE case_num=?",
-		undef,
-		$sesame_patient_id,
-		$case_number,
-	);
+	my $update_sql = "UPDATE invisalign_patient SET patient_id=" . $self->{'dbh'}->quote($sesame_patient_id) .
+		" WHERE case_num=" . $self->{'dbh'}->quote($case_number);
+
+	$self->{'data_source'}->add_statement($update_sql);
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($update_sql);
+	}
 }
 
 sub _get_invisalign_patient_columns {
@@ -504,15 +527,13 @@ sub delete_invisalign_processing_patient {
 	}
 }
 
-sub delete_invisalign_processing_patient_not_in_list {
-	my ($self, $case_numbers) = @_;
+sub set_invisalign_processing_patient_processed {
+	my ($self, $case_number) = @_;
 
 	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
-
-	if ($inv_client_ids && @$case_numbers) {
-		my @list = map {$self->{'dbh'}->quote($_)} @$case_numbers;
-		my $sql = "DELETE FROM invisalign_case_process_patient WHERE invisalign_client_id IN (" .
-			$inv_client_ids . ") AND case_number NOT IN (" . join(', ', @list) . ")";
+	if ($inv_client_ids) {
+		my $sql = "UPDATE invisalign_case_process_patient SET processed=1 WHERE invisalign_client_id IN (" .
+			$inv_client_ids . ") AND case_number=" . $self->{'dbh'}->quote($case_number);
 
 		$self->{'data_source'}->add_statement($sql);
 		unless ($self->{'data_source'}->is_read_only()) {
@@ -520,6 +541,70 @@ sub delete_invisalign_processing_patient_not_in_list {
 		}
 	}
 }
+
+sub is_invisalign_patient_processed {
+	my ($self, $case_number) = @_;
+
+	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
+	if ($inv_client_ids) {
+		return scalar $self->{'dbh'}->selectrow_array(
+			"SELECT count(*) FROM invisalign_case_process_patient WHERE processed=1 AND invisalign_client_id IN (" .
+				$inv_client_ids . ") AND case_number=" . $self->{'dbh'}->quote($case_number)
+		);
+	}
+	else {
+		return undef;
+	}
+}
+
+sub get_invisalign_patient {
+	my ($self, $case_number) = @_;
+
+	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
+	if ($inv_client_ids) {
+		return $self->{'dbh'}->selectrow_hashref(
+			"SELECT " . $self->_get_invisalign_patient_columns() .
+				" FROM invisalign_patient WHERE invisalign_client_id IN (" . $inv_client_ids .
+				") AND case_num=" . $self->{'dbh'}->quote($case_number)
+		);
+	}
+	else {
+		return undef;
+	}
+}
+
+sub set_invisalign_client_id_for_invisalign_patient {
+	my ($self, $case_number, $invisalign_client_id) = @_;
+
+	my $update_icp_sql = "UPDATE invisalign_case_process_patient SET invisalign_client_id=" . $self->{'dbh'}->quote($invisalign_client_id) .
+		" WHERE case_number=" . $self->{'dbh'}->quote($case_number);
+	my $update_sql = "UPDATE invisalign_patient SET invisalign_client_id=" . $self->{'dbh'}->quote($invisalign_client_id) .
+		" WHERE case_num=" . $self->{'dbh'}->quote($case_number);
+
+	$self->{'data_source'}->add_statement($update_icp_sql);
+	$self->{'data_source'}->add_statement($update_sql);
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($update_icp_sql);
+		$self->{'dbh'}->do($update_sql);
+	}
+}
+
+#sub delete_invisalign_processing_patient_not_in_list {
+#	my ($self, $case_numbers) = @_;
+#
+#	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
+#
+#	if ($inv_client_ids && @$case_numbers) {
+#		my @list = map {$self->{'dbh'}->quote($_)} @$case_numbers;
+#		my $sql = "DELETE FROM invisalign_case_process_patient WHERE invisalign_client_id IN (" .
+#			$inv_client_ids . ") AND case_number NOT IN (" . join(', ', @list) . ")";
+#
+#		$self->{'data_source'}->add_statement($sql);
+#		unless ($self->{'data_source'}->is_read_only()) {
+#			$self->{'dbh'}->do($sql);
+#		}
+#	}
+#}
 
 sub file_path_for_si_image {
 	my ($self, $file_name) = @_;

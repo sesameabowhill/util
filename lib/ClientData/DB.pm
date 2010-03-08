@@ -13,12 +13,11 @@ my %PROFILE_COLUMN_TYPE_ID = (
 );
 
 sub new {
-	my ($class, $data_source, $db_name, $unified_client_ref) = @_;
+	my ($class, $data_source, $db_name) = @_;
 
 	my $self = bless {
 		'data_source' => $data_source,
 		'approx_search' => 0,
-		'client_ref' => $unified_client_ref,
 		'cached_data' => {},
 	}, $class;
 
@@ -91,6 +90,7 @@ sub _search_with_fields_by_name {
 sub _string_to_rlike {
 	my ($self, $str) = @_;
 
+	$str =~ s/[\(\)*?]/ /g;
 	$str =~ s/\b/ /g;
 	$str =~ s/\s+/.*/g;
 	$str =~ s/\b(?=\w)/[[:<:]]/g;
