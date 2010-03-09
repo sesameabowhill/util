@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="../../jsunit/css/jsUnitStyle.css">
     <script type="text/javascript" src="../../jsunit/app/jsUnitCore.js"></script>
 
+    <script type="text/javascript" src="../lib/graph_utils.js"></script>
     <script type="text/javascript" src="../lib/data_graph.js"></script>
     <script type="text/javascript" src="../lib/client_stack.js"></script>
     <script type="text/javascript" src="../lib/date_utils.js"></script>
@@ -80,10 +81,9 @@
         }
 
         function testGoogleChartEncode() {
-        	var data_graph = new DataGraph()
-        	assertEquals("encode 0", "AA", data_graph.google_chart_encode(0) );
-        	assertEquals("encode 0", "BA", data_graph.google_chart_encode(64) );
-        	assertEquals("encode 0", "-g", data_graph.google_chart_encode(4000) );
+        	assertEquals("encode 0", "AA", GraphUtils.google_chart_encode(0) );
+        	assertEquals("encode 0", "BA", GraphUtils.google_chart_encode(64) );
+        	assertEquals("encode 0", "-g", GraphUtils.google_chart_encode(4000) );
         }
         
         function testGetCurrentSeconds() {

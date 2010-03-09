@@ -11,7 +11,6 @@
 <script type="text/javascript">
 	function update_graph() {
 		var background = chrome.extension.getBackgroundPage();
-		var img_upload_queue = document.getElementById("img_upload_queue");
 		var current_graph = background.get_current_graph_params();
 		var chart = current_graph.graph.get_chart_settings();
 		var labels = [
@@ -21,11 +20,12 @@
 			'-' + background.secondsToString(Math.floor(chart.time_interval*0.25)),
 			''
 		];
+		var img_upload_queue = document.getElementById("img_upload_queue");
 		img_upload_queue.src = 
 			"http://chart.apis.google.com/chart?chs=300x200&cht=lc&chxt=r,x&chxl=1:|" + labels.join('|') +
 			"&chxr=0,0," + chart.max + 
 			"&chd=e:" + chart.data;
-		//print(img_upload_queue.src);
+		//http://chart.apis.google.com/chart?cht=bvg&chs=250x150&chd=e:Monkey.-&chxt=x,y&chxl=0:|3m31s|2m30s&chbh=30
 	}
 	
 	function init_form() {
@@ -65,7 +65,7 @@
 	}
 	
 	function print(msg) {
-		//document.getElementById("errors").innerHTML += msg+"<br/>"
+		document.getElementById("errors").innerHTML += msg+"<br/>"
 	}
 </script>
 </head>
