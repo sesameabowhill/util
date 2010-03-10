@@ -307,7 +307,7 @@ sub get_invisalign_ids_with_image {
 	my @good_ids;
 	for my $id (@$invisalign_ids) {
 		my $file = $client_data->file_path_for_invisalign_comment($id, $case_number);
-		if (1 || -f $file) {
+		if (-f $file) {
 			push(@good_ids, $id);
 		}
 	}
