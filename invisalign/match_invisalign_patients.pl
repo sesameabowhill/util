@@ -15,12 +15,16 @@ use DataSource::DB;
 	my (@clients) = @ARGV;
 	if (@clients) {
 		my $data_source = DataSource::DB->new();
+		$data_source->set_read_only(1);
 	    my $start_time = time();
 	    for my $client_identity (@clients) {
 			my $client_data = $data_source->get_client_data_by_db($client_identity);
 			printf "database source: client [%s]\n", $client_identity;
 	    	match_invisalign_patients($client_data);
 	    }
+		my $fn = "_match_invisalign_patients.sql";
+		printf "write match commands to [$fn]\n";
+		$data_source->save_sql_commands_to_file($fn);
 	    my $work_time = time() - $start_time;
 	    printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
 	}
