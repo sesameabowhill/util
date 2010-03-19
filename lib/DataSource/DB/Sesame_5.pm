@@ -4,6 +4,9 @@ package DataSource::DB::Sesame_5;
 use strict;
 use warnings;
 
+use File::Spec;
+use IPC::Run3;
+
 #use Sesame::Unified::Client;
 #use Sesame::Unified::ClientProperties;
 
@@ -65,6 +68,76 @@ sub get_client_id_by_invisalign_id {
 	return scalar $self->{'dbh'}->selectrow_array(<<'SQL', undef, $invisalign_id);
 SELECT client_id FROM invisalign_client WHERE id=?
 SQL
+}
+
+sub get_all_clincheck_files {
+	my ($self) = @_;
+
+	my @cmd = (
+		'find',
+		File::Spec->join(
+	    	$ENV{'SESAME_COMMON'},
+	    	'invisalign-cases',
+	    ),
+		'-type', 'f',
+		'-name', '*.txt',
+	);
+	my ($output, $err);
+	run3(\@cmd, \undef, \$output, \$err);
+	my @files;
+	for my $fn (split m/\r?\n/, $output) {
+		my @file_mtime = (localtime((stat($fn))[9]))[5, 4, 3];
+		$file_mtime[0] += 1900;
+		$file_mtime[1] ++;
+		my ($id, $file) = (File::Spec->splitdir($fn))[-2, -1];
+		my $params = _read_clinchecks_settings($fn) || {};
+		($params->{'case_number'} = $file) =~ s/\.txt$//;
+		($params->{'file_mask'}   = $fn)   =~ s/\.txt$/*/;
+		$params->{'file'} = $fn;
+		$params->{'file_mtime'} = sprintf('%04d-%02d-%02d', @file_mtime);
+		push(@files, $params);
+	}
+	return \@files;
+}
+
+sub _read_clinchecks_settings {
+	my ($file) = @_;
+
+	local $/;
+	open(my $f, "<", $file) or die "can't read [$file]: $!";
+	my $data = <$f>;
+	close($f);
+
+	if ($data =~ m/---PTI Russia comments---(.*)---End of comments---/si) {
+		my ($params_str) = ($1);
+		my %params;
+		for my $line (split m/\r?\n/, $params_str) {
+			my ($key, $value) = split(m/:/, $line, 2);
+			if (defined $key) {
+				$params{$key} = $value;
+			}
+		}
+		my @dt = split(m'/', $params{'Data'}, 3);
+		$dt[2] += 2000;
+		return {
+			'date' => sprintf('%04d-%02d-%02d', @dt[2, 1, 0]),
+			'stages' => $params{'Stages #'},
+			#'case_number' => $params{'Patient Case Number'},
+		};
+	}
+	else {
+		return undef;
+	}
+
+#Patient First Name:Kelly
+#Patient Last Name:Simmermaker
+#Patient Case Number:1167917
+#Patient ADF File Name:Kelly Simmermaker 07_30_09__13_05.adf
+#Doctor ID:148
+#Doctor login:rgakhal3
+#Data:30/07/09
+#Stages #:16
+
 }
 
 1;

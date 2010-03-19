@@ -314,7 +314,9 @@ VALUES
 SQL
 	$sql =~ s/\r?\n/ /g;
 	$sql =~ s/\s+/ /g;
-	$self->{'dbh'}->do($sql);
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($sql);
+	}
 	$self->{'data_source'}->add_statement($sql);
 }
 
@@ -542,20 +544,20 @@ sub set_invisalign_processing_patient_processed {
 	}
 }
 
-sub is_invisalign_patient_processed {
-	my ($self, $case_number) = @_;
-
-	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
-	if ($inv_client_ids) {
-		return scalar $self->{'dbh'}->selectrow_array(
-			"SELECT count(*) FROM invisalign_case_process_patient WHERE processed=1 AND invisalign_client_id IN (" .
-				$inv_client_ids . ") AND case_number=" . $self->{'dbh'}->quote($case_number)
-		);
-	}
-	else {
-		return undef;
-	}
-}
+#sub is_invisalign_patient_processed {
+#	my ($self, $case_number) = @_;
+#
+#	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
+#	if ($inv_client_ids) {
+#		return scalar $self->{'dbh'}->selectrow_array(
+#			"SELECT count(*) FROM invisalign_case_process_patient WHERE processed=1 AND invisalign_client_id IN (" .
+#				$inv_client_ids . ") AND case_number=" . $self->{'dbh'}->quote($case_number)
+#		);
+#	}
+#	else {
+#		return undef;
+#	}
+#}
 
 sub get_invisalign_patient {
 	my ($self, $case_number) = @_;
@@ -573,10 +575,28 @@ sub get_invisalign_patient {
 	}
 }
 
+sub get_invisalign_processing_patient {
+	my ($self, $case_number) = @_;
+
+	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
+	if ($inv_client_ids) {
+		return $self->{'dbh'}->selectrow_hashref(
+			"SELECT case_number, fname, lname, vip_patient_id, processed, store_date, post_date, adf_file, linked" .
+				" FROM invisalign_case_process_patient WHERE invisalign_client_id IN (" . $inv_client_ids .
+				") AND case_number=" . $self->{'dbh'}->quote($case_number)
+		);
+	}
+	else {
+		return undef;
+	}
+}
+
 sub set_invisalign_client_id_for_invisalign_patient {
 	my ($self, $case_number, $invisalign_client_id) = @_;
 
-	my $update_icp_sql = "UPDATE invisalign_case_process_patient SET invisalign_client_id=" . $self->{'dbh'}->quote($invisalign_client_id) .
+	my $update_icp_sql = "UPDATE invisalign_case_process_patient SET " .
+		"invisalign_client_id=" . $self->{'dbh'}->quote($invisalign_client_id) . ", " .
+		"client_id=" . $self->{'dbh'}->quote( $self->{'client_id'} ) .
 		" WHERE case_number=" . $self->{'dbh'}->quote($case_number);
 	my $update_sql = "UPDATE invisalign_patient SET invisalign_client_id=" . $self->{'dbh'}->quote($invisalign_client_id) .
 		" WHERE case_num=" . $self->{'dbh'}->quote($case_number);
@@ -589,22 +609,34 @@ sub set_invisalign_client_id_for_invisalign_patient {
 	}
 }
 
-#sub delete_invisalign_processing_patient_not_in_list {
-#	my ($self, $case_numbers) = @_;
-#
-#	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
-#
-#	if ($inv_client_ids && @$case_numbers) {
-#		my @list = map {$self->{'dbh'}->quote($_)} @$case_numbers;
-#		my $sql = "DELETE FROM invisalign_case_process_patient WHERE invisalign_client_id IN (" .
-#			$inv_client_ids . ") AND case_number NOT IN (" . join(', ', @list) . ")";
-#
-#		$self->{'data_source'}->add_statement($sql);
-#		unless ($self->{'data_source'}->is_read_only()) {
-#			$self->{'dbh'}->do($sql);
-#		}
-#	}
-#}
+sub add_invisaling_patient {
+	my ($self, $case_number, $invisalign_client_id, $params) = @_;
+
+	my @params = (
+		$case_number, $invisalign_client_id,
+		@$params{'fname', 'lname', 'post_date', 'start_date', 'transfer_date', 'retire_date', 'stages'},
+	);
+	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+INSERT INTO invisalign_patient (
+	case_num, invisalign_client_id,
+	fname, lname, post_date, start_date, transfer_date, retire_date, stages,
+	img_available, patient_id, refine, deleted
+) VALUES (
+	%s, %s,
+	%s, %s, %s, %s, %s, %s, %s,
+	'flu', NULL, 0, NULL
+)
+SQL
+	$sql =~ s/\r?\n/ /g;
+	$sql =~ s/\s+/ /g;
+
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($sql);
+	}
+	$self->{'data_source'}->add_statement($sql);
+
+}
+
 
 sub file_path_for_si_image {
 	my ($self, $file_name) = @_;
@@ -623,10 +655,18 @@ sub file_path_for_invisalign_comment {
 	my ($self, $invisalign_client_id, $case_number) = @_;
 
 	return File::Spec->join(
+    	$self->file_path_for_clinchecks($invisalign_client_id),
+    	$case_number.'.txt',
+    );
+}
+
+sub file_path_for_clinchecks {
+	my ($self, $invisalign_client_id) = @_;
+
+	return File::Spec->join(
     	$ENV{'SESAME_COMMON'},
     	'invisalign-cases',
     	$invisalign_client_id,
-    	$case_number.'.txt',
     );
 }
 
