@@ -23,7 +23,7 @@
 				last_graph = {
 					"type": localStorage["graph_type"],
 					"data_url": get_url("upload_queue_5"),
-					"refresh": get_refresh_interval("upload_queue"),
+					"refresh": get_refresh_interval("upload_queue_fast"),
 					"name": "Sesame5 upload processing queue",
 					"graph": new DataGraph(60, 120),
 					"client_stack": new ClientStack(20)
@@ -59,6 +59,7 @@
 	function get_refresh_interval(name) {
 		var intervals = {
 			'upload_queue': 15*1000,
+			'upload_queue_fast': 5*1000,
 			'client_list': 5*60*1000
 		};
 		return intervals[name];
@@ -225,7 +226,7 @@
 	//	return sesame4_upload_queue_data.get_chart_settings();
 	//}
 
-  	window.setInterval(refresh_upload_queue_size, get_refresh_interval('upload_queue'));
+  	window.setInterval(refresh_upload_queue_size, get_current_graph_params().refresh);
   	window.setInterval(refresh_client_list, get_refresh_interval('client_list'));
   	refresh_upload_queue_size();
   	refresh_client_list();
