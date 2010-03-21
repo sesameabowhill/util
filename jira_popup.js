@@ -5,7 +5,8 @@ chrome.extension.sendRequest({"action": "get_clients"}, function(response) {
 		names.push(username);
 	}
 
-	var replace_re = new RegExp('\\b(' + names.join('|') + ')\\b(?!<sup>)', 'g');
+	var replace_re = new RegExp('((?:^|>)[^<]*)\\b(' + names.join('|') + ')\\b(?!<sup>)', 'g');
+	//var replace_re = new RegExp('(.)\\b(' + names.join('|') + ')\\b(?!<sup>)', 'g');
 
 	var issue_title_elements = document.getElementsByTagName("h3");
 	var header_element = issue_title_elements[0];
@@ -20,8 +21,8 @@ chrome.extension.sendRequest({"action": "get_clients"}, function(response) {
 function replace_in_element(replace_re, clients, elem) {
 	elem.innerHTML = elem.innerHTML.replace(
 		replace_re, 
-		function (username) {
-			return '<a title="Find client [' + username +
+		function (full_matched, text, username) {
+			return text + '<a title="Find client [' + username +
 				' - ' + clients[username].type +
 				' - ' + clients[username].status +
 				'] id [' + clients[username].id + 
