@@ -2,7 +2,7 @@
 <head>
 <link rel="stylesheet" type="text/css" href="css/sesame.css" />
 <style>
-  input { width: 150px }
+  input { width: 130px }
   input, button { float: left }
 
   #input_search_param { margin-right: 10px }
@@ -22,7 +22,7 @@
 		];
 		var img_upload_queue = document.getElementById("img_upload_queue");
 		img_upload_queue.src = 
-			"http://chart.apis.google.com/chart?chs=300x200&cht=lc&chxt=r,x&chxl=1:|" + labels.join('|') +
+			"http://chart.apis.google.com/chart?chs=340x200&cht=lc&chxt=r,x&chxl=1:|" + labels.join('|') +
 			"&chxr=0,0," + chart.max + 
 			"&chd=e:" + chart.data;
 		//http://chart.apis.google.com/chart?cht=bvg&chs=250x150&chd=e:Monkey.-&chxt=x,y&chxl=0:|3m31s|2m30s&chbh=30
@@ -44,7 +44,9 @@
 			link_elem.style.display = "none";
 		}
 		update_graph();
-		
+		var input_search_param = document.getElementById("input_search_param");
+		input_search_param.focus();
+
   		window.setInterval(update_graph, current_graph.refresh);
 	}
 	
@@ -56,9 +58,11 @@
 		return false;
 	}
 	
-	function submit_form_to(url_key) {
+	function submit_form_to(url_key, find) {
 		var search_form = document.getElementById("search_form");
 		search_form.action = chrome.extension.getBackgroundPage().get_url(url_key);
+		var input_find = document.getElementById("input_find");
+		input_find.value = find;
 		if (check_form_input()) {
 			search_form.submit();
 		}
@@ -70,12 +74,14 @@
 </script>
 </head>
 <body onload="init_form()">
-    <h2>Find client</h2>
+    <h2>Find client or visitor</h2>
   	<form target="_blank" id="search_form" onsubmit="return check_form_input()">
     <p>
     <input name="search_param" id="input_search_param" />
-    <button type="button" onclick="submit_form_to('fcs_5')">client5</button>
-    <button type="button" onclick="submit_form_to('fcs_4')">client4</button>
+    <input name="find" id="input_find" type="hidden" />
+    <button type="button" onclick="submit_form_to('fcs_5', 'client')">client5</button>
+    <button type="button" onclick="submit_form_to('fcs_5', 'visitor')">visitor5</button>
+    <button type="button" onclick="submit_form_to('fcs_4', 'client')">client4</button>
     </p>
     </form>
     <h2 id="graph_header"></h2>
