@@ -5,6 +5,8 @@ use strict;
 use warnings;
 
 use DBI;
+use File::Spec;
+use IPC::Run3;
 
 use Sesame::Config;
 
@@ -62,7 +64,7 @@ sub new {
     	require DataSource::DB::Sesame_4;
     	$class = 'DataSource::DB::Sesame_4';
     }
-    $self->{'dbh'} = get_connection($self, $self->{'db'}{'database'});
+    $self->{'dbh'} = _get_connection($self, $self->{'db'}{'database'});
 
     return bless $self, $class;
 }
@@ -141,7 +143,7 @@ sub get_categories_stat {
 	return $self->{'categories'};
 }
 
-sub get_connection {
+sub _get_connection {
     my ($self, $db_name) = @_;
 
     $db_name ||= '';
@@ -158,6 +160,90 @@ sub get_connection {
     );
 }
 
+#sub get_single_db_connection {
+#    my ($self, $db_name) = @_;
+#
+#    $db_name ||= '';
+#
+#	if (exists $self->{'last_connection'}) {
+#		if ($self->{'last_db_name'} ne $db_name) {
+#			die "can't switch DB name from [".$self->{'last_db_name'}."] to [$db_name]";
+#		}
+#	}
+#	else {
+#		$self->{'last_connection'} = $self->get_connection($db_name);
+#		$self->{'last_db_name'} = $db_name;
+#	}
+#	return $self->{'last_connection'} ;
+#}
+
+sub _get_all_clincheck_files {
+	my ($self, $folder) = @_;
+
+	my @cmd = (
+		'find',
+		'-L',
+		$folder,
+		'-type', 'f',
+		'-name', '*.txt',
+	);
+	my ($output, $err);
+	run3(\@cmd, \undef, \$output, \$err);
+	my @files;
+	for my $fn (split m/\r?\n/, $output) {
+		my @file_mtime = (localtime((stat($fn))[9]))[5, 4, 3];
+		$file_mtime[0] += 1900;
+		$file_mtime[1] ++;
+		my ($id, $file) = (File::Spec->splitdir($fn))[-2, -1];
+		my $params = _read_clinchecks_settings($fn) || {};
+		($params->{'case_number'} = $file) =~ s/\.txt$//;
+		($params->{'file_mask'}   = $fn)   =~ s/\.txt$/*/;
+		$params->{'file'} = $fn;
+		$params->{'file_mtime'} = sprintf('%04d-%02d-%02d', @file_mtime);
+		push(@files, $params);
+	}
+	return \@files;
+}
+
+sub _read_clinchecks_settings {
+	my ($file) = @_;
+
+	local $/;
+	open(my $f, "<", $file) or die "can't read [$file]: $!";
+	my $data = <$f>;
+	close($f);
+
+	if ($data =~ m/---PTI Russia comments---(.*)---End of comments---/si) {
+		my ($params_str) = ($1);
+		my %params;
+		for my $line (split m/\r?\n/, $params_str) {
+			my ($key, $value) = split(m/:/, $line, 2);
+			if (defined $key) {
+				$params{$key} = $value;
+			}
+		}
+		my @dt = split(m'/', $params{'Data'}, 3);
+		$dt[2] += 2000;
+		return {
+			'date' => sprintf('%04d-%02d-%02d', @dt[2, 1, 0]),
+			'stages' => $params{'Stages #'},
+			#'case_number' => $params{'Patient Case Number'},
+		};
+	}
+	else {
+		return undef;
+	}
+
+#Patient First Name:Kelly
+#Patient Last Name:Simmermaker
+#Patient Case Number:1167917
+#Patient ADF File Name:Kelly Simmermaker 07_30_09__13_05.adf
+#Doctor ID:148
+#Doctor login:rgakhal3
+#Data:30/07/09
+#Stages #:16
+
+}
 
 package DataSource::DB::DBI;
 

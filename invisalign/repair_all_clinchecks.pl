@@ -19,8 +19,14 @@ use Fix::RepairClincheck;
 
 	my $case_numbers = $data_access->get_all_case_numbers();
 	@$case_numbers = map { {'case_number' => $_} } sort {$a <=> $b} @$case_numbers;
+	my $do_file_check = 1;
+	if (defined $ARGV[0] && $ARGV[0] eq '--skip-file-check') {
+		print "skip file check\n";
+		$do_file_check = 0;
+	}
+	my $fixer = Fix::RepairClincheck->new($do_file_check);
 	for my $case_number (@$case_numbers) {
-		Fix::RepairClincheck->repair_case_number($data_access, $case_number);
+		$fixer->repair_case_number($data_access, $case_number);
 	}
 
 	my $work_time = time() - $start_time;

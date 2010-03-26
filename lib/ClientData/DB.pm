@@ -24,14 +24,11 @@ sub new {
 	return $self;
 }
 
-
-
 sub set_approx_search {
 	my ($self, $level) = @_;
 
 	$self->{'approx_search'} = $level;
 }
-
 
 sub get_cached_data {
 	my ($self, $key, $generate_cache_sub) = @_;
@@ -127,6 +124,15 @@ sub _get_invisalign_quotes_ids {
 	else {
 		return "";
 	}
+}
+
+sub file_path_for_invisalign_comment {
+	my ($self, $invisalign_client_id, $case_number) = @_;
+
+	return File::Spec->join(
+    	$self->file_path_for_clinchecks($invisalign_client_id),
+    	$case_number.'.txt',
+    );
 }
 
 1;

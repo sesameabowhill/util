@@ -544,21 +544,6 @@ sub set_invisalign_processing_patient_processed {
 	}
 }
 
-#sub is_invisalign_patient_processed {
-#	my ($self, $case_number) = @_;
-#
-#	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
-#	if ($inv_client_ids) {
-#		return scalar $self->{'dbh'}->selectrow_array(
-#			"SELECT count(*) FROM invisalign_case_process_patient WHERE processed=1 AND invisalign_client_id IN (" .
-#				$inv_client_ids . ") AND case_number=" . $self->{'dbh'}->quote($case_number)
-#		);
-#	}
-#	else {
-#		return undef;
-#	}
-#}
-
 sub get_invisalign_patient {
 	my ($self, $case_number) = @_;
 
@@ -648,15 +633,6 @@ sub file_path_for_si_image {
     	'si',
     	'images',
     	$file_name,
-    );
-}
-
-sub file_path_for_invisalign_comment {
-	my ($self, $invisalign_client_id, $case_number) = @_;
-
-	return File::Spec->join(
-    	$self->file_path_for_clinchecks($invisalign_client_id),
-    	$case_number.'.txt',
     );
 }
 

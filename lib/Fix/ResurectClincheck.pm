@@ -4,22 +4,45 @@ package Fix::ResurectClincheck;
 use strict;
 use warnings;
 
-use IPC::Run3;
-
 use base 'Fix::RepairClincheck';
 
+sub new {
+	my $class = shift;
+
+	my $self = $class->SUPER::new(@_);
+	$self->{'commands'} = [];
+	return $self;
+}
+
+sub save_commands {
+	my ($self, $fn) = @_;
+
+	open(my $f, ">", $fn) or die "can't write [$fn]: $!";
+	print $f "## $fn\n";
+	for my $cmd (@{ $self->{'commands'} }) {
+		print $f "$cmd\n";
+	}
+	close($f);
+}
+
+sub add_command {
+	my ($self, $cmd) = @_;
+
+	push(@{ $self->{'commands'} }, $cmd);
+}
+
 sub repair_clincheck_for_single_client {
-	my ($class, $data_access, $case, $icp_client_id, $inv_client_id, $client_data) = @_;
+	my ($self, $data_access, $case, $icp_client_id, $inv_client_id, $client_data) = @_;
 
 }
 
 sub repair_clincheck_for_two_clients {
-	my ($class, $data_access, $case, $icp_client_id, $inv_client_id, $client_data_by_icp, $client_data_by_inv) = @_;
+	my ($self, $data_access, $case, $icp_client_id, $inv_client_id, $client_data_by_icp, $client_data_by_inv) = @_;
 
 }
 
 sub repair_clincheck_with_one_icp_client {
-	my ($class, $data_access, $case, $icp_client_id, $client_data) = @_;
+	my ($self, $data_access, $case, $icp_client_id, $client_data) = @_;
 
 	my $expected_file = $client_data->file_path_for_invisalign_comment(
 		$icp_client_id,
@@ -33,9 +56,10 @@ sub repair_clincheck_with_one_icp_client {
 		}
 		else {
 			$todo = " (mkdir, copy files)";
-			mkdir($to_folder) or die "can't mkdir [$to_folder]: $!";
+			$self->add_command('mkdir '.$to_folder);
+			#mkdir($to_folder) or die "can't mkdir [$to_folder]: $!";
 		}
-		run3('cp -v '.$case->{'file_mask'}.' '.$to_folder);
+		$self->add_command('cp -v '.$case->{'file_mask'}.' '.$to_folder);
 	}
 	printf(
 		"case [%s]: resurect\n",
@@ -58,12 +82,12 @@ sub repair_clincheck_with_one_icp_client {
 			'stages' => ($case->{'stages'} || 0),
 		},
 	);
-	#my $todo = $class->repair_processed_clincheck($client_data, $case->{'case_number'}, \@todo);
+	#my $todo = $self->repair_processed_clincheck($client_data, $case->{'case_number'}, \@todo);
 	$data_access->add_category("clincheck is resurected$todo");
 }
 
 sub repair_clincheck_with_one_inv_client {
-	my ($class, $data_access, $case, $inv_client_id, $client_data) = @_;
+	my ($self, $data_access, $case, $inv_client_id, $client_data) = @_;
 
 }
 

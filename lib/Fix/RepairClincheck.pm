@@ -4,27 +4,46 @@ package Fix::RepairClincheck;
 use strict;
 use warnings;
 
+sub new {
+	my ($class, $check_files) = @_;
+
+	return bless {
+		'check_files' => (defined $check_files ? $check_files : 1),
+		'clients' => {},
+	}, $class;
+}
+
 sub repair_case_number {
-	my ($class, $data_access, $case) = @_;
+	my ($self, $data_access, $case) = @_;
 
 	my $case_number = $case->{'case_number'};
 	my $inv_cl_ids = $data_access->get_invisalign_client_ids_by_case_number($case_number);
-	my $clients_inv = $class->get_client_by_invisalign_ids($data_access, $inv_cl_ids);
+	my $clients_inv = $self->get_client_by_invisalign_ids($data_access, $inv_cl_ids);
 	if (@$clients_inv > 1) {
-		$data_access->add_category('case_number is not unique for patient');
-		die "TODO: remove duplicated records";
+		for my $client_data (@$clients_inv) {
+			$client_data->delete_invisalign_patient($case_number);
+			$client_data->delete_invisalign_processing_patient($case_number);
+		}
+		$data_access->add_category('case_number is not unique for invisalign patient (delete all)');
+		print("case [$case_number]: duplicated invisalign for [".join(', ', @$inv_cl_ids)."]\n");
+		#warn "TODO: remove duplicated invisalign case [$case_number] for [".join(', ', @$inv_cl_ids)."]";
 	}
 	else {
 		my $icp_cl_ids = $data_access->get_invisalign_processing_client_ids_by_case_number($case_number);
-		my $clients_icp = $class->get_client_by_invisalign_ids($data_access, $icp_cl_ids);
+		my $clients_icp = $self->get_client_by_invisalign_ids($data_access, $icp_cl_ids);
 		if (@$clients_icp > 1) {
-			$data_access->add_category('case_number is not unique for processing patient');
-			die "TODO: remove duplicated records";
+			for my $client_data (@$clients_icp) {
+				$client_data->delete_invisalign_patient($case_number);
+				$client_data->delete_invisalign_processing_patient($case_number);
+			}
+			$data_access->add_category('case_number is not unique for processing patient (delete all)');
+			print("case [$case_number]: duplicated processing for [".join(', ', @$icp_cl_ids)."]\n");
+			#warn "TODO: remove duplicated processing case [$case_number] for [".join(', ', @$icp_cl_ids)."]";
 		}
 		else {
 			if (@$clients_icp == 1 && @$clients_inv == 1) {
 				if ($clients_icp->[0]->get_id() eq $clients_inv->[0]->get_id()) {
-					$class->repair_clincheck_for_single_client(
+					$self->repair_clincheck_for_single_client(
 						$data_access,
 						$case,
 						$icp_cl_ids->[0],
@@ -33,7 +52,7 @@ sub repair_case_number {
 					);
 				}
 				else {
-					$class->repair_clincheck_for_two_clients(
+					$self->repair_clincheck_for_two_clients(
 						$data_access,
 						$case,
 						$icp_cl_ids->[0],
@@ -44,7 +63,7 @@ sub repair_case_number {
 				}
 			}
 			elsif (@$clients_icp > 0) {
-				$class->repair_clincheck_with_one_icp_client(
+				$self->repair_clincheck_with_one_icp_client(
 					$data_access,
 					$case,
 					$icp_cl_ids->[0],
@@ -52,7 +71,7 @@ sub repair_case_number {
 				);
 			}
 			elsif (@$clients_inv > 0) {
-				$class->repair_clincheck_with_one_inv_client(
+				$self->repair_clincheck_with_one_inv_client(
 					$data_access,
 					$case,
 					$inv_cl_ids->[0],
@@ -60,7 +79,7 @@ sub repair_case_number {
 				);
 			}
 			else {
-				$class->repair_missing_clincheck(
+				$self->repair_missing_clincheck(
 					$data_access,
 					$case,
 				);
@@ -72,23 +91,23 @@ sub repair_case_number {
 }
 
 sub repair_clincheck_for_single_client {
-	my ($class, $data_access, $case, $icp_client_id, $inv_client_id, $client_data) = @_;
+	my ($self, $data_access, $case, $icp_client_id, $inv_client_id, $client_data) = @_;
 
 	my $case_number = $case->{'case_number'};
-	my $good_inv_ids = get_invisalign_ids_with_image(
+	my $good_inv_ids = $self->get_invisalign_ids_with_image(
 		$client_data,
 		$case_number,
 		[ $icp_client_id, $inv_client_id ],
 	);
 	if (@$good_inv_ids) {
 		if ($icp_client_id eq $inv_client_id) {
-			my $done_str = $class->repair_processed_clincheck($client_data, $case_number);
+			my $done_str = $self->repair_processed_clincheck($client_data, $case_number);
 			$data_access->add_category("clincheck with single client$done_str");
 		}
 		else {
 			#printf("case [%s]\n", $case_number);
 			fix_change_invisalign_id($client_data, $case_number, $good_inv_ids->[0]);
-			my $done_str = $class->repair_processed_clincheck($client_data, $case_number);
+			my $done_str = $self->repair_processed_clincheck($client_data, $case_number);
 			$data_access->add_category("clincheck with different invisalign client$done_str");
 		}
 	}
@@ -100,7 +119,7 @@ sub repair_clincheck_for_single_client {
 }
 
 sub repair_clincheck_for_two_clients {
-	my ($class, $data_access, $case, $icp_client_id, $inv_client_id, $client_data_by_icp, $client_data_by_inv) = @_;
+	my ($self, $data_access, $case, $icp_client_id, $inv_client_id, $client_data_by_icp, $client_data_by_inv) = @_;
 
 	my $case_number = $case->{'case_number'};
 
@@ -126,13 +145,13 @@ sub repair_clincheck_for_two_clients {
 #	}
 
 
-	my $good_icp_ids = get_invisalign_ids_with_image(
+	my $good_icp_ids = $self->get_invisalign_ids_with_image(
 		$client_data_by_icp,
 		$case_number,
 		[ $icp_client_id ],
 	);
 
-	my $good_inv_ids = get_invisalign_ids_with_image(
+	my $good_inv_ids = $self->get_invisalign_ids_with_image(
 		$client_data_by_inv,
 		$case_number,
 		[ $inv_client_id ],
@@ -167,7 +186,7 @@ sub repair_clincheck_for_two_clients {
 }
 
 sub repair_clincheck_with_one_icp_client {
-	my ($class, $data_access, $case, $icp_client_id, $client_data) = @_;
+	my ($self, $data_access, $case, $icp_client_id, $client_data) = @_;
 
 	my $case_number = $case->{'case_number'};
 	my $done_str = fix_remove_clincheck($client_data, $case_number, 1);
@@ -176,7 +195,7 @@ sub repair_clincheck_with_one_icp_client {
 }
 
 sub repair_clincheck_with_one_inv_client {
-	my ($class, $data_access, $case, $inv_client_id, $client_data) = @_;
+	my ($self, $data_access, $case, $inv_client_id, $client_data) = @_;
 
 	my $case_number = $case->{'case_number'};
 	my $done_str = fix_remove_clincheck($client_data, $case_number);
@@ -185,14 +204,14 @@ sub repair_clincheck_with_one_inv_client {
 }
 
 sub repair_missing_clincheck {
-	my ($class, $data_access, $case) = @_;
+	my ($self, $data_access, $case) = @_;
 
 	print "case [".$case->{'case_number'}."]: is not found in database\n";
 	$data_access->add_category("clincheck is not in database");
 }
 
 sub repair_processed_clincheck {
-	my ($class, $client_data, $case_number) = @_;
+	my ($self, $client_data, $case_number) = @_;
 
 	my @done;
 	my $processing_patient = $client_data->get_invisalign_processing_patient($case_number);
@@ -238,7 +257,7 @@ sub fix_remove_clincheck {
 	}
 
 	my $processing_patient = $client_data->get_invisalign_processing_patient($case_number);
-	if ($processing_patient->{'processed'} == 0) {
+	if (!defined $processing_patient || $processing_patient->{'processed'} == 0) {
 		push(@done, 'delete processing patient');
 		$client_data->delete_invisalign_processing_patient($case_number);
 	}
@@ -299,38 +318,40 @@ sub get_all_sesame_patients {
 }
 
 sub get_invisalign_ids_with_image {
-	my ($client_data, $case_number, $invisalign_ids) = @_;
+	my ($self, $client_data, $case_number, $invisalign_ids) = @_;
 
 	my @good_ids;
-	for my $id (@$invisalign_ids) {
-		my $file = $client_data->file_path_for_invisalign_comment($id, $case_number);
-		if (-f $file) {
-			push(@good_ids, $id);
+	if ($self->{'check_files'}) {
+		for my $id (@$invisalign_ids) {
+			my $file = $client_data->file_path_for_invisalign_comment($id, $case_number);
+			if (-f $file) {
+				push(@good_ids, $id);
+			}
 		}
+	}
+	else {
+		@good_ids = @$invisalign_ids;
 	}
 	return \@good_ids;
 }
 
-{
-	my %clients;
-	sub get_client_by_invisalign_ids {
-		my ($class, $data_access, $ids) = @_;
+sub get_client_by_invisalign_ids {
+	my ($self, $data_access, $ids) = @_;
 
-		my @clients;
-		for my $id (@$ids) {
-			my $client_id = $data_access->get_client_id_by_invisalign_id($id);
-			if (defined $client_id) {
-				unless (exists $clients{$client_id}) {
-					$clients{$client_id} = $data_access->get_client_data_by_id($client_id);
-				}
-				push(@clients, $clients{$client_id});
+	my @clients;
+	for my $id (@$ids) {
+		my $client_id = $data_access->get_client_id_by_invisalign_id($id);
+		if (defined $client_id) {
+			unless (exists $self->{'clients'}{$client_id}) {
+				$self->{'clients'}{$client_id} = $data_access->get_client_data_by_id($client_id);
 			}
-			else {
-				die "TODO: remove unexisting invisalign [$id]";
-			}
+			push(@clients, $self->{'clients'}{$client_id});
 		}
-		return \@clients;
+		else {
+			die "TODO: remove unexisting invisalign [$id]";
+		}
 	}
+	return \@clients;
 }
 
 1;
