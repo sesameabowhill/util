@@ -34,20 +34,38 @@
 		document.getElementById("search_form").action = background.get_url('fcs_5');
 		document.getElementById("graph_header").innerHTML = current_graph.name;
 		document.getElementById("img_upload_queue").alt = current_graph.name;
-		if (current_graph.page_url) {
-			var link_elem = document.getElementById("link_queue_full_list");
-			link_elem.href = current_graph.page_url;
-			link_elem.style.display = "block";
-		}
-		else {
-			var link_elem = document.getElementById("link_queue_full_list");
-			link_elem.style.display = "none";
-		}
+		init_link(current_graph);
 		update_graph();
 		var input_search_param = document.getElementById("input_search_param");
 		input_search_param.focus();
 
   		window.setInterval(update_graph, current_graph.refresh);
+	}
+	
+	function init_link(current_graph) {
+		var link_elem = document.getElementById("link_to_list");
+		if (current_graph.page_url) {
+			link_elem.href = current_graph.page_url;
+			link_elem.style.display = "block";
+		}
+		else {
+			link_elem.style.display = "none";
+		}
+		if (current_graph.error_count_url) {
+			var link_title;
+			if (current_graph.error_count == 0) {
+				link_title = "All errors are linked";
+			}
+			else if (current_graph.error_count == 1) {
+				link_title = "There is 1 unlinked error";
+			}
+			else {
+				link_title = "There are " + current_graph.error_count + " unlinked errors";
+			}
+			link_elem.innerText = link_title;
+			link_elem.style.display = "block";
+			link_elem.href = current_graph.error_count_url;
+		}
 	}
 	
 	function check_form_input() {
@@ -90,7 +108,7 @@
     	id="img_upload_queue"
     	src=""
     </p>
-    <a href="" target="_blank" id="link_queue_full_list">See full list</a>
+    <a href="" target="_blank" id="link_to_list">See full list</a>
   <!--div id="errors"></div-->
 
 </html>

@@ -5,14 +5,18 @@ chrome.extension.sendRequest({"action": "get_clients"}, function(response) {
 		names.push(username);
 	}
 
-	var replace_re = new RegExp('((?:^|>)[^<]*)\\b(' + names.join('|') + ')\\b(?!<sup>)', 'g');
+	var replace_re = new RegExp('((?:^|>)[^<]*?)\\b(' + names.join('|') + ')\\b(?!<sup>)', 'g');
 	//var replace_re = new RegExp('(.)\\b(' + names.join('|') + ')\\b(?!<sup>)', 'g');
 
-	var issue_title_elements = document.getElementsByTagName("h3");
-	var header_element = issue_title_elements[0];
-	replace_in_element(replace_re, clients, issue_title_elements[0]);
+	var header_element = document.getElementById("issue_header_summary");
+	// remove link from the title
+	var title_html = header_element.innerHTML;
+	title_html = title_html.replace(/^\s*<a[^>]+>/, '');
+	title_html = title_html.replace(/<\/a>\s*$/g, '');
+	header_element.innerHTML = title_html;
+	replace_in_element(replace_re, clients, header_element);
 	
-	var desc_div = document.getElementById("description_full");
+	var desc_div = document.getElementById("description-full");
 	if (desc_div) {
 		replace_in_element(replace_re, clients, desc_div);
 	}

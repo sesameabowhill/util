@@ -28,6 +28,8 @@
 				last_graph = {
 					"type": localStorage["graph_type"],
 					"data_url": get_url("upload_queue_5"),
+					"error_count_url": get_url("error_count"),
+					"error_count": 0,
 					"refresh": get_refresh_interval("upload_queue_fast"),
 					"name": "Sesame5 upload processing queue",
 					"graph": new DataGraph(60, 120),
@@ -56,7 +58,8 @@
  			'fcs_4': "https://www4.orthosesame.com/internal/fast_client_search/",
  			'upload_queue': "http://www.remindergenie.com/tech_support/upload_queue.cgi?queue_id=1",
  			'upload_queue_5': "https://members.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=upload_queue_5",
- 			'client_api': "https://members.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=client_list"
+ 			'client_api': "https://members.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=client_list",
+ 			'error_count': "https://members.sesamecommunications.com/support-tools/error_reporter/"
  		};
  		return urls[name];
 	}
@@ -66,7 +69,8 @@
 		var intervals = {
 			'upload_queue': 15*1000,
 			'upload_queue_fast': 5*1000,
-			'client_list': 5*60*1000
+			'client_list': 5*60*1000,
+			'error_count': 10*1000
 		};
 		return intervals[name];
 	}
@@ -147,6 +151,28 @@
   				delete client_list["test"]; // remove bad words
   			}
   		);
+  	}
+
+  	function refresh_error_count() {
+  		var current_graph = get_current_graph_params();
+  		if (current_graph.error_count_url) {
+	  		get_json_data(
+	  			current_graph.error_count_url + "?action=error_stat",
+	  			function (error_stat) {
+	  				current_graph.error_count = error_stat.unlinked_errors;
+	  				update_icon_status(current_graph.error_count > 0);
+	  			}
+	  		);
+	  	}
+	  	else {
+	  		update_icon_status(0);
+	  	}
+  	}
+  	
+  	function update_icon_status(is_error) {
+  		chrome.browserAction.setIcon({
+  			'path': (is_error ? "icon_failed.png" : "icon.png")
+  		});
   	}
   	
   	function set_upload_queue_size(resp, current_graph) {
@@ -236,9 +262,11 @@
 
   	//window.setInterval(refresh_upload_queue_size, get_current_graph_params().refresh);
   	window.setInterval(refresh_client_list, get_refresh_interval('client_list'));
+  	window.setInterval(refresh_error_count, get_refresh_interval('error_count'));
 
   	refresh_upload_queue_size();
   	refresh_client_list();
+  	refresh_error_count();
   	
   	chrome.extension.onRequest.addListener(
 		function(request, sender, sendResponse) {

@@ -15,7 +15,8 @@
   },
   "content_scripts": [
     {
-      "matches": [ "http://hippo.3treepoint.com/browse/*", "http://jira.sesamecommunications.com/browse/*" ],
+      "matches": [ "http://jira.sesamecommunications.com/browse/*" ],
+      "css": ["jira_popup.css"],
       "js": ["jira_popup.js"]
     }
   ]
