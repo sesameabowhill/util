@@ -647,4 +647,27 @@ sub file_path_for_clinchecks {
 }
 
 
+sub dump_table_data {
+	my ($self, $table_name, $table_id, $columns, $where) = @_;
+
+	$table_name = '`'.$table_name.'`';
+	my $sql = "SELECT ".join(", ", $table_id, @$columns)." FROM ".$table_name." WHERE client_id=? AND NOT ISNULL(".$table_id.")";
+	if (defined $where) {
+		$sql .= " AND ".$where;
+	}
+	my $qr = $self->{'dbh'}->prepare($sql);
+	$qr->execute($self->{'client_id'});
+	while (my $r = $qr->fetchrow_hashref()) {
+		my $update_sql = "UPDATE ".$table_name .
+			" SET ". join(', ', map {'`'.$_.'`='.$self->{'dbh'}->quote( $r->{$_} )} @$columns) .
+			" WHERE client_id=".$self->{'dbh'}->quote( $self->{'client_id'} ) .
+			" AND ".$table_id."=".$self->{'dbh'}->quote( $r->{$table_id} );
+		if (defined $where) {
+			$update_sql .= ' AND '.$where;
+		}
+		$update_sql .= ' LIMIT 1';
+		$self->{'data_source'}->add_statement($update_sql);
+	}
+}
+
 1;

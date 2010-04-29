@@ -11,7 +11,7 @@ use IPC::Run3;
 use Sesame::Config;
 
 sub new {
-    my ($class, $is_sesame_5) = @_;
+    my ($class, $is_sesame_5, $db_connection_string) = @_;
 
     my $self = {
     	'read_only' => 0,
@@ -63,6 +63,21 @@ sub new {
     	}
     	require DataSource::DB::Sesame_4;
     	$class = 'DataSource::DB::Sesame_4';
+    }
+    if (defined $db_connection_string) {
+    	## admin:higer4@127.0.0.1:3306/sesame_db
+    	if ($db_connection_string =~ m{^(\w+):(\w+)\@([\w.-]+)(?::(\d+))?/(\w+)$}) {
+	    	$self->{'db'} = {
+	    		'user'     => $1,
+	    		'password' => $2,
+	    		'host'     => $3,
+	    		'port'     => ($4 || 3306),
+	    		'database' => $5,
+	    	};
+    	}
+    	else {
+    		die "invalid connection string [$db_connection_string]";
+    	}
     }
     $self->{'dbh'} = _get_connection($self, $self->{'db'}{'database'});
 
