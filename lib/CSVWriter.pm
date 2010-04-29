@@ -9,8 +9,13 @@ sub new {
 	my ($class, $file_name, $columns) = @_;
 
 	open(my $fh, '>', $file_name) or die "can't write [$file_name]: $!";
+	{
+		my $cur_fh = select($fh);
+		$| = 1;
+		select($cur_fh);
+	}
 	print $fh join(';', @$columns)."\n";
-	
+
 	return bless {
 		'fh' => $fh,
 		'columns' => $columns,
@@ -19,7 +24,7 @@ sub new {
 
 sub write_item {
 	my ($self, $item) = @_;
-	
+
 	my $fh = $self->{'fh'};
 	print $fh join(';', @$item{ @{ $self->{'columns'} } })."\n";
 }
@@ -35,7 +40,7 @@ sub write_data {
 
 DESTROY {
 	my ($self) = @_;
-	
+
 	close( $self->{'fh'} );
 }
 
