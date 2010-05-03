@@ -11,7 +11,7 @@
 	<property name="packer_script" value="packer.py" />
 	<property name="file.last_version" value="last_version.properties" />
 
-	<target name="build" depends="version.write, build.copy_files, build.replace_version, build.make_package, build.sign_package" />
+	<target name="build" depends="build.create_temp_folder, version.write, build.copy_files, build.replace_version, build.make_package, build.sign_package" />
 	<target name="deploy" depends="deploy.ask_password, deploy.installer_page, deploy.package" />
 	<target name="build_and_deploy" depends="build, deploy" description="build and deploy project" />
 
