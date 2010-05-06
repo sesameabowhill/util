@@ -72,8 +72,10 @@ if (defined $db_to) {
 				{
 					'by_pat_resp_with_phone' => 1,
 					'by_pat_resp' => 2,
-					'by_resp' => 3,
-					'by_pat' => 4,
+					'by_pms_resp' => 3,
+					'by_pms_pat' => 4,
+					'by_resp' => 5,
+					'by_pat' => 6,
 				}
 			);
 
@@ -170,21 +172,51 @@ sub select_candidate_sesame_sesame {
 
 	my $visitor = $client_data_from->get_visitor_by_id( $from_email->{'VisitorId'} );
 	if ($visitor->{'type'} eq 'patient') {
-		my $patients = $client_data_to->get_patients_by_name($visitor->{'FName'}, $visitor->{'LName'});
-		for my $patient (@$patients) {
-			$candidate_manager->add_candidate(
-				'by_pat',
-				$patient,
+		{
+			my $patients = $client_data_to->get_patients_by_name($visitor->{'FName'}, $visitor->{'LName'});
+			for my $patient (@$patients) {
+				$candidate_manager->add_candidate(
+					'by_pat',
+					$patient,
+				);
+			}
+		}
+		{
+			my $patients = $client_data_to->get_patients_by_name_and_pms_id(
+				$visitor->{'FName'},
+				$visitor->{'LName'},
+				$visitor->{'pms_id'},
 			);
+			for my $patient (@$patients) {
+				$candidate_manager->add_candidate(
+					'by_pms_pat',
+					$patient,
+				);
+			}
 		}
 	}
 	else {
-		my $responsibles = $client_data_to->get_responsibles_by_name($visitor->{'FName'}, $visitor->{'LName'});
-		for my $responsible (@$responsibles) {
-			$candidate_manager->add_candidate(
-				'by_resp',
-				$responsible,
+		{
+			my $responsibles = $client_data_to->get_responsibles_by_name($visitor->{'FName'}, $visitor->{'LName'});
+			for my $responsible (@$responsibles) {
+				$candidate_manager->add_candidate(
+					'by_resp',
+					$responsible,
+				);
+			}
+		}
+		{
+			my $responsibles = $client_data_to->get_responsibles_by_name_and_pms_id(
+				$visitor->{'FName'},
+				$visitor->{'LName'},
+				$visitor->{'pms_id'},
 			);
+			for my $responsible (@$responsibles) {
+				$candidate_manager->add_candidate(
+					'by_pms_resp',
+					$responsible,
+				);
+			}
 		}
 	}
 }

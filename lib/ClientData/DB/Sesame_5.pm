@@ -151,6 +151,28 @@ sub get_patients_by_name_and_birth {
     );
 }
 
+sub get_patients_by_name_and_pms_id {
+    my ($self, $fname, $lname, $visitor_pms_id) = @_;
+
+    return $self->_get_visitors_by_name(
+    	'id AS PId',
+    	$fname,
+    	$lname,
+    	'pms_id='.$self->{'dbh'}->quote($visitor_pms_id).' AND type="patient"',
+    );
+}
+
+sub get_responsibles_by_name_and_pms_id {
+    my ($self, $fname, $lname, $visitor_pms_id) = @_;
+
+    return $self->_get_visitors_by_name(
+    	'id AS RId',
+    	$fname,
+    	$lname,
+    	'pms_id='.$self->{'dbh'}->quote($visitor_pms_id).' AND type="responsible"',
+    );
+}
+
 sub get_patients_by_name_and_ids {
     my ($self, $fname, $lname, $ids) = @_;
 
@@ -190,7 +212,7 @@ sub _get_visitors_by_name {
 sub _get_visitor_columns {
     my ($self) = @_;
 
-    return 'id, address_id, type, first_name AS FName, last_name AS LName, birthday AS BDate, blocked, blocked_source, privacy, password, no_email, active, active_in_pms';
+    return 'id, pms_id, address_id, type, first_name AS FName, last_name AS LName, birthday AS BDate, blocked, blocked_source, privacy, password, no_email, active, active_in_pms';
 }
 
 sub get_all_patients {

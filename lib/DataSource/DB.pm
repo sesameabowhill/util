@@ -182,7 +182,7 @@ sub get_connection_info {
 	my $database = $self->{'dbh'}->selectrow_array("SELECT database()");
 	my $connection_id = $self->{'dbh'}->selectrow_array("SELECT connection_id()");
 
-	return "$user/$database".($self->is_read_only()?' "readonly"':'')." #$connection_id";
+	return "$user".(defined $database?"/$database":'').($self->is_read_only()?' "readonly"':'')." #$connection_id";
 }
 
 #sub get_single_db_connection {
