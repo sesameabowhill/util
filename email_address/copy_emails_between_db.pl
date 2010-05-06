@@ -9,12 +9,25 @@ use lib qw( ../lib );
 use CandidateManager;
 use DataSource::DB;
 
-my ($db_from, $db_to) = @ARGV;
+my ($db_from, $db_to, $db_from_connection, $db_to_connection) = @ARGV;
 
 if (defined $db_to) {
 	printf("copying emails from [%s] to [%s]\n", $db_from, $db_to);
-	my $data_source_from = ( $db_from =~ s/^4:// ? DataSource::DB->new_4() : DataSource::DB->new() );
-	my $data_source_to   = DataSource::DB->new();
+	my $data_source_from = (
+		$db_from =~ s/^4:// ?
+			DataSource::DB->new_4($db_from_connection) :
+			DataSource::DB->new(undef, $db_from_connection)
+	);
+	my $data_source_to   = DataSource::DB->new(undef, $db_to_connection);
+	$data_source_from->set_read_only(1);
+	$data_source_to->set_read_only(1);
+	printf(
+		"copy emails from [%s] (%s) -> [%s] (%s)\n",
+		$db_from,
+		$data_source_from->get_connection_info(),
+		$db_to,
+		$data_source_to->get_connection_info(),
+	);
 	my $client_data_from = $data_source_from->get_client_data_by_db($db_from);
 	my $client_data_to   = $data_source_to->get_client_data_by_db($db_to);
 
@@ -25,6 +38,9 @@ if (defined $db_to) {
 		},
 		'ortho_pat' => {
 			'ortho_resp' => \&select_candidate_pat_resp,
+		},
+		'sesame' => {
+			'sesame' => \&select_candidate_sesame_sesame,
 		},
 	);
 	my %add_email = (
@@ -110,7 +126,7 @@ if (defined $db_to) {
 	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
 }
 else {
-	print("Usage: $0 <db_from> <db_to>\n");
+	print("Usage: $0 <db_from> <db_to> [db_from_connection] [db_to_connection]\n");
 	exit(1);
 }
 
@@ -147,7 +163,30 @@ sub select_candidate_resp_sesame {
 			}
 		}
 	}
+}
 
+sub select_candidate_sesame_sesame {
+	my ($from_email, $client_data_from, $client_data_to, $candidate_manager) = @_;
+
+	my $visitor = $client_data_from->get_visitor_by_id( $from_email->{'VisitorId'} );
+	if ($visitor->{'type'} eq 'patient') {
+		my $patients = $client_data_to->get_patients_by_name($visitor->{'FName'}, $visitor->{'LName'});
+		for my $patient (@$patients) {
+			$candidate_manager->add_candidate(
+				'by_pat',
+				$patient,
+			);
+		}
+	}
+	else {
+		my $responsibles = $client_data_to->get_responsibles_by_name($visitor->{'FName'}, $visitor->{'LName'});
+		for my $responsible (@$responsibles) {
+			$candidate_manager->add_candidate(
+				'by_resp',
+				$responsible,
+			);
+		}
+	}
 }
 
 sub select_candidate_resp_resp {
@@ -309,8 +348,8 @@ sub add_email_to_visitor {
 		$email->{'Email'},
 		( exists $resp_type{ $email->{'BelongsTo'} } ? $resp_type{ $email->{'BelongsTo'} } : 'other' ),
 		$email->{'Name'},
-		( $email->{'Status'} ? 'true' : 'false' ),
 		( exists $source_map{ $email->{'Source'} } ? $source_map{ $email->{'Source'} } : 'other' ),
+		$email->{'Deleted'},
 	);
 }
 

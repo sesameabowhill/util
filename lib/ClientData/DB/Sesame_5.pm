@@ -103,6 +103,17 @@ sub get_emails_by_responsible {
 	return $self->get_emails_by_pid($rid);
 }
 
+sub get_all_emails {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		$self->_get_emails_select().", visitor_id AS VisitorId FROM email WHERE client_id=?",
+		{ 'Slice' => {} },
+        $self->{'client_id'},
+	);
+}
+
+
 sub _get_emails_select {
 	my ($self) = @_;
 
@@ -113,8 +124,8 @@ SELECT
 	responsible_type AS BelongsTo,
 	relative_name AS Name,
     date AS Date,
-	welcome_sent='true' AS Status,
-	source AS Source
+	source AS Source,
+	deleted AS Deleted
 SQL
 }
 
@@ -195,10 +206,21 @@ sub get_all_patients {
 sub get_patient_by_id {
     my ($self, $pid) = @_;
 
-    return $self->{'dbh'}->selectall_arrayref(
+	return $self->{'dbh'}->selectrow_hashref(
         "SELECT id AS PId, ".$self->_get_visitor_columns()." FROM visitor WHERE type='patient' AND id=? AND client_id=?",
 		{ 'Slice' => {} },
 		$pid,
+		$self->{'client_id'},
+    );
+}
+
+sub get_visitor_by_id {
+    my ($self, $visitor_id) = @_;
+
+	return $self->{'dbh'}->selectrow_hashref(
+        "SELECT id AS VisitorId, ".$self->_get_visitor_columns()." FROM visitor WHERE id=? AND client_id=?",
+		{ 'Slice' => {} },
+		$visitor_id,
 		$self->{'client_id'},
     );
 }
@@ -295,21 +317,22 @@ sub _get_invisalign_patient_columns {
 }
 
 sub add_email {
-    my ($self, $visitor_id, $email, $belongs_to, $name, $status, $source) = @_;
+    my ($self, $visitor_id, $email, $belongs_to, $name, $source, $deleted) = @_;
 
+	$deleted ||= 'false';
 	my @params = map {$self->{'dbh'}->quote($_)} (
 		$visitor_id, $email, $belongs_to, $name,
-		$status, $source,
+		$source, $deleted,
 		$self->{'client_id'},
     );
 	my $sql = sprintf(<<'SQL', @params);
 INSERT INTO email
 	(visitor_id, email, date, responsible_type, relative_name,
-	welcome_sent, source, deleted, deleted_datetime, deleted_source,
+	source, deleted, deleted_datetime, deleted_source,
 	client_id)
 VALUES
 	(%s, %s, NOW(), %s, %s,
-	%s, %s, 'false', NULL, NULL,
+	%s, %s, NULL, NULL,
 	%s)
 SQL
 	$sql =~ s/\r?\n/ /g;

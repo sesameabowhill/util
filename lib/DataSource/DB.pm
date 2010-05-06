@@ -85,15 +85,15 @@ sub new {
 }
 
 sub new_4 {
-	my ($class) = @_;
+	my ($class, $db_connection_string) = @_;
 
-	return $class->new(0);
+	return $class->new(0, $db_connection_string);
 }
 
 sub new_5 {
-	my ($class) = @_;
+	my ($class, $db_connection_string) = @_;
 
-	return $class->new(1);
+	return $class->new(1, $db_connection_string);
 }
 
 sub read_config {
@@ -173,6 +173,16 @@ sub _get_connection {
             'PrintError' => 0,
         }
     );
+}
+
+sub get_connection_info {
+	my ($self) = @_;
+
+	my $user = $self->{'dbh'}->selectrow_array("SELECT user()");
+	my $database = $self->{'dbh'}->selectrow_array("SELECT database()");
+	my $connection_id = $self->{'dbh'}->selectrow_array("SELECT connection_id()");
+
+	return "$user/$database".($self->is_read_only()?' "readonly"':'')." #$connection_id";
 }
 
 #sub get_single_db_connection {
