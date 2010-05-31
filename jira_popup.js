@@ -22,6 +22,23 @@ chrome.extension.sendRequest({"action": "get_clients"}, function(response) {
 	}
 });
 
+init_accesskeys();
+
+function init_accesskeys() {
+	add_accesskey("log-work", "w");
+	add_accesskey("move-issue", "m");
+	add_accesskey("link-issue", "l");
+	add_accesskey("clone-issue", "c");
+}
+
+function add_accesskey(elem_id, key) {
+	var elem = document.getElementById(elem_id);
+	if (null !== elem) {
+		elem.accessKey = key;
+		console.log("access: #"+elem_id+"-"+key);
+	}
+}
+
 function replace_in_element(replace_re, clients, elem) {
 	elem.innerHTML = elem.innerHTML.replace(
 		replace_re, 
