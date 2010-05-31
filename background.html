@@ -160,7 +160,7 @@
 	  			current_graph.error_count_url + "?action=error_stat",
 	  			function (error_stat) {
 	  				current_graph.error_count = error_stat.unlinked_errors;
-	  				update_icon_status(current_graph.error_count > 0);
+	  				update_icon_status(error_stat.unlinked_instances);
 	  			}
 	  		);
 	  	}
@@ -169,9 +169,16 @@
 	  	}
   	}
   	
-  	function update_icon_status(is_error) {
+  	function update_icon_status(error_instances) {
+  		var icon_name = "icon.png";
+  		if (error_instances > 0) {
+  			icon_name = "icon_warning.png";
+  		}
+  		else if (error_instances > 10) {
+  			icon_name = "icon_failed.png";
+  		}
   		chrome.browserAction.setIcon({
-  			'path': (is_error ? "icon_failed.png" : "icon.png")
+  			'path': icon_name
   		});
   	}
   	
