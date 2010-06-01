@@ -32,7 +32,7 @@
 					"error_count": 0,
 					"refresh": get_refresh_interval("upload_queue_fast"),
 					"name": "Sesame5 upload processing queue",
-					"graph": new DataGraph(60, 120),
+					"graph": new DataGraph(60, 120, 3),
 					"client_stack": new ClientStack(20)
 				};
 			}
@@ -43,7 +43,7 @@
 					"page_url": get_url("upload_queue"),
 					"refresh": get_refresh_interval("upload_queue"),
 					"name": "Sesame4 upload queue",
-					"graph": new DataGraph(60, 120),
+					"graph": new DataGraph(60, 120, 3),
 					"client_stack": new ClientStack(20)
 				};
 			}
@@ -170,12 +170,15 @@
   	}
   	
   	function update_icon_status(error_instances) {
-  		var icon_name = "icon.png";
-  		if (error_instances > 0) {
+  		var icon_name;
+  		if (error_instances > 10) {
+  			icon_name = "icon_failed.png";
+  		}
+  		else if (error_instances > 0) {
   			icon_name = "icon_warning.png";
   		}
-  		else if (error_instances > 10) {
-  			icon_name = "icon_failed.png";
+  		else {
+  			icon_name = "icon.png"
   		}
   		chrome.browserAction.setIcon({
   			'path': icon_name
@@ -193,6 +196,7 @@
 
     	var active_clients_count = 0;
     	var inactive_clients_count = 0;
+    	var initial_count = 0;
     	var total_waits = 0;
     	var max_wait_time = 0;
     	var max_inactive_wait_time = 0;
@@ -210,6 +214,9 @@
     		}
     		if (resp[client_id].waits > max_wait_time) {
     			max_wait_time = resp[client_id].waits;
+    		}
+    		if (resp[client_id].initial) {
+    			initial_count ++;
     		}
     	}
     	var total_clients_count = active_clients_count+inactive_clients_count;
@@ -234,7 +241,7 @@
 		}
 	  	
   		current_graph.client_stack.add_processing_clients(getCurrentSeconds(), resp);
-	  	current_graph.graph.add_point(getCurrentSeconds(), total_clients_count);
+	  	current_graph.graph.add_point(getCurrentSeconds(), total_clients_count, active_clients_count, initial_count);
 
 		var average_processing_time = current_graph.client_stack.get_average_processing_time();
 		if (null !== average_processing_time) {
