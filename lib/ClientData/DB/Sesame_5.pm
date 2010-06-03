@@ -431,11 +431,18 @@ sub get_si_patient_by_id {
 sub get_hhf_id {
 	my ($self) = @_;
 
-	return scalar $self->{'dbh'}->selectrow_array(
-		"SELECT guid FROM hhf_client_settings WHERE client_id=?",
-		undef,
-		$self->{'client_id'},
+
+	return $self->get_cached_data(
+		'_hhf_id',
+		sub {
+			return $self->get_profile_value('HHF->GUID');
+		}
 	);
+#	return scalar $self->{'dbh'}->selectrow_array(
+#		"SELECT guid FROM hhf_client_settings WHERE client_id=?",
+#		undef,
+#		$self->{'client_id'},
+#	);
 }
 
 sub get_profile_value {
@@ -444,7 +451,7 @@ sub get_profile_value {
 	return $self->_get_profile_value(
 		$key,
 		'client_setting',
-		'client_id=' . $self->{'dbh'}->quote( $self->{'client_id'} ),
+		' AND client_id=' . $self->{'dbh'}->quote( $self->{'client_id'} ),
 	);
 }
 
@@ -460,6 +467,11 @@ sub get_all_hhf_forms {
 
 sub add_hhf_form {
 	my ($self, $filldate, $fname, $lname, $birthdate, $note, $signature, $body) = @_;
+
+	if (ref($filldate) eq 'HASH') {
+		($filldate, $fname, $lname, $birthdate, $note, $signature, $body) =
+			@$filldate{'filldate', 'fname', 'lname', 'birthdate', 'note', 'signature', 'body'};
+	}
 
 	$self->{'dbh'}->do(<<'SQL',
 INSERT INTO hhf_applications (client_id, filldate, fname, lname, birthdate, note, signature, body)

@@ -219,7 +219,7 @@ sub add_email {
 sub get_profile_value {
 	my ($self, $key) = @_;
 
-	return $self->_get_profile_value($key, 'profile', '');
+	return $self->_get_profile_value($key, $self->{'db_name'}.'.profile', '');
 }
 
 sub get_sales_resources {
