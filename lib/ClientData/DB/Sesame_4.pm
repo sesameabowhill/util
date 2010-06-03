@@ -366,6 +366,36 @@ sub get_hhf_user_id {
 	);
 }
 
+sub get_hhf_settings {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT PKey, Type, SVal, IVal, RVal, DVal FROM hhf.settings WHERE cl_id=?",
+		{ 'Slice' => {} },
+		$self->get_hhf_user_id(),
+    );
+}
+
+sub get_hhf_templates {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT body, 1 AS body_exists FROM hhf.templates WHERE cl_id=?",
+		{ 'Slice' => {} },
+		$self->get_hhf_user_id(),
+    );
+}
+
+sub get_hhf_client_settings {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT guid, install_date FROM hhf.clients WHERE id=?",
+		{ 'Slice' => {} },
+		$self->get_hhf_user_id(),
+    );
+}
+
 sub get_all_hhf_forms {
 	my ($self) = @_;
 

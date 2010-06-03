@@ -455,11 +455,41 @@ sub get_profile_value {
 	);
 }
 
+sub get_hhf_settings {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT PKey, Type, SVal, IVal, RVal, DVal FROM hhf_settings WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->get_id(),
+    );
+}
+
+sub get_hhf_templates {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT body, 1 AS body_exists FROM hhf_templates WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->get_id(),
+    );
+}
+
 sub get_all_hhf_forms {
 	my ($self) = @_;
 
 	return $self->{'dbh'}->selectall_arrayref(
         "SELECT id, filldate, fname, lname, birthdate, note, signature, body FROM hhf_applications WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->get_id(),
+    );
+}
+
+sub get_hhf_client_settings {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT guid, install_date FROM hhf_client_settings WHERE client_id=?",
 		{ 'Slice' => {} },
 		$self->get_id(),
     );
@@ -472,21 +502,90 @@ sub add_hhf_form {
 		($filldate, $fname, $lname, $birthdate, $note, $signature, $body) =
 			@$filldate{'filldate', 'fname', 'lname', 'birthdate', 'note', 'signature', 'body'};
 	}
-
-	$self->{'dbh'}->do(<<'SQL',
-INSERT INTO hhf_applications (client_id, filldate, fname, lname, birthdate, note, signature, body)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-SQL
-		undef,
-		$self->{'client_id'},
-		$filldate,
-		$fname,
-		$lname,
-		$birthdate,
-		$note,
-		$signature,
-		$body,
+	my @params = (
+		$self->{'client_id'},  $filldate, $fname,
+		$lname,  $birthdate, $note,
+		$signature, $body,
 	);
+	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+INSERT INTO hhf_applications (
+	client_id, filldate, fname,
+	lname, birthdate, note,
+	signature, body
+)
+VALUES (%s, %s, %s,  %s, %s, %s,  %s, %s)
+SQL
+	$sql =~ s/\r?\n/ /g;
+	$sql =~ s/\s+/ /g;
+
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($sql);
+	}
+	$self->{'data_source'}->add_statement($sql);
+}
+
+sub add_hhf_setting {
+	my ($self, $params) = @_;
+
+	my @params = (
+		$self->{'client_id'},
+		@$params{
+			'PKey', 'Type', 'SVal',
+			'IVal', 'RVal', 'DVal'
+		},
+	);
+	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+INSERT INTO hhf_settings (
+	client_id,
+	PKey, Type, SVal,
+	IVal, RVal, DVal
+)
+VALUES (%s,  %s, %s, %s,  %s, %s, %s)
+SQL
+	$sql =~ s/\r?\n/ /g;
+	$sql =~ s/\s+/ /g;
+
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($sql);
+	}
+	$self->{'data_source'}->add_statement($sql);
+}
+
+sub add_hhf_client_setting {
+	my ($self, $params) = @_;
+
+	my @params = ($self->{'client_id'}, @$params{'guid', 'install_date'});
+	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+INSERT INTO hhf_client_settings (client_id, guid, install_date)
+VALUES (%s, %s, %s)
+SQL
+	$sql =~ s/\r?\n/ /g;
+	$sql =~ s/\s+/ /g;
+
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($sql);
+	}
+	$self->{'data_source'}->add_statement($sql);
+}
+
+sub add_hhf_template {
+	my ($self, $body) = @_;
+
+	if (ref($body) eq 'HASH') {
+		$body = $body->{'body'};
+	}
+
+	my @params = ($self->{'client_id'}, $body);
+	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+INSERT INTO hhf_templates (client_id, body) VALUES (%s, %s)
+SQL
+	$sql =~ s/\r?\n/ /g;
+	$sql =~ s/\s+/ /g;
+
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($sql);
+	}
+	$self->{'data_source'}->add_statement($sql);
 }
 
 

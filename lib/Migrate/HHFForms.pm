@@ -52,9 +52,11 @@ sub migrate {
 #			}
 #		}
 		$class->SUPER::migrate($client_data_5, $client_data_4);
+		return 1;
 	}
 	else {
 		printf "ERROR [%s]: hhf has different guid\n", $client_data_5->get_username();
+		return 0;
 	}
 }
 

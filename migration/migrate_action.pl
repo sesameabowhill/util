@@ -10,6 +10,7 @@ use DataSource::DB;
 
 use Migrate::EmailReminderSettings;
 use Migrate::HHFForms;
+use Migrate::HHFAll;
 use Migrate::SRMResources;
 
 {
@@ -19,6 +20,7 @@ use Migrate::SRMResources;
 	my %actions = (
 		'email_settings' => 'Migrate::EmailReminderSettings',
 		'hhf_forms'      => 'Migrate::HHFForms',
+		'hhf_all'        => 'Migrate::HHFAll',
 		'srm'            => 'Migrate::SRMResources',
 	);
 
@@ -27,13 +29,14 @@ use Migrate::SRMResources;
 
 	if (exists $actions{$action} && @clients) {
 	    my $start_time = time();
+	    my $migrator = $actions{$action}->new();
 		for my $client_db_5 (@clients) {
 			my $client_data_5 = $data_source_5->get_client_data_by_db($client_db_5);
 			my $username = $client_data_5->get_username();
 			my $db_name = $data_source_4->get_database_by_username($username);
 			if (defined $db_name) {
 				my $client_data_4 = $data_source_4->get_client_data_by_db($db_name);
-				$actions{$action}->migrate($client_data_5, $client_data_4);
+				$migrator->migrate($client_data_5, $client_data_4);
 			}
 			else {
 				printf "SKIP [%s]: client is not found sesame4\n";

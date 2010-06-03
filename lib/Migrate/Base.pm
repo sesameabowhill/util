@@ -4,6 +4,14 @@ package Migrate::Base;
 use strict;
 use warnings;
 
+sub new {
+	my ($class) = @_;
+
+	return bless {
+
+	}, $class;
+}
+
 sub migrate {
 	my ($class, $client_data_5, $client_data_4) = @_;
 
@@ -39,6 +47,7 @@ sub migrate {
 			$client_data_5->$add_new_method($item);
 		}
 	}
+	return 1;
 }
 
 
