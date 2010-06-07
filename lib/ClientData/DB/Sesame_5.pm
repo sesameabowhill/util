@@ -802,6 +802,38 @@ sub file_path_for_clinchecks {
     );
 }
 
+sub get_all_phones {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        <<'SQL',
+SELECT
+	id, pms_id, link_id, visitor_id, number, ext, comment, type,
+	sms_active='true' AS sms_active, voice_active='true' AS voice_active,
+	source, deleted, deleted_datetime, deleted_source, entry_datetime
+FROM phone
+WHERE client_id=?
+SQL
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+    );
+}
+
+sub delete_phone {
+	my ($self, $id, $visitor_id) = @_;
+
+	my @params = ($id, $visitor_id, $self->{'client_id'});
+	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+DELETE FROM phone WHERE id=%s AND visitor_id=%s AND client_id=%s LIMIT 1
+SQL
+	$sql =~ s/\r?\n/ /g;
+	$sql =~ s/\s+/ /g;
+
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($sql);
+	}
+	$self->{'data_source'}->add_statement($sql);
+}
 
 sub dump_table_data {
 	my ($self, $table_name, $table_id, $columns, $where) = @_;
@@ -824,6 +856,12 @@ sub dump_table_data {
 		$update_sql .= ' LIMIT 1';
 		$self->{'data_source'}->add_statement($update_sql);
 	}
+}
+
+sub register_category {
+	my ($self, $category) = @_;
+
+	$self->{'data_source'}->add_category($category);
 }
 
 1;
