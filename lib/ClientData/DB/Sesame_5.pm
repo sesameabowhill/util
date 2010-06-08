@@ -212,7 +212,7 @@ sub _get_visitors_by_name {
 sub _get_visitor_columns {
     my ($self) = @_;
 
-    return 'id, pms_id, address_id, type, first_name AS FName, last_name AS LName, birthday AS BDate, blocked, blocked_source, privacy, password, no_email, active, active_in_pms';
+    return 'id, pms_id, address_id, address_id_in_pms, type, first_name AS FName, last_name AS LName, birthday AS BDate, blocked, blocked_source, privacy, password, no_email, active, active_in_pms';
 }
 
 sub get_all_patients {
@@ -225,6 +225,16 @@ sub get_all_patients {
     );
 }
 
+sub get_all_visitors {
+    my ($self) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT ".$self->_get_visitor_columns()." FROM visitor WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+    );
+}
+
 sub get_patient_by_id {
     my ($self, $pid) = @_;
 
@@ -232,6 +242,17 @@ sub get_patient_by_id {
         "SELECT id AS PId, ".$self->_get_visitor_columns()." FROM visitor WHERE type='patient' AND id=? AND client_id=?",
 		{ 'Slice' => {} },
 		$pid,
+		$self->{'client_id'},
+    );
+}
+
+sub get_address_by_id {
+    my ($self, $address_id) = @_;
+
+	return $self->{'dbh'}->selectrow_hashref(
+        "SELECT id, pms_id, street, city, state, zip, country FROM address WHERE id=? AND client_id=?",
+		{ 'Slice' => {} },
+		$address_id,
 		$self->{'client_id'},
     );
 }
@@ -825,6 +846,22 @@ sub delete_phone {
 	my @params = ($id, $visitor_id, $self->{'client_id'});
 	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
 DELETE FROM phone WHERE id=%s AND visitor_id=%s AND client_id=%s LIMIT 1
+SQL
+	$sql =~ s/\r?\n/ /g;
+	$sql =~ s/\s+/ /g;
+
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($sql);
+	}
+	$self->{'data_source'}->add_statement($sql);
+}
+
+sub set_visitor_address_id {
+	my ($self, $visitor_id, $address_id) = @_;
+
+	my @params = ($address_id, $visitor_id, $self->{'client_id'});
+	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+UPDATE visitor SET address_id=%s WHERE id=%s AND client_id=%s LIMIT 1
 SQL
 	$sql =~ s/\r?\n/ /g;
 	$sql =~ s/\s+/ /g;

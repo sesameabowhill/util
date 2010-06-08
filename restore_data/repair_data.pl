@@ -9,6 +9,7 @@ use lib '../lib';
 use DataSource::DB;
 
 use Repair::Phones;
+use Repair::Address;
 
 {
 	my $data_source = DataSource::DB->new();
@@ -16,6 +17,7 @@ use Repair::Phones;
 
 	my %actions = (
 		'phones' => 'Repair::Phones',
+		'address' => 'Repair::Address',
 	);
 
 	my ($action, @clients) = @ARGV;

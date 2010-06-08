@@ -4,14 +4,7 @@ package Repair::Phones;
 use strict;
 use warnings;
 
-use Migrate::Custom;
-
-sub new {
-	my ($class) = @_;
-
-	return bless {
-	}, $class;
-}
+use base 'Repair::Base';
 
 sub repair {
 	my ($self, $client_data) = @_;
