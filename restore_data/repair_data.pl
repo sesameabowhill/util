@@ -12,6 +12,7 @@ use Repair::Phones;
 use Repair::Address;
 
 {
+	$|=1;
 	my $data_source = DataSource::DB->new();
 	$data_source->set_read_only(1);
 
