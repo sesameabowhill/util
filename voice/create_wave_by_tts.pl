@@ -15,7 +15,6 @@ use URI::Escape;
 my $MAX_SOX_FILES = 32;
 my $MAX_FILENAME_LENGTH = 100;
 
-#use Sesame::Config;
 # SELECT PKey, IVal, SVal FROM properties WHERE PKey IN ('Voice.VoiceID', 'Voice.TTSrate') ORDER BY PKey;
 
 {

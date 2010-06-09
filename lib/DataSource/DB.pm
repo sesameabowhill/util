@@ -8,8 +8,6 @@ use DBI;
 use File::Spec;
 use IPC::Run3;
 
-use Sesame::Config;
-
 sub new {
     my ($class, $is_sesame_5, $db_connection_string) = @_;
 
@@ -99,7 +97,14 @@ sub new_5 {
 sub read_config {
 	my ($class, $file_name) = @_;
 
-	return Sesame::Config->read_file($file_name);
+	my $config_file = File::Spec->join($ENV{'SESAME_ROOT'}, 'sesame', 'config', $file_name);
+	open(my $f, "<", $config_file) or die "can't read config [$config_file]: $!";
+	local $/;
+	my $config_data = <$f>;
+	close($f);
+
+	my $data = eval( $config_data ) or die("Can't parse data from [$config_file]: $@");
+	return $data;
 }
 
 sub set_read_only {

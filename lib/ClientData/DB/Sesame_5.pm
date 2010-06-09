@@ -8,8 +8,6 @@ use File::Spec;
 
 use base qw( ClientData::DB );
 
-use Sesame::Unified::Client;
-
 sub new {
 	my ($class, $data_source, $db_name, $dbh) = @_;
 

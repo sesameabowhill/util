@@ -9,7 +9,6 @@ use HTTP::Request;
 use LWP::UserAgent;
 use MIME::Base64;
 
-#use Sesame::Config;
 # SELECT PKey, IVal, SVal FROM properties WHERE PKey IN ('Voice.VoiceID', 'Voice.TTSrate') ORDER BY PKey;
 
 {

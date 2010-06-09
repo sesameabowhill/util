@@ -41,12 +41,6 @@ sub remove_resource {
 #    );
 #    $self->{'affected_clients'}{ $client_ref->get_db_name() } = 1;
 #}
-#
-#sub client_by_db {
-#    my ($self, $db) = @_;
-#
-#    return Sesame::Unified::Client->new('db_name', $db);
-#}
 
 sub get_client_data_by_db {
     my ($self, $db) = @_;
@@ -61,12 +55,6 @@ sub get_client_data_by_id {
     require ClientData::DB::Sesame_4;
     return ClientData::DB::Sesame_4->new_by_id($self, $id, $self->{'dbh'});
 }
-
-#sub get_clients {
-#    my ($self) = @_;
-#
-#    return Sesame::Unified::Client->get_all_clients();
-#}
 
 sub get_email_messaging_guids {
     my ($self, $client_id) = @_;
