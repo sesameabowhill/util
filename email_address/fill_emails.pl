@@ -256,10 +256,7 @@ sub find_responsible_by_name {
 	for my $responsible (values %resp_grouped_by_patients) {
 		$candidate_manager->add_candidate(
 			'by_resp_grouped_by_pats',
-			{
-				'patient' => undef,
-				'responsible' => $responsible,
-			}
+			$responsible,
 		);
 	}
 }
