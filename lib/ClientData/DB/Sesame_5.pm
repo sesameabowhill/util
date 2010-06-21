@@ -474,6 +474,24 @@ sub get_profile_value {
 	);
 }
 
+sub set_profile_value {
+	my ($self, $key, $value, $type) = @_;
+
+	my $type_id = $self->_get_profile_type_id_by_column_name($type);
+	my $update_sql = sprintf(
+		'INSERT INTO client_setting (client_id, PKey, Type, %s) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE %s=%s, Type=%s',
+		$type,
+		map({ $self->{'dbh'}->quote($_) } ( $self->{'client_id'}, $key, $type_id, $value )),
+		$type,
+		map({ $self->{'dbh'}->quote($_) } ( $value, $type_id )),
+	);
+	if ($self->{'data_source'}->is_read_only()) {
+		$self->{'data_source'}->add_statement($update_sql);
+	} else {
+		$self->{'dbh'}->do($update_sql);
+	}
+}
+
 sub get_hhf_settings {
 	my ($self) = @_;
 

@@ -92,6 +92,16 @@ sub get_current_date_mysql {
 	return sprintf("%04d-%02d-%02d %02d:%02d:%02d", $dt[5], $dt[4], $dt[3], $dt[2], $dt[1], $dt[0]);
 }
 
+sub get_current_date_filename {
+	my ($class) = @_;
+
+	my @dt = localtime();
+	$dt[4]++;
+	$dt[5] += 1900;
+	return sprintf("%04d-%02d-%02d-%02d-%02d-%02d", $dt[5], $dt[4], $dt[3], $dt[2], $dt[1], $dt[0]);
+}
+
+
 #sub get_current_date_voice_utc {
 #
 #}

@@ -180,6 +180,30 @@ sub _get_connection {
     );
 }
 
+sub expand_client_group {
+	my ($self, $clients) = @_;
+
+	my @groups  = grep {$_ =~ m{^:}} @$clients;
+	my @clients = grep {$_ !~ m{^:}} @$clients;
+	for my $group (@groups) {
+		my $usernames;
+		if ($group eq ':all') {
+			$usernames = $self->_get_all_clients_username();
+		}
+		elsif ($group eq ':all_active') {
+			$usernames = $self->_get_all_clients_username(1);
+		}
+		else {
+			die "unknown group [$group] (use :all_active or :all)";
+		}
+		push(@clients, @$usernames);
+	}
+	my %unique_usernames;
+	## remove duplicates
+	@clients = grep { !$unique_usernames{$_}++ } @clients;
+	return \@clients;
+}
+
 sub get_connection_info {
 	my ($self) = @_;
 

@@ -98,7 +98,7 @@ sub _get_profile_value {
 	my ($self, $key, $table, $where) = @_;
 
 	my $value = $self->{'dbh'}->selectall_arrayref(
-		"SELECT	Type, SVal, IVal, RVal, DVal, TVal FROM $table WHERE PKey=? $where",
+		"SELECT Type, SVal, IVal, RVal, DVal, TVal FROM $table WHERE PKey=? $where",
 		{ 'Slice' => {} },
 		$key,
 	)->[0];
@@ -107,6 +107,18 @@ sub _get_profile_value {
 	}
 	else {
 		return undef;
+	}
+}
+
+sub _get_profile_type_id_by_column_name {
+	my ($self, $type) = @_;
+
+	my %profile_column_name = reverse %PROFILE_COLUMN_TYPE_ID;
+	if (exists $profile_column_name{$type}) {
+		return $profile_column_name{$type};
+	}
+	else {
+		die "invalid profile column type [$type]";
 	}
 }
 
