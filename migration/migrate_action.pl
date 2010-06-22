@@ -12,6 +12,7 @@ use Migrate::EmailReminderSettings;
 use Migrate::HHFForms;
 use Migrate::HHFAll;
 use Migrate::SRMResources;
+use Migrate::SIColleagues;
 
 {
 	my $data_source_5 = DataSource::DB->new_5();
@@ -22,6 +23,7 @@ use Migrate::SRMResources;
 		'hhf_forms'      => 'Migrate::HHFForms',
 		'hhf_all'        => 'Migrate::HHFAll',
 		'srm'            => 'Migrate::SRMResources',
+		'si_colleagues'  => 'Migrate::SIColleagues',
 	);
 
 	my ($action, @clients) = @ARGV;
