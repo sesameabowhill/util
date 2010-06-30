@@ -201,7 +201,7 @@ sub get_email_reminder_settings {
 	return $self->{'dbh'}->selectall_arrayref(
 		"SELECT id, is_enabled, type, subject, body, response_options, design_id, image_guid, image_title FROM email_messaging.reminder_settings WHERE client_id=?",
 		{ 'Slice' => {} },
-		$self->_get_id(),
+		$self->get_id(),
 	);
 }
 
@@ -211,7 +211,7 @@ sub get_ccp_id {
 	return $self->get_cached_data(
 		'_ccp_id',
 		sub {
-			my ($type, $id) = ($self->_get_id() =~ m/^(\w)(\d+)$/);
+			my ($type, $id) = ($self->get_id() =~ m/^(\w)(\d+)$/);
 
 			return scalar $self->{'dbh'}->selectrow_array(
 				"SELECT CID FROM opse.clients WHERE Category=? AND OuterId=?",
