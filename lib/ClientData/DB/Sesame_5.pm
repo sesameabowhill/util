@@ -105,7 +105,7 @@ sub get_all_emails {
 	my ($self) = @_;
 
 	return $self->{'dbh'}->selectall_arrayref(
-		$self->_get_emails_select().", visitor_id AS VisitorId FROM email WHERE client_id=?",
+		$self->_get_emails_select().", visitor_id AS VisitorId, visitor_id, pms_id FROM email WHERE client_id=?",
 		{ 'Slice' => {} },
         $self->{'client_id'},
 	);
@@ -862,6 +862,22 @@ sub delete_phone {
 	my @params = ($id, $visitor_id, $self->{'client_id'});
 	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
 DELETE FROM phone WHERE id=%s AND visitor_id=%s AND client_id=%s LIMIT 1
+SQL
+	$sql =~ s/\r?\n/ /g;
+	$sql =~ s/\s+/ /g;
+
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($sql);
+	}
+	$self->{'data_source'}->add_statement($sql);
+}
+
+sub delete_email {
+	my ($self, $id, $visitor_id) = @_;
+
+	my @params = ($id, $visitor_id, $self->{'client_id'});
+	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+DELETE FROM email WHERE id=%s AND visitor_id=%s AND client_id=%s LIMIT 1
 SQL
 	$sql =~ s/\r?\n/ /g;
 	$sql =~ s/\s+/ /g;

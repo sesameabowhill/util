@@ -131,6 +131,7 @@ sub save_sql_commands_to_file {
 	open(my $fh, '>', $file_name) or die "can't write [$file_name]: $!";
 	print $fh "-- $file_name\n";
 	for my $sql_cmd (sort @{ $self->{'statements'} }) {
+		$sql_cmd =~ s/\s+$//;
 		print $fh "$sql_cmd;\n";
 	}
 	close($fh);

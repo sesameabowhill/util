@@ -8,23 +8,26 @@ use lib '../lib';
 
 use DataSource::DB;
 
-use Repair::Phones;
 use Repair::Address;
+use Repair::Emails;
+use Repair::Phones;
 
 {
 	$|=1;
-	my $data_source = DataSource::DB->new();
-	$data_source->set_read_only(1);
-
 	my %actions = (
-		'phones' => 'Repair::Phones',
+		'phones'  => 'Repair::Phones',
 		'address' => 'Repair::Address',
+		'emails'  => 'Repair::Emails',
 	);
 
 	my ($action, @clients) = @ARGV;
 	$action ||= '';
 
 	if (exists $actions{$action} && @clients) {
+		my $data_source = DataSource::DB->new();
+		$data_source->set_read_only(1);
+		@clients = @{ $data_source->expand_client_group( \@clients ) };
+
 	    my $start_time = time();
 	    my $repair = $actions{$action}->new();
 		for my $client_db (@clients) {
