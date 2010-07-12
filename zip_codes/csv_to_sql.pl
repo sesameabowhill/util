@@ -19,7 +19,7 @@ GetOptions(
 	'input=s'         => \@input_files,
 	'table=s'         => \@table_name,
 	'output=s'        => \@output_file,
-	'important-zip=s' => \@important_zip,
+	'important-area-code=s' => \@important_zip,
 );
 
 $|=1;
@@ -53,7 +53,7 @@ if (@input_files > 1 && @output_file > 0 && @table_name == @output_file) {
 	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
 }
 else {
-	print "Usage: $0 --input=<input_file> --table=<table_name> --output=<output.sql> --important-zip=[zip] <input_file> ...\n";
+	print "Usage: $0 --input=<input_file> --table=<table_name> --output=<output.sql> --important-area-code=[area-code] <input_file> ...\n";
 	exit(1);
 }
 
