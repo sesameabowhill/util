@@ -14,29 +14,29 @@ if (@run) {
     my $start_time = time();
     my $data_source = DataSource::DB->new();
 
-    fix_containers($data_source);
+    #fix_containers($data_source);
     my $missing_resources = check_resources($data_source);
     filter_missing_banners($data_source, $missing_resources);
-    print "statements\n";
-    for my $sql (@{ $data_source->get_statements() }) {
-        print "$sql;\n";
-    }
-    print "affected clients\n";
-    my $client_count = 0;
-    for my $client (@{ $data_source->get_affected_clients() }) {
-        $client_count++;
-        print "$client_count: $client\n";
-    }
+#    print "statements\n";
+#    for my $sql (@{ $data_source->get_statements() }) {
+#        print "$sql;\n";
+#    }
+#    print "affected clients\n";
+#    my $client_count = 0;
+#    for my $client (@{ $data_source->get_affected_clients() }) {
+#        $client_count++;
+#        print "$client_count: $client\n";
+#    }
 
-    if (@$missing_resources) {
-        my $min_date = $missing_resources->[0]{'date'};
-        for my $res (@$missing_resources) {
-            if ($min_date gt $res->{'date'}) {
-                $min_date = $res->{'date'};
-            }
-        }
-        print "first missing resource date [$min_date]\n";
-    }
+#    if (@$missing_resources) {
+#        my $min_date = $missing_resources->[0]{'date'};
+#        for my $res (@$missing_resources) {
+#            if ($min_date gt $res->{'date'}) {
+#                $min_date = $res->{'date'};
+#            }
+#        }
+#        print "first missing resource date [$min_date]\n";
+#    }
 
     printf "done: %.2f minutes\n", (time() - $start_time) / 60;
 } else {
@@ -48,13 +48,13 @@ if (@run) {
 sub check_resources {
     my ($data_source) = @_;
 
-    my $resources = $data_source->get_srm_resources();
+    my $resources = $data_source->get_all_srm_resources();
     my @missing_resources;
     for my $res (@$resources) {
         my ($extention) = ( $res->{'path_from'} =~ m/\.(\w+)\s*$/ );
         my $file = File::Spec->join(
-            $ENV{'SESAME_WEB'},
-            'sesame_store',
+            $ENV{'SESAME_COMMON'},
+            'srm',
             $res->{'container'},
             $res->{'id'}.'.'.( defined $extention ? $extention : '' ),
         );
