@@ -87,4 +87,14 @@ sub _get_all_clients_username {
 	return $self->{'dbh'}->selectcol_arrayref("SELECT cl_username FROM client WHERE $where");
 }
 
+sub get_all_srm_resources {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT id, container, date, path_from, type, description FROM srm_resource",
+		{ 'Slice' => {} },
+	);
+}
+
+
 1;
