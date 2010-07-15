@@ -14,7 +14,7 @@
 	</target>
 
 	<target name="deploy.do">
-		<scp trust="true" todir="${server.user}:${server.password}@${server.host}:${server.folder}">
+		<scp verbose="true" trust="true" todir="${server.user}:${server.password}@${server.host}:${server.folder}">
 			<fileset dir=".">
 				<include name="**/*" />
 				<exclude name="**/.svn/**/*" />

@@ -38,10 +38,7 @@ use Repair::Phones;
 		printf "write repair commands to [$fn]\n";
 		$data_source->save_sql_commands_to_file($fn);
 
-		my $stat = $data_source->get_categories_stat();
-		for my $category (sort keys %$stat) {
-			printf("%s - %d\n", $category, $stat->{$category});
-		}
+		$data_source->print_category_stat();
 
 	    my $work_time = time() - $start_time;
 	    printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;

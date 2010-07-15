@@ -1,5 +1,5 @@
 ## $Id$
-package Fix::RepairClincheck;
+package Repair::RepairClincheck;
 
 use strict;
 use warnings;
@@ -222,7 +222,7 @@ sub repair_processed_clincheck {
 	}
 	my $patient = $client_data->get_invisalign_patient($case_number);
 	unless (defined $patient->{'patient_id'}) {
-		my $sesame_patient_id = match_to_sesame_patient(
+		my $sesame_patient_id = $self->match_to_sesame_patient(
 			$client_data,
 			$patient,
 		);
@@ -272,7 +272,7 @@ sub fix_change_invisalign_id {
 
 
 sub match_to_sesame_patient {
-	my ($client_data, $inv_patient) = @_;
+	my ($self, $client_data, $inv_patient) = @_;
 
 	my $sesame_patients = $client_data->get_cached_data(
 		'_get_all_sesame_patients',
@@ -306,8 +306,8 @@ sub get_all_sesame_patients {
 			$sesame_patient->{'PId'}
 		);
 	}
-	my $fname_re = '\b('.join('|', map {quotemeta($_)} sort keys %fname).')\b';
-	my $lname_re = '\b('.join('|', map {quotemeta($_)} sort keys %lname).')\b';
+	my $fname_re = '\b('.join('|', map {quotemeta($_)} grep {defined && length} sort keys %fname).')\b';
+	my $lname_re = '\b('.join('|', map {quotemeta($_)} grep {defined && length} sort keys %lname).')\b';
 	printf "CLIENT [%s]: [%d] patients found\n", $client_data->get_username(), scalar @$sesame_patients;
 
 	return {

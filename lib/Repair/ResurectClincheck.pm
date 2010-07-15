@@ -1,10 +1,10 @@
 ## $Id$
-package Fix::ResurectClincheck;
+package Repair::ResurectClincheck;
 
 use strict;
 use warnings;
 
-use base 'Fix::RepairClincheck';
+use base 'Repair::RepairClincheck';
 
 sub new {
 	my $class = shift;

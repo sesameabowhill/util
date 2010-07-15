@@ -10,7 +10,7 @@ use lib '../lib';
 
 use DataSource::DB;
 use CandidateManager;
-use Fix::RepairClincheck;
+use Repair::RepairClincheck;
 
 {
 	my $data_access = DataSource::DB->new();
@@ -24,7 +24,7 @@ use Fix::RepairClincheck;
 		print "skip file check\n";
 		$do_file_check = 0;
 	}
-	my $fixer = Fix::RepairClincheck->new($do_file_check);
+	my $fixer = Repair::RepairClincheck->new($do_file_check);
 	for my $case_number (@$case_numbers) {
 		$fixer->repair_case_number($data_access, $case_number);
 	}

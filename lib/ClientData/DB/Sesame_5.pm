@@ -769,6 +769,24 @@ sub get_invisalign_processing_patient {
 	}
 }
 
+sub get_invisalign_client_by_shared_invisalign_client {
+	my ($self, $shared_invisalign_client_id) = @_;
+
+	return scalar $self->{'dbh'}->selectrow_array(
+		<<'SQL',
+SELECT id
+FROM invisalign_client
+WHERE client_id=? AND inv_uname IN (
+	SELECT inv_uname FROM invisalign_client WHERE id=?
+)
+SQL
+		undef,
+		$self->{'client_id'},
+		$shared_invisalign_client_id,
+	);
+}
+
+
 sub set_invisalign_client_id_for_invisalign_patient {
 	my ($self, $case_number, $invisalign_client_id) = @_;
 
@@ -927,10 +945,24 @@ sub dump_table_data {
 	}
 }
 
-sub register_category {
-	my ($self, $category) = @_;
+sub get_clients_who_share_invisalign_accounts {
+	my ($self) = @_;
 
-	$self->{'data_source'}->add_category($category);
+	my $client_ids = $self->{'dbh'}->selectcol_arrayref(
+		<<'SQL',
+SELECT client_id
+FROM invisalign_client
+WHERE inv_uname IN (
+	SELECT inv_uname
+	FROM invisalign_client
+	WHERE client_id=?
+) and client_id<>?
+SQL
+		undef,
+		$self->{'client_id'},
+		$self->{'client_id'},
+	);
+	return [ map {ref($self)->new_by_id($self->{'data_source'}, $_, $self->{'dbh'})} @$client_ids ];
 }
 
 1;

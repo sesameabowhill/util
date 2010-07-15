@@ -10,7 +10,7 @@ use lib '../lib';
 
 use DataSource::DB;
 use CandidateManager;
-use Fix::ResurectClincheck;
+use Repair::ResurectClincheck;
 
 
 {
@@ -22,7 +22,7 @@ use Fix::ResurectClincheck;
 	my $clincheck_files = $data_access->get_all_clincheck_files();
 	print "end [get_all_clincheck_files]\n";
 	@$clincheck_files = sort {$a->{'case_number'} <=> $b->{'case_number'}} @$clincheck_files;
-	my $fixer = Fix::ResurectClincheck->new();
+	my $fixer = Repair::ResurectClincheck->new();
 	for my $clincheck_file (@$clincheck_files) {
 		$fixer->repair_case_number($data_access, $clincheck_file);
 	}

@@ -147,4 +147,10 @@ sub file_path_for_invisalign_comment {
     );
 }
 
+sub register_category {
+	my ($self, $category) = @_;
+
+	$self->{'data_source'}->add_category($category);
+}
+
 1;

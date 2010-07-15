@@ -155,7 +155,22 @@ sub add_statement {
 sub add_category {
 	my ($self, $category) = @_;
 
+	$self->register_category($category);
+}
+
+sub register_category {
+	my ($self, $category) = @_;
+
 	$self->{'categories'}{$category} ++;
+}
+
+sub print_category_stat {
+	my ($self) = @_;
+
+	my $stat = $self->get_categories_stat();
+	for my $category (sort keys %$stat) {
+		printf("%s - %d\n", $category, $stat->{$category});
+	}
 }
 
 sub get_categories_stat {
