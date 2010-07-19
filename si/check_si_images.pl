@@ -14,8 +14,9 @@ $| = 1;
 
 my @clients = @ARGV;
 if (@clients) {
-	my $data_access = DataSource::DB->new();
 	my $start_time = time();
+	my $data_access = DataSource::DB->new();
+	$data_access->set_read_only(1);
     my $result_file = '_si_patients_without_images.csv';
     printf "writing result to [%s]\n", $result_file;
     my $output = CSVWriter->new(
@@ -29,7 +30,7 @@ if (@clients) {
     		'pid',
     	],
     );
-
+	@clients = @{ $data_access->expand_client_group( \@clients ) };
 	for my $client_db (@clients) {
 		my $client_data = $data_access->get_client_data_by_db($client_db);
 		printf "database source: client [%s]\n", $client_db;
