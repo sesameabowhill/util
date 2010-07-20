@@ -8,6 +8,7 @@ use lib qw( ../lib );
 
 use CandidateManager;
 use DataSource::DB;
+use Email::Valid;
 
 my ($db_from, $db_to, $db_from_connection, $db_to_connection) = @ARGV;
 
@@ -18,7 +19,7 @@ if (defined $db_to) {
 			DataSource::DB->new_4($db_from_connection) :
 			DataSource::DB->new(undef, $db_from_connection)
 	);
-	my $data_source_to   = DataSource::DB->new(undef, $db_to_connection);
+	my $data_source_to = DataSource::DB->new(undef, $db_to_connection);
 	$data_source_from->set_read_only(1);
 	$data_source_to->set_read_only(1);
 	printf(
@@ -61,61 +62,74 @@ if (defined $db_to) {
 	my $from_emails = $client_data_from->get_all_emails();
 	my $added_count = 0;
 	for my $from_email (@$from_emails) {
-		if ($client_data_to->email_is_used( $from_email->{'Email'} )) {
-			printf(
-				"SKIP: email [%s] is already used\n",
-				$from_email->{'Email'},
-			);
-		}
-		else {
-			my $candidate_manager = CandidateManager->new(
-				{
-					'by_pat_resp_with_phone' => 1,
-					'by_pat_resp' => 2,
-					'by_pms_resp' => 3,
-					'by_pms_pat' => 4,
-					'by_resp' => 5,
-					'by_pat' => 6,
-				}
-			);
-
-			$candidate_selector->(
-				$from_email,
-				$client_data_from,
-				$client_data_to,
-				$candidate_manager,
-			);
-
-			my $candidate = $candidate_manager->get_single_candidate();
-			if (defined $candidate) {
+		if (Email::Valid->address($from_email->{'Email'})) {
+			if ($client_data_to->email_is_used( $from_email->{'Email'} )) {
 				printf(
-					"ADD: %s\n",
+					"SKIP: email [%s] is already used\n",
 					$from_email->{'Email'},
 				);
-				$add_email{ $client_data_to->get_full_type() }->(
-					$client_data_to,
-					$from_email,
-					$candidate,
-				);
-#				$client_data_to->add_email(
-#					(defined $candidate->{'patient'} ? $candidate->{'patient'}{'PId'} : 0 ),
-#					$candidate->{'responsible'}{'RId'},
-#					$from_email->{'Email'},
-#					$from_email->{'BelongsTo'},
-#					$from_email->{'Name'},
-#					$from_email->{'Status'},
-#					$from_email->{'Source'},
-#				);
-				$added_count++;
+				$client_data_to->register_category('email exists');
 			}
 			else {
-				printf(
-					"SKIP: %s - %s\n",
-					$from_email->{'Email'},
-					$candidate_manager->candidates_count_str(),
+				my $candidate_manager = CandidateManager->new(
+					{
+						'by_pat_resp_with_phone' => 1,
+						'by_pat_resp' => 2,
+						'by_pms_resp' => 3,
+						'by_pms_pat' => 4,
+						'by_resp' => 5,
+						'by_pat' => 6,
+					}
 				);
+
+				$candidate_selector->(
+					$from_email,
+					$client_data_from,
+					$client_data_to,
+					$candidate_manager,
+				);
+
+				my $candidate = $candidate_manager->get_single_candidate();
+				if (defined $candidate) {
+					printf(
+						"ADD: %s\n",
+						$from_email->{'Email'},
+					);
+					$add_email{ $client_data_to->get_full_type() }->(
+						$client_data_to,
+						$from_email,
+						$candidate,
+					);
+	#				$client_data_to->add_email(
+	#					(defined $candidate->{'patient'} ? $candidate->{'patient'}{'PId'} : 0 ),
+	#					$candidate->{'responsible'}{'RId'},
+	#					$from_email->{'Email'},
+	#					$from_email->{'BelongsTo'},
+	#					$from_email->{'Name'},
+	#					$from_email->{'Status'},
+	#					$from_email->{'Source'},
+	#				);
+					$added_count++;
+					$client_data_to->register_category('email added');
+				}
+				else {
+					printf(
+						"SKIP: %s - %s\n",
+						$from_email->{'Email'},
+						$candidate_manager->candidates_count_str(),
+					);
+					$client_data_to->register_category('email not added (no candidate found)');
+				}
 			}
 		}
+		else {
+			printf(
+				"SKIP: email [%s] is invalid\n",
+				$from_email->{'Email'},
+			);
+			$client_data_to->register_category('email is invalid');
+		}
+
 	}
 #    for my $sql (@{ $data_source->get_statements() }) {
 #        print "$sql;\n";
@@ -124,6 +138,8 @@ if (defined $db_to) {
 	printf("write sql commands to [$result_sql_fn]\n");
 	$data_source_to->save_sql_commands_to_file($result_sql_fn);
 	printf("[%d] of [%d] emails added\n", $added_count, scalar @$from_emails);
+	$data_source_to->print_category_stat();
+
 	my $work_time = time() - $start_time;
 	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
 }

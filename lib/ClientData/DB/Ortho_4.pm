@@ -172,7 +172,8 @@ $moved_fields
 	ml_name AS Name,
     ml_date AS Date,
 	ml_status AS Status,
-	ml_source AS Source
+	ml_source AS Source,
+	'false' AS Deleted
 FROM $table
 SQL
 }
