@@ -84,6 +84,17 @@ sub email_is_used {
     );
 }
 
+sub phone_is_used {
+	my ($self, $phone) = @_;
+
+	return scalar $self->{'dbh'}->selectrow_array(
+        "SELECT count(*) FROM phone WHERE number=? AND client_id=?",
+        undef,
+        $phone,
+        $self->{'client_id'},
+    );
+}
+
 sub get_emails_by_pid {
 	my ($self, $pid) = @_;
 
@@ -375,6 +386,38 @@ VALUES
 	(%s, %s, NOW(), %s, %s,
 	%s, %s, NULL, NULL,
 	%s)
+SQL
+	$sql =~ s/\r?\n/ /g;
+	$sql =~ s/\s+/ /g;
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($sql);
+	}
+	$self->{'data_source'}->add_statement($sql);
+}
+
+sub add_phone {
+    my ($self, $visitor_id, $number, $type, $sms_active, $voice_active, $source, $entry_datetime) = @_;
+
+	my @params = map {$self->{'dbh'}->quote($_)} (
+		$visitor_id, $number, $type,
+		$sms_active, $voice_active,
+		$source, $entry_datetime,
+		$self->{'client_id'},
+    );
+	my $sql = sprintf(<<'SQL', @params);
+INSERT INTO phone (
+	visitor_id, number, type,
+	sms_active, voice_active,
+	source, entry_datetime,
+	client_id, ext, comment,
+	deleted, deleted_datetime, deleted_source
+)
+VALUES
+	(%s, %s, %s,
+	%s, %s,
+	%s, %s,
+	%s, '', '',
+	'false', null, null)
 SQL
 	$sql =~ s/\r?\n/ /g;
 	$sql =~ s/\s+/ /g;
@@ -912,6 +955,22 @@ sub set_visitor_address_id {
 	my @params = ($address_id, $visitor_id, $self->{'client_id'});
 	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
 UPDATE visitor SET address_id=%s WHERE id=%s AND client_id=%s LIMIT 1
+SQL
+	$sql =~ s/\r?\n/ /g;
+	$sql =~ s/\s+/ /g;
+
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($sql);
+	}
+	$self->{'data_source'}->add_statement($sql);
+}
+
+sub set_sms_active_for_phone_number {
+	my ($self, $visitor_id, $phone_number, $sms_active) = @_;
+
+	my @params = ($sms_active, $visitor_id, $phone_number, $self->{'client_id'});
+	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+UPDATE phone SET sms_active=%s WHERE visitor_id=%s AND number=%s AND client_id=%s LIMIT 1
 SQL
 	$sql =~ s/\r?\n/ /g;
 	$sql =~ s/\s+/ /g;

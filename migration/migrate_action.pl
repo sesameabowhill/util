@@ -14,6 +14,7 @@ use Migrate::HHFAll;
 use Migrate::SRMResources;
 use Migrate::SIColleagues;
 use Migrate::PatientPasswords;
+use Migrate::PatientPhones;
 {
 	my $data_source_5 = DataSource::DB->new_5();
 	my $data_source_4 = DataSource::DB->new_4();
@@ -25,6 +26,7 @@ use Migrate::PatientPasswords;
 		'srm'               => 'Migrate::SRMResources',
 		'si_colleagues'     => 'Migrate::SIColleagues',
 		'patient_passwords' => 'Migrate::PatientPasswords',
+		'patient_phones'    => 'Migrate::PatientPhones',
 	);
 
 	my ($action, @clients) = @ARGV;

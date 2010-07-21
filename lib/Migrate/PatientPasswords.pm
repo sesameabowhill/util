@@ -45,11 +45,11 @@ sub migrate {
 					}
 				}
 				else {
-					$client_data_5->register_category("can't find responsible in 5.0");
+					$client_data_5->register_category("failed to find responsible in 5.0");
 				}
 			}
 			else {
-				$client_data_5->register_category("can't find pms id in 4.6");
+				$client_data_5->register_category("failed to find pms id in 4.6");
 			}
 			$processed_count ++;
 		}

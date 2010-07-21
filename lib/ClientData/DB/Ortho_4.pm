@@ -318,6 +318,32 @@ sub get_all_accounts {
     );
 }
 
+sub get_all_patient_phones {
+	my ($self) = @_;
+
+    my $voice_phones = $self->{'dbh'}->selectall_arrayref(
+    	<<"SQL",
+SELECT
+	PId, CONCAT(CountryCode, AreaCode, Phone) as number, Registered as entry_datetime,
+	0 as sms_active, 1 as voice_active, 'other' as source, 'unknown' as type
+FROM $self->{'db_name'}.patient_phones
+SQL
+		{ 'Slice' => {} },
+    );
+    my $sms_phones = $self->{'dbh'}->selectall_arrayref(
+    	<<"SQL",
+SELECT
+	pat.PId, p.Phone as number, p.Registered as entry_datetime,
+	p.active as sms_active, 0 as voice_active, 'other' as source, 'unknown' as type
+FROM $self->{'db_name'}.phone_book p
+LEFT JOIN $self->{'db_name'}.phone_patient pat ON (pat.PhoneId=p.PhoneId)
+SQL
+		{ 'Slice' => {} },
+    );
+    push(@$sms_phones, @$voice_phones);
+    return $sms_phones;
+}
+
 sub get_accounts_by_pid {
 	my ($self, $pid) = @_;
 
