@@ -922,6 +922,22 @@ SQL
 	$self->{'data_source'}->add_statement($sql);
 }
 
+sub set_visitor_password_by_id {
+	my ($self, $password, $visitor_id) = @_;
+
+	my @params = ($password, $visitor_id, $self->{'client_id'});
+	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+UPDATE visitor SET password=%s WHERE id=%s AND client_id=%s LIMIT 1
+SQL
+	$sql =~ s/\r?\n/ /g;
+	$sql =~ s/\s+/ /g;
+
+	unless ($self->{'data_source'}->is_read_only()) {
+		$self->{'dbh'}->do($sql);
+	}
+	$self->{'data_source'}->add_statement($sql);
+}
+
 sub dump_table_data {
 	my ($self, $table_name, $table_id, $columns, $where) = @_;
 

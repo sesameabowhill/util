@@ -21,6 +21,15 @@ sub count_emails_by_pid {
 	return scalar keys %emails;
 }
 
+sub get_all_sesame_accounts {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT SAId as RId, PSWD as Password, PrivacyPolicy, blocked as Blocked FROM ".$self->{'db_name'}.".sesame_accounts",
+		{ 'Slice' => {} },
+	);
+}
+
 
 
 

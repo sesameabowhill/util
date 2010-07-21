@@ -13,17 +13,18 @@ use Migrate::HHFForms;
 use Migrate::HHFAll;
 use Migrate::SRMResources;
 use Migrate::SIColleagues;
-
+use Migrate::PatientPasswords;
 {
 	my $data_source_5 = DataSource::DB->new_5();
 	my $data_source_4 = DataSource::DB->new_4();
 
 	my %actions = (
-		'email_settings' => 'Migrate::EmailReminderSettings',
-		'hhf_forms'      => 'Migrate::HHFForms',
-		'hhf_all'        => 'Migrate::HHFAll',
-		'srm'            => 'Migrate::SRMResources',
-		'si_colleagues'  => 'Migrate::SIColleagues',
+		'email_settings'    => 'Migrate::EmailReminderSettings',
+		'hhf_forms'         => 'Migrate::HHFForms',
+		'hhf_all'           => 'Migrate::HHFAll',
+		'srm'               => 'Migrate::SRMResources',
+		'si_colleagues'     => 'Migrate::SIColleagues',
+		'patient_passwords' => 'Migrate::PatientPasswords',
 	);
 
 	my ($action, @clients) = @ARGV;
@@ -44,6 +45,7 @@ use Migrate::SIColleagues;
 				printf "SKIP [%s]: client is not found sesame4\n";
 			}
 		}
+		$data_source_5->print_category_stat();
 	    my $work_time = time() - $start_time;
 	    printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
 	}
