@@ -96,5 +96,40 @@ sub get_all_srm_resources {
 	);
 }
 
+sub get_orphan_sent_mail_log_ids {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectcol_arrayref(
+		'SELECT l.id FROM email_sent_mail_log l LEFT JOIN visitor v ON (v.id=l.visitor_id) WHERE isnull(v.id)',
+		undef
+	);
+}
+
+sub delete_sent_mail_log {
+	my ($self, $id) = @_;
+
+	$self->_do_query(<<'SQL', [ $id ]);
+DELETE FROM email_sent_mail_log WHERE id=%s LIMIT 1
+SQL
+}
+
+sub get_orphan_email_contact_log_ids {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectcol_arrayref(
+		'SELECT l.id FROM email_contact_log l LEFT JOIN visitor v ON (v.id=l.visitor_id) WHERE isnull(v.id)',
+		undef
+	);
+}
+
+sub delete_email_contact_log {
+	my ($self, $id) = @_;
+
+	$self->_do_query(<<'SQL', [ $id ]);
+DELETE FROM email_contact_log WHERE id=%s LIMIT 1
+SQL
+}
+
+
 
 1;

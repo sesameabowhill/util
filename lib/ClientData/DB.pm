@@ -153,4 +153,10 @@ sub register_category {
 	$self->{'data_source'}->add_category($category);
 }
 
+sub _do_query {
+	my ($self, $sql_pattern, $params) = @_;
+
+	return $self->{'data_source'}->_do_query($sql_pattern, $params);
+}
+
 1;

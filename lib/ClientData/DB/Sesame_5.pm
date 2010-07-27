@@ -372,12 +372,12 @@ sub add_email {
     my ($self, $visitor_id, $email, $belongs_to, $name, $source, $deleted) = @_;
 
 	$deleted ||= 'false';
-	my @params = map {$self->{'dbh'}->quote($_)} (
+	my @params = (
 		$visitor_id, $email, $belongs_to, $name,
 		$source, $deleted,
 		$self->{'client_id'},
     );
-	my $sql = sprintf(<<'SQL', @params);
+	$self->_do_query(<<'SQL', \@params);
 INSERT INTO email
 	(visitor_id, email, date, responsible_type, relative_name,
 	source, deleted, deleted_datetime, deleted_source,
@@ -387,24 +387,18 @@ VALUES
 	%s, %s, NULL, NULL,
 	%s)
 SQL
-	$sql =~ s/\r?\n/ /g;
-	$sql =~ s/\s+/ /g;
-	unless ($self->{'data_source'}->is_read_only()) {
-		$self->{'dbh'}->do($sql);
-	}
-	$self->{'data_source'}->add_statement($sql);
 }
 
 sub add_phone {
     my ($self, $visitor_id, $number, $type, $sms_active, $voice_active, $source, $entry_datetime) = @_;
 
-	my @params = map {$self->{'dbh'}->quote($_)} (
+	my @params = (
 		$visitor_id, $number, $type,
 		$sms_active, $voice_active,
 		$source, $entry_datetime,
 		$self->{'client_id'},
     );
-	my $sql = sprintf(<<'SQL', @params);
+	$self->_do_query(<<'SQL', \@params);
 INSERT INTO phone (
 	visitor_id, number, type,
 	sms_active, voice_active,
@@ -419,12 +413,6 @@ VALUES
 	%s, '', '',
 	'false', null, null)
 SQL
-	$sql =~ s/\r?\n/ /g;
-	$sql =~ s/\s+/ /g;
-	unless ($self->{'data_source'}->is_read_only()) {
-		$self->{'dbh'}->do($sql);
-	}
-	$self->{'data_source'}->add_statement($sql);
 }
 
 
@@ -587,7 +575,7 @@ sub add_hhf_form {
 		$lname,  $birthdate, $note,
 		$signature, $body,
 	);
-	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+	$self->_do_query(<<'SQL', \@params);
 INSERT INTO hhf_applications (
 	client_id, filldate, fname,
 	lname, birthdate, note,
@@ -595,13 +583,6 @@ INSERT INTO hhf_applications (
 )
 VALUES (%s, %s, %s,  %s, %s, %s,  %s, %s)
 SQL
-	$sql =~ s/\r?\n/ /g;
-	$sql =~ s/\s+/ /g;
-
-	unless ($self->{'data_source'}->is_read_only()) {
-		$self->{'dbh'}->do($sql);
-	}
-	$self->{'data_source'}->add_statement($sql);
 }
 
 sub add_hhf_setting {
@@ -614,7 +595,7 @@ sub add_hhf_setting {
 			'IVal', 'RVal', 'DVal'
 		},
 	);
-	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+	$self->_do_query(<<'SQL', \@params);
 INSERT INTO hhf_settings (
 	client_id,
 	PKey, Type, SVal,
@@ -622,30 +603,16 @@ INSERT INTO hhf_settings (
 )
 VALUES (%s,  %s, %s, %s,  %s, %s, %s)
 SQL
-	$sql =~ s/\r?\n/ /g;
-	$sql =~ s/\s+/ /g;
-
-	unless ($self->{'data_source'}->is_read_only()) {
-		$self->{'dbh'}->do($sql);
-	}
-	$self->{'data_source'}->add_statement($sql);
 }
 
 sub add_hhf_client_setting {
 	my ($self, $params) = @_;
 
 	my @params = ($self->{'client_id'}, @$params{'guid', 'install_date'});
-	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+	$self->_do_query(<<'SQL', \@params);
 INSERT INTO hhf_client_settings (client_id, guid, install_date)
 VALUES (%s, %s, %s)
 SQL
-	$sql =~ s/\r?\n/ /g;
-	$sql =~ s/\s+/ /g;
-
-	unless ($self->{'data_source'}->is_read_only()) {
-		$self->{'dbh'}->do($sql);
-	}
-	$self->{'data_source'}->add_statement($sql);
 }
 
 sub add_hhf_template {
@@ -654,18 +621,10 @@ sub add_hhf_template {
 	if (ref($body) eq 'HASH') {
 		$body = $body->{'body'};
 	}
-
 	my @params = ($self->{'client_id'}, $body);
-	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+	$self->_do_query(<<'SQL', \@params);
 INSERT INTO hhf_templates (client_id, body) VALUES (%s, %s)
 SQL
-	$sql =~ s/\r?\n/ /g;
-	$sql =~ s/\s+/ /g;
-
-	unless ($self->{'data_source'}->is_read_only()) {
-		$self->{'dbh'}->do($sql);
-	}
-	$self->{'data_source'}->add_statement($sql);
 }
 
 
@@ -683,15 +642,7 @@ sub get_email_reminder_settings {
 sub add_new_reminder_setting {
 	my ($self, $params) = @_;
 
-	$self->{'dbh'}->do(
-		<<SQL,
-INSERT INTO email_reminder_settings
-	(client_id, is_enabled, type,
-	subject, body, response_options,
-	design_id, image_guid, image_title)
-VALUES (?,?,?, ?,?,?, ?,?,?)
-SQL
-		undef,
+	my @params = (
 		$self->{'client_id'},
 		@$params{
 			'is_enabled', 'type',
@@ -699,7 +650,13 @@ SQL
 			'design_id', 'image_guid', 'image_title'
 		},
 	);
-	return $self->{'dbh'}->{'mysql_insertid'};
+	return $self->_do_query(<<'SQL', \@params);
+INSERT INTO email_reminder_settings
+	(client_id, is_enabled, type,
+	subject, body, response_options,
+	design_id, image_guid, image_title)
+VALUES (%s,%s,%s, %s,%s,%s, %s,%s,%s)
+SQL
 }
 
 
@@ -716,21 +673,19 @@ sub get_all_srm_resources {
 sub add_new_srm_resource {
 	my ($self, $params) = @_;
 
-	$self->{'dbh'}->do(
-		<<SQL,
-INSERT INTO srm_resource
-	(container, id, date,
-	path_from, type, description)
-VALUES (?,?,?, ?,?,?)
-SQL
-		undef,
+	my @params = (
 		$self->get_username(),
 		@$params{
 			'id', 'date',
 			'path_from', 'type', 'description',
 		},
 	);
-	return $self->{'dbh'}->{'mysql_insertid'};
+	return $self->_do_query(<<'SQL', \@params);
+INSERT INTO srm_resource
+	(container, id, date,
+	path_from, type, description)
+VALUES (%s,%s,%s, %s,%s,%s)
+SQL
 }
 
 sub delete_invisalign_patient {
@@ -920,33 +875,17 @@ SQL
 sub delete_phone {
 	my ($self, $id, $visitor_id) = @_;
 
-	my @params = ($id, $visitor_id, $self->{'client_id'});
-	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+	$self->_do_query(<<'SQL', [ $id, $visitor_id, $self->{'client_id'} ]);
 DELETE FROM phone WHERE id=%s AND visitor_id=%s AND client_id=%s LIMIT 1
 SQL
-	$sql =~ s/\r?\n/ /g;
-	$sql =~ s/\s+/ /g;
-
-	unless ($self->{'data_source'}->is_read_only()) {
-		$self->{'dbh'}->do($sql);
-	}
-	$self->{'data_source'}->add_statement($sql);
 }
 
 sub delete_email {
 	my ($self, $id, $visitor_id) = @_;
 
-	my @params = ($id, $visitor_id, $self->{'client_id'});
-	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+	$self->_do_query(<<'SQL', [ $id, $visitor_id, $self->{'client_id'} ]);
 DELETE FROM email WHERE id=%s AND visitor_id=%s AND client_id=%s LIMIT 1
 SQL
-	$sql =~ s/\r?\n/ /g;
-	$sql =~ s/\s+/ /g;
-
-	unless ($self->{'data_source'}->is_read_only()) {
-		$self->{'dbh'}->do($sql);
-	}
-	$self->{'data_source'}->add_statement($sql);
 }
 
 sub set_visitor_address_id {

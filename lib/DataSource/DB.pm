@@ -230,6 +230,24 @@ sub get_connection_info {
 	return "$user".(defined $database?"/$database":'').($self->is_read_only()?' "readonly"':'')." #$connection_id";
 }
 
+sub _do_query {
+	my ($self, $sql_pattern, $params) = @_;
+
+	my $sql = sprintf($sql_pattern, map { $self->{'dbh'}->quote($_) } @$params);
+	$sql =~ s/\r?\n/ /g;
+	$sql =~ s/\s+/ /g;
+
+	$self->add_statement($sql);
+
+	if ($self->is_read_only()) {
+		return undef;
+	}
+	else {
+		$self->{'dbh'}->do($sql);
+		return $self->{'dbh'}->{'mysql_insertid'};
+	}
+}
+
 #sub get_single_db_connection {
 #    my ($self, $db_name) = @_;
 #
