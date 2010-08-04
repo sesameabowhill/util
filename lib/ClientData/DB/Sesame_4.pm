@@ -161,17 +161,17 @@ sub _search_by_name {
 sub add_colleague {
 	my ($self, $fname, $lname, $email, $password) = @_;
 
-	my $new_id = 1 + $self->{'dbh'}->selectrow_array("SELECT max(id) FROM referring_contacts");
+	my $new_id = 1 + $self->{'dbh'}->selectrow_array("SELECT max(id) FROM ".$self->{'db_name'}.".referring_contacts");
 
-	my $insert_cmd = "INSERT INTO referring_contacts (id, fname, lname, practice_name, email, speciality) VALUES (".$self->{'dbh'}->quote($new_id).", ".$self->{'dbh'}->quote($fname).", ".$self->{'dbh'}->quote($lname).", NULL, ".$self->{'dbh'}->quote($email).", NULL)";
+	my $insert_cmd = "INSERT INTO ".$self->{'db_name'}.".referring_contacts (id, fname, lname, practice_name, email, speciality) VALUES (".$self->{'dbh'}->quote($new_id).", ".$self->{'dbh'}->quote($fname).", ".$self->{'dbh'}->quote($lname).", NULL, ".$self->{'dbh'}->quote($email).", NULL)";
 	$self->{'dbh'}->do($insert_cmd);
 	$self->{'data_source'}->add_statement($insert_cmd);
 
-	my $si_insert_cmd = "INSERT INTO SI_Doctor (FName, LName, Status, Password, Deleted, WelcomeSent, PrivacyAccepted, ref_contact_id, AutoNotify) VALUES (NULL, NULL, 1, ".$self->{'dbh'}->quote($password).", 0, 0, 0, ".$self->{'dbh'}->quote($new_id).", 0)";
+	my $si_insert_cmd = "INSERT INTO ".$self->{'db_name'}.".SI_Doctor (FName, LName, Status, Password, Deleted, WelcomeSent, PrivacyAccepted, ref_contact_id, AutoNotify) VALUES (NULL, NULL, 1, ".$self->{'dbh'}->quote($password).", 0, 0, 0, ".$self->{'dbh'}->quote($new_id).", 0)";
 	$self->{'dbh'}->do($si_insert_cmd);
 	$self->{'data_source'}->add_statement($si_insert_cmd);
 
-	my $ref_insert_cmd = "INSERT INTO referrings (ref_fname, ref_lname, ref_email, ref_contact_id) VALUES (".$self->{'dbh'}->quote($fname).", ".$self->{'dbh'}->quote($lname).", ".$self->{'dbh'}->quote($email).", ".$self->{'dbh'}->quote($new_id).")";
+	my $ref_insert_cmd = "INSERT INTO ".$self->{'db_name'}.".referrings (ref_fname, ref_lname, ref_email, ref_contact_id) VALUES (".$self->{'dbh'}->quote($fname).", ".$self->{'dbh'}->quote($lname).", ".$self->{'dbh'}->quote($email).", ".$self->{'dbh'}->quote($new_id).")";
 	$self->{'dbh'}->do($ref_insert_cmd);
 	$self->{'data_source'}->add_statement($ref_insert_cmd);
 }
@@ -180,7 +180,7 @@ sub email_exists_by_colleague {
 	my ($self, $email) = @_;
 
 	return scalar $self->{'dbh'}->selectrow_array(
-		"SELECT count(*) FROM referring_contacts WHERE email=?",
+		"SELECT count(*) FROM ".$self->{'db_name'}.".referring_contacts WHERE email=?",
 		undef,
 		$email,
 	);
@@ -190,7 +190,7 @@ sub get_unsubscribed_emails {
 	my ($self) = @_;
 
 	return $self->{'dbh'}->selectall_arrayref(
-		"SELECT Email, Type FROM unsubscribe",
+		"SELECT Email, Type FROM ".$self->{'db_name'}.".unsubscribe",
 		{ 'Slice' => {} },
 	);
 }
@@ -294,7 +294,7 @@ sub get_sent_emails_by_pid_type {
 	my ($self, $pid, $type) = @_;
 
     return $self->{'dbh'}->selectall_arrayref(
-        "SELECT id, sml_resp_id AS RId, sml_pat_id AS PId, sml_email as Email, sml_date AS DateTime, sml_belongsto, sml_name, sml_mail_type, sml_mail_id, sml_body, sml_body_hash FROM sent_mail_log WHERE sml_mail_type=? AND sml_pat_id=? ORDER BY sml_date",
+        "SELECT id, sml_resp_id AS RId, sml_pat_id AS PId, sml_email as Email, sml_date AS DateTime, sml_belongsto, sml_name, sml_mail_type, sml_mail_id, sml_body, sml_body_hash FROM ".$self->{'db_name'}.".sent_mail_log WHERE sml_mail_type=? AND sml_pat_id=? ORDER BY sml_date",
 		{ 'Slice' => {} },
         $type,
         $pid,
@@ -305,7 +305,7 @@ sub count_sent_emails_by_type {
 	my ($self, $type) = @_;
 
     return scalar $self->{'dbh'}->selectrow_array(
-        "SELECT count(*) FROM sent_mail_log WHERE sml_mail_type=?",
+        "SELECT count(*) FROM ".$self->{'db_name'}.".sent_mail_log WHERE sml_mail_type=?",
         undef,
 		$type,
     );
@@ -316,7 +316,7 @@ sub get_all_si_images {
 	my ($self) = @_;
 
 	return $self->{'dbh'}->selectall_arrayref(
-        "SELECT ImageId, PatId, FileName FROM SI_Images",
+        "SELECT ImageId, PatId, FileName FROM ".$self->{'db_name'}.".SI_Images",
 		{ 'Slice' => {} },
     );
 }
@@ -325,7 +325,7 @@ sub count_all_si_images {
 	my ($self) = @_;
 
 	return scalar $self->{'dbh'}->selectrow_array(
-        "SELECT count(*) FROM SI_Images",
+        "SELECT count(*) FROM ".$self->{'db_name'}.".SI_Images",
 		undef,
     );
 }
@@ -334,7 +334,7 @@ sub get_si_patient_by_id {
 	my ($self, $pat_id) = @_;
 
 	return $self->{'dbh'}->selectall_arrayref(
-        "SELECT FName, LName, BDate FROM SI_Patients WHERE PatId=?",
+        "SELECT FName, LName, BDate FROM ".$self->{'db_name'}.".SI_Patients WHERE PatId=?",
 		{ 'Slice' => {} },
 		$pat_id,
     )->[0];
