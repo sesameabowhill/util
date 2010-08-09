@@ -979,4 +979,32 @@ SQL
 	return [ map {ref($self)->new_by_id($self->{'data_source'}, $_, $self->{'dbh'})} @$client_ids ];
 }
 
+sub get_all_offices {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id, address_id, name, pms_id FROM office WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->get_id(),
+    );
+}
+
+sub file_path_for_google_map {
+	my ($self, $address_id) = @_;
+
+	return File::Spec->join(
+    	$ENV{'SESAME_COMMON'},
+    	'google-maps',
+    	$address_id.'.gif',
+    );
+}
+
+sub delete_google_map {
+	my ($self, $address_id) = @_;
+
+	$self->_do_query(<<'SQL', [ $address_id ]);
+DELETE FROM google_map WHERE address_id=%s LIMIT 1
+SQL
+}
+
 1;
