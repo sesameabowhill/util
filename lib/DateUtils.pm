@@ -116,4 +116,19 @@ sub date_diff_in_days {
 	return $diff->in_units('days');
 }
 
+sub date_diff_in_seconds {
+	my ($class, $first_date, $second_date) = @_;
+
+	require DateTime::Format::Duration;
+
+	my $format = DateTime::Format::Duration->new(
+		'pattern' => '%s',
+	);
+
+	my $first_date_ref = DateTime::Format::MySQL->parse_datetime($first_date);
+	my $second_date_ref = DateTime::Format::MySQL->parse_datetime($second_date);
+	my $diff = $first_date_ref - $second_date_ref;
+	return $format->format_duration($diff);
+}
+
 1;
