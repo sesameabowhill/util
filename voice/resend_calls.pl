@@ -8,15 +8,16 @@ use DateTime::Format::MySQL;
 use Hash::Util qw( lock_keys );
 
 {
-    my $sending_date = '2009-10-14'; #Set to today's date
-    my $skip_date = '2009-10-14'; #set to yesterday
-    my $sending_datetime = "2009-10-15 08:00:00";# set time to NOW+30 min. +
+    my $sending_date = '2010-08-16'; #Set to today's date
+    my $skip_date = '2010-08-16'; #set to yesterday
+    my $sending_datetime = "2010-08-17 11:15:00";# set time to NOW+30 min. +
+    my $cid = 386;
     my $dbi = connect1();
-    my $calls = $dbi->selectall_arrayref(<<SQL, { Slice => {} }, "$sending_date 00:00:00", "$sending_date 23:59:59", "$skip_date%");
+    my $calls = $dbi->selectall_arrayref(<<SQL, { Slice => {} }, "$sending_date 00:00:00", "$sending_date 23:59:59", "$skip_date%", $cid);
 SELECT * FROM MessageHistory
-WHERE 
-	sent_type='transient' AND time2send >= ? AND time2send <= ? AND 
-	unique_key not like ? AND event_datetime > NOW()
+WHERE
+	sent_type='transient' AND time2send >= ? AND time2send <= ? AND
+	unique_key not like ? AND event_datetime > NOW() AND cid=?
 LIMIT 3000
 SQL
     printf "going to resend [%d] calls\n", scalar @$calls;

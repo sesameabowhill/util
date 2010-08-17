@@ -23,6 +23,7 @@
 				<exclude name="zip_codes/*.csv" />
 				<exclude name="zip_codes/*.CSV" />
 				<exclude name=".**/*" />
+				<exclude name=".*" />
 			</fileset>
 		</scp>
 	</target>
