@@ -84,7 +84,7 @@ sub _get_all_clients_username {
 		"cl_status=1" :
 		"cl_status IN (0,1)"
 	);
-	return $self->{'dbh'}->selectcol_arrayref("SELECT cl_username FROM client WHERE $where");
+	return $self->{'dbh'}->selectcol_arrayref("SELECT cl_username FROM client WHERE $where ORDER BY 1");
 }
 
 sub get_all_srm_resources {
