@@ -87,19 +87,8 @@ sub match_invisalign_patients {
 						$inv_patient,
 					);
 					if (defined $sesame_patient_id) {
-						$current_client_data->set_sesame_patient_for_invisalign_patient(
-							$inv_patient->{'case_number'},
-							$sesame_patient_id,
-						);
-						printf(
-							"MATCH [%s]: matched patient [%s %s] to [%s] at [%s]\n",
-							$inv_patient->{'case_number'},
-							$inv_patient->{'fname'},
-							$inv_patient->{'lname'},
-							$sesame_patient_id,
-							$current_client_data->get_username(),
-						);
 						if ($current_client_data->get_username() eq $client_data->get_username()) {
+							match_patient_to_sesame($current_client_data, $inv_patient, $sesame_patient_id);
 							$current_client_data->register_category("found sesame patient for invisalign patient");
 						}
 						else {
@@ -107,6 +96,7 @@ sub match_invisalign_patients {
 								$inv_patient->{'invisalign_client_id'},
 							);
 							if (defined $new_invisaling_client_id) {
+								match_patient_to_sesame($current_client_data, $inv_patient, $sesame_patient_id);
 								$current_client_data->register_category("found sesame patient for invisalign patient (with different client)");
 								$current_client_data->set_invisalign_client_id_for_invisalign_patient(
 									$inv_patient->{'case_number'},
@@ -114,7 +104,15 @@ sub match_invisalign_patients {
 								);
 							}
 							else {
-								$current_client_data->register_category("found sesame patient for invisalign patient (with different client) (no new inv id found)");
+								printf(
+									"UNMOVABLE [%s]: from [%s] to [%s] patient [%s %s]\n",
+									$inv_patient->{'case_number'},
+									$client_data->get_username(),
+									$current_client_data->get_username(),
+									$inv_patient->{'fname'},
+									$inv_patient->{'lname'},
+								);
+								$current_client_data->register_category("found sesame patient with different client for invisalign patient, but no suitable invisalign account found");
 							}
 						}
 						next PATIENT;
@@ -124,4 +122,21 @@ sub match_invisalign_patients {
 			}
 		}
 	}
+}
+
+sub match_patient_to_sesame {
+	my ($client_data, $inv_patient, $sesame_patient_id) = @_;
+
+	$client_data->set_sesame_patient_for_invisalign_patient(
+		$inv_patient->{'case_number'},
+		$sesame_patient_id,
+	);
+	printf(
+		"MATCH [%s]: matched patient [%s %s] to [%s] at [%s]\n",
+		$inv_patient->{'case_number'},
+		$inv_patient->{'fname'},
+		$inv_patient->{'lname'},
+		$sesame_patient_id,
+		$client_data->get_username(),
+	);
 }
