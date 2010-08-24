@@ -9,36 +9,21 @@ use lib qw(../lib);
 use CandidateManager;
 use DataSource::DB;
 use Repair::RepairClincheck;
+use Script;
 
-{
-	my (@clients) = @ARGV;
-	if (@clients) {
-	    my $start_time = time();
-		my $data_source = DataSource::DB->new();
-		$data_source->set_read_only(1);
-		@clients = @{ $data_source->expand_client_group( \@clients ) };
-	    for my $client_identity (@clients) {
-			my $client_data = $data_source->get_client_data_by_db($client_identity);
-			printf "database source: client [%s]\n", $client_identity;
-	    	match_invisalign_patients($client_data);
-	    }
-		my $fn = "_match_invisalign_patients.sql";
-		printf "write match commands to [$fn]\n";
-		$data_source->save_sql_commands_to_file($fn);
-		$data_source->print_category_stat();
-	    my $work_time = time() - $start_time;
-	    printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
+Script->simple_client_loop(
+	\@ARGV,
+	{
+		'read_only' => 1,
+		'client_data_handler' => \&match_invisalign_patients,
+		'save_sql_to_file' => '_match_invisalign_patients.sql',
 	}
-	else {
-	    print "Usage: $0 <database1> [database2...]\n";
-	    exit(1);
-	}
-}
+);
 
 sub match_invisalign_patients {
-	my ($start_client_data) = @_;
+	my ($logger, $start_client_data) = @_;
 
-	my $repair_module = Repair::RepairClincheck->new();
+	my $repair_module = Repair::RepairClincheck->new($logger);
 
 	my $shared_client_data = $start_client_data->get_clients_who_share_invisalign_accounts();
 	if (@$shared_client_data) {
@@ -62,7 +47,7 @@ sub match_invisalign_patients {
 			if ($inv_patient->{'patient_id'}) {
 				my $sesame_patient = $client_data->get_patient_by_id( $inv_patient->{'patient_id'} );
 				if (defined $sesame_patient) {
-					$client_data->register_category("matched invisalign patient");
+					$logger->register_category("matched invisalign patient");
 
 				}
 				else {
@@ -77,7 +62,7 @@ sub match_invisalign_patients {
 						$inv_patient->{'lname'},
 						$client_data->get_username(),
 					);
-					$client_data->register_category("invisalign patient is matched to orphan patient");
+					$logger->register_category("invisalign patient is matched to orphan patient");
 				}
 			}
 			else {
@@ -89,7 +74,7 @@ sub match_invisalign_patients {
 					if (defined $sesame_patient_id) {
 						if ($current_client_data->get_username() eq $client_data->get_username()) {
 							match_patient_to_sesame($current_client_data, $inv_patient, $sesame_patient_id);
-							$current_client_data->register_category("found sesame patient for invisalign patient");
+							$logger->register_category("found sesame patient for invisalign patient");
 						}
 						else {
 							my $new_invisaling_client_id = $current_client_data->get_invisalign_client_by_shared_invisalign_client(
@@ -97,7 +82,7 @@ sub match_invisalign_patients {
 							);
 							if (defined $new_invisaling_client_id) {
 								match_patient_to_sesame($current_client_data, $inv_patient, $sesame_patient_id);
-								$current_client_data->register_category("found sesame patient for invisalign patient (with different client)");
+								$logger->register_category("found sesame patient for invisalign patient (with different client)");
 								$current_client_data->set_invisalign_client_id_for_invisalign_patient(
 									$inv_patient->{'case_number'},
 									$new_invisaling_client_id,
@@ -112,13 +97,13 @@ sub match_invisalign_patients {
 									$inv_patient->{'fname'},
 									$inv_patient->{'lname'},
 								);
-								$current_client_data->register_category("found sesame patient with different client for invisalign patient, but no suitable invisalign account found");
+								$logger->register_category("found sesame patient with different client for invisalign patient, but no suitable invisalign account found");
 							}
 						}
 						next PATIENT;
 					}
 				}
-				$client_data->register_category("can't match invisalign patient");
+				$logger->register_category("can't match invisalign patient");
 			}
 		}
 	}

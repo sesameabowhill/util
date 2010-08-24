@@ -5,9 +5,10 @@ use strict;
 use warnings;
 
 sub new {
-	my ($class, $check_files) = @_;
+	my ($class, $logger, $check_files) = @_;
 
 	return bless {
+		'logger' => $logger,
 		'check_files' => (defined $check_files ? $check_files : 1),
 		'clients' => {},
 	}, $class;
@@ -24,7 +25,7 @@ sub repair_case_number {
 			$client_data->delete_invisalign_patient($case_number);
 			$client_data->delete_invisalign_processing_patient($case_number);
 		}
-		$data_access->add_category('case_number is not unique for invisalign patient (delete all)');
+		$self->{'logger'}->register_category('case_number is not unique for invisalign patient (delete all)');
 		print("case [$case_number]: duplicated invisalign for [".join(', ', @$inv_cl_ids)."]\n");
 		#warn "TODO: remove duplicated invisalign case [$case_number] for [".join(', ', @$inv_cl_ids)."]";
 	}
@@ -36,7 +37,7 @@ sub repair_case_number {
 				$client_data->delete_invisalign_patient($case_number);
 				$client_data->delete_invisalign_processing_patient($case_number);
 			}
-			$data_access->add_category('case_number is not unique for processing patient (delete all)');
+			$self->{'logger'}->register_category('case_number is not unique for processing patient (delete all)');
 			print("case [$case_number]: duplicated processing for [".join(', ', @$icp_cl_ids)."]\n");
 			#warn "TODO: remove duplicated processing case [$case_number] for [".join(', ', @$icp_cl_ids)."]";
 		}
@@ -102,19 +103,19 @@ sub repair_clincheck_for_single_client {
 	if (@$good_inv_ids) {
 		if ($icp_client_id eq $inv_client_id) {
 			my $done_str = $self->repair_processed_clincheck($client_data, $case_number);
-			$data_access->add_category("clincheck with single client$done_str");
+			$self->{'logger'}->register_category("clincheck with single client$done_str");
 		}
 		else {
 			#printf("case [%s]\n", $case_number);
 			fix_change_invisalign_id($client_data, $case_number, $good_inv_ids->[0]);
 			my $done_str = $self->repair_processed_clincheck($client_data, $case_number);
-			$data_access->add_category("clincheck with different invisalign client$done_str");
+			$self->{'logger'}->register_category("clincheck with different invisalign client$done_str");
 		}
 	}
 	else {
 		my $done_str = fix_remove_clincheck($client_data, $case_number);
 		print "case [$case_number]: file is missing\n";
-		$data_access->add_category("clincheck file is missing$done_str");
+		$self->{'logger'}->register_category("clincheck file is missing$done_str");
 	}
 }
 
@@ -161,12 +162,12 @@ sub repair_clincheck_for_two_clients {
 		if (@$good_icp_ids) {
 			$client_data_by_icp->set_invisalign_client_id_for_invisalign_patient( $case_number, $good_icp_ids->[0] );
 			print "case [$case_number]: 2 clients: switch to invisalign processing client [".$good_icp_ids->[0]."]\n";
-			$data_access->add_category('clincheck with two clients (switch to processing client)');
+			$self->{'logger'}->register_category('clincheck with two clients (switch to processing client)');
 		}
 		elsif (@$good_inv_ids) {
 			$client_data_by_inv->set_invisalign_client_id_for_invisalign_patient( $case_number, $good_inv_ids->[0] );
 			print "case [$case_number]: 2 clients: switch to invisalign client [".$good_inv_ids->[0]."]\n";
-			$data_access->add_category('clincheck with two clients (switch to invisalign client)');
+			$self->{'logger'}->register_category('clincheck with two clients (switch to invisalign client)');
 		}
 		else {
 			die "can't happend";
@@ -179,9 +180,9 @@ sub repair_clincheck_for_two_clients {
 		$client_data_by_icp->delete_invisalign_processing_patient($case_number);
 		$client_data_by_inv->delete_invisalign_processing_patient($case_number);
 
-		$data_access->add_category('clincheck file is missing from 2 clients');
+		$self->{'logger'}->register_category('clincheck file is missing from 2 clients');
 		print "case [$case_number]: file is missing\n";
-		#$data_access->add_category('clincheck with two clients');
+		#$self->{'logger'}->register_category('clincheck with two clients');
 	}
 }
 
@@ -191,7 +192,7 @@ sub repair_clincheck_with_one_icp_client {
 	my $case_number = $case->{'case_number'};
 	my $done_str = fix_remove_clincheck($client_data, $case_number, 1);
 	print "case [$case_number]: invisalign patient is missing$done_str\n";
-	$data_access->add_category("clincheck with icp client$done_str");
+	$self->{'logger'}->register_category("clincheck with icp client$done_str");
 }
 
 sub repair_clincheck_with_one_inv_client {
@@ -200,14 +201,14 @@ sub repair_clincheck_with_one_inv_client {
 	my $case_number = $case->{'case_number'};
 	my $done_str = fix_remove_clincheck($client_data, $case_number);
 	print "case [$case_number]: processing patient is missing$done_str\n";
-	$data_access->add_category("clincheck with inv client$done_str");
+	$self->{'logger'}->register_category("clincheck with inv client$done_str");
 }
 
 sub repair_missing_clincheck {
 	my ($self, $data_access, $case) = @_;
 
 	print "case [".$case->{'case_number'}."]: is not found in database\n";
-	$data_access->add_category("clincheck is not in database");
+	$self->{'logger'}->register_category("clincheck is not in database");
 }
 
 sub repair_processed_clincheck {

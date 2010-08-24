@@ -14,7 +14,6 @@ sub new {
     my $self = {
     	'read_only' => 0,
         'statements' => [],
-        'categories' => {},
         'affected_clients' => {},
     };
 
@@ -129,10 +128,12 @@ sub save_sql_commands_to_file {
 	my ($self, $file_name) = @_;
 
 	open(my $fh, '>', $file_name) or die "can't write [$file_name]: $!";
-	print $fh "-- $file_name\n";
-	for my $sql_cmd (sort @{ $self->{'statements'} }) {
-		$sql_cmd =~ s/\s+$//;
-		print $fh "$sql_cmd;\n";
+	if (@{ $self->{'statements'} }) {
+		print $fh "-- $file_name\n";
+		for my $sql_cmd (sort @{ $self->{'statements'} }) {
+			$sql_cmd =~ s/\s+$//;
+			print $fh "$sql_cmd;\n";
+		}
 	}
 	close($fh);
 }
@@ -150,33 +151,6 @@ sub add_statement {
         @{ $self->{'statements'} },
         $sql,
 	);
-}
-
-sub add_category {
-	my ($self, $category) = @_;
-
-	$self->register_category($category);
-}
-
-sub register_category {
-	my ($self, $category) = @_;
-
-	$self->{'categories'}{$category} ++;
-}
-
-sub print_category_stat {
-	my ($self) = @_;
-
-	my $stat = $self->get_categories_stat();
-	for my $category (sort keys %$stat) {
-		printf("%s - %d\n", $category, $stat->{$category});
-	}
-}
-
-sub get_categories_stat {
-	my ($self) = @_;
-
-	return $self->{'categories'};
 }
 
 sub _get_connection {

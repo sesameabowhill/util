@@ -10,46 +10,19 @@ use lib '../lib';
 
 use CSVWriter;
 use DataSource::DB;
+use Script;
 
-
-my @clients = @ARGV;
-if (@clients) {
-	my $data_access = DataSource::DB->new();
-	$data_access->set_read_only(1);
-	my $start_time = time();
-#    my $result_file = '_si_patients_without_images.csv';
-#    printf "writing result to [%s]\n", $result_file;
-#    my $output = CSVWriter->new(
-#    	$result_file,
-#    	[
-#    		'client',
-#    		'fname',
-#    		'lname',
-#    		'birthday',
-#    		'broken img count',
-#    		'pid',
-#    	],
-#    );
-
-	for my $client_db (@clients) {
-		my $client_data = $data_access->get_client_data_by_db($client_db);
-		printf "database source: client [%s]\n", $client_db;
-		my $data = find_broken_images($client_data);
-#		$output->write_data($data);
+Script->simple_client_loop(
+	\@ARGV,
+	{
+		'read_only' => 1,
+		'client_data_handler' => \&find_broken_images,
+		'save_sql_to_file' => '_delete_missing_invisalign_images.sql',
 	}
-	my $work_time = time() - $start_time;
-	my $fn = "_delete_missing_invisalign_images.sql";
-	printf "write delete commands to [$fn]\n";
-	$data_access->save_sql_commands_to_file($fn);
-	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
-}
-else {
-	print "Usage: $0 <client_db> ...\n";
-	exit(1);
-}
+);
 
 sub find_broken_images {
-	my ($client_data) = @_;
+	my ($logger, $client_data) = @_;
 
 	my $counter = 0;
 	my $invisaling_patients = $client_data->get_all_invisalign_patients();

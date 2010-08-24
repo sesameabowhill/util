@@ -11,9 +11,11 @@ use DataSource::DB;
 use Repair::Address;
 use Repair::Emails;
 use Repair::Phones;
+use Logger;
 
 {
 	$|=1;
+	my $logger = Logger->new();
 	my %actions = (
 		'phones'  => 'Repair::Phones',
 		'address' => 'Repair::Address',
@@ -29,7 +31,7 @@ use Repair::Phones;
 		@clients = @{ $data_source->expand_client_group( \@clients ) };
 
 	    my $start_time = time();
-	    my $repair = $actions{$action}->new();
+	    my $repair = $actions{$action}->new($logger);
 		for my $client_db (@clients) {
 			my $client_data = $data_source->get_client_data_by_db($client_db);
 			$repair->repair($client_data);
@@ -38,7 +40,7 @@ use Repair::Phones;
 		printf "write repair commands to [$fn]\n";
 		$data_source->save_sql_commands_to_file($fn);
 
-		$data_source->print_category_stat();
+		$logger->print_category_stat();
 
 	    my $work_time = time() - $start_time;
 	    printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;

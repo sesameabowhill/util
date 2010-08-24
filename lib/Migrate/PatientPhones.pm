@@ -5,15 +5,15 @@ use strict;
 use warnings;
 
 sub new {
-	my ($class) = @_;
+	my ($class, $logger) = @_;
 
 	return bless {
-
+		'logger' => $logger,
 	}, $class;
 }
 
 sub migrate {
-	my ($class, $client_data_5, $client_data_4) = @_;
+	my ($self, $client_data_5, $client_data_4) = @_;
 
 	if ($client_data_4->get_full_type() =~ m'^ortho') {
 		my $remap_tables = $client_data_4->get_all_remap_tables();
@@ -42,7 +42,7 @@ sub migrate {
 								$valid_phone_number,
 								$patient_phone->{'sms_active'},
 							);
-							$client_data_5->register_category("activate phone for sms");
+							$self->{'logger'}->register_category("activate phone for sms");
 							printf(
 								"CLIENT [%s]: set sms active for phone [%s]\n",
 								$client_data_5->get_username(),
@@ -50,12 +50,12 @@ sub migrate {
 							);
 						}
 						else {
-							$client_data_5->register_category("failed to find patient in 5.0");
+							$self->{'logger'}->register_category("failed to find patient in 5.0");
 						}
 
 					}
 					else {
-						$client_data_5->register_category("phone number is allready used");
+						$self->{'logger'}->register_category("phone number is allready used");
 						printf(
 							"CLIENT [%s]: number [%s] is already used\n",
 							$client_data_5->get_username(),
@@ -80,7 +80,7 @@ sub migrate {
 								$patient_phone->{'source'},
 								$patient_phone->{'entry_datetime'},
 							);
-							$client_data_5->register_category("phone added");
+							$self->{'logger'}->register_category("phone added");
 							printf(
 								"CLIENT [%s]: add phone [%s] to patient #%d [%s, %s]\n",
 								$client_data_5->get_username(),
@@ -91,16 +91,16 @@ sub migrate {
 							);
 						}
 						else {
-							$client_data_5->register_category("failed to find patient in 5.0");
+							$self->{'logger'}->register_category("failed to find patient in 5.0");
 						}
 					}
 					else {
-						$client_data_5->register_category("failed to find pms id in 4.6");
+						$self->{'logger'}->register_category("failed to find pms id in 4.6");
 					}
 				}
 			}
 			else {
-				$client_data_5->register_category("phone number is invalid");
+				$self->{'logger'}->register_category("phone number is invalid");
 			}
 			$processed_count ++;
 		}

@@ -8,28 +8,18 @@ use lib qw(../lib);
 
 use CandidateManager;
 use DataSource::DB;
+use Script;
 
-{
-	my (@clients) = @ARGV;
-	if (@clients) {
-		my $data_source = DataSource::DB->new();
-	    my $start_time = time();
-	    for my $client_identity (@clients) {
-			my $client_data = $data_source->get_client_data_by_db($client_identity);
-			printf "database source: client [%s]\n", $client_identity;
-	    	match_si_patients($client_data);
-	    }
-	    my $work_time = time() - $start_time;
-	    printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
+Script->simple_client_loop(
+	\@ARGV,
+	{
+		'read_only' => 0,
+		'client_data_handler' => \&match_si_patients,
 	}
-	else {
-	    print "Usage: $0 <database1> [database2...]\n";
-	    exit(1);
-	}
-}
+);
 
 sub match_si_patients {
-	my ($client_data) = @_;
+	my ($logger, $client_data) = @_;
 
 	$client_data->set_approx_search(1);
 	#my $sesame_patients = $client_data->get_all_patients();

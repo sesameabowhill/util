@@ -4,15 +4,18 @@
 use strict;
 use warnings;
 
+use Email::Valid;
+
 use lib qw( ../lib );
 
 use CandidateManager;
 use DataSource::DB;
-use Email::Valid;
+use Logger;
 
 my ($db_from, $db_to, $db_from_connection, $db_to_connection) = @ARGV;
 
 if (defined $db_to) {
+	my $logger = Logger->new();
 	printf("copying emails from [%s] to [%s]\n", $db_from, $db_to);
 	my $data_source_from = (
 		$db_from =~ s/^4:// ?
@@ -68,7 +71,7 @@ if (defined $db_to) {
 					"SKIP: email [%s] is already used\n",
 					$from_email->{'Email'},
 				);
-				$client_data_to->register_category('email exists');
+				$logger->register_category('email exists');
 			}
 			else {
 				my $candidate_manager = CandidateManager->new(
@@ -110,7 +113,7 @@ if (defined $db_to) {
 	#					$from_email->{'Source'},
 	#				);
 					$added_count++;
-					$client_data_to->register_category('email added');
+					$logger->register_category('email added');
 				}
 				else {
 					printf(
@@ -118,7 +121,7 @@ if (defined $db_to) {
 						$from_email->{'Email'},
 						$candidate_manager->candidates_count_str(),
 					);
-					$client_data_to->register_category('email not added (no candidate found)');
+					$logger->register_category('email not added (no candidate found)');
 				}
 			}
 		}
@@ -127,7 +130,7 @@ if (defined $db_to) {
 				"SKIP: email [%s] is invalid\n",
 				$from_email->{'Email'},
 			);
-			$client_data_to->register_category('email is invalid');
+			$logger->register_category('email is invalid');
 		}
 
 	}
@@ -138,7 +141,7 @@ if (defined $db_to) {
 	printf("write sql commands to [$result_sql_fn]\n");
 	$data_source_to->save_sql_commands_to_file($result_sql_fn);
 	printf("[%d] of [%d] emails added\n", $added_count, scalar @$from_emails);
-	$data_source_to->print_category_stat();
+	$logger->print_category_stat();
 
 	my $work_time = time() - $start_time;
 	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;

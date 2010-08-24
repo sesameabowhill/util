@@ -17,14 +17,14 @@ sub repair {
 		my $visitor = $client_data->get_visitor_by_id($email->{'visitor_id'});
 		if (defined $visitor) {
 			if (Email::Valid->address($email->{'Email'})) {
-				$client_data->register_category('valid email');
+				$self->{'logger'}->register_category('valid email');
 			}
 			else {
 				if (defined $email->{'pms_id'}) {
-					$client_data->register_category('invalid email from PMS');
+					$self->{'logger'}->register_category('invalid email from PMS');
 				}
 				else {
-					$client_data->register_category('invalid email from '.$email->{'Source'}.' (delete)');
+					$self->{'logger'}->register_category('invalid email from '.$email->{'Source'}.' (delete)');
 					$client_data->delete_email($email->{'id'}, $email->{'visitor_id'});
 					printf("DELETE [%s]: invalid email [%s] #%d (visitor #%d)\n", $client_data->get_username(), @$email{'Email', 'id', 'visitor_id'});
 				}
@@ -32,10 +32,10 @@ sub repair {
 		}
 		else {
 			if (defined $email->{'pms_id'}) {
-				$client_data->register_category('orphan email from PMS');
+				$self->{'logger'}->register_category('orphan email from PMS');
 			}
 			else {
-				$client_data->register_category('orphan email from '.$email->{'Source'}.' (delete)');
+				$self->{'logger'}->register_category('orphan email from '.$email->{'Source'}.' (delete)');
 				$client_data->delete_email($email->{'id'}, $email->{'visitor_id'});
 				printf("DELETE [%s]: orphan email [%s] #%d (visitor #%d)\n", $client_data->get_username(), @$email{'Email', 'id', 'visitor_id'});
 			}

@@ -5,9 +5,10 @@ use strict;
 use warnings;
 
 sub new {
-	my ($class) = @_;
+	my ($class, $logger) = @_;
 
 	return bless {
+		'logger' => $logger,
 	}, $class;
 }
 

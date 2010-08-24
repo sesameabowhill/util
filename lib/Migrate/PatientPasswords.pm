@@ -5,15 +5,15 @@ use strict;
 use warnings;
 
 sub new {
-	my ($class) = @_;
+	my ($class, $logger) = @_;
 
 	return bless {
-
+		'logger' => $logger,
 	}, $class;
 }
 
 sub migrate {
-	my ($class, $client_data_5, $client_data_4) = @_;
+	my ($self, $client_data_5, $client_data_4) = @_;
 
 	if ($client_data_4->get_full_type() eq 'ortho_resp') {
 		my $remap_tables = $client_data_4->get_all_remap_tables();
@@ -34,7 +34,7 @@ sub migrate {
 				);
 				if (@$responsible_5) {
 					$client_data_5->set_visitor_password_by_id($sesame_account->{'Password'}, $responsible_5->[0]{'RId'});
-					$client_data_5->register_category("password is changed");
+					$self->{'logger'}->register_category("password is changed");
 					if ($processed_count % 100 == 0) {
 						printf(
 							"CLIENT [%s]: (%d/%d) change password\n",
@@ -45,11 +45,11 @@ sub migrate {
 					}
 				}
 				else {
-					$client_data_5->register_category("failed to find responsible in 5.0");
+					$self->{'logger'}->register_category("failed to find responsible in 5.0");
 				}
 			}
 			else {
-				$client_data_5->register_category("failed to find pms id in 4.6");
+				$self->{'logger'}->register_category("failed to find pms id in 4.6");
 			}
 			$processed_count ++;
 		}

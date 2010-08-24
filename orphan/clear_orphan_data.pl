@@ -7,12 +7,13 @@ use warnings;
 use lib '../lib';
 
 use DataSource::DB;
-
+use Logger;
 use Orphan::SentMailLog;
 use Orphan::EmailContactLog;
 
 {
 	$|=1;
+	my $logger = Logger->new();
 	my %actions = (
 		'sent_mail_log'     => 'Orphan::SentMailLog',
 		'email_contact_log' => 'Orphan::EmailContactLog',
@@ -26,13 +27,13 @@ use Orphan::EmailContactLog;
 		$data_source->set_read_only(1);
 
 	    my $start_time = time();
-	    my $repair = $actions{$action}->new();
+	    my $repair = $actions{$action}->new($logger);
 		$repair->clear_orphan_data($data_source);
 		my $fn = "_clear_orphan_".$action.".sql";
 		printf "write repair commands to [$fn]\n";
 		$data_source->save_sql_commands_to_file($fn);
 
-		$data_source->print_category_stat();
+		$logger->print_category_stat();
 
 	    my $work_time = time() - $start_time;
 	    printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;

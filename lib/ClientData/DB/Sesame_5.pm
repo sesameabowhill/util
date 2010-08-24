@@ -297,7 +297,7 @@ sub get_all_responsibles {
     );
 }
 
-sub _get_invisalign_client_ids {
+sub get_invisalign_client_ids {
 	my ($self) = @_;
 
 	return $self->get_cached_data(

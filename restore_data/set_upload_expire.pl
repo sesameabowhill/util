@@ -8,6 +8,7 @@ use lib '../lib';
 
 use DataSource::DB;
 use DateUtils;
+use Logger;
 
 my $EXPIRE_KEY  = 'Reminder.UploadExpire';
 my $EXPIRE_TYPE = 'IVal';
@@ -15,6 +16,7 @@ my $EXPIRE_TYPE = 'IVal';
 my ($days, @clients) = @ARGV;
 if (@clients) {
 	$|=1;
+	my $logger = Logger->new();
 	my $start_time = time();
 	my $data_source = DataSource::DB->new();
 	@clients = @{ $data_source->expand_client_group( \@clients ) };
@@ -28,25 +30,22 @@ if (@clients) {
 				$data_source->set_read_only(1);
 				$client_data->set_profile_value($EXPIRE_KEY, $current_value, $EXPIRE_TYPE);
 				printf "CHANGE [".$client_data->get_username()."]: set expiration to [$days] days\n";
-				$client_data->register_category('settings changed');
+				$logger->register_category('settings changed');
 			}
 			else {
 				printf "SKIP [".$client_data->get_username()."]: current settings are not changed\n";
-				$client_data->register_category('no need to change settings');
+				$logger->register_category('no need to change settings');
 			}
 		}
 		else {
 			printf "SKIP [".$client_data->get_username()."]: set expiration key doesn't exists\n";
-			$client_data->register_category('profile key is not found');
+			$logger->register_category('profile key is not found');
 		}
 	}
 	my $fn = '_expiration_setting_backup.'.DateUtils->get_current_date_filename().'.sql';
 	print "write settings backup to [$fn]\n";
 	$data_source->save_sql_commands_to_file($fn);
-	my $stat = $data_source->get_categories_stat();
-	for my $category (sort keys %$stat) {
-		printf("%s - %d\n", $category, $stat->{$category});
-	}
+	$logger->print_category_stat();
 	my $work_time = time() - $start_time;
 	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
 }

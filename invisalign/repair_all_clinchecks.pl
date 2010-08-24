@@ -11,8 +11,10 @@ use lib '../lib';
 use DataSource::DB;
 use CandidateManager;
 use Repair::RepairClincheck;
+use Logger;
 
 {
+	my $logger = Logger->new();
 	my $data_access = DataSource::DB->new();
 	$data_access->set_read_only(1);
 	my $start_time = time();
@@ -24,7 +26,7 @@ use Repair::RepairClincheck;
 		print "skip file check\n";
 		$do_file_check = 0;
 	}
-	my $fixer = Repair::RepairClincheck->new($do_file_check);
+	my $fixer = Repair::RepairClincheck->new($logger, $do_file_check);
 	for my $case_number (@$case_numbers) {
 		$fixer->repair_case_number($data_access, $case_number);
 	}
@@ -33,10 +35,8 @@ use Repair::RepairClincheck;
 	my $fn = "_repair_all_clinchecks.sql";
 	printf "write repair commands to [$fn]\n";
 	$data_access->save_sql_commands_to_file($fn);
-	my $stat = $data_access->get_categories_stat();
-	for my $category (sort keys %$stat) {
-		printf("%s - %d\n", $category, $stat->{$category});
-	}
+	$logger->print_category_stat();
+
 	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
 
 }

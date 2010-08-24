@@ -18,6 +18,7 @@ sub new {
 
 	return bless {
 		'fh' => $fh,
+		'file_name' => $file_name,
 		'columns' => $columns,
 	}, $class;
 }
@@ -36,6 +37,12 @@ sub write_data {
 	for my $d (@$data) {
 		$self->write_item($d);
 	}
+}
+
+sub get_file_name {
+	my ($self) = @_;
+
+	return $self->{'file_name'};
 }
 
 DESTROY {

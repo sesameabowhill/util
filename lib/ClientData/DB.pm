@@ -125,7 +125,7 @@ sub _get_profile_type_id_by_column_name {
 sub _get_invisalign_quotes_ids {
 	my ($self, $case_number) = @_;
 
-	my $inv_client_ids = $self->_get_invisalign_client_ids();
+	my $inv_client_ids = $self->get_invisalign_client_ids();
 
 	if (@$inv_client_ids) {
 		return join(
@@ -147,11 +147,11 @@ sub file_path_for_invisalign_comment {
     );
 }
 
-sub register_category {
-	my ($self, $category) = @_;
-
-	$self->{'data_source'}->add_category($category);
-}
+#sub register_category {
+#	my ($self, $category) = @_;
+#
+#	$self->{'data_source'}->add_category($category);
+#}
 
 sub _do_query {
 	my ($self, $sql_pattern, $params) = @_;

@@ -83,7 +83,7 @@ sub repair_clincheck_with_one_icp_client {
 		},
 	);
 	#my $todo = $self->repair_processed_clincheck($client_data, $case->{'case_number'}, \@todo);
-	$data_access->add_category("clincheck is resurected$todo");
+	$self->{'logger'}->register_category("clincheck is resurected$todo");
 }
 
 sub repair_clincheck_with_one_inv_client {

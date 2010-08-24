@@ -7,7 +7,7 @@ use warnings;
 use lib '../lib';
 
 use DataSource::DB;
-
+use Logger;
 use Migrate::EmailReminderSettings;
 use Migrate::HHFForms;
 use Migrate::HHFAll;
@@ -15,7 +15,9 @@ use Migrate::SRMResources;
 use Migrate::SIColleagues;
 use Migrate::PatientPasswords;
 use Migrate::PatientPhones;
+
 {
+	my $logger = Logger->new();
 	my $data_source_5 = DataSource::DB->new_5();
 	my $data_source_4 = DataSource::DB->new_4();
 
@@ -34,7 +36,7 @@ use Migrate::PatientPhones;
 
 	if (exists $actions{$action} && @clients) {
 	    my $start_time = time();
-	    my $migrator = $actions{$action}->new();
+	    my $migrator = $actions{$action}->new($logger);
 		for my $client_db_5 (@clients) {
 			my $client_data_5 = $data_source_5->get_client_data_by_db($client_db_5);
 			my $username = $client_data_5->get_username();
@@ -47,7 +49,7 @@ use Migrate::PatientPhones;
 				printf "SKIP [%s]: client is not found sesame4\n";
 			}
 		}
-		$data_source_5->print_category_stat();
+		$logger->print_category_stat();
 	    my $work_time = time() - $start_time;
 	    printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
 	}

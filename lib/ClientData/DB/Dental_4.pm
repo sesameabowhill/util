@@ -254,15 +254,12 @@ sub _get_invisalign_patient_columns {
 sub get_all_invisalign_patients {
 	my ($self) = @_;
 
-	my $inv_client_ids = $self->_get_invisalign_client_ids();
+	my $inv_client_ids = $self->_get_invisalign_quotes_ids();
 
-	if (@$inv_client_ids) {
+	if ($inv_client_ids) {
 		return $self->{'dbh'}->selectall_arrayref(
 	        "SELECT ".$self->_get_invisalign_patient_columns()." FROM dentists.inv_patients
-	        WHERE client_id IN (".join(
-	        	", ",
-	        	map { $self->{'dbh'}->quote($_) } @$inv_client_ids
-	        ).")",
+	        WHERE client_id IN (".$inv_client_ids.")",
 			{ 'Slice' => {} },
 	    );
 	}
@@ -272,7 +269,7 @@ sub get_all_invisalign_patients {
 }
 
 
-sub _get_invisalign_client_ids {
+sub get_invisalign_client_ids {
 	my ($self) = @_;
 
 	return $self->get_cached_data(

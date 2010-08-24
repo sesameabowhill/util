@@ -17,29 +17,29 @@ sub repair {
 			if (length( $phone->{'number'} ) < 11) {
 				if (defined $phone->{'pms_id'}) {
 					if ($phone->{'sms_active'} || $phone->{'voice_active'}) {
-						$client_data->register_category('invalid active phone from PMS');
+						$self->{'logger'}->register_category('invalid active phone from PMS');
 						printf("DEACTIVATE [%s]: active PMS phone [%s] #%d (visitor #%d)\n", $client_data->get_username(), @$phone{'number', 'id', 'visitor_id'});
 					}
 					else {
-						$client_data->register_category('invalid phone from PMS');
+						$self->{'logger'}->register_category('invalid phone from PMS');
 					}
 				}
 				else {
-					$client_data->register_category('invalid phone from '.$phone->{'source'}.' (delete)');
+					$self->{'logger'}->register_category('invalid phone from '.$phone->{'source'}.' (delete)');
 					$client_data->delete_phone($phone->{'id'}, $phone->{'visitor_id'});
 					printf("DELETE [%s]: invalid phone [%s] #%d (visitor #%d)\n", $client_data->get_username(), @$phone{'number', 'id', 'visitor_id'});
 				}
 			}
 			else {
-				$client_data->register_category('valid phone');
+				$self->{'logger'}->register_category('valid phone');
 			}
 		}
 		else {
 			if (defined $phone->{'pms_id'}) {
-				$client_data->register_category('orphan phone from PMS');
+				$self->{'logger'}->register_category('orphan phone from PMS');
 			}
 			else {
-				$client_data->register_category('orphan phone from '.$phone->{'source'}.' (delete)');
+				$self->{'logger'}->register_category('orphan phone from '.$phone->{'source'}.' (delete)');
 				$client_data->delete_phone($phone->{'id'}, $phone->{'visitor_id'});
 				printf("DELETE [%s]: orphan phone [%s] #%d (visitor #%d)\n", $client_data->get_username(), @$phone{'number', 'id', 'visitor_id'});
 			}
