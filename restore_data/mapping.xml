@@ -173,9 +173,10 @@
 			</property>
 
 			<property column="hide_patient" default="false" />
+			<property column="hiding_patient_source" default="none" />
 			<property column="hide_insurance" default="false" />
-			<property column="hide_financial" default="false" />
 			<property column="hide_payments" default="false" />
+			<property column="hiding_financial_source" default="none" />
 			<property column="self" default="false" />
 		</additionalProperties>
 	</class>
@@ -220,7 +221,7 @@
 	<class name="Ledger" table="ledger">
 		<key>
 			<property name="ID" column="id">
-				<remap class="Ledger" addable="true" nullable="false" />
+				<remap class="Ledger" addable="false" nullable="true" />
 			</property>
 		</key>
 
@@ -409,6 +410,7 @@
 			<property column="archived" default="false" />
 			<property column="archived_date" />
 			<property column="archived_reason" />
+			<property column="added_to_calendar" default="false" />
 		</additionalProperties>
 
 		<trigger name="AppointmentTrigger" />
@@ -476,7 +478,7 @@
 	</class>
 
 	<class name="Phone" table="phone" embeddable="true"
-		externallyAddable="true">
+		externallyAddable="true" failOnInconsistentUpdate="true">
 		<key>
 			<property name="ID" column="id">
 				<remap class="Phone" addable="true" nullable="false" />
@@ -495,7 +497,7 @@
 	</class>
 
 	<class name="PatientPhoneLink" table="phone" embeds="Phone"
-		externallyAddable="true">
+		externallyAddable="true" failOnInconsistentUpdate="true">
 		<key>
 			<property name="ID" column="link_id">
 				<transformation method="linkId">
@@ -537,7 +539,7 @@
 	</class>
 
 	<class name="ResponsiblePhoneLink" table="phone" embeds="Phone"
-		externallyAddable="true">
+		externallyAddable="true" failOnInconsistentUpdate="true">
 		<key>
 			<property name="ID" column="link_id">
 				<transformation method="linkId">
@@ -579,7 +581,7 @@
 	</class>
 
 	<class name="EMail" table="email" embeddable="true"
-		externallyAddable="true">
+		externallyAddable="true" failOnInconsistentUpdate="true">
 		<key>
 			<property name="ID" column="id">
 				<remap class="EMail" addable="true" nullable="false" />
@@ -594,7 +596,7 @@
 	</class>
 
 	<class name="PatientEMailLink" table="email" embeds="EMail"
-		externallyAddable="true">
+		externallyAddable="true" failOnInconsistentUpdate="true">
 		<key>
 			<property name="ID" column="link_id">
 				<transformation method="linkId">
@@ -629,7 +631,7 @@
 	</class>
 
 	<class name="ResponsibleEMailLink" table="email" embeds="EMail"
-		externallyAddable="true">
+		externallyAddable="true" failOnInconsistentUpdate="true">
 		<key>
 			<property name="ID" column="link_id">
 				<transformation method="linkId">

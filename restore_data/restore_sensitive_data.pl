@@ -4,28 +4,48 @@
 use strict;
 use warnings;
 
+use Getopt::Long;
 use XML::LibXML;
 
 use lib '../lib';
 
 use DataSource::DB;
+use Logger;
 
 my ($username, $xml_file, $db_connection_string) = @ARGV;
+my $skip_passwords = 0;
+GetOptions(
+	'mapping-file=s'  => \$xml_file,
+	'db-connection=s' => \$db_connection_string,
+	'skip-passwords!' => \$skip_passwords,
+);
 if ($xml_file) {
+	my $logger = Logger->new();
 	my $data_source = DataSource::DB->new(undef, $db_connection_string);
 	my $client_data = $data_source->get_client_data_by_db($username);
-	print "load sensitive data from [$xml_file]\n";
+	$logger->printf("load sensitive data from [%s]", $xml_file);
 	my $sensitive_tables = get_sensitive_data_from_xml($xml_file);
+	if ($skip_passwords) {
+		$logger->printf("skip passwords");
+		for my $table (@$sensitive_tables) {
+			$table->{'columns'} = [ grep {$_ ne 'password'} @{ $table->{'columns'} } ];
+		}
+	}
 	for my $table (@$sensitive_tables) {
-		print "process table [".$table->{'name'}."]\n";
-		$client_data->dump_table_data(@$table{'name', 'id', 'columns', 'where'});
+		$logger->printf("process table [%s]", $table->{'name'});
+		$client_data->dump_table_data(@$table{'name', 'id', 'columns', 'where'}, $logger);
 	}
 	my $fn = '_'.$username.'.sensitive_data.sql';
-	print "write result to [$fn]\n";
+	$logger->printf("write result to [%s]", $fn);
 	$data_source->save_sql_commands_to_file($fn);
 }
 else {
-	print "Usage: $0 <username> <xml_file> [db_connection_string]\n";
+	print <<USAGE;
+Usage: $0 <username> [mapping-file] [db_connection_string] [options...]
+    --mapping-file=<file_name>
+    --db-connection=<db_user:db_password\@db_host:db_port/db_name>
+    --skip-passwords - do not restore passwords
+USAGE
 	exit(1);
 }
 
