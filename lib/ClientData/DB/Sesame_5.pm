@@ -277,6 +277,30 @@ sub get_visitor_by_id {
     );
 }
 
+sub get_patients_by_pms_id {
+    my ($self, $visitor_pms_id) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id AS VisitorId, ".$self->_get_visitor_columns()." FROM visitor WHERE type=? AND pms_id=? AND client_id=?",
+		{ 'Slice' => {} },
+		"patient",
+		$visitor_pms_id,
+		$self->{'client_id'},
+    );
+}
+
+sub get_responsibles_by_pms_id {
+    my ($self, $visitor_pms_id) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT id AS VisitorId, ".$self->_get_visitor_columns()." FROM visitor WHERE type=? AND pms_id=? AND client_id=?",
+		{ 'Slice' => {} },
+		"responsible",
+		$visitor_pms_id,
+		$self->{'client_id'},
+    );
+}
+
 sub get_patient_ids_by_responsible {
     my ($self, $rid) = @_;
 

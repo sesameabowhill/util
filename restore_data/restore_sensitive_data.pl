@@ -35,7 +35,7 @@ if ($xml_file) {
 		$logger->printf("process table [%s]", $table->{'name'});
 		$client_data->dump_table_data(@$table{'name', 'id', 'columns', 'where'}, $logger);
 	}
-	my $fn = '_'.$username.'.sensitive_data.sql';
+	my $fn = '_sensitive_data.'.$username.'.sql';
 	$logger->printf("write result to [%s]", $fn);
 	$data_source->save_sql_commands_to_file($fn);
 }

@@ -16,7 +16,6 @@ my ($db_from, $db_to, $db_from_connection, $db_to_connection) = @ARGV;
 
 if (defined $db_to) {
 	my $logger = Logger->new();
-	printf("copying emails from [%s] to [%s]\n", $db_from, $db_to);
 	my $data_source_from = (
 		$db_from =~ s/^4:// ?
 			DataSource::DB->new_4($db_from_connection) :
@@ -25,8 +24,8 @@ if (defined $db_to) {
 	my $data_source_to = DataSource::DB->new(undef, $db_to_connection);
 	$data_source_from->set_read_only(1);
 	$data_source_to->set_read_only(1);
-	printf(
-		"copy emails from [%s] (%s) -> [%s] (%s)\n",
+	$logger->printf(
+		"copy emails from [%s] (%s) -> [%s] (%s)",
 		$db_from,
 		$data_source_from->get_connection_info(),
 		$db_to,
@@ -67,8 +66,8 @@ if (defined $db_to) {
 	for my $from_email (@$from_emails) {
 		if (Email::Valid->address($from_email->{'Email'})) {
 			if ($client_data_to->email_is_used( $from_email->{'Email'} )) {
-				printf(
-					"SKIP: email [%s] is already used\n",
+				$logger->printf_slow(
+					"SKIP: email [%s] is already used",
 					$from_email->{'Email'},
 				);
 				$logger->register_category('email exists');
@@ -76,12 +75,13 @@ if (defined $db_to) {
 			else {
 				my $candidate_manager = CandidateManager->new(
 					{
-						'by_pat_resp_with_phone' => 1,
-						'by_pat_resp' => 2,
-						'by_pms_resp' => 3,
-						'by_pms_pat' => 4,
-						'by_resp' => 5,
-						'by_pat' => 6,
+						'by_pms_id' => 1,
+						'by_pat_resp_with_phone' => 2,
+						'by_pat_resp' => 3,
+						'by_pms_resp' => 4,
+						'by_pms_pat' => 5,
+						'by_resp' => 6,
+						'by_pat' => 7,
 					}
 				);
 
@@ -92,11 +92,12 @@ if (defined $db_to) {
 					$candidate_manager,
 				);
 
-				my $candidate = $candidate_manager->get_single_candidate();
+				my ($candidate, $found_by) = $candidate_manager->get_single_candidate_with_priority();
 				if (defined $candidate) {
-					printf(
-						"ADD: %s\n",
+					$logger->printf_slow(
+						"ADD: %s by %s",
 						$from_email->{'Email'},
+						$found_by,
 					);
 					$add_email{ $client_data_to->get_full_type() }->(
 						$client_data_to,
@@ -113,11 +114,11 @@ if (defined $db_to) {
 	#					$from_email->{'Source'},
 	#				);
 					$added_count++;
-					$logger->register_category('email added');
+					$logger->register_category('email added (matched by '.$found_by.')');
 				}
 				else {
-					printf(
-						"SKIP: %s - %s\n",
+					$logger->printf_slow(
+						"SKIP: %s - %s",
 						$from_email->{'Email'},
 						$candidate_manager->candidates_count_str(),
 					);
@@ -126,8 +127,8 @@ if (defined $db_to) {
 			}
 		}
 		else {
-			printf(
-				"SKIP: email [%s] is invalid\n",
+			$logger->printf(
+				"SKIP: email [%s] is invalid",
 				$from_email->{'Email'},
 			);
 			$logger->register_category('email is invalid');
@@ -138,16 +139,16 @@ if (defined $db_to) {
 #        print "$sql;\n";
 #    }
 	my $result_sql_fn = '_new_email.'.$db_to.'.sql';
-	printf("write sql commands to [$result_sql_fn]\n");
+	$logger->printf("write sql commands to [%s]", $result_sql_fn);
 	$data_source_to->save_sql_commands_to_file($result_sql_fn);
-	printf("[%d] of [%d] emails added\n", $added_count, scalar @$from_emails);
+	$logger->printf("[%d] of [%d] emails added", $added_count, scalar @$from_emails);
 	$logger->print_category_stat();
 
 	my $work_time = time() - $start_time;
-	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
+	$logger->printf("done in %d:%02d", $work_time / 60, $work_time % 60);
 }
 else {
-	print("Usage: $0 <db_from> <db_to> [db_from_connection] [db_to_connection]\n");
+	print("Usage: $0 <username_from> <username_to> [db_from_connection] [db_to_connection]\n");
 	exit(1);
 }
 
@@ -192,6 +193,15 @@ sub select_candidate_sesame_sesame {
 	my $visitor = $client_data_from->get_visitor_by_id( $from_email->{'VisitorId'} );
 	if ($visitor->{'type'} eq 'patient') {
 		{
+			my $patients = $client_data_to->get_patients_by_pms_id( $visitor->{'pms_id'} );
+			for my $patient (@$patients) {
+				$candidate_manager->add_candidate(
+					'by_pms_id',
+					$patient,
+				);
+			}
+		}
+		{
 			my $patients = $client_data_to->get_patients_by_name($visitor->{'FName'}, $visitor->{'LName'});
 			for my $patient (@$patients) {
 				$candidate_manager->add_candidate(
@@ -215,6 +225,15 @@ sub select_candidate_sesame_sesame {
 		}
 	}
 	else {
+		{
+			my $responsibles = $client_data_to->get_responsibles_by_pms_id( $visitor->{'pms_id'} );
+			for my $responsible (@$responsibles) {
+				$candidate_manager->add_candidate(
+					'by_pms_id',
+					$responsible,
+				);
+			}
+		}
 		{
 			my $responsibles = $client_data_to->get_responsibles_by_name($visitor->{'FName'}, $visitor->{'LName'});
 			for my $responsible (@$responsibles) {
