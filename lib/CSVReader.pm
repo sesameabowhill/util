@@ -8,7 +8,7 @@ use Text::CSV;
 use Hash::Util qw( lock_keys );
 
 sub new {
-	my ($class, $file_name, $columns, $sep_char) = @_;
+	my ($class, $file_name, $columns, $sep_char, $key_mapper) = @_;
 
     my $csv = Text::CSV->new(
         {
@@ -31,6 +31,7 @@ sub new {
 	return bless {
 		'fh' => $fh,
 		'csv' => $csv,
+		'key_mapper' => $key_mapper,
 #		'columns' => $columns,
 	}, $class;
 }
@@ -40,6 +41,18 @@ sub get_next_item {
 
 	my $line = $self->{'csv'}->getline_hr( $self->{'fh'} );
 	if (defined $line) {
+		if (defined $self->{'key_mapper'}) {
+			my %new_line;
+			for my $k (keys %$line) {
+				if (exists $self->{'key_mapper'}{$k}) {
+					$new_line{ $self->{'key_mapper'}{$k} } = $line->{$k};
+				}
+				else {
+					$new_line{$k} = $line->{$k};
+				}
+			}
+			$line = \%new_line;
+		}
     	lock_keys(%$line);
 	}
     return $line;

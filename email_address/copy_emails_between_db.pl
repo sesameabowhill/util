@@ -10,6 +10,7 @@ use lib qw( ../lib );
 
 use CandidateManager;
 use DataSource::DB;
+use DataSource::PMSMigrationBackup;
 use Logger;
 
 my ($db_from, $db_to, $db_from_connection, $db_to_connection) = @ARGV;
@@ -18,8 +19,11 @@ if (defined $db_to) {
 	my $logger = Logger->new();
 	my $data_source_from = (
 		$db_from =~ s/^4:// ?
-			DataSource::DB->new_4($db_from_connection) :
-			DataSource::DB->new(undef, $db_from_connection)
+			DataSource::DB->new_4($db_from_connection) : (
+				$db_from =~ s/^pms_migration_backup:// ?
+					DataSource::PMSMigrationBackup->new():
+					DataSource::DB->new(undef, $db_from_connection)
+			)
 	);
 	my $data_source_to = DataSource::DB->new(undef, $db_to_connection);
 	$data_source_from->set_read_only(1);
@@ -148,7 +152,12 @@ if (defined $db_to) {
 	$logger->printf("done in %d:%02d", $work_time / 60, $work_time % 60);
 }
 else {
-	print("Usage: $0 <username_from> <username_to> [db_from_connection] [db_to_connection]\n");
+	print <<USAGE;
+Usage: $0 <username_from> <username_to> [db_from_connection] [db_to_connection]
+Special username_from prefix:
+    4: - data should be loaded from sesame 4 database
+    pms_migration_backup: - data should be loaded from pms migration backup files
+USAGE
 	exit(1);
 }
 

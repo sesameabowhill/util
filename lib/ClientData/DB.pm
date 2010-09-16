@@ -12,31 +12,14 @@ my %PROFILE_COLUMN_TYPE_ID = (
 	'16' => 'TVal',
 );
 
+use base 'ClientData::Base';
+
 sub new {
 	my ($class, $data_source, $db_name) = @_;
 
-	my $self = bless {
-		'data_source' => $data_source,
-		'approx_search' => 0,
-		'cached_data' => {},
-	}, $class;
-
+	my $self = $class->SUPER::new();
+	$self->{'data_source'} = $data_source;
 	return $self;
-}
-
-sub set_approx_search {
-	my ($self, $level) = @_;
-
-	$self->{'approx_search'} = $level;
-}
-
-sub get_cached_data {
-	my ($self, $key, $generate_cache_sub) = @_;
-
-	unless (exists $self->{'cached_data'}{$key}) {
-		$self->{'cached_data'}{$key} = $generate_cache_sub->();
-	}
-	return $self->{'cached_data'}{$key};
 }
 
 sub _search_with_fields_by_name {
