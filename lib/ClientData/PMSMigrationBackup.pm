@@ -12,10 +12,11 @@ use CSVReader;
 use base 'ClientData::Base';
 
 sub new {
-	my ($class, $backup_folder) = @_;
+	my ($class, $backup_folder, $username) = @_;
 
 	my $self = $class->SUPER::new();
 	$self->{'backup_folder'} = $backup_folder;
+	$self->{'username'} = $username;
 	return $self;
 }
 
@@ -23,6 +24,12 @@ sub get_full_type {
 	my ($self) = @_;
 
 	return 'sesame';
+}
+
+sub get_username {
+	my ($self) = @_;
+
+	return $self->{'username'};
 }
 
 sub get_all_emails {

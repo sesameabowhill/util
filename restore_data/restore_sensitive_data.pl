@@ -12,13 +12,16 @@ use lib '../lib';
 use DataSource::DB;
 use Logger;
 
-my ($username, $xml_file, $db_connection_string) = @ARGV;
-my $skip_passwords = 0;
+my ($username, $xml_file, $db_connection_string, $skip_passwords);
 GetOptions(
 	'mapping-file=s'  => \$xml_file,
 	'db-connection=s' => \$db_connection_string,
 	'skip-passwords!' => \$skip_passwords,
 );
+$username //= $ARGV[0];
+$xml_file //= $ARGV[1];
+$db_connection_string //= $ARGV[2];
+
 if ($xml_file) {
 	my $logger = Logger->new();
 	my $data_source = DataSource::DB->new(undef, $db_connection_string);

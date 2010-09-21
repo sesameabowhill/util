@@ -5,6 +5,7 @@ use strict;
 use warnings;
 
 use Email::Valid;
+use Getopt::Long;
 
 use lib qw( ../lib );
 
@@ -12,19 +13,19 @@ use CandidateManager;
 use DataSource::DB;
 use DataSource::PMSMigrationBackup;
 use Logger;
+use Script;
 
-my ($db_from, $db_to, $db_from_connection, $db_to_connection) = @ARGV;
+my $match_by_pms_id = 0;
+GetOptions(
+	'match-by-pms-id!' => \$match_by_pms_id,
+);
+
+my ($db_from_param, $db_to, $db_from_connection, $db_to_connection) = @ARGV;
 
 if (defined $db_to) {
 	my $logger = Logger->new();
-	my $data_source_from = (
-		$db_from =~ s/^4:// ?
-			DataSource::DB->new_4($db_from_connection) : (
-				$db_from =~ s/^pms_migration_backup:// ?
-					DataSource::PMSMigrationBackup->new():
-					DataSource::DB->new(undef, $db_from_connection)
-			)
-	);
+
+	my ($db_from, $data_source_from) = Script->choose_data_source_by_username($db_from_param, $db_from_connection);
 	my $data_source_to = DataSource::DB->new(undef, $db_to_connection);
 	$data_source_from->set_read_only(1);
 	$data_source_to->set_read_only(1);
@@ -67,9 +68,17 @@ if (defined $db_to) {
 	my $start_time = time();
 	my $from_emails = $client_data_from->get_all_emails();
 	my $added_count = 0;
+	my %just_added_email;
 	for my $from_email (@$from_emails) {
 		if (Email::Valid->address($from_email->{'Email'})) {
-			if ($client_data_to->email_is_used( $from_email->{'Email'} )) {
+			if (exists $just_added_email{ trim_email( $from_email->{'Email'} ) }) {
+				$logger->printf_slow(
+					"SKIP: email [%s] is already added",
+					$from_email->{'Email'},
+				);
+				$logger->register_category('email is already added');
+			}
+			elsif ($client_data_to->email_is_used( $from_email->{'Email'} )) {
 				$logger->printf_slow(
 					"SKIP: email [%s] is already used",
 					$from_email->{'Email'},
@@ -79,7 +88,7 @@ if (defined $db_to) {
 			else {
 				my $candidate_manager = CandidateManager->new(
 					{
-						'by_pms_id' => 1,
+						($match_by_pms_id ? ( 'by_pms_id' => 1 ) : () ),
 						'by_pat_resp_with_phone' => 2,
 						'by_pat_resp' => 3,
 						'by_pms_resp' => 4,
@@ -118,6 +127,7 @@ if (defined $db_to) {
 	#					$from_email->{'Source'},
 	#				);
 					$added_count++;
+					$just_added_email{ trim_email( $from_email->{'Email'} ) } = 1;
 					$logger->register_category('email added (matched by '.$found_by.')');
 				}
 				else {
@@ -153,10 +163,12 @@ if (defined $db_to) {
 }
 else {
 	print <<USAGE;
-Usage: $0 <username_from> <username_to> [db_from_connection] [db_to_connection]
+Usage: $0 <username_from> <username_to> [db_from_connection] [db_to_connection] [...options]
 Special username_from prefix:
     4: - data should be loaded from sesame 4 database
     pms_migration_backup: - data should be loaded from pms migration backup files
+Options:
+    --match-by-pms-id - allow to match using PMS id
 USAGE
 	exit(1);
 }
@@ -201,7 +213,7 @@ sub select_candidate_sesame_sesame {
 
 	my $visitor = $client_data_from->get_visitor_by_id( $from_email->{'VisitorId'} );
 	if ($visitor->{'type'} eq 'patient') {
-		{
+		if ($candidate_manager->can_use_priority('by_pms_id')) {
 			my $patients = $client_data_to->get_patients_by_pms_id( $visitor->{'pms_id'} );
 			for my $patient (@$patients) {
 				$candidate_manager->add_candidate(
@@ -234,7 +246,7 @@ sub select_candidate_sesame_sesame {
 		}
 	}
 	else {
-		{
+		if ($candidate_manager->can_use_priority('by_pms_id')) {
 			my $responsibles = $client_data_to->get_responsibles_by_pms_id( $visitor->{'pms_id'} );
 			for my $responsible (@$responsibles) {
 				$candidate_manager->add_candidate(
@@ -432,3 +444,9 @@ sub add_email_to_visitor {
 	);
 }
 
+sub trim_email {
+	my ($email) = @_;
+
+	$email =~ s/^\s+|\s+$//g;
+	return lc($email);
+}

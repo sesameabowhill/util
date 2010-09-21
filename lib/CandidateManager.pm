@@ -66,4 +66,10 @@ sub get_single_candidate_with_priority {
 	return ();
 }
 
+sub can_use_priority {
+	my ($self, $priority) = @_;
+
+	return exists $self->{'priorities'}{$priority};
+}
+
 1;
