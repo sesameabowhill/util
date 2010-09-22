@@ -1034,4 +1034,14 @@ DELETE FROM google_map WHERE address_id=%s LIMIT 1
 SQL
 }
 
+sub get_sent_mail_log_by_visitor_id {
+	my ($self, $visitor_id) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT id, visitor_id, sml_belongsto AS BelongsTo, sml_email AS Email, sml_name AS Name, sml_mail_type, sml_date AS Date, sml_mail_id, sml_body, sml_body_hash, contact_log_id FROM email_sent_mail_log WHERE visitor_id=?",
+		{ 'Slice' => {} },
+        $visitor_id,
+	);
+}
+
 1;

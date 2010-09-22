@@ -6,6 +6,7 @@ use warnings;
 
 use Email::Valid;
 use Getopt::Long;
+use Hash::Util qw( lock_keys );
 
 use lib qw( ../lib );
 
@@ -16,9 +17,14 @@ use Logger;
 use Script;
 
 my $match_by_pms_id = 0;
+my $load_emails_from_archive = undef;
 GetOptions(
 	'match-by-pms-id!' => \$match_by_pms_id,
+	'load-emails-from-archive=s' => \$load_emails_from_archive,
 );
+if (defined $load_emails_from_archive && $load_emails_from_archive !~ m{^\d{4}-\d{2}-\d{2}$}) {
+	die "invalid options value --load-emails-from-archive=$load_emails_from_archive";
+}
 
 my ($db_from_param, $db_to, $db_from_connection, $db_to_connection) = @ARGV;
 
@@ -66,7 +72,11 @@ if (defined $db_to) {
 	}
 
 	my $start_time = time();
-	my $from_emails = $client_data_from->get_all_emails();
+	my $from_emails = (
+		defined $load_emails_from_archive ?
+			load_emails_from_archive($logger, $client_data_from, $load_emails_from_archive) :
+			$client_data_from->get_all_emails()
+	);
 	my $added_count = 0;
 	my %just_added_email;
 	for my $from_email (@$from_emails) {
@@ -169,8 +179,46 @@ Special username_from prefix:
     pms_migration_backup: - data should be loaded from pms migration backup files
 Options:
     --match-by-pms-id - allow to match using PMS id
+    --load-emails-from-archive=YYYY-MM-DD - load emails based on email archive before date
 USAGE
 	exit(1);
+}
+
+sub load_emails_from_archive {
+	my ($logger, $client_data, $max_date) = @_;
+
+	if (length $max_date == 10) {
+		$max_date .= ' 00:00:00';
+	}
+	$logger->printf("loading emails from email archive before [%s]", $max_date);
+	my $all_visitors = $client_data->get_all_visitors();
+	my @emails;
+	for my $visitor (@$all_visitors) {
+		my $sent_mail_log = $client_data->get_sent_mail_log_by_visitor_id( $visitor->{'id'} );
+		my %emails;
+		for my $sent_mail (@$sent_mail_log) {
+			$emails{ trim_email( $sent_mail->{'Email'} ) } = $sent_mail;
+		}
+		$logger->printf_slow(
+			"visitor #%d: [%d] email%s found",
+			$visitor->{'id'},
+			scalar keys %emails,
+			(keys %emails == 1 ? '' : 's'),
+		);
+		for my $email (values %emails) {
+			my %row = (
+				'VisitorId' => $visitor->{'id'},
+				'Email'     => $email->{'Email'},
+				'BelongsTo' => $email->{'BelongsTo'},
+				'Name'      => $email->{'Name'},
+				'Source'    => 'other',
+				'Deleted'   => 'false',
+			);
+			lock_keys(%row);
+			push(@emails, \%row);
+		}
+	}
+	return \@emails;
 }
 
 sub select_candidate_resp_sesame {
