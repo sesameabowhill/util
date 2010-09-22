@@ -197,7 +197,9 @@ sub load_emails_from_archive {
 		my $sent_mail_log = $client_data->get_sent_mail_log_by_visitor_id( $visitor->{'id'} );
 		my %emails;
 		for my $sent_mail (@$sent_mail_log) {
-			$emails{ trim_email( $sent_mail->{'Email'} ) } = $sent_mail;
+			if ($sent_mail->{'Date'} lt $max_date) {
+				$emails{ trim_email( $sent_mail->{'Email'} ) } = $sent_mail;
+			}
 		}
 		$logger->printf_slow(
 			"visitor #%d: [%d] email%s found",
