@@ -17,9 +17,11 @@ use Logger;
 use Script;
 
 my $match_by_pms_id = 0;
+my $add_duplicated_emails = 0;
 my $load_emails_from_archive = undef;
 GetOptions(
 	'match-by-pms-id!' => \$match_by_pms_id,
+	'add-duplicated-emails!' => \$add_duplicated_emails,
 	'load-emails-from-archive=s' => \$load_emails_from_archive,
 );
 if (defined $load_emails_from_archive && $load_emails_from_archive !~ m{^\d{4}-\d{2}-\d{2}$}) {
@@ -81,21 +83,32 @@ if (defined $db_to) {
 	my %just_added_email;
 	for my $from_email (@$from_emails) {
 		if (Email::Valid->address($from_email->{'Email'})) {
-			if (exists $just_added_email{ trim_email( $from_email->{'Email'} ) }) {
-				$logger->printf_slow(
-					"SKIP: email [%s] is already added",
-					$from_email->{'Email'},
-				);
-				$logger->register_category('email is already added');
-			}
-			elsif ($client_data_to->email_is_used( $from_email->{'Email'} )) {
-				$logger->printf_slow(
-					"SKIP: email [%s] is already used",
-					$from_email->{'Email'},
-				);
-				$logger->register_category('email exists');
+			my $add_email;
+			if ($add_duplicated_emails) {
+				$add_email = 1;
 			}
 			else {
+				if (exists $just_added_email{ trim_email( $from_email->{'Email'} ) }) {
+					$logger->printf_slow(
+						"SKIP: email [%s] is already added",
+						$from_email->{'Email'},
+					);
+					$logger->register_category('email is already added');
+					$add_email = 0;
+				}
+				elsif ($client_data_to->email_is_used( $from_email->{'Email'} )) {
+					$logger->printf_slow(
+						"SKIP: email [%s] is already used",
+						$from_email->{'Email'},
+					);
+					$logger->register_category('email exists');
+					$add_email = 0;
+				}
+				else {
+					$add_email = 1;
+				}
+			}
+			if ($add_email) {
 				my $candidate_manager = CandidateManager->new(
 					{
 						($match_by_pms_id ? ( 'by_pms_id' => 1 ) : () ),
@@ -178,6 +191,7 @@ Special username_from prefix:
     4: - data should be loaded from sesame 4 database
     pms_migration_backup: - data should be loaded from pms migration backup files
 Options:
+    --add-duplicated-emails - add duplicated emails
     --match-by-pms-id - allow to match using PMS id
     --load-emails-from-archive=YYYY-MM-DD - load emails based on email archive before date
 USAGE
