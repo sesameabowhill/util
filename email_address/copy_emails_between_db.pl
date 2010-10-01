@@ -88,15 +88,7 @@ if (defined $db_to) {
 				$add_email = 1;
 			}
 			else {
-				if (exists $just_added_email{ trim_email( $from_email->{'Email'} ) }) {
-					$logger->printf_slow(
-						"SKIP: email [%s] is already added",
-						$from_email->{'Email'},
-					);
-					$logger->register_category('email is already added');
-					$add_email = 0;
-				}
-				elsif ($client_data_to->email_is_used( $from_email->{'Email'} )) {
+				if ($client_data_to->email_is_used( $from_email->{'Email'} )) {
 					$logger->printf_slow(
 						"SKIP: email [%s] is already used",
 						$from_email->{'Email'},
@@ -104,6 +96,14 @@ if (defined $db_to) {
 					$logger->register_category('email exists');
 					$add_email = 0;
 				}
+#				elsif (exists $just_added_email{ trim_email( $from_email->{'Email'} ) }) {
+#					$logger->printf_slow(
+#						"SKIP: email [%s] is already added",
+#						$from_email->{'Email'},
+#					);
+#					$logger->register_category('email is already added');
+#					$add_email = 0;
+#				}
 				else {
 					$add_email = 1;
 				}
