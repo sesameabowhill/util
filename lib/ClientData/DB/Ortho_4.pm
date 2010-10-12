@@ -262,15 +262,15 @@ sub get_patients_by_name_and_phone_and_ids {
     	$self->{'db_name'}.".patients",
     	$fname,
     	$lname,
-    	"Phone LIKE ".$self->{'dbh'}->quote($self->_string_to_like($phone)).
-    	"AND PId IN (".join(', ', map {$self->{'dbh'}->quote($_)} @$ids).")",
+    	"Phone RLIKE ".$self->{'dbh'}->quote( $self->_string_to_rlike($phone) ).
+    	"AND PId IN (".join(', ', map { $self->{'dbh'}->quote($_) } @$ids).")",
     );
 }
 
 sub get_responsible_ids_by_name {
     my ($self, $fname, $lname) = @_;
 
-    return $self->_search_by_name('RId', 'responsibles', $fname, $lname);
+    return $self->_search_by_name('RId', $self->{'db_name'}.'.responsibles', $fname, $lname);
 }
 
 sub get_patient_by_id {

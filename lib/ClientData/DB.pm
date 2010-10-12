@@ -70,6 +70,7 @@ sub _search_with_fields_by_name {
 sub _string_to_rlike {
 	my ($self, $str) = @_;
 
+	$str =~ s/([\[\]])/\\$1/g;
 	$str =~ s/[\(\)*?]/ /g;
 	$str =~ s/\b/ /g;
 	$str =~ s/\s+/.*/g;
