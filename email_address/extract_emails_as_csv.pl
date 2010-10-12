@@ -2,6 +2,8 @@
 use strict;
 use warnings;
 
+use Hash::Util qw( lock_keys );
+
 use lib qw( ../lib );
 
 use CSVWriter;
@@ -40,7 +42,7 @@ sub extract_emails {
 			$logger->register_category('email is deleted');
 		}
 		else {
-			my $visitor = $client_data->get_visitor_by_id( $email->{'VisitorId'} );
+			my $visitor = find_visitor_for_email($client_data, $email);
 			push(
 				@result,
 				{
@@ -59,6 +61,29 @@ sub extract_emails {
 		}
 	}
 	return \@result;
+}
+
+sub find_visitor_for_email {
+	my ($client_data, $email) = @_;
+
+	if ($client_data->get_full_type() eq 'sesame') {
+		return $client_data->get_visitor_by_id( $email->{'VisitorId'} );
+	}
+	elsif ($client_data->get_full_type() eq 'ortho_resp') {
+		my $responsible = $client_data->get_responsible_by_id( $email->{'RId'} );
+		my %r = (
+			'id'    => $responsible->{'RId'},
+			'FName' => $responsible->{'FName'},
+			'LName' => $responsible->{'LName'},
+			'type'  => 'responsible',
+			'BDate' => '',
+		);
+		lock_keys(%r);
+		return \%r;
+	}
+	else {
+		die "client type [".$client_data->get_full_type()."] is not supported";
+	}
 }
 
 sub overwrite_source {

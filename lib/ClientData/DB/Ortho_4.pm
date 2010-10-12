@@ -173,7 +173,8 @@ $moved_fields
     ml_date AS Date,
 	ml_status AS Status,
 	ml_source AS Source,
-	'false' AS Deleted
+	'false' AS Deleted,
+	NULL AS pms_id
 FROM $table
 SQL
 }
