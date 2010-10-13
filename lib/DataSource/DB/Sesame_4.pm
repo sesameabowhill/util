@@ -43,10 +43,10 @@ sub remove_resource {
 #}
 
 sub get_client_data_by_db {
-    my ($self, $db) = @_;
+    my ($self, $db, $force_type) = @_;
 
     require ClientData::DB::Sesame_4;
-    return ClientData::DB::Sesame_4->new($self, $db, $self->{'dbh'});
+    return ClientData::DB::Sesame_4->new($self, $db, $self->{'dbh'}, $force_type);
 }
 
 sub get_client_data_by_id {

@@ -25,6 +25,15 @@ sub get_all_sesame_accounts {
 	);
 }
 
+sub get_sent_mail_log_by_pid {
+	my ($self, $pid) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT ".$self->_get_sent_mail_log_fields()." FROM ".$self->{'db_name'}.".sent_mail_log WHERE sml_pat_id=? ORDER BY sml_date",
+		{ 'Slice' => {} },
+        $pid,
+    );
+}
 
 
 1;

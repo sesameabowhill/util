@@ -19,7 +19,7 @@ my $DENTAL_CLIENT_PARAMS = "$COMMON_CLIENT_PARAMS, 'dental' AS type, cl_mysql AS
 
 
 sub new {
-	my ($class, $data_source, $db_name, $dbh) = @_;
+	my ($class, $data_source, $db_name, $dbh, $force_type) = @_;
 
 	my $self = $class->SUPER::new($data_source, $db_name);
 
@@ -28,7 +28,7 @@ sub new {
 	unless (defined $self->{'client'}) {
 		die "can't find client by [$db_name]";
 	}
-	return $self->_init_params();
+	return $self->_init_params($force_type);
 }
 
 sub new_by_id {
@@ -46,34 +46,50 @@ sub new_by_id {
 }
 
 sub _init_params {
-	my ($self) = @_;
+	my ($self, $force_type) = @_;
 
 	my $class;
 
-	my $client_type = $self->{'client'}{'type'};
-	if ($client_type eq 'dental') {
-		$class = 'ClientData::DB::Dental_4';
-		require ClientData::DB::Dental_4;
+	my $client_type;
+	if (defined $force_type) {
+		$client_type = $force_type;
 	}
 	else {
-		my $db_name = $self->{'client'}{'db_name'};
-		my $context = $self->{'dbh'}->selectrow_array(<<'SQL', undef, $db_name);
+		if ($self->{'client'}{'type'} eq 'dental') {
+			$client_type = $self->{'client'}{'type'};
+		}
+		else {
+			my $context = $self->{'dbh'}->selectrow_array(<<'SQL', undef, $self->{'client'}{'db_name'});
 SELECT s.dbs_context
 FROM sesameweb.clients cl
 LEFT JOIN sesameweb.udbf_software s ON (s.dbs_id=cl.cl_pms)
 WHERE cl.cl_mysql=?
 SQL
-		if ($context eq 'pat') {
-			$class = 'ClientData::DB::OrthoPat_4';
-			require ClientData::DB::OrthoPat_4;
+			if ($context eq 'pat') {
+				$client_type = 'ortho_pat';
+			}
+			elsif ($context eq 'resp') {
+				$client_type = 'ortho_resp';
+			}
+			else {
+				die "unknown Ortho context [$context] for [".$self->{'client'}{'db_name'}."]";
+			}
 		}
-		elsif ($context eq 'resp') {
-			$class = 'ClientData::DB::OrthoResp_4';
-			require ClientData::DB::OrthoResp_4;
-		}
-		else {
-			die "unknown Ortho context [$context] for [$db_name]";
-		}
+	}
+	if ($client_type eq 'dental') {
+		$class = 'ClientData::DB::Dental_4';
+		require ClientData::DB::Dental_4;
+	}
+	elsif ($client_type eq 'ortho_pat') {
+		$class = 'ClientData::DB::OrthoPat_4';
+		require ClientData::DB::OrthoPat_4;
+	}
+	elsif ($client_type eq 'ortho_resp') {
+		$class = 'ClientData::DB::OrthoResp_4';
+		require ClientData::DB::OrthoResp_4;
+	}
+	else {
+		die "unknown type [$client_type] forced in 4.6 for [".$self->{'client'}{'db_name'}."]";
 	}
 	$self->{'db_name'} = $self->{'client'}{'db_name'};
 	return bless($self, $class);
@@ -294,11 +310,17 @@ sub get_sent_emails_by_pid_type {
 	my ($self, $pid, $type) = @_;
 
     return $self->{'dbh'}->selectall_arrayref(
-        "SELECT id, sml_resp_id AS RId, sml_pat_id AS PId, sml_email as Email, sml_date AS DateTime, sml_belongsto, sml_name, sml_mail_type, sml_mail_id, sml_body, sml_body_hash FROM ".$self->{'db_name'}.".sent_mail_log WHERE sml_mail_type=? AND sml_pat_id=? ORDER BY sml_date",
+        "SELECT ".$self->_get_sent_mail_log_fields()." FROM ".$self->{'db_name'}.".sent_mail_log WHERE sml_mail_type=? AND sml_pat_id=? ORDER BY sml_date",
 		{ 'Slice' => {} },
         $type,
         $pid,
     );
+}
+
+sub _get_sent_mail_log_fields {
+	my ($class) = @_;
+
+	return 'id, sml_resp_id AS RId, sml_pat_id AS PId, sml_email as Email, sml_date AS DateTime, sml_belongsto AS BelongsTo, sml_name AS Name, sml_mail_type, sml_mail_id, sml_body, sml_body_hash';
 }
 
 sub count_sent_emails_by_type {

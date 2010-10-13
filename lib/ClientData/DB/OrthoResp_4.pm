@@ -30,7 +30,14 @@ sub get_all_sesame_accounts {
 	);
 }
 
+sub get_sent_mail_log_by_rid {
+	my ($self, $rid) = @_;
 
-
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT ".$self->_get_sent_mail_log_fields()." FROM ".$self->{'db_name'}.".sent_mail_log WHERE sml_resp_id=? ORDER BY sml_date",
+		{ 'Slice' => {} },
+        $rid,
+    );
+}
 
 1;

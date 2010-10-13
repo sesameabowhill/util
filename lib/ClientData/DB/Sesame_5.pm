@@ -9,8 +9,11 @@ use File::Spec;
 use base qw( ClientData::DB );
 
 sub new {
-	my ($class, $data_source, $db_name, $dbh) = @_;
+	my ($class, $data_source, $db_name, $dbh, $force_type) = @_;
 
+	if (defined $force_type && $force_type ne 'sesame') {
+		die "unknown client type [$force_type] forced in 5.0 for [$db_name]";
+	}
 	return $class->_new_by($data_source, 'cl_username', $db_name, $dbh);
 }
 
@@ -1038,7 +1041,7 @@ sub get_sent_mail_log_by_visitor_id {
 	my ($self, $visitor_id) = @_;
 
 	return $self->{'dbh'}->selectall_arrayref(
-		"SELECT id, visitor_id, sml_belongsto AS BelongsTo, sml_email AS Email, sml_name AS Name, sml_mail_type, sml_date AS Date, sml_mail_id, sml_body, sml_body_hash, contact_log_id FROM email_sent_mail_log WHERE visitor_id=?",
+		"SELECT id, visitor_id, sml_belongsto AS BelongsTo, sml_email AS Email, sml_name AS Name, sml_mail_type, sml_date AS DateTime, sml_mail_id, sml_body, sml_body_hash, contact_log_id FROM email_sent_mail_log WHERE visitor_id=?",
 		{ 'Slice' => {} },
         $visitor_id,
 	);

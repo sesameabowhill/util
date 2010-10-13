@@ -300,6 +300,15 @@ sub get_all_patients {
     );
 }
 
+sub get_all_responsibles {
+    my ($self) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT RId, FName, LName FROM ".$self->{'db_name'}.".responsibles ORDER BY 3,2",
+		{ 'Slice' => {} },
+    );
+}
+
 sub get_addresses_by_pid {
 	my ($self, $pid) = @_;
 

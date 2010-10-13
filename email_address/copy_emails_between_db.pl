@@ -19,10 +19,12 @@ use Script;
 my $match_by_pms_id = 0;
 my $add_duplicated_emails = 0;
 my $load_emails_from_archive = undef;
+my $force_from_client_type = undef;
 GetOptions(
 	'match-by-pms-id!' => \$match_by_pms_id,
 	'add-duplicated-emails!' => \$add_duplicated_emails,
 	'load-emails-from-archive=s' => \$load_emails_from_archive,
+	'force-from-client-type=s' => \$force_from_client_type,
 );
 if (defined $load_emails_from_archive && $load_emails_from_archive !~ m{^\d{4}-\d{2}-\d{2}$}) {
 	die "invalid options value --load-emails-from-archive=$load_emails_from_archive";
@@ -37,15 +39,17 @@ if (defined $db_to) {
 	my $data_source_to = DataSource::DB->new(undef, $db_to_connection);
 	$data_source_from->set_read_only(1);
 	$data_source_to->set_read_only(1);
+	my $client_data_from = $data_source_from->get_client_data_by_db($db_from, $force_from_client_type);
+	my $client_data_to   = $data_source_to->get_client_data_by_db($db_to);
 	$logger->printf(
-		"copy emails from [%s] (%s) -> [%s] (%s)",
+		"copy emails from %s [%s] (%s) -> %s [%s] (%s)",
+		$client_data_from->get_full_type(),
 		$db_from,
 		$data_source_from->get_connection_info(),
+		$client_data_to->get_full_type(),
 		$db_to,
 		$data_source_to->get_connection_info(),
 	);
-	my $client_data_from = $data_source_from->get_client_data_by_db($db_from);
-	my $client_data_to   = $data_source_to->get_client_data_by_db($db_to);
 
 	my %candidate_selectors = (
 		'ortho_resp' => {
@@ -73,12 +77,29 @@ if (defined $db_to) {
 		die "can't convert data from [".$client_data_from->get_full_type()."] to [".$client_data_to->get_full_type()."]";
 	}
 
+
 	my $start_time = time();
-	my $from_emails = (
-		defined $load_emails_from_archive ?
-			load_emails_from_archive($logger, $client_data_from, $load_emails_from_archive) :
-			$client_data_from->get_all_emails()
-	);
+	my $from_emails;
+	if (defined $load_emails_from_archive) {
+		my %load_emails_from_archive_method = (
+			'sesame'     => \&load_emails_from_archive_sesame,
+			'ortho_resp' => \&load_emails_from_archive_ortho_resp,
+			'ortho_pat'   => \&load_emails_from_archive_ortho_pat,
+		);
+		if (exists $load_emails_from_archive_method{ $client_data_from->get_full_type() }) {
+			$from_emails = $load_emails_from_archive_method{ $client_data_from->get_full_type() }->(
+				$logger,
+				$client_data_from,
+				$load_emails_from_archive,
+			);
+		}
+		else {
+			die "can't load emails from archive for [".$client_data_from->get_full_type()."] client";
+		}
+	}
+	else {
+		$from_emails = $client_data_from->get_all_emails()
+	}
 	my $added_count = 0;
 	my %just_added_email;
 	for my $from_email (@$from_emails) {
@@ -192,44 +213,97 @@ Special username_from prefix:
     pms_migration_backup: - data should be loaded from pms migration backup files
 Options:
     --add-duplicated-emails - add duplicated emails
-    --match-by-pms-id - allow to match using PMS id
+    --force-from-client-type - force specific client type from
     --load-emails-from-archive=YYYY-MM-DD - load emails based on email archive before date
+    --match-by-pms-id - allow to match using PMS id
 USAGE
 	exit(1);
 }
 
-sub load_emails_from_archive {
+sub load_emails_from_archive_sesame {
 	my ($logger, $client_data, $max_date) = @_;
+
+	return _load_emails_from_archive(
+		$logger,
+		$client_data,
+		$max_date,
+		$client_data->get_all_visitors(),
+		'get_sent_mail_log_by_visitor_id',
+		'id',
+		{
+			'VisitorId' => 'visitor_id',
+		},
+	);
+}
+
+sub load_emails_from_archive_ortho_resp {
+	my ($logger, $client_data, $max_date) = @_;
+
+	return _load_emails_from_archive(
+		$logger,
+		$client_data,
+		$max_date,
+		$client_data->get_all_responsibles(),
+		'get_sent_mail_log_by_rid',
+		'RId',
+		{
+			'RId' => 'RId',
+			'PId' => 'PId',
+		},
+	);
+}
+
+sub load_emails_from_archive_ortho_pat {
+	my ($logger, $client_data, $max_date) = @_;
+
+	return _load_emails_from_archive(
+		$logger,
+		$client_data,
+		$max_date,
+		$client_data->get_all_patients(),
+		'get_sent_mail_log_by_pid',
+		'PId',
+		{
+			'RId' => 'RId',
+			'PId' => 'PId',
+		},
+	);
+}
+
+sub _load_emails_from_archive {
+	my ($logger, $client_data, $max_date, $all_visitors, $email_archive_method, $visitor_id_field, $log_copy_fields) = @_;
 
 	if (length $max_date == 10) {
 		$max_date .= ' 00:00:00';
 	}
 	$logger->printf("loading emails from email archive before [%s]", $max_date);
-	my $all_visitors = $client_data->get_all_visitors();
 	my @emails;
 	for my $visitor (@$all_visitors) {
-		my $sent_mail_log = $client_data->get_sent_mail_log_by_visitor_id( $visitor->{'id'} );
+		my $sent_mail_log = $client_data->$email_archive_method( $visitor->{$visitor_id_field} );
 		my %emails;
 		for my $sent_mail (@$sent_mail_log) {
-			if ($sent_mail->{'Date'} lt $max_date) {
+			if ($sent_mail->{'DateTime'} lt $max_date) {
 				$emails{ trim_email( $sent_mail->{'Email'} ) } = $sent_mail;
 			}
 		}
 		$logger->printf_slow(
 			"visitor #%d: [%d] email%s found",
-			$visitor->{'id'},
+			$visitor->{$visitor_id_field},
 			scalar keys %emails,
 			(keys %emails == 1 ? '' : 's'),
 		);
 		for my $email (values %emails) {
 			my %row = (
-				'VisitorId' => $visitor->{'id'},
 				'Email'     => $email->{'Email'},
 				'BelongsTo' => $email->{'BelongsTo'},
 				'Name'      => $email->{'Name'},
 				'Source'    => 'other',
 				'Deleted'   => 'false',
+				'Status'    => 1, ## if email is in archive then welcome was already sent
 			);
+			for my $from_field (keys %$log_copy_fields) {
+				$row{ $from_field } = $email->{ $log_copy_fields->{$from_field} };
+			}
 			lock_keys(%row);
 			push(@emails, \%row);
 		}
