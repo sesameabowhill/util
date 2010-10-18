@@ -37,13 +37,13 @@ use Logger;
 			$repair->repair($client_data);
 		}
 		my $fn = "_repair_".$action.".sql";
-		printf "write repair commands to [$fn]\n";
+		$logger->printf("write repair commands to [$fn]");
 		$data_source->save_sql_commands_to_file($fn);
 
 		$logger->print_category_stat();
 
 	    my $work_time = time() - $start_time;
-	    printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
+	    $logger->printf("done in %d:%02d", $work_time / 60, $work_time % 60);
 	}
 	else {
 		my @actions = sort keys %actions;

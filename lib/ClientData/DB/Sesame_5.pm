@@ -918,49 +918,90 @@ SQL
 sub set_visitor_address_id {
 	my ($self, $visitor_id, $address_id) = @_;
 
-	my @params = ($address_id, $visitor_id, $self->{'client_id'});
-	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
-UPDATE visitor SET address_id=%s WHERE id=%s AND client_id=%s LIMIT 1
-SQL
-	$sql =~ s/\r?\n/ /g;
-	$sql =~ s/\s+/ /g;
+	$self->_do_query(
+		"UPDATE visitor SET address_id=%s WHERE id=%s AND client_id=%s LIMIT 1",
+		[
+			$address_id,
+			$visitor_id,
+			$self->{'client_id'},
+		],
+	);
 
-	unless ($self->{'data_source'}->is_read_only()) {
-		$self->{'dbh'}->do($sql);
-	}
-	$self->{'data_source'}->add_statement($sql);
+#	my @params = ($address_id, $visitor_id, $self->{'client_id'});
+#	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+#UPDATE visitor SET address_id=%s WHERE id=%s AND client_id=%s LIMIT 1
+#SQL
+#	$sql =~ s/\r?\n/ /g;
+#	$sql =~ s/\s+/ /g;
+#
+#	unless ($self->{'data_source'}->is_read_only()) {
+#		$self->{'dbh'}->do($sql);
+#	}
+#	$self->{'data_source'}->add_statement($sql);
 }
 
 sub set_sms_active_for_phone_number {
 	my ($self, $visitor_id, $phone_number, $sms_active) = @_;
 
-	my @params = ($sms_active, $visitor_id, $phone_number, $self->{'client_id'});
-	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
-UPDATE phone SET sms_active=%s WHERE visitor_id=%s AND number=%s AND client_id=%s LIMIT 1
-SQL
-	$sql =~ s/\r?\n/ /g;
-	$sql =~ s/\s+/ /g;
+	$self->_do_query(
+		"UPDATE phone SET sms_active=%s WHERE visitor_id=%s AND number=%s AND client_id=%s LIMIT 1",
+		[
+			$sms_active,
+			$visitor_id,
+			$phone_number,
+			$self->{'client_id'},
+		],
+	);
 
-	unless ($self->{'data_source'}->is_read_only()) {
-		$self->{'dbh'}->do($sql);
-	}
-	$self->{'data_source'}->add_statement($sql);
+#	my @params = ($sms_active, $visitor_id, $phone_number, $self->{'client_id'});
+#	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+#UPDATE phone SET sms_active=%s WHERE visitor_id=%s AND number=%s AND client_id=%s LIMIT 1
+#SQL
+#	$sql =~ s/\r?\n/ /g;
+#	$sql =~ s/\s+/ /g;
+#
+#	unless ($self->{'data_source'}->is_read_only()) {
+#		$self->{'dbh'}->do($sql);
+#	}
+#	$self->{'data_source'}->add_statement($sql);
 }
 
 sub set_visitor_password_by_id {
 	my ($self, $password, $visitor_id) = @_;
 
-	my @params = ($password, $visitor_id, $self->{'client_id'});
-	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
-UPDATE visitor SET password=%s WHERE id=%s AND client_id=%s LIMIT 1
-SQL
-	$sql =~ s/\r?\n/ /g;
-	$sql =~ s/\s+/ /g;
+	$self->_do_query(
+		"UPDATE visitor SET password=%s WHERE id=%s AND client_id=%s LIMIT 1",
+		[
+			$password,
+			$visitor_id,
+			$self->{'client_id'},
+		],
+	);
 
-	unless ($self->{'data_source'}->is_read_only()) {
-		$self->{'dbh'}->do($sql);
-	}
-	$self->{'data_source'}->add_statement($sql);
+#	my @params = ($password, $visitor_id, $self->{'client_id'});
+#	my $sql = sprintf(<<'SQL', map { $self->{'dbh'}->quote($_) } @params);
+#UPDATE visitor SET password=%s WHERE id=%s AND client_id=%s LIMIT 1
+#SQL
+#	$sql =~ s/\r?\n/ /g;
+#	$sql =~ s/\s+/ /g;
+#
+#	unless ($self->{'data_source'}->is_read_only()) {
+#		$self->{'dbh'}->do($sql);
+#	}
+#	$self->{'data_source'}->add_statement($sql);
+}
+
+sub set_email_address_by_id {
+	my ($self, $id, $email) = @_;
+
+	$self->_do_query(
+		"UPDATE email SET email=%s WHERE id=%s AND client_id=%s LIMIT 1",
+		[
+			$email,
+			$id,
+			$self->{'client_id'},
+		],
+	);
 }
 
 sub dump_table_data {
