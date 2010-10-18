@@ -17,23 +17,18 @@ sub repair {
 		my $visitor = $client_data->get_visitor_by_id($email->{'visitor_id'});
 		if (defined $visitor) {
 			if (Email::Valid->address( $email->{'Email'} )) {
-				my $space_count = () = ($email->{'Email'} =~ m/\s/g);
-				if ($space_count == 1) { ## remove only single space
-					if (defined $email->{'pms_id'}) {
-						$self->{'logger'}->register_category('invalid email from PMS');
-					}
-					else {
-						$self->{'logger'}->register_category('email with space (remove space)');
-						$self->{'logger'}->printf("UPDATE [%s]: email [%s] with space #%d (visitor #%d)", $client_data->get_username(), @$email{'Email', 'id', 'visitor_id'});
-						(my $new_email = $email->{'Email'}) =~ s/\s//g;
-						$client_data->set_email_address_by_id($email->{'id'}, $new_email);
-					}
-				}
-				elsif ($space_count == 0) {
-					$self->{'logger'}->register_category('valid email');
+				if ($email->{'Email'} =~ m{\(}) { ## email with comment
+					$self->{'logger'}->register_category('valid email with comment from '.$email->{'Source'});
+					$self->{'logger'}->printf("SKIP [%s]: email [%s] with comment #%d (visitor #%d)", $client_data->get_username(), @$email{'Email', 'id', 'visitor_id'});
 				}
 				else {
-					$self->_process_invalid_email($client_data, $email);
+					my $space_count = () = ($email->{'Email'} =~ m/\s/g);
+					if ($space_count) {
+						$self->_process_email_with_spaces($client_data, $email);
+					}
+					else {
+						$self->{'logger'}->register_category('valid email');
+					}
 				}
 			}
 			else {
@@ -41,15 +36,35 @@ sub repair {
 			}
 		}
 		else {
-			if (defined $email->{'pms_id'}) {
-				$self->{'logger'}->register_category('orphan email from PMS');
-			}
-			else {
-				$self->{'logger'}->register_category('orphan email from '.$email->{'Source'}.' (delete)');
-				$self->{'logger'}->printf_slow("DELETE [%s]: orphan email [%s] #%d (visitor #%d)", $client_data->get_username(), @$email{'Email', 'id', 'visitor_id'});
-				$client_data->delete_email($email->{'id'}, $email->{'visitor_id'});
-			}
+			$self->_process_orphan_email($client_data, $email);
 		}
+	}
+}
+
+sub _process_email_with_spaces {
+	my ($self, $client_data, $email) = @_;
+
+	if (defined $email->{'pms_id'}) {
+		$self->{'logger'}->register_category('email with spaces from PMS');
+	}
+	else {
+		$self->{'logger'}->register_category('email with spaces (remove space)');
+		$self->{'logger'}->printf("CHANGE [%s]: remove spaces from [%s] email #%d (visitor #%d)", $client_data->get_username(), @$email{'Email', 'id', 'visitor_id'});
+		(my $new_email = $email->{'Email'}) =~ s/\s//g;
+		$client_data->set_email_address_by_id($email->{'id'}, $new_email);
+	}
+}
+
+sub _process_orphan_email {
+	my ($self, $client_data, $email) = @_;
+
+	if (defined $email->{'pms_id'}) {
+		$self->{'logger'}->register_category('orphan email from PMS');
+	}
+	else {
+		$self->{'logger'}->register_category('orphan email from '.$email->{'Source'}.' (delete)');
+		$self->{'logger'}->printf_slow("DELETE [%s]: orphan email [%s] #%d (visitor #%d)", $client_data->get_username(), @$email{'Email', 'id', 'visitor_id'});
+		$client_data->delete_email($email->{'id'}, $email->{'visitor_id'});
 	}
 }
 
