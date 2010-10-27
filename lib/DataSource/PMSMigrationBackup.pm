@@ -31,7 +31,7 @@ sub get_client_data_by_db {
 	my $backup_folder = File::Spec->join( $self->{'backup_folder'}, $username, 'backup');
 	if (-d $backup_folder) {
 		require ClientData::PMSMigrationBackup;
-		return ClientData::PMSMigrationBackup->new($backup_folder, $username);
+		return ClientData::PMSMigrationBackup->new($self, $backup_folder, $username);
 	}
 	else {
 		die "can't find [$username] backup folder [$backup_folder]";
