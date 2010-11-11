@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-## $Id: repair_data.pl 2098 2010-06-09 19:22:05Z ivan $
+## $Id$
 
 use strict;
 use warnings;
