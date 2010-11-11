@@ -23,12 +23,17 @@ sub get_statements {
 }
 
 sub save_sql_commands_to_file {
-	my ($self, $file_name) = @_;
+	my ($self, $file_name, $filter_re) = @_;
+
+	my $statements = $self->{'statements'};
+	if (defined $filter_re) {
+		$statements = [ grep { m/$filter_re/ } @$statements ];
+	}
 
 	open(my $fh, '>', $file_name) or die "can't write [$file_name]: $!";
-	if (@{ $self->{'statements'} }) {
+	if (@$statements) {
 		print $fh "-- $file_name\n";
-		for my $sql_cmd (sort @{ $self->{'statements'} }) {
+		for my $sql_cmd (sort @$statements) {
 			$sql_cmd =~ s/\s+$//;
 			print $fh "$sql_cmd;\n";
 		}

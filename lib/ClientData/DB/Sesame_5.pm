@@ -1088,4 +1088,46 @@ sub get_sent_mail_log_by_visitor_id {
 	);
 }
 
+sub get_email_appointment_schedule {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT id, appointment_week_day, send_offset FROM email_appointment_schedule WHERE client_id=?",
+		{ 'Slice' => {} },
+        $self->{'client_id'},
+	);
+}
+
+sub add_email_appointment_schedule {
+	my ($self, $appointment_week_day, $send_offset) = @_;
+
+	$self->_do_query(
+		"INSERT INTO email_appointment_schedule (client_id, appointment_week_day, send_offset) VALUES (%s, %s, %s)",
+		[
+			$self->{'client_id'},
+			$appointment_week_day,
+			$send_offset,
+		],
+	);
+}
+
+sub delete_email_appointment_schedule {
+	my ($self, $appointment_week_day, $send_offset, $schedule_id) = @_;
+
+	$self->_do_query(
+		"DELETE FROM email_appointment_schedule WHERE ".
+			"client_id=%s AND appointment_week_day=%s AND send_offset=%s".
+			(defined $schedule_id ? ' AND id=%s' :''),
+		[
+			$self->{'client_id'},
+			$appointment_week_day,
+			$send_offset,
+			(defined $schedule_id ?
+				( $schedule_id ):
+				()
+			),
+		],
+	);
+}
+
 1;
