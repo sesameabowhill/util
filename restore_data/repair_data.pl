@@ -11,6 +11,7 @@ use DataSource::DB;
 use Repair::Address;
 use Repair::Emails;
 use Repair::Phones;
+use Repair::HolidaySettings;
 use Logger;
 
 {
@@ -20,6 +21,7 @@ use Logger;
 		'phones'  => 'Repair::Phones',
 		'address' => 'Repair::Address',
 		'emails'  => 'Repair::Emails',
+		'holiday_settings' => 'Repair::HolidaySettings',
 	);
 
 	my ($action, @clients) = @ARGV;

@@ -1130,4 +1130,30 @@ sub delete_email_appointment_schedule {
 	);
 }
 
+sub get_all_holiday_settings {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT hds_id AS id, hd_id AS holiday_id, hdc_id AS holiday_card_id, ".
+			"hds_subject AS subject, hds_optional_text AS optional_text, ".
+			"hds_status AS is_enabled, hds_date AS date ".
+			"FROM holiday_settings WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+	);
+}
+
+sub delete_holiday_setting {
+	my ($self, $id) = @_;
+
+	$self->_do_query(
+		"DELETE FROM holiday_settings WHERE client_id=%s AND hds_id=%s",
+		[
+			$self->{'client_id'},
+			$id,
+		],
+	);
+
+}
+
 1;
