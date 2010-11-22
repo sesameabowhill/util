@@ -58,6 +58,7 @@ if (defined $db_to) {
 		},
 		'ortho_pat' => {
 			'ortho_resp' => \&select_candidate_pat_resp,
+			'sesame' => \&select_candidate_pat_sesame,
 		},
 		'sesame' => {
 			'sesame' => \&select_candidate_sesame_sesame,
@@ -342,6 +343,26 @@ sub select_candidate_resp_sesame {
 					$visitor,
 				);
 			}
+		}
+	}
+}
+
+sub select_candidate_pat_sesame {
+	my ($from_email, $client_data_from, $client_data_to, $candidate_manager) = @_;
+
+	if ($from_email->{'PId'}) {
+		my $from_patient = $client_data_from->get_patient_by_id(
+			$from_email->{'PId'},
+		);
+		my $to_pat_visitors = $client_data_to->get_patients_by_name(
+			$from_patient->{'FName'},
+			$from_patient->{'LName'},
+		);
+		for my $visitor (@$to_pat_visitors) {
+			$candidate_manager->add_candidate(
+				'by_pat',
+				$visitor,
+			);
 		}
 	}
 }
