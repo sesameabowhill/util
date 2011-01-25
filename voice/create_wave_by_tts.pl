@@ -124,9 +124,9 @@ sub concat_sound_files {
 		concat_sound_files(\@first_files, $temp_file);
 		unshift(@all_files, $temp_file);
 	}
-	my $cmd = 'sox '.join(' ', @all_files).' '.$out_file;
+	my @cmd = ('sox', @all_files, $out_file);
 	#print "cmd [$cmd]\n";
-	system($cmd);
+	system(@cmd);
 }
 
 sub make_cache_file_name {
