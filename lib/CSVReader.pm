@@ -18,7 +18,7 @@ sub new {
         }
     );
 
-    open(my $fh, "<", $file_name) or die "can't read [$file_name]: $!";
+    open(my $fh, "<:utf8", $file_name) or die "can't read [$file_name]: $!";
     if (defined $columns) {
     	$csv->column_names(@$columns);
     }
