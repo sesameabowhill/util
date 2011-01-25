@@ -35,7 +35,7 @@ function add_accesskey(elem_id, key) {
 	var elem = document.getElementById(elem_id);
 	if (null !== elem) {
 		elem.accessKey = key;
-		console.log("access: #"+elem_id+"-"+key);
+		//console.log("access: #"+elem_id+"-"+key);
 	}
 }
 
