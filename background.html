@@ -31,7 +31,7 @@
 					"data_url": get_url("upload_queue_5"),
 					"error_count_url": get_url("error_count"),
 					"error_count": 0,
-					"refresh": get_refresh_interval("upload_queue_fast"),
+					"refresh": get_refresh_interval("upload_queue"),
 					"name": "Sesame upload processing queue",
 					"graph": new DataGraph(60, 120, 3),
 					"client_stack": new ClientStack(20)
@@ -56,7 +56,7 @@
 	
 	function get_refresh_interval(name) {
 		var intervals = {
-			'upload_queue': 15*1000,
+			'upload_queue': 10*1000,
 			'upload_queue_fast': 5*1000,
 			'client_list': 5*60*1000,
 			'error_count': 10*1000
