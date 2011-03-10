@@ -2,6 +2,7 @@
 <head>
 <link rel="stylesheet" type="text/css" href="css/sesame.css" />
 <style>
+  body { width: 350px }
   input { width: 130px }
   input, button { float: left }
 
@@ -107,9 +108,9 @@
     <p>
     <input name="search_param" id="input_search_param" />
     <input name="find" id="input_find" type="hidden" />
-    <button type="button" onclick="submit_form_to('fcs_5', 'client')">client5</button>
-    <button type="button" onclick="submit_form_to('fcs_5', 'visitor')">visitor5</button>
-    <button type="button" onclick="submit_form_to('fcs_4', 'client')">client4</button>
+    <button type="button" onclick="submit_form_to('fcs_5', 'client')">client</button>
+    <button type="button" onclick="submit_form_to('fcs_5', 'visitor')">visitor</button>
+    <button type="button" onclick="submit_form_to('fcs_stage', 'client')">client stage</button>
     </p>
     </form>
     <h2 id="graph_header"></h2>
@@ -123,5 +124,5 @@
     </p>
     <a href="" target="_blank" id="link_to_list">See full list</a>
   <!--div id="errors"></div-->
-
+</body>
 </html>
