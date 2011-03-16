@@ -161,9 +161,10 @@ sub get_connection_info {
 
 	my $user = $self->{'dbh'}->selectrow_array("SELECT user()");
 	my $database = $self->{'dbh'}->selectrow_array("SELECT database()");
-	my $connection_id = $self->{'dbh'}->selectrow_array("SELECT connection_id()");
+	#my $connection_id = $self->{'dbh'}->selectrow_array("SELECT connection_id()");
+	my $connection_info = $self->{'dbh'}->get_info(2);
 
-	return "$user".(defined $database?"/$database":'').($self->is_read_only()?' "readonly"':'')." #$connection_id";
+	return "$user".(defined $database?"/$database":'').($self->is_read_only()?' "readonly"':'')." $connection_info";
 }
 
 sub _do_query {

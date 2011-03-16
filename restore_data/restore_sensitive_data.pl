@@ -3,6 +3,7 @@
 
 use strict;
 use warnings;
+use feature ':5.10';
 
 use Getopt::Long;
 use XML::LibXML;
@@ -13,9 +14,9 @@ use DataSource::DB;
 use Logger;
 use Script;
 
-my ($username, $xml_file, $single_table, $db_connection_string, $skip_passwords);
+my ($username, $xml_file, $only_table, $db_connection_string, $skip_passwords);
 GetOptions(
-	'single-table=s'  => \$single_table,
+	'only-table=s@'  => \$only_table,
 	'mapping-file=s'  => \$xml_file,
 	'db-connection=s' => \$db_connection_string,
 	'skip-passwords!' => \$skip_passwords,
@@ -27,19 +28,26 @@ $db_connection_string //= $ARGV[2];
 if ($xml_file) {
 	my $logger = Logger->new();
 
+	$logger->printf("load sensitive data from [%s]", $xml_file);
+	my $sensitive_tables = get_sensitive_data_from_xml($logger, $xml_file);
+	if (defined $only_table && @$only_table) {
+		my %filter_tables = map {$_ => 1} @$only_table;
+		$logger->printf(
+			"restore [%s] table%s only",
+			join(', ', @$only_table),
+			( @$only_table == 1 ? '' : 's' ),
+		);
+		$sensitive_tables = [ grep { exists $filter_tables{ $_->{'name'} } } @$sensitive_tables ];
+	}
+	print_table_restore_rules($logger, $sensitive_tables);
+
 	my ($client_username, $data_source) = Script->choose_data_source_by_username($username, $db_connection_string);
 	my $client_data = $data_source->get_client_data_by_db($client_username);
-	$logger->printf("load sensitive data from [%s]", $xml_file);
-	my $sensitive_tables = get_sensitive_data_from_xml($xml_file);
 	if ($skip_passwords) {
 		$logger->printf("skip passwords");
 		for my $table (@$sensitive_tables) {
 			$table->{'columns'} = [ grep {$_ ne 'password'} @{ $table->{'columns'} } ];
 		}
-	}
-	if ($single_table) {
-		$logger->printf("restore [%s] table only", $single_table);
-		$sensitive_tables = [ grep { $_->{'name'} eq $single_table } @$sensitive_tables ];
 	}
 	$logger->printf(
 		"restore data for %s [%s] (%s)",
@@ -67,7 +75,7 @@ USAGE
 }
 
 sub get_sensitive_data_from_xml {
-	my ($xml_file) = @_;
+	my ($logger, $xml_file) = @_;
 
 
 	my $exigen_ns = "http://mapping.filling.sesame.exigen.com";
@@ -97,12 +105,6 @@ sub get_sensitive_data_from_xml {
 				}
 			}
 		}
-		unless (exists $table{$table_name}{'id'}) {
-			my $id_column_nodes = $class_xpath->findnodes('exigen:property[@name="ID"]');
-			if ($id_column_nodes->size() == 1) {
-				$table{$table_name}{'id'} = $id_column_nodes->get_node(0)->getAttribute("column");
-			}
-		}
 		unless (exists $table{$table_name}{'table_name'}) {
 			$table{$table_name}{'table_name'} = $class_node->getAttribute("table");
 		}
@@ -113,29 +115,60 @@ sub get_sensitive_data_from_xml {
 			$table{$table_name}{'where'} = "type='patient'";
 		}
 	}
+	my $table_ids = get_tables_ids($class_nodes, $exigen_ns);
 	my @tables =
 		grep {defined $_->{'id'} && @{ $_->{'columns'} }}
 		map {
 			{
 				'name' => $table{$_}{'table_name'},
-				'id' => $table{$_}{'id'},
+				'id' => $table_ids->{ $table{$_}{'table_name'} },
 				'where' => $table{$_}{'where'},
 				'columns' => [ sort keys %{ $table{$_}{'columns'} } ],
 			}
 		} keys %table;
 	## skip all foreign keys
 	for my $table (@tables) {
+		$table->{'effective_id'} = sprintf(
+			"%s %s %s",
+			$table->{'name'},
+			($table->{'where'} // '1'),
+			join(", ", @{ $table->{'columns'} }),
+		);
 		$table->{'columns'} = [ grep {$_ !~ m/_id$/} @{ $table->{'columns'} } ];
 	}
+	my %unique_rules;
+	@tables = grep {! $unique_rules{ $_->{'effective_id'} } ++ } @tables;
 
-#	for my $table (@tables) {
-#		printf(
-#			"sensitive data [%s.%s]: %s\n",
-#			$table->{'name'},
-#			$table->{'id'},
-#			join(', ', @{ $table->{'columns'} }),
-#		);
-#	}
 	return \@tables;
 }
 
+sub print_table_restore_rules {
+	my ($logger, $tables) = @_;
+
+	for my $table (@$tables) {
+		$logger->printf(
+			"update [%s] where [%s=?%s] set [%s]",
+			$table->{'name'},
+			$table->{'id'},
+			( defined $table->{'where'} ? ' and '.$table->{'where'} : '' ),
+			join(', ', @{ $table->{'columns'} }),
+		);
+	}
+}
+
+sub get_tables_ids {
+	my ($class_nodes, $exigen_ns) = @_;
+
+	my %table_id;
+	for my $class_node ($class_nodes->get_nodelist()) {
+		my $table_name = $class_node->getAttribute("table");
+		my $class_xpath = XML::LibXML::XPathContext->new($class_node);
+		$class_xpath->registerNs("exigen", $exigen_ns);
+
+		my $id_column_nodes = $class_xpath->findnodes('exigen:property[@name="ID"]');
+		if ($id_column_nodes->size() == 1) {
+			$table_id{$table_name} = $id_column_nodes->get_node(0)->getAttribute("column");
+		}
+	}
+	return \%table_id;
+}
