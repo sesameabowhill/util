@@ -1026,6 +1026,7 @@ sub dump_table_data {
 		$self->{'data_source'}->add_statement($update_sql);
 		if ($logger) {
 			$logger->printf_slow("save data for %s.%s='%s'", $table_name, $table_id, $r->{$table_id});
+			$logger->register_category("restore $table_name");
 		}
 	}
 }

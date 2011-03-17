@@ -62,6 +62,7 @@ if ($xml_file) {
 	my $fn = '_sensitive_data.'.$client_username.'.sql';
 	$logger->printf("write result to [%s]", $fn);
 	$data_source->save_sql_commands_to_file($fn);
+	$logger->print_category_stat();
 }
 else {
 	print <<USAGE;
@@ -99,9 +100,15 @@ sub get_sensitive_data_from_xml {
 			my $skip = $property_node->getAttribute("skipStoring") || 'false';
 			if ($skip ne 'true') {
 				my $column = $property_node->getAttribute("column");
-				unless (exists $table{$table_name}{'columns'}{$column}) {
-					#print "sensitive column: $table_name.$column\n";
-					$table{$table_name}{'columns'}{$column} = 1;
+				my $table_id = get_table_id($class_node, $exigen_ns);
+				if (defined $table_id) {
+					if (exists $table{$table_name}{'columns'}{$column}) {
+						$logger->printf("dumplicated sensitive column: %s.%s", $table_name, $column);
+					}
+					else {
+						#print "sensitive column: $table_name.$column\n";
+						$table{$table_name}{'columns'}{$column} = $table_id;
+					}
 				}
 			}
 		}
@@ -115,22 +122,29 @@ sub get_sensitive_data_from_xml {
 			$table{$table_name}{'where'} = "type='patient'";
 		}
 	}
-	my $table_ids = get_tables_ids($class_nodes, $exigen_ns);
-	my @tables =
-		grep {defined $_->{'id'} && @{ $_->{'columns'} }}
-		map {
-			{
-				'name' => $table{$_}{'table_name'},
-				'id' => $table_ids->{ $table{$_}{'table_name'} },
-				'where' => $table{$_}{'where'},
-				'columns' => [ sort keys %{ $table{$_}{'columns'} } ],
+	my @tables;
+	for my $table (values %table) {
+		if (exists $table->{'columns'} && keys %{ $table->{'columns'} }) {
+			my $columns_by_id = group_columns_by_id($table->{'columns'});
+			for my $table_id (keys %$columns_by_id) {
+				push(
+					@tables,
+					{
+						'name' => $table->{'table_name'},
+						'where' => $table->{'where'},
+						'id' => $table_id,
+						'columns' => [ sort @{ $columns_by_id->{$table_id} } ],
+					}
+				);
 			}
-		} keys %table;
+		}
+	}
 	## skip all foreign keys
 	for my $table (@tables) {
 		$table->{'effective_id'} = sprintf(
-			"%s %s %s",
+			"%s %s and %s %s",
 			$table->{'name'},
+			$table->{'id'},
 			($table->{'where'} // '1'),
 			join(", ", @{ $table->{'columns'} }),
 		);
@@ -140,6 +154,19 @@ sub get_sensitive_data_from_xml {
 	@tables = grep {! $unique_rules{ $_->{'effective_id'} } ++ } @tables;
 
 	return \@tables;
+}
+
+sub group_columns_by_id {
+	my ($columns) = @_;
+
+	my %column_by_id;
+	for my $column (keys %$columns) {
+		push(
+			@{ $column_by_id{ $columns->{$column} } },
+			$column,
+		);
+	}
+	return \%column_by_id;
 }
 
 sub print_table_restore_rules {
@@ -156,19 +183,24 @@ sub print_table_restore_rules {
 	}
 }
 
-sub get_tables_ids {
-	my ($class_nodes, $exigen_ns) = @_;
+sub get_table_id {
+	my ($class_node, $exigen_ns) = @_;
 
-	my %table_id;
-	for my $class_node ($class_nodes->get_nodelist()) {
-		my $table_name = $class_node->getAttribute("table");
-		my $class_xpath = XML::LibXML::XPathContext->new($class_node);
-		$class_xpath->registerNs("exigen", $exigen_ns);
+	my $table_name = $class_node->getAttribute("table");
+	my $class_xpath = XML::LibXML::XPathContext->new($class_node);
+	$class_xpath->registerNs("exigen", $exigen_ns);
 
-		my $id_column_nodes = $class_xpath->findnodes('exigen:property[@name="ID"]');
-		if ($id_column_nodes->size() == 1) {
-			$table_id{$table_name} = $id_column_nodes->get_node(0)->getAttribute("column");
+	my $id_column_nodes = $class_xpath->findnodes('exigen:property[@name="ID"]');
+	if ($id_column_nodes->size() == 1) {
+		return $id_column_nodes->get_node(0)->getAttribute("column");
+	}
+	else {
+		my $key_column_nodes = $class_xpath->findnodes('exigen:key/exigen:property[@name="ID" and @column!="client_id"]');
+		if ($key_column_nodes->size() == 1) {
+			return $key_column_nodes->get_node(0)->getAttribute("column");
+		}
+		else {
+			return undef;
 		}
 	}
-	return \%table_id;
 }
