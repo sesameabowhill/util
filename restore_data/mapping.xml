@@ -416,6 +416,28 @@
 		<trigger name="AppointmentTrigger" />
 	</class>
 
+	<class name="AppointmentExtension" table="appointment_extension" externallyAddable="false" extensionEntity="true">
+		<key>
+			<property name="ID" column="appointment_id">
+				<remap class="Appointment" addable="false" nullable="false" />
+			</property>
+		</key>
+
+		<property name="CreatedDate" column="created_date">
+ 			<transformation method="nullIfEmpty" />
+		</property>
+		<property name="ID" column="pms_id" />
+
+		<additionalProperties>
+			<property column="client_id" skipStoring="true">
+				<transformation method="clientId" />
+			</property>
+		</additionalProperties>
+
+		<trigger name="AppointmentExtensionTrigger" />
+
+	</class>
+
 	<class name="AppointmentProcedureLink" table="appointment_procedure">
 		<key>
 			<property name="ID" column="id">
