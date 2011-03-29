@@ -882,6 +882,17 @@ sub file_path_for_clinchecks {
     );
 }
 
+sub file_path_for_srm {
+	my ($self, $file) = @_;
+
+	return File::Spec->join(
+    	$ENV{'SESAME_COMMON'},
+		'srm',
+		$self->get_username(),
+		$file
+    );
+}
+
 sub get_all_phones {
 	my ($self) = @_;
 

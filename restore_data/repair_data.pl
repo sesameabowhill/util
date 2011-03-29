@@ -9,6 +9,7 @@ use lib '../lib';
 use DataSource::DB;
 
 use Repair::Address;
+use Repair::Banners;
 use Repair::Emails;
 use Repair::Phones;
 use Repair::HolidaySettings;
@@ -22,6 +23,8 @@ use Logger;
 		'address' => 'Repair::Address',
 		'emails'  => 'Repair::Emails',
 		'holiday_settings' => 'Repair::HolidaySettings',
+		'banners' => 'Repair::Banners',
+		'newsletters' => 'Repair::Newsletters',
 	);
 
 	my ($action, @clients) = @ARGV;
@@ -36,11 +39,19 @@ use Logger;
 	    my $repair = $actions{$action}->new($logger);
 		for my $client_db (@clients) {
 			my $client_data = $data_source->get_client_data_by_db($client_db);
+			$logger->printf("process [%s]", $client_data->get_username());
 			$repair->repair($client_data);
 		}
-		my $fn = "_repair_".$action.".sql";
-		$logger->printf("write repair commands to [$fn]");
-		$data_source->save_sql_commands_to_file($fn);
+		if (defined $repair->get_commands_extension()) {
+			my $fn = "_repair_".$action.$repair->get_commands_extension();
+			$logger->printf("write custom commands to [$fn]");
+			$logger->save_commands_to_file($fn);
+		}
+		else {
+			my $fn = "_repair_".$action.".sql";
+			$logger->printf("write repair commands to [$fn]");
+			$data_source->save_sql_commands_to_file($fn);
+		}
 
 		$logger->print_category_stat();
 

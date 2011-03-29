@@ -12,4 +12,10 @@ sub new {
 	}, $class;
 }
 
+sub get_commands_extension {
+	my ($self) = @_;
+
+	return undef;
+}
+
 1;
