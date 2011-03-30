@@ -11,8 +11,9 @@ use DataSource::DB;
 use Repair::Address;
 use Repair::Banners;
 use Repair::Emails;
-use Repair::Phones;
 use Repair::HolidaySettings;
+use Repair::Newsletters;
+use Repair::Phones;
 use Logger;
 
 {
@@ -39,7 +40,7 @@ use Logger;
 	    my $repair = $actions{$action}->new($logger);
 		for my $client_db (@clients) {
 			my $client_data = $data_source->get_client_data_by_db($client_db);
-			$logger->printf("process [%s]", $client_data->get_username());
+			$logger->printf_slow("process [%s]", $client_data->get_username());
 			$repair->repair($client_data);
 		}
 		if (defined $repair->get_commands_extension()) {

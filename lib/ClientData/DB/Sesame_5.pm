@@ -893,6 +893,20 @@ sub file_path_for_srm {
     );
 }
 
+sub file_path_for_newsletter {
+	my ($self, $hash) = @_;
+
+	return File::Spec->join(
+    	$ENV{'SESAME_COMMON'},
+		'members',
+		$self->get_username(),
+		'common',
+		'news',
+		$hash,
+		'index.html',
+    );
+}
+
 sub get_all_phones {
 	my ($self) = @_;
 
@@ -903,6 +917,20 @@ SELECT
 	sms_active='true' AS sms_active, voice_active='true' AS voice_active,
 	source, deleted, deleted_datetime, deleted_source, entry_datetime
 FROM phone
+WHERE client_id=?
+SQL
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+    );
+}
+
+sub get_all_newsletters {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        <<'SQL',
+SELECT id, letter_hash, is_send, send_to, dt
+FROM ppn_email_queue
 WHERE client_id=?
 SQL
 		{ 'Slice' => {} },
