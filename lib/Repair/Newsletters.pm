@@ -13,7 +13,7 @@ sub repair {
 	for my $ppn (@$ppns) {
 		my $file = $client_data->file_path_for_newsletter( $ppn->{'letter_hash'} );
 		if (-e $file) {
-			$self->{'logger'}->register_category('newsletter exists');
+			$self->on_newsletter_found($client_data, $file, $ppn);
 		}
 		else {
 			$self->{'logger'}->printf(
@@ -24,6 +24,12 @@ sub repair {
 			$self->{'logger'}->register_category('newsletters file is missing');
 		}
 	}
+}
+
+sub on_newsletter_found {
+	my ($self, $client_data, $file) = @_;
+
+	$self->{'logger'}->register_category('newsletter exists');
 }
 
 1;

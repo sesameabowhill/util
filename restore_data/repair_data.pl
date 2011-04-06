@@ -13,6 +13,7 @@ use Repair::Banners;
 use Repair::Emails;
 use Repair::HolidaySettings;
 use Repair::Newsletters;
+use Repair::NewsletterArticleStat;
 use Repair::Phones;
 use Logger;
 
@@ -26,6 +27,7 @@ use Logger;
 		'holiday_settings' => 'Repair::HolidaySettings',
 		'banners' => 'Repair::Banners',
 		'newsletters' => 'Repair::Newsletters',
+		'ppn_article_stat' => 'Repair::NewsletterArticleStat',
 	);
 
 	my ($action, @clients) = @ARGV;

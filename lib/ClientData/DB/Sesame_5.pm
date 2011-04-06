@@ -929,7 +929,7 @@ sub get_all_newsletters {
 
 	return $self->{'dbh'}->selectall_arrayref(
         <<'SQL',
-SELECT id, letter_hash, is_send, send_to, dt
+SELECT id, letter_hash, is_send, send_to, dt, recipient_count
 FROM ppn_email_queue
 WHERE client_id=?
 SQL
