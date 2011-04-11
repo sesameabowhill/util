@@ -9,6 +9,7 @@ use lib '../lib';
 use DataSource::DB;
 
 use Repair::Address;
+use Repair::Appointments;
 use Repair::Banners;
 use Repair::Emails;
 use Repair::HolidaySettings;
@@ -23,6 +24,7 @@ use Logger;
 	my %actions = (
 		'phones'  => 'Repair::Phones',
 		'address' => 'Repair::Address',
+		'appointments' => 'Repair::Appointments',
 		'emails'  => 'Repair::Emails',
 		'holiday_settings' => 'Repair::HolidaySettings',
 		'banners' => 'Repair::Banners',
