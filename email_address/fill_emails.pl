@@ -2,11 +2,14 @@
 use strict;
 use warnings;
 
+use Email::Valid;
+
 use lib qw( ../lib );
 
 use CandidateManager;
 use CSVReader;
 use DataSource::DB;
+use Logger;
 
 
 my @files = @ARGV;
@@ -14,6 +17,7 @@ if (@files) {
 	my $start_time = time();
 	my $add_email_count = 0;
 	my $total_email_count = 0;
+	my $logger = Logger->new();
 
 	my %implemented = (
 		'patient_emails' => {
@@ -59,6 +63,7 @@ if (@files) {
 	);
 
 	my $data_source = DataSource::DB->new();
+	$data_source->set_read_only(1);
 	my $last_client_db = undef;
 	for my $file_name (@files) {
 		if ($file_name =~ m/^_?(.*)\.(.*)\.(.*)$/) {
@@ -70,7 +75,7 @@ if (@files) {
 			$client_data->set_approx_search(1);
 
 			my $client_full_type = $client_data->get_full_type();
-			printf "database source: client [%s] type [%s]\n", $client_db, $client_full_type;
+			$logger->printf("database source: client [%s] type [%s]", $client_db, $client_full_type);
 			if (exists $implemented{$type}{$client_full_type}) {
 				my $params = $implemented{$type}{$client_full_type};
 				my $reader = CSVReader->new(
@@ -82,6 +87,7 @@ if (@files) {
 				$total_email_count += @$emails;
 				if (exists $params->{'function'}) {
 					$add_email_count += $params->{'function'}->(
+						$logger,
 						$emails,
 						$client_data,
 					);
@@ -89,6 +95,7 @@ if (@files) {
 				}
 				else {
 					$add_email_count += fill_emails(
+						$logger,
 						$emails,
 						$client_data,
 						$params->{'candidate'},
@@ -107,13 +114,16 @@ if (@files) {
 	}
 	if ($last_client_db) {
 		my $result_sql_fn = '_new_email.'.$last_client_db.'.sql';
-		printf("write sql commands to [$result_sql_fn]\n");
+		$logger->printf("write sql commands to [$result_sql_fn]");
 		$data_source->save_sql_commands_to_file($result_sql_fn);
 	}
 
-	print "$add_email_count/$total_email_count emails added\n";
+	$logger->print_category_stat();
+
+	$logger->printf("%s/%s emails added", $add_email_count, $total_email_count);
+
 	my $work_time = time() - $start_time;
-	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
+	$logger->printf("done in %d:%02d", $work_time / 60, $work_time % 60);
 }
 else {
 	print <<USAGE;
@@ -127,7 +137,7 @@ USAGE
 }
 
 sub fill_emails {
-	my ($emails, $client_data, $candidate_selector, $adder) = @_;
+	my ($logger, $emails, $client_data, $candidate_selector, $adder) = @_;
 
 	my $add_email_count = 0;
 	for my $email_row (@$emails) {
@@ -141,34 +151,46 @@ sub fill_emails {
 		);
 		my $name = $email_row->{'name'};
 		my $email = $email_row->{'email'};
-		my $is_email_exists = $client_data->email_is_used($email);
-		if ($is_email_exists) {
-			print "SKIP [$email]: is already database\n";
-		}
-		else {
-			$candidate_selector->(
-				$name,
-				$client_data,
-				$candidate_manager,
-			);
-
-			my $candidate = $candidate_manager->get_single_candidate();
-			if (defined $candidate) {
-				printf(
-					"ADD: %s\n",
-					$email,
-				);
-				$adder->($email, $candidate, $client_data);
-				$add_email_count++;
+		if (Email::Valid->address($email)) {
+			my $is_email_exists = $client_data->email_is_used($email);
+			if ($is_email_exists) {
+				$logger->printf_slow("SKIP [$email]: is already database");
+				$logger->register_category('skipped exists');
 			}
 			else {
-				printf(
-					"SKIP: %s (%s) - %s\n",
-					$email,
+				$candidate_selector->(
 					$name,
-					$candidate_manager->candidates_count_str(),
+					$client_data,
+					$candidate_manager,
 				);
+
+				my $candidate = $candidate_manager->get_single_candidate();
+				if (defined $candidate) {
+					$logger->printf_slow(
+						"ADD: %s",
+						$email,
+					);
+					$logger->register_category('added');
+					$adder->($email, $candidate, $client_data);
+					$add_email_count++;
+				}
+				else {
+					$logger->printf(
+						"SKIP: %s (%s) - %s",
+						$email,
+						$name,
+						$candidate_manager->candidates_count_str(),
+					);
+					$logger->register_category('no candidate found ('.$candidate_manager->candidates_count_str().')');
+				}
 			}
+		}
+		else {
+			$logger->printf(
+				"SKIP: invalid email [%s]",
+				$email,
+			);
+			$logger->register_category('skipped invalid');
 		}
 	}
 	return $add_email_count;
@@ -313,6 +335,8 @@ sub find_responsible_ortho_resp {
 
 sub add_pms_referrings {
 	my ($colleagues, $client_data) = @_;
+
+die "TODO check invalid email";
 
 	my $add_count = 0;
 	for my $colleague (@$colleagues) {
@@ -529,113 +553,3 @@ sub generate_password {
 }
 
 
-
-#package DBSource;
-#
-#use DBI;
-#
-#
-#
-#sub get_insert_commands {
-#    my ($self) = @_;
-#
-#    return $self->{'insert_commands'};
-#}
-#
-#
-#sub get_db_name {
-#    my ($self) = @_;
-#
-#    return $self->{'db_name'};
-#}
-#
-#sub _insert {
-#    my ($self, $insert_cmd) = @_;
-#
-#    $self->{'dbh'}->do($insert_cmd);
-#    push( @{ $self->{'insert_commands'} }, $insert_cmd );
-#}
-#
-#
-#sub get_patients_by_responsible {
-#    my ($self, $rid) = @_;
-#
-#    my $patients = $self->{'dbh'}->selectall_arrayref(
-#        "SELECT PId, RId, FName, LName, Active FROM Patients WHERE RId=?",
-#        { 'Slice' => {} },
-#        $rid
-#    );
-#}
-#
-#sub find_patients_by_name {
-#    my ($self, $name) = @_;
-#
-#    my $patients = $self->{'dbh'}->selectall_arrayref(
-#        "SELECT PId, RId, FName, LName, Active FROM Patients WHERE CONCAT(FName, ' ', LName)=?",
-#        { 'Slice' => {} },
-#        $name
-#    );
-#    unless (@$patients) {
-#        $patients = $self->{'dbh'}->selectall_arrayref(
-#            "SELECT PId, RId, FName, LName, Active FROM Patients WHERE ? LIKE CONCAT('%', FName, ' ', LName,'%')",
-#            { 'Slice' => {} },
-#            $name
-#        );
-#    }
-#    return $patients;
-#}
-#
-#sub find_responsible_by_name {
-#    my ($self, $name) = @_;
-#
-#    my $responsibles = $self->{'dbh'}->selectall_arrayref(
-#        "SELECT RId, FName, LName FROM Responsibles WHERE CONCAT(FName, ' ', LName)=?",
-#        { 'Slice' => {} },
-#        $name
-#    );
-#    unless (@$responsibles) {
-#        $responsibles = $self->{'dbh'}->selectall_arrayref(
-#            "SELECT RId, FName, LName FROM Responsibles WHERE ? LIKE CONCAT('%', FName, ' ', LName,'%')",
-#            { 'Slice' => {} },
-#            $name
-#        );
-#    }
-#    return $responsibles;
-#}
-#
-
-
-#sub count_ledgers_by_patient {
-#    my ($self, $pid) = @_;
-#
-#    return scalar $self->{'dbh'}->selectrow_array(
-#        "SELECT count(*) FROM Ledgers WHERE PId=?",
-#        undef,
-#        $pid,
-#    );
-#}
-#
-### static
-#sub is_client_exists {
-#    my ($class, $db_name) = @_;
-#
-#    my $dbh = get_connection();
-#    return $db_name eq $dbh->selectrow_array("SHOW DATABASES LIKE ?", undef, $db_name);
-#}
-#
-#sub get_connection {
-#    my ($db_name) = @_;
-#
-#    $db_name ||= '';
-#
-#    return DBI->connect(
-#        "DBI:mysql:host=$ENV{SESAME_DB_SERVER}".($db_name?";database=$db_name":""),
-#        'admin',
-#        'higer4',
-#        {
-#            'RaiseError' => 1,
-#            'ShowErrorStatement' => 1,
-#            'PrintError' => 0,
-#        }
-#    );
-#}
