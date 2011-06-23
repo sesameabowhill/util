@@ -40,6 +40,13 @@ sub get_all_emails {
 	return $reader->get_all_data();
 }
 
+sub get_all_phones {
+	my ($self) = @_;
+
+	my $reader = $self->_new_csv_reader('phone');
+	return $reader->get_all_data();
+}
+
 sub get_visitor_by_id {
 	my ($self, $visitor_id) = @_;
 
