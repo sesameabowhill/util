@@ -5,21 +5,24 @@ use strict;
 use warnings;
 
 use Getopt::Long;
-use List::MoreUtils qw( each_array );
+use List::MoreUtils 'each_array';
+use List::Util 'sum';
 
 use lib qw( ../lib );
 
 use CSVReader;
 
 my @input_files;
+my @input_columns;
 my @output_file;
 my @table_name;
-my @important_zip;
+my @important_area_code;
 GetOptions(
 	'input=s'         => \@input_files,
+	'input-columns=s' => \@input_columns,
 	'table=s'         => \@table_name,
 	'output=s'        => \@output_file,
-	'important-area-code=s' => \@important_zip,
+	'important-area-code=s' => \@important_area_code,
 );
 
 $|=1;
@@ -29,38 +32,66 @@ if (@input_files > 1 && @output_file > 0 && @table_name == @output_file) {
 	my $start_time = time();
 	#my $output_file = shift @files;
 
+    my %important_area_codes = map {$_ => 1} @important_area_code;
 	my @writers;
 	my $writer_iter = each_array(@table_name, @output_file);
 	while (my ($table, $file) = $writer_iter->()) {
 		print "output table [$table] to [$file]\n";
 		push(
 			@writers,
-			SQLWriter->new($file, $table),
+			SQLWriter->new($file, $table, \%important_area_codes),
 		);
 	}
-	my %important_zips = map {$_ => 1} @important_zip;
-	for my $file (@input_files) {
+	my $input_iter = each_array(@input_files, @input_columns);
+    while (my ($file, $columns_str) = $input_iter->()) {
 		print "reading file [$file]\n";
+		my $columns = parse_columns_string($columns_str);
 		my $reader = CSVReader->new($file);
 		while (my $line = $reader->get_next_item()) {
 			for my $writer (@writers) {
-				$writer->write_item($line, \%important_zips);
+				$writer->write_item($line, $columns);
 			}
 		}
 	}
+    for my $code (sort {$a <=> $b} keys %important_area_codes) {
+        my $use_count = sum map { $_->get_area_code_use_count($code) } @writers;
+        printf(
+            "area code [%d] %s\n",
+            $code,
+            ($use_count == 0 ? "not used" :
+                ($use_count == 1 ? "used 1 time" : "used $use_count times"))
+        );
+    }
+
 	printf "[%d] records saved\n", $writers[0]->get_count();
 	my $work_time = time() - $start_time;
 	printf "done in %d:%02d\n", $work_time / 60, $work_time % 60;
 }
 else {
-	print "Usage: $0 --input=<input_file> --table=<table_name> --output=<output.sql> --important-area-code=[area-code] <input_file> ...\n";
+	print "Usage: $0 --input=<input_file> --input-columns=zip,area,city,state --table=<table_name> --output=<output.sql> --important-area-code=[area-code] <input_file> ...\n";
 	exit(1);
+}
+
+sub parse_columns_string {
+    my ($str) = @_;
+
+    unless (defined $str && $str =~ m{,}) {
+        die "invalid input-columns [$str]";
+    }
+    return [ map { trim($_) } split ',', $str ];
+}
+
+sub trim {
+	my ($str) = @_;
+
+    $str =~ s/^\s+|\s+$//g;
+	return $str;
 }
 
 package SQLWriter;
 
 sub new {
-	my ($class, $output_file, $table_name) = @_;
+	my ($class, $output_file, $table_name, $important_area_codes) = @_;
 
 	open(my $output_fh, '>', $output_file) or die "can't write [$output_file]: $!";
 	print $output_fh "-- Dumping data for table \`$table_name\`\n--\n\n";
@@ -70,11 +101,13 @@ sub new {
 	return bless {
 		'output_fh' => $output_fh,
 		'used_zip' => {},
+		'used_area_code' => {},
 		'count' => 0,
 		'current_query' => [],
 		'current_size' => 0,
 		'max_query_size' => 150_000,
 		'table_name' => $table_name,
+		'important_area_codes' => $important_area_codes,
 	}, $class;
 }
 
@@ -89,27 +122,30 @@ sub get_count {
 
 
 sub write_item {
-	my ($self, $r, $important_zips) = @_;
+	my ($self, $r, $columns) = @_;
 
-	my ($state_field, $zip_field) = (
-		exists $r->{'POSTAL_CODE'} ?
-			( 'PROVINCE_ABBR', 'POSTAL_CODE' ) :
-			( 'STATE', 'ZIP_CODE' )
-	);
-	unless (exists $self->{'used_zip'}{ $r->{$zip_field} }) {
-		$self->{'used_zip'}{ $r->{$zip_field} } = 1;
+	my ($zip_field, $area_field, $city_field, $state_field) = @$columns;
+	if (defined $r->{$area_field} && length $r->{$area_field}) {
+        unless (exists $self->{'used_zip'}{ $r->{$zip_field} }) {
+            $self->{'used_zip'}{ $r->{$zip_field} } = 1;
 
-		if ($r->{'AREA_CODE'} =~ m{(\d+)/(\d+)}) {
-			my ($first_zip, $second_zip) = ($1, $2);
-			if (exists $important_zips->{$first_zip}) {
-				$r->{'AREA_CODE'} = $first_zip;
-			}
-			else {
-				$r->{'AREA_CODE'} = $second_zip;
-			}
-		}
-		$self->{'count'}++;
-		$self->_print( @$r{'AREA_CODE', $zip_field, 'CITY', $state_field} );
+            if ($r->{$area_field} =~ m{(\d+)/(\d+)}) {
+                my ($first_zip, $second_zip) = ($1, $2);
+                if (exists $self->{'important_area_codes'}{$first_zip}) {
+                    $r->{$area_field} = $first_zip;
+                }
+                else {
+                    $r->{$area_field} = $second_zip;
+                }
+            }
+            $self->{'used_area_code'}{ $r->{$area_field} } ++;
+
+            $self->{'count'}++;
+            $self->_print( @$r{$area_field, $zip_field, $city_field, $state_field} );
+        }
+	}
+	else {
+	    print "skip empty area code record\n";
 	}
 }
 
@@ -150,6 +186,12 @@ sub sql_quote {
 		$str =~ s/"/\\"/g;
 		return qq("$str");
 	}
+}
+
+sub get_area_code_use_count {
+	my ($self, $area_code) = @_;
+
+    return $self->{'used_area_code'}{$area_code};
 }
 
 DESTROY {

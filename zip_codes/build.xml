@@ -13,16 +13,18 @@
 		<exec failonerror="true" executable="perl">
 			<arg value="csv_to_sql.pl"/>
 			<arg value="--input=${zipcode.csv.usa}"/>
+			<arg value="--input-columns=${zipcode.columns.usa}"/>
 			<arg value="--input=${zipcode.csv.canada}"/>
-			<arg value="--output=${result.file.sesame4}"/>
-			<arg value="--table=${result.table.sesame4}"/>
+			<arg value="--input-columns=${zipcode.columns.canada}"/>
+			<!--arg value="- -output=${result.file.sesame4}"/>
+			<arg value="- -table=${result.table.sesame4}"/-->
 			<arg value="--output=${result.file.sesame5}"/>
 			<arg value="--table=${result.table.sesame5}"/>
 			<arg value="--important-area-code=432"/>
 			<arg value="--important-area-code=661"/>
 			<arg value="--important-area-code=708"/>
 			<arg value="--important-area-code=845"/>
-			<arg value="--important-area-code=909"/> 
+			<arg value="--important-area-code=909"/>
 			<arg value="--important-area-code=916"/>
 		</exec>
 	</target>
@@ -43,26 +45,32 @@
 		</unzip>
 	</target>
 
-	<target name="download.zip.usa" depends="ask.password">
+	<target name="download.zip.usa" depends="ask.password.usa">
 		<exec failonerror="true" executable="wget">
 			<arg value="${zipcode.url.usa}" />
 			<arg value="--quiet" />
 			<arg value="--output-document=${zipcode.file.usa}" />
-			<arg value="--post-data=login=${zipcodeworld.login}&amp;password=${zipcodeworld.password}&amp;btnDownload=Download" />
+			<arg value="--http-user=${zipcodeworld.login.usa}" />
+			<arg value="--http-password=${zipcodeworld.password.usa}" />
 		</exec>
 	</target>
 
-	<target name="download.zip.canada" depends="ask.password">
+	<target name="download.zip.canada" depends="ask.password.canada">
 		<exec failonerror="true" executable="wget">
 			<arg value="${zipcode.url.canada}" />
 			<arg value="--quiet" />
 			<arg value="--output-document=${zipcode.file.canada}" />
-			<arg value="--post-data=login=${zipcodeworld.login}&amp;password=${zipcodeworld.password}&amp;btnDownload=Download" />
+            <arg value="--http-user=${zipcodeworld.login.canada}" />
+            <arg value="--http-password=${zipcodeworld.password.canada}" />
 		</exec>
 	</target>
 
-	<target name="ask.password">
-		<input addproperty="zipcodeworld.password" message="ZipCodeWorld password" />
+	<target name="ask.password.usa">
+		<input addproperty="zipcodeworld.password.usa" message="Password for USA zipcodes" />
+	</target>
+
+	<target name="ask.password.canada">
+		<input addproperty="zipcodeworld.password.canada" message="Password for Canada zipcodes" />
 	</target>
 
 	<target name="deploy.sesame4">
