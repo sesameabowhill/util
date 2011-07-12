@@ -22,6 +22,8 @@
 				<exclude name="*" />
 				<exclude name="zip_codes/*.csv" />
 				<exclude name="zip_codes/*.CSV" />
+				<exclude name="zip_codes/*.txt" />
+				<exclude name="zip_codes/*.TXT" />
 				<exclude name=".**/*" />
 				<exclude name=".*" />
 			</fileset>
