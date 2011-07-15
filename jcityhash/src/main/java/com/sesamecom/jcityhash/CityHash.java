@@ -13,5 +13,10 @@ public class CityHash {
     /**
      * Returns unsigned 64bit integer hash code as a string, due to lack of unsigned types in Java.
      */
-    public static native String hash64(String message);
+    public static String hash64(String message) {
+        if (message == null) return null;
+        return hash64Native(message).trim();
+    }
+
+    private static native String hash64Native(String message);
 }
