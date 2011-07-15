@@ -1,0 +1,55 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.sesamecom</groupId>
+    <artifactId>jcityhash</artifactId>
+    <version>1.0.2</version>
+    <packaging>nar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>duns-plugin-repository</id>
+            <name>Duns Plugin Repository</name>
+            <url>http://duns.github.com/maven-snapshots/</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-nar-plugin</artifactId>
+                <version>2.1-SNAPSHOT</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <cpp>
+                        <exceptions>false</exceptions>
+                    </cpp>
+                    <libraries>
+                        <library>
+                            <type>jni</type>
+                            <linkCPP>false</linkCPP>
+                            <narSystemPackage>com.sesamecom.jcityhash</narSystemPackage>
+                        </library>
+                    </libraries>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
