@@ -1,13 +1,12 @@
 package com.sesamecom.jcityhash;
 
-import com.sesamecom.jcityhash.NarSystem;
-
 /**
- * A JNI wrapper around the excellent CityHash.
+ * A JNI wrapper around the excellent CityHash library.  It's an extremely small library, but very dense, and uses a lot
+ * of datatypes that don't exist in Java, making it potentially difficult to port.
  */
 public class CityHash {
     static {
-        NarSystem.loadLibrary();
+        Native.loadNativeLibrary();
     }
 
     /**
