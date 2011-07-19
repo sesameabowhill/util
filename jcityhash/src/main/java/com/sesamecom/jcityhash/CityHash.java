@@ -6,7 +6,7 @@ package com.sesamecom.jcityhash;
  */
 public class CityHash {
     static {
-        Native.loadNativeLibrary();
+        Native.loadNativeLibraryFromResourcePath();
     }
 
     /**

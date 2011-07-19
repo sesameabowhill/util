@@ -1,5 +1,8 @@
 package com.sesamecom.jcityhash;
 
+/**
+ * The results of a brief attempt to port CityHash to Java.
+ */
 public class CityHashJava {
 /*
     public String hash64(String s) {
