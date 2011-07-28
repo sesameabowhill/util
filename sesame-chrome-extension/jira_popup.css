@@ -1,0 +1,7 @@
+.item-summary a:link, .item-summary a:visited {
+	color: #009DC9 !important;
+}
+.item-summary a:hover, .item-summary a:active {
+	color: #ADD404 !important;
+	text-decoration: underline !important;
+}

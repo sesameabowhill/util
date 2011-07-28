@@ -1,0 +1,24 @@
+{
+  "name": "Sesame Support Helper",
+  "version": "0.0.0.0",
+  "background_page": "background.html",
+  "options_page": "options.html",
+  "update_url": "https://members.sesamecommunications.com/support-tools/sesame/support-helper/updates.xml",
+  "permissions": [ "https://members.sesamecommunications.com/" ],
+  "browser_action": {
+    "name": "Sesame upload queue size",
+    "default_icon": "icon.png",
+    "popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [ 
+        "http://jira.sesamecommunications.com/browse/*", 
+        "https://jira.sesamecommunications.com/browse/*",
+        "https://jira.sesamecommunications.com:8443/browse/*" 
+      ],
+      "css": ["jira_popup.css"],
+      "js": ["jira_popup.js"]
+    }
+  ]
+}
