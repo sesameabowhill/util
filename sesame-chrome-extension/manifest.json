@@ -10,12 +10,18 @@
     "default_icon": "icon.png",
     "popup": "popup.html"
   },
+  "icons" : {
+    "16": "img/icon.16.png",
+    "48": "img/icon.48.png"
+  },
+  "omnibox" : {
+    "keyword": "s"
+  },
   "content_scripts": [
     {
       "matches": [ 
         "http://jira.sesamecommunications.com/browse/*", 
-        "https://jira.sesamecommunications.com/browse/*",
-        "https://jira.sesamecommunications.com:8443/browse/*" 
+        "https://jira.sesamecommunications.com/browse/*" 
       ],
       "css": ["jira_popup.css"],
       "js": ["jira_popup.js"]
