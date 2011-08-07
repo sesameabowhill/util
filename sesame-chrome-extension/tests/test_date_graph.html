@@ -9,6 +9,8 @@
     <script type="text/javascript" src="../lib/data_graph.js"></script>
     <script type="text/javascript" src="../lib/client_stack.js"></script>
     <script type="text/javascript" src="../lib/date_utils.js"></script>
+    <script type="text/javascript" src="../lib/command_finder.js"></script>
+    <script type="text/javascript" src="../lib/suggest_link.js"></script>
     <script type="text/javascript">
 
         test("testConstruct", function () {
@@ -176,7 +178,67 @@
 	        	);
         	}
         });
-
+		module("CommandFinder");
+		test("get_suggestions", function () {
+			var finder = new CommandFinder(["abs", "ab1", "ab2", "find"]);
+			deepEqual(finder.get_suggestions("a"), ["ab1", "ab2", "abs"]);
+			deepEqual(finder.get_suggestions("ab"), ["ab1", "ab2", "abs"]);
+			deepEqual(finder.get_suggestions("abs"), ["abs"]);
+			deepEqual(finder.get_suggestions("abs1"), []);
+			deepEqual(finder.get_suggestions("f"), ["find"]);
+			var finder = new CommandFinder(["a", "aa", "aaa"]);
+			deepEqual(finder.get_suggestions("a"), ["a", "aa", "aaa"]);
+			deepEqual(finder.get_suggestions("aa"), ["aa", "aaa"]);
+			deepEqual(finder.get_suggestions("aaa"), ["aaa"]);
+		});
+		module("SuggestLink");
+		test("get_link_suggestions", function () {
+			var finder = new SuggestLink();
+			deepEqual(
+				finder.get_link_suggestions("ji issue 1", {}), 
+				[ {"content": "jira issue 1 ", "description": "Search for [<match>issue 1</match>] in <match>Jira</match>"} ]
+			);
+			deepEqual(
+				finder.get_link_suggestions("inv st", {}), 
+				[ {"content": "invisalign stage ", "description": "go to <match>Stage Invisalign</match> tool"} ]
+			);
+			deepEqual(
+				finder.get_link_suggestions("cp d", { "d1": "d1", "d2": "d2" }), 
+				[ 
+					{"content": "cp d ", "description": "go to [<match>d</match>] <match>Control Panel</match>"},
+					{"content": "cp d1 ", "description": "go to [<match>d1</match>] <match>Control Panel</match>"},
+					{"content": "cp d2 ", "description": "go to [<match>d2</match>] <match>Control Panel</match>"}
+				]
+			);
+			deepEqual(
+				finder.get_link_suggestions("cp d", { "d1": "d1" }), 
+				[ {"content": "cp d1 ", "description": "go to [<match>d1</match>] <match>Control Panel</match>"} ]
+			);
+			deepEqual(
+				finder.get_link_suggestions("cp d", {}), 
+				[ {"content": "cp d ", "description": "go to [<match>d</match>] <match>Control Panel</match>"} ]
+			);
+			deepEqual(
+				finder.get_link_suggestions("cp", {}), 
+				[ {"content": "cp ", "description": "go to [<match></match>] <match>Control Panel</match>"} ]
+			);
+			equal(
+				finder.get_url("ji sw", {}),
+				"https://jira.sesamecommunications.com:8443/secure/QuickSearch.jspa?searchString=sw"
+			);
+			equal(
+				finder.get_url("cp d ", { "d1": "d1", "d2": "d2" }),
+				"https://members.sesamecommunications.com/d/"
+			);
+			equal(
+				finder.get_url("cp d1 ", { "d1": "d1", "d2": "d2" }),
+				"https://members.sesamecommunications.com/d1/"
+			);
+			equal(
+				finder.get_url("demo 1", {}),
+				"http://demo-stage.sesamecommunications.com/sesame_demo/login.cgi?user=dental_demo_1"
+			);
+		});
     </script>
 </head>
 

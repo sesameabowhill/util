@@ -4,9 +4,14 @@
 <script type="text/javascript" src="lib/date_utils.js"></script> 
 <script type="text/javascript" src="lib/client_stack.js"></script> 
 <script type="text/javascript" src="lib/graph_utils.js"></script>
+<script type="text/javascript" src="lib/command_finder.js"></script>
+<script type="text/javascript" src="lib/suggest_link.js"></script>
 <script>
 	var client_list;
+	var client_suggestions;
 	var last_graph;
+	var link_suggest = new SuggestLink();
+
 	localStorage["graph_type"] = "upload_queue_5";
 
 	function get_current_graph_params() {
@@ -116,8 +121,11 @@
   					"d": "sesame4"
   				};
   				client_list = {};
+				client_suggestions = {};
   				for (var i=0; i<clients.length; ++i) {
   					var cl = clients[i];
+					client_suggestions[cl.u] = cl.u;
+					client_suggestions[cl.i] = cl.u;
   					var new_cl;
   					if (client_list[cl.u]) {
   						if (cl.t == 's') {
@@ -283,6 +291,26 @@
 			}
 		}
 	);
+
+	chrome.omnibox.onInputChanged.addListener(
+		function(text, suggest_callback) {
+			var links = link_suggest.get_link_suggestions(text, client_suggestions);
+			console.log(links);
+			suggest_callback(links);
+		}
+	);
+
+	chrome.omnibox.onInputEntered.addListener(
+		function(text) {
+			var url = link_suggest.get_url(text, client_suggestions);
+			if (null !== url) {
+				chrome.tabs.getSelected(null, function(tab) {
+					chrome.tabs.update(tab.id, {"url": url});
+				});
+			}
+		}
+	);
+	
 </script>
 </head>
 </html>
