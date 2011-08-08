@@ -30,15 +30,33 @@
 			}
 		}
 		if (! last_graph) {
-			if (localStorage["graph_type"] == "upload_queue_5") {
+			if (localStorage["graph_type"] == "error_count") {
+				last_graph = {
+					"type": localStorage["graph_type"],
+					"data_url": get_url("error_count") + "?action=error_stat",
+					"error_count_url": get_url("error_count"),
+					"error_count": 0,
+					"refresh": get_refresh_interval("upload_queue"),
+					"name": "New errors",
+					"graph": new DataGraph(60, 120, 2, function (a, b) { return a + b }),
+					"process_result": set_error_count,
+					"graph_lines": [ "All errors", "Unlinked errors" ],
+
+					"last_error_count": null
+				};
+			}
+			else if (localStorage["graph_type"] == "upload_queue_5") {
 				last_graph = {
 					"type": localStorage["graph_type"],
 					"data_url": get_url("upload_queue_5"),
 					"error_count_url": get_url("error_count"),
 					"error_count": 0,
 					"refresh": get_refresh_interval("upload_queue"),
-					"name": "Sesame upload processing queue",
-					"graph": new DataGraph(60, 120, 3),
+					"name": "Upload processing queue",
+					"graph": new DataGraph(60, 120, 3, Math.max),
+					"process_result": set_upload_queue_size,
+					"graph_lines": [ "Delayed", "Processing", "Initial" ],
+
 					"client_stack": new ClientStack(20)
 				};
 			}
@@ -96,7 +114,7 @@
   		get_json_data(
   			current_graph.data_url,
   			function (resp) {
-  				set_upload_queue_size(resp, current_graph);
+  				current_graph.process_result(resp, current_graph);
   			}
   		);
   		window.setTimeout(refresh_upload_queue_size, current_graph.refresh);
@@ -181,6 +199,27 @@
   			'path': icon_name
   		});
   	}
+
+	function set_error_count(response, current_graph) {
+		if (null === current_graph.last_error_count) {
+			current_graph.last_error_count = response;
+		}
+
+		console.log(response);
+		var all_new_instances = response.all_instances - current_graph.last_error_count.all_instances; 
+		var unlinked_new_instances = response.unlinked_instances - current_graph.last_error_count.unlinked_instances;
+		if (all_new_instances < 0 ) {
+			all_new_instances = 0;
+		}
+		if (unlinked_new_instances < 0) {
+			unlinked_new_instances = 0;
+		}
+	  	current_graph.graph.add_point(getCurrentSeconds(), all_new_instances, unlinked_new_instances);
+    	chrome.browserAction.setBadgeText({"text": String(unlinked_new_instances)});
+	  	chrome.browserAction.setBadgeBackgroundColor({"color": get_badge_color_by_queue_size(unlinked_new_instances)});
+	  	chrome.browserAction.setTitle({"title": ""});
+		current_graph.last_error_count = response;
+	}
   	
   	function set_upload_queue_size(resp, current_graph) {
   		// normalize waits
@@ -248,13 +287,13 @@
   	}
 
   	function get_badge_color_by_queue_size(queue_size) {
-  		if (queue_size < 10) {
+  		if (queue_size < 20) {
  			return [ 0, 132, 226, 255 ];
  		}
- 		else if (queue_size < 50) {//50
+ 		else if (queue_size < 100) {//50
   			return [ 0, 205, 0, 255 ];
   		}
- 		else if (queue_size < 100) {//100
+ 		else if (queue_size < 200) {//100
   			return [ 226, 189, 0, 255 ];
   		}
  		else {

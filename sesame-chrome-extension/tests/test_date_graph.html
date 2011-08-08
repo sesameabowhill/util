@@ -14,12 +14,12 @@
     <script type="text/javascript">
 
         test("testConstruct", function () {
-        	var data_graph = new DataGraph();
-                notEqual(data_graph, null, "object created");
+			var data_graph = new DataGraph();
+			notEqual(data_graph, null, "object created");
         });
 
         test("testAddPoints", function () {
-        	var data_graph = new DataGraph(10, 20)
+        	var data_graph = new DataGraph(10, 20, null, Math.max)
         	data_graph.add_point(10, 100);
         	data_graph.add_point(20, 200);
         	equal("BkDI", data_graph.get_chart_data());
@@ -27,7 +27,7 @@
 
         test("testGranularity", function () {
         	{
-	        	var data_graph = new DataGraph(5, 20)
+	        	var data_graph = new DataGraph(5, 20, null, Math.max)
 	        	data_graph.add_point(10, 100);
 	        	data_graph.add_point(12, 200);
 	        	data_graph.add_point(15, 100);
@@ -35,7 +35,7 @@
 	        	equal("DIBk", data_graph.get_chart_data());
 	        }
         	{
-	        	var data_graph = new DataGraph(5, 20)
+	        	var data_graph = new DataGraph(5, 20, null, Math.max)
 	        	data_graph.add_point(10, 100);
 	        	data_graph.add_point(20, 200);
 	        	data_graph.add_point(30, 100);
@@ -43,7 +43,7 @@
 	        	equal("Bk__DI__Bk__Ay", data_graph.get_chart_data());
 	        }
         	{
-	        	var data_graph = new DataGraph(1, 20)
+	        	var data_graph = new DataGraph(1, 20, null, Math.max)
 	        	data_graph.add_point(10, 100);
 	        	data_graph.add_point(20, 200);
 	        	equal("Bk__________________DI", data_graph.get_chart_data());
@@ -52,7 +52,7 @@
 
         test("testMaxLength", function () {
         	{
-	        	var data_graph = new DataGraph(2, 2)
+	        	var data_graph = new DataGraph(2, 2, null, Math.max)
 	        	data_graph.add_point(10, 100);
 	        	data_graph.add_point(12, 200);
 	        	data_graph.add_point(15, 100);
@@ -63,7 +63,7 @@
 
         test("testGetChartSettings", function () {
         	{
-	        	var data_graph = new DataGraph(2, 2)
+	        	var data_graph = new DataGraph(2, 2, null, Math.max)
 	        	data_graph.add_point(10, 100);
 	        	data_graph.add_point(12, 200);
 	        	data_graph.add_point(15, 98);
@@ -73,7 +73,7 @@
 	        	equal("-tf.", settings.data);
 	        }
         	{
-	        	var data_graph = new DataGraph(2, 2)
+	        	var data_graph = new DataGraph(2, 2, null, Math.max)
 	        	data_graph.add_point(10, 100);
 	        	data_graph.add_point(12, 200);
 	        	var settings = data_graph.get_chart_settings();
@@ -89,7 +89,7 @@
         });
         
         test("testTwoDimensionGraph", function () {
-        	var data_graph = new DataGraph(5, 20, 2)
+        	var data_graph = new DataGraph(5, 20, 2, Math.max);
         	data_graph.add_point(10, 100, 200);
         	data_graph.add_point(15, 100, 50);
         	equal("BkBk,DIAy", data_graph.get_chart_data());

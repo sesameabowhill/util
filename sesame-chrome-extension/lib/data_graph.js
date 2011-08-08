@@ -1,4 +1,4 @@
-function DataGraph(granularity, capacity, dimensions) {
+function DataGraph(granularity, capacity, dimensions, group_func) {
 	this.granularity = granularity;
 	this.capacity = capacity;
 	this.points = [];
@@ -6,6 +6,7 @@ function DataGraph(granularity, capacity, dimensions) {
 	this.current_point = null; // index of point in points array
 	this.value_granularity = 5;
 	this.dimensions = dimensions || 1;
+	this.group_func = group_func;
 }
 
 // params: (time, data1, ...)
@@ -33,10 +34,15 @@ DataGraph.prototype.add_point = function() {
 	}
 	else {
 		for (var data_index=0; data_index < this.dimensions; ++data_index) {
-			this.points[this.current_point][data_index] = Math.max(
-				this.points[this.current_point][data_index],
-				data_array[data_index]
-			);
+			if (this.points[this.current_point][data_index] == -1) {
+				this.points[this.current_point][data_index] = data_array[data_index];
+			}
+			else {
+				this.points[this.current_point][data_index] = this.group_func(
+					this.points[this.current_point][data_index],
+					data_array[data_index]
+				);
+			}
 		}
 	}
 };
