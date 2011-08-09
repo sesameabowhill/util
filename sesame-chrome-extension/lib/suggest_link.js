@@ -35,7 +35,7 @@ function SuggestLink() {
 			"title": "Search for [<match>%s</match>] in <match>Jira</match>"
 		}, 
 		"confluence" : {
-			"url": "http://wiki.sesamecommunications.com:8090/dosearchsite.action?queryString=%a",
+			"url": "http://wiki.sesamecommunications.com:8090/dosearchsite.action?queryString=%s",
 			"title": "Search for [<match>%s</match>] in <match>Confluence</match>"
 		}, 
 		"demo" : {
@@ -72,6 +72,7 @@ function SuggestLink() {
 		}
 	};
 	commands.error = commands.slm;
+	commands.wiki = commands.confluence;
 	commands.client = commands.fcs;
 	this.commands = commands;
 	

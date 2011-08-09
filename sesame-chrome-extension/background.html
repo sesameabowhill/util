@@ -38,9 +38,9 @@
 					"error_count": 0,
 					"refresh": get_refresh_interval("upload_queue"),
 					"name": "New errors",
-					"graph": new DataGraph(60, 120, 2, function (a, b) { return a + b }),
+					"graph": new DataGraph(60*5, 120/5, 2, function (a, b) { return a + b }),
 					"process_result": set_error_count,
-					"graph_lines": [ "All errors", "Unlinked errors" ],
+					"graph_lines": [ "Unlinked errors", "All errors" ],
 
 					"last_error_count": null
 				};
@@ -214,7 +214,7 @@
 		if (unlinked_new_instances < 0) {
 			unlinked_new_instances = 0;
 		}
-	  	current_graph.graph.add_point(getCurrentSeconds(), all_new_instances, unlinked_new_instances);
+	  	current_graph.graph.add_point(getCurrentSeconds(), unlinked_new_instances, all_new_instances);
     	chrome.browserAction.setBadgeText({"text": String(unlinked_new_instances)});
 	  	chrome.browserAction.setBadgeBackgroundColor({"color": get_badge_color_by_queue_size(unlinked_new_instances)});
 	  	chrome.browserAction.setTitle({"title": ""});
