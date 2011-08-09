@@ -38,7 +38,7 @@
 					"error_count": 0,
 					"refresh": get_refresh_interval("upload_queue"),
 					"name": "New errors",
-					"graph": new DataGraph(60*5, 120/5, 2, function (a, b) { return a + b }),
+					"graph": new DataGraph(60, 120, 2, function (a, b) { return a + b }),
 					"process_result": set_error_count,
 					"graph_lines": [ "Unlinked errors", "All errors" ],
 
@@ -175,26 +175,21 @@
 	  			current_graph.error_count_url + "?action=error_stat",
 	  			function (error_stat) {
 	  				current_graph.error_count = error_stat.unlinked_errors;
-	  				update_icon_status(error_stat.unlinked_instances);
+	  				update_icon_status(error_stat.status);
 	  			}
 	  		);
 	  	}
 	  	else {
-	  		update_icon_status(0);
+	  		update_icon_status(null);
 	  	}
   	}
   	
-  	function update_icon_status(error_instances) {
-  		var icon_name;
-  		if (error_instances > 10) {
-  			icon_name = "icon_failed.png";
-  		}
-  		else if (error_instances > 0) {
-  			icon_name = "icon_warning.png";
-  		}
-  		else {
-  			icon_name = "icon.png"
-  		}
+  	function update_icon_status(status) {
+  		var icon_name = (
+			status == "red" ? 
+				"img/icon.19.error.png" : 
+				"img/icon.19.png" 
+		);
   		chrome.browserAction.setIcon({
   			'path': icon_name
   		});
