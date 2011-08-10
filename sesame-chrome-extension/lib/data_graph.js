@@ -47,6 +47,27 @@ DataGraph.prototype.add_point = function() {
 	}
 };
 
+DataGraph.prototype.get_point_summary = function (n) {
+	var start = this.points.length - n;
+	if (start < 0) {
+		start = 0;
+	}
+	var summary = [];
+	for (var data_index=0; data_index < this.dimensions; ++data_index) {
+		var row_summary = 0;
+		for (var point_index = start; point_index < this.points.length; ++point_index) {
+			if (this.points[point_index][data_index] != -1) {
+				row_summary = this.group_func(
+					row_summary,
+					this.points[point_index][data_index]
+				);
+			}
+		}
+		summary.push(row_summary);
+	}
+	return summary;
+};
+
 DataGraph.prototype._add_new_data_point = function(data) {
 	this.points.push(data);
 	if (this.points.length > this.capacity) {

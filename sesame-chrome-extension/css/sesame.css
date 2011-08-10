@@ -1,5 +1,5 @@
 body, form, input, select, table, textarea { color: #656b6f; font: 11px/18px tahoma, sans-serif }
-button { background-color: #2FB0D1; color: #fff; font: 11px/18px tahoma, sans-serif; font-weight: bold; height: 20px; }
+button { background-color: #2FB0D1; color: #fff; font: 11px/18px tahoma, sans-serif; font-weight: bold; height: 2em; }
 input { height: 22px; }
 
 h2 { color: #A0B606; border-bottom: 1px dotted #000; padding-bottom: 0.5em; margin-top: 1em; clear: both; float: left; width: 100% }

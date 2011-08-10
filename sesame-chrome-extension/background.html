@@ -199,8 +199,6 @@
 		if (null === current_graph.last_error_count) {
 			current_graph.last_error_count = response;
 		}
-
-		console.log(response);
 		var all_new_instances = response.all_instances - current_graph.last_error_count.all_instances; 
 		var unlinked_new_instances = response.unlinked_instances - current_graph.last_error_count.unlinked_instances;
 		if (all_new_instances < 0 ) {
@@ -213,8 +211,19 @@
     	chrome.browserAction.setBadgeText({
 			"text": ( unlinked_new_instances > 0 ? String(unlinked_new_instances) : "" )
 		});
+		var recent_errors = current_graph.graph.get_point_summary(5);
+		var title = [];
+		if (unlinked_new_instances > 0) {
+			title.push(unlinked_new_instances + "unlinked error" + (unlinked_new_instances == 1 ? "" : "s"));
+		}
+		if (all_new_instances > 0) {
+			title.push(all_new_instances + " error" + (all_new_instances == 1 ? "" : "s"));
+		}
+		if (title.length == 0) {
+			title.push("no errors recently");
+		}
 	  	chrome.browserAction.setBadgeBackgroundColor({"color": [ 255, 0, 0, 255 ]});
-	  	chrome.browserAction.setTitle({"title": ""});
+	  	chrome.browserAction.setTitle({"title": title.join("\n")});
 		current_graph.last_error_count = response;
 	}
   	
