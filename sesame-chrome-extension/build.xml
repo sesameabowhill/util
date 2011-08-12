@@ -32,7 +32,7 @@
 		</scp>
 	</target>
 	
-	<target name="version.get_last_revision_number">
+	<!--target name="version.get_last_revision_number">
 		<tempfile property="temp_file.revision" destdir="${tmpdir}" deleteonexit="true" />
 		<exec executable="svn" failonerror="true" output="${temp_file.revision}">
 			<arg value="log" />
@@ -40,15 +40,20 @@
 			<arg value="1" />
 			<arg value="-r" />
 			<arg value="HEAD:1" />
-			<arg value="--xml" />
+			<arg value="- -xml" />
 		</exec>
 		<xmlproperty file="${temp_file.revision}" collapseAttributes="true"/>
 		<property name="last_revision_number" value="${log.logentry.revision}" />
 		<echo>last_revision_number [${last_revision_number}]</echo>
-	</target>
+	</target-->
 	
-	<target name="version.write" depends="version.get_last_revision_number">
-		<echo file="${file.last_version}">last_version=1.0.${last_revision_number}</echo>
+	<target name="version.write">
+		<exec executable="python" failonerror="true" outputproperty="last_version">
+			<arg value="-c" />
+			<arg value="import json; v = json.load(open('_version.json')); v['v3']+=1; json.dump(v, open('_version.json', 'w')); print '%d.%d.%d' % (v['v1'], v['v2'], v['v3'])"/>
+		</exec>
+		<echo>last_version [${last_version}]</echo>
+		<echo file="${file.last_version}">last_version=${last_version}</echo>
 	</target>
 
 	<target name="version.read">
@@ -65,6 +70,7 @@
 			<fileset dir=".">
 				<include name="**/*" />
 				<exclude name="**/.svn/**/*" />
+				<exclude name="**/_*" />
 				<exclude name="tests" />
 				<exclude name="tests/**/*" />
 				<exclude name="build.xml" />
