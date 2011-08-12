@@ -212,15 +212,25 @@
 			"text": ( unlinked_new_instances > 0 ? String(unlinked_new_instances) : "" )
 		});
 		var recent_errors = current_graph.graph.get_point_summary(5);
+		var unlinked_summary = recent_errors[0];
+		var all_summary = recent_errors[1];
 		var title = [];
-		if (unlinked_new_instances > 0) {
-			title.push(unlinked_new_instances + " unlinked error" + (unlinked_new_instances == 1 ? "" : "s"));
+		var time_string = " in the past 5 minutes";
+		if (unlinked_summary > 0) {
+			if (unlinked_summary == all_summary) {
+				title.push(unlinked_summary + " unlinked error" + (unlinked_summary == 1 ? "" : "s") + time_string);
+			}
+			else {
+				title.push(unlinked_summary + " unlinked error" + (unlinked_summary == 1 ? "" : "s") + " of " + all_summary + " total" + time_string);
+			}
 		}
-		if (all_new_instances > 0) {
-			title.push(all_new_instances + " error" + (all_new_instances == 1 ? "" : "s"));
+		else {
+			if (all_summary > 0) {
+				title.push(all_summary + " error" + (all_summary == 1 ? "" : "s") + time_string);
+			}
 		}
 		if (title.length == 0) {
-			title.push("no errors recently");
+			title.push("no errors" + time_string);
 		}
 	  	chrome.browserAction.setBadgeBackgroundColor({"color": [ 255, 0, 0, 255 ]});
 	  	chrome.browserAction.setTitle({"title": title.join("\n")});

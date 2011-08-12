@@ -10,8 +10,8 @@ function SuggestLink() {
 			"clients_stage": {}
 		}, 
 		"pp" : {
-			"url": "https://login.sesamecommunications.com/%s/",
-			"url_stage": "https://pp-stage1-1.sesamecommunications.com/%s/",
+			"url": "https://login.sesamecommunications.com/%s/index.html",
+			"url_stage": "https://pp-stage1-1.sesamecommunications.com/%s/index.html",
 			"title": "go to [<match>%s</match>] <match>Patient Pages</match>" ,
 			"title_stage": "go to [<match>%s</match>] <match>Stage Patient Pages</match>" ,
 			"need_client": true,
