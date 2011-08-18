@@ -348,7 +348,7 @@
 	chrome.omnibox.onInputChanged.addListener(
 		function(text, suggest_callback) {
 			var links = link_suggest.get_link_suggestions(text, client_suggestions);
-			console.log(links);
+			//console.log(links);
 			suggest_callback(links);
 		}
 	);
