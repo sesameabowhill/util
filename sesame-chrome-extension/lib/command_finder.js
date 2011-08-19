@@ -31,14 +31,14 @@ CommandFinder.prototype.get_suggestions = function (word) {
 
 CommandFinder.prototype._make_suggestion = function (nodes, suggestions, path) {
 	var all_commands = [];
-	if ("matched" in nodes) {
-		all_commands.push(nodes.matched);
-	}
 	for (letter in nodes.nodes) {
 		var next_path = path + letter;
 		var next_commands = this._make_suggestion(nodes.nodes[letter], suggestions, next_path);
 		suggestions[next_path] = next_commands;
 		all_commands = all_commands.concat(next_commands);
+	}
+	if ("matched" in nodes) {
+		all_commands = [ nodes.matched ];
 	}
 	return all_commands;
 };

@@ -189,9 +189,13 @@
 			deepEqual(finder.get_suggestions("abs"), ["abs"]);
 			deepEqual(finder.get_suggestions("abs1"), []);
 			deepEqual(finder.get_suggestions("f"), ["find"]);
+			var finder = new CommandFinder(["a1", "aa1", "aaa1"]);
+			deepEqual(finder.get_suggestions("a"), ["a1", "aa1", "aaa1"]);
+			deepEqual(finder.get_suggestions("aa"), ["aa1", "aaa1"]);
+			deepEqual(finder.get_suggestions("aaa"), ["aaa1"]);
 			var finder = new CommandFinder(["a", "aa", "aaa"]);
-			deepEqual(finder.get_suggestions("a"), ["a", "aa", "aaa"]);
-			deepEqual(finder.get_suggestions("aa"), ["aa", "aaa"]);
+			deepEqual(finder.get_suggestions("a"), ["a"]);
+			deepEqual(finder.get_suggestions("aa"), ["aa"]);
 			deepEqual(finder.get_suggestions("aaa"), ["aaa"]);
 		});
 		module("SuggestLink");
@@ -240,6 +244,10 @@
 			equal(
 				finder.get_url("demo 1", {}),
 				"http://demo-stage.sesamecommunications.com/sesame_demo/login.cgi?user=dental_demo_1"
+			);
+			equal(
+				finder.get_url("pp test", {}),
+				"https://login.sesamecommunications.com/test/index.html"
 			);
 		});
     </script>
