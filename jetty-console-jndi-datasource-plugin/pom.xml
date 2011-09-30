@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>jetty-console-plugins</artifactId>
+    <groupId>org.simplericity.jettyconsole</groupId>
+    <version>1.42</version>
+  </parent>
+
+  <groupId>com.sesamecom</groupId>
+  <artifactId>jetty-console-jndi-datasource-plugin</artifactId>
+  <name>Jetty Console JNDI Datasource Plugin</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.jolbox</groupId>
+      <artifactId>bonecp</artifactId>
+      <version>0.7.1.RELEASE</version>
+    </dependency>
+
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>5.1.16</version>
+    </dependency>
+
+    <!-- HACK: seems like these two should have the same version, but 5.5.23 naming-factory alone doesn't include
+         "StringManager" as a dependency, and naming-common contains it but peters out at 5.0.28 -->
+    <dependency>
+      <groupId>tomcat</groupId>
+      <artifactId>naming-factory</artifactId>
+      <version>5.5.23</version>
+    </dependency>
+
+    <dependency>
+      <groupId>tomcat</groupId>
+      <artifactId>naming-common</artifactId>
+      <version>5.0.28</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.springframework.build.aws</groupId>
+        <artifactId>org.springframework.build.aws.maven</artifactId>
+        <version>3.0.0.RELEASE</version>
+      </extension>
+    </extensions>
+  </build>
+  <distributionManagement>
+    <repository>
+      <id>sesame-maven</id>
+      <name>Sesame S3 Repository</name>
+      <url>s3://sesame-maven-public/release</url>
+    </repository>
+  </distributionManagement>
+</project>
