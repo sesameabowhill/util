@@ -12,6 +12,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A Jetty Console plugin that creates a JNDI data source using persist and bonecp system properties.
  */
@@ -36,12 +38,24 @@ public class JndiDataSourcePlugin extends JettyConsolePluginBase {
         System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.naming.java.javaURLContextFactory");
         System.setProperty(Context.URL_PKG_PREFIXES, "org.apache.naming");
 
-        String host = System.getProperty("persistHost", "localhost");
-        String port = System.getProperty("persistPort", "3306");
-        String schema = System.getProperty("persistSchema", "sesame_db");
-        String user = System.getProperty("persistUser", "sesame");
-        String pass = System.getProperty("persistPassword", "");
+        // CODE DEBT: copied from SesamePersistModule
+        String host = System.getProperty("persistHost");
+        String port = System.getProperty("persistPort");
+        String schema = System.getProperty("persistSchema");
+        String user = System.getProperty("persistUser");
+        String pass = System.getProperty("persistPassword");
 
+        checkNotNull(host, "Please supply the 'persistHost' system property.");
+        checkNotNull(port, "Please supply the 'persistPort' system property.");
+        checkNotNull(schema, "Please supply the 'persistSchema' system property.");
+        checkNotNull(user, "Please supply the 'persistUser' system property.");
+        checkNotNull(pass, "Please supply the 'persistPassword' system property.");
+
+        if (System.getProperty("hibernate.connection.provider_class") == null) {
+            log.warn("No connection pool provider configured via hibernate.connection.provider_class!");
+            log.warn("If this is a deployed application, it will eventually error out due to stale connections!");
+        }
+        
         String url = String.format("jdbc:mysql://%s:%s/%s?characterEncoding=utf8", host, port, schema);
 
         log.info("Bootstrapping JNDI DataSource @ /comp/env/jdbc/SesameDB with {}", url);
