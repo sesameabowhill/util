@@ -9,15 +9,10 @@
     <parent>
         <artifactId>jetty-console-plugins</artifactId>
         <groupId>org.simplericity.jettyconsole</groupId>
-        <version>1.42</version>
+        <version>1.43-sesame</version>
     </parent>
 
     <dependencies>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>0.9.29</version>
-        </dependency>
         <dependency>
             <groupId>com.sesamecom</groupId>
             <artifactId>legacy-integration-utils</artifactId>
