@@ -12,10 +12,14 @@ class ConventionForeignKeys
     {
         $ret = array();
         foreach(fields($table) as $field => $args){
-            if($field == 'parent_id'){
-                $ret[] = array("table" => $table, "source" => array($field), "target" => array("id"));
-            }elseif(preg_match("#^(.*)_id$#", $field, $args)){
-                $tableName = $this->plural($args[1]);
+            if($field == 'patient_id'){
+                $ret[] = array("table" => "visitor", "source" => array($field), "target" => array("id"));
+            }elseif($field == 'responsible_id'){
+                $ret[] = array("table" => "visitor", "source" => array($field), "target" => array("id"));
+            }elseif($field == 'member_id'){
+                $ret[] = array("table" => "client", "source" => array($field), "target" => array("id"));
+            }elseif(preg_match("#^(.*)_id$#", $field, $args) && ! in_array($field, array("pms_id", "link_id"))){
+                $tableName = $args[1];
                 if(in_array($tableName, get_vals("SHOW TABLES")/*tables_list()*/)){  //foreign keys only for existing tables
                     $ret[] = array("table" => $tableName, "source" => array($field), "target" => array("id"));
                 }
