@@ -63,6 +63,17 @@ public class GlobalPersistCompatibleJndiDataSource {
         dataSource.setUsername(user);
         dataSource.setPassword(pass);
 
+        // BoneCP iterates its own properties rather than the ones you pass in, so there's no possibility of confusing
+        // it by simply passing in all system properties.
+        try {
+            dataSource.setProperties(System.getProperties());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        // the legacy apps weren't designed to use a pool, and so their connections must be rolled back when checked in.
+        dataSource.setConnectionHook(new RollBackOnCheckInConnectionHook());
+
         try {
             InitialContext ic = new InitialContext();
 

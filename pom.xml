@@ -9,9 +9,10 @@
     <packaging>pom</packaging>
 
     <modules>
-      <module>jcityhash</module>
-      <module>jetty-console-jndi-datasource-plugin</module>
-      <module>legacy-integration-utils</module>
+        <module>jcityhash</module>
+        <module>jetty-console-jndi-datasource-plugin</module>
+        <module>legacy-integration-utils</module>
+        <module>legacy-struts-app</module>
     </modules>
 
     <dependencies>
@@ -35,6 +36,15 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.0.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
         </plugins>
         <extensions>
             <extension>
@@ -51,6 +61,13 @@
             <url>s3://sesame-maven-public/release</url>
         </repository>
     </distributionManagement>
+    <repositories>
+        <repository>
+            <id>s3repo</id>
+            <name>Sesame S3 Repository</name>
+            <url>http://sesame-maven-public.s3.amazonaws.com/release</url>
+        </repository>
+    </repositories>
 </project>
 
 
