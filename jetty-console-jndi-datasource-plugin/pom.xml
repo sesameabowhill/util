@@ -42,6 +42,13 @@
             </extension>
         </extensions>
     </build>
+    <repositories>
+        <repository>
+            <id>s3repo</id>
+            <name>Sesame S3 Repository</name>
+            <url>http://sesame-maven-public.s3.amazonaws.com/release</url>
+        </repository>
+    </repositories>
     <distributionManagement>
         <repository>
             <id>sesame-maven</id>
