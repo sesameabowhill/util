@@ -11,8 +11,9 @@ import javax.naming.NamingException;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Establishes a JNDI DataSource at java:/comp/env/jdbc/SesameDB, using the connection parameter system properties from
- * persist (persistHost, persistPort, persistSchema, persistUser, and persistPassword).
+ * Establishes a JNDI DataSource at java:comp/env/jdbc/SesameDB, using the connection parameter system properties
+ * from persist (persistHost, persistPort, persistSchema, persistUser, and persistPassword).  For compatability with
+ * some broken code, registers the same DataSource at java:/comp/env/jdbc/SesameDB (note the leading slash).
  *
  * DataSource is connection pooled using BoneCP, so you'll need to configure it via its system properties.  e.g.:
  *
@@ -50,7 +51,7 @@ public class GlobalPersistCompatibleJndiDataSource {
 
         String url = String.format("jdbc:mysql://%s:%s/%s?characterEncoding=utf8", host, port, schema);
 
-        log.info("Bootstrapping JNDI DataSource @ /comp/env/jdbc/SesameDB with {}", url);
+        log.info("Bootstrapping JNDI DataSource @ (/)comp/env/jdbc/SesameDB with {}", url);
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -78,10 +79,17 @@ public class GlobalPersistCompatibleJndiDataSource {
             InitialContext ic = new InitialContext();
 
             ic.createSubcontext("java:");
+            ic.createSubcontext("java:comp");
+            ic.createSubcontext("java:comp/env");
+            ic.createSubcontext("java:comp/env/jdbc");
+            ic.bind("java:comp/env/jdbc/SesameDB", dataSource);
+
+            // HACK: at one point while trying to debug JNDI issues, this variant of the context path was introduced
+            // into some legacy code.  cheaper to duplicate the error here (this is all legacy iBATIS code that will
+            // eventually be rewritten).
             ic.createSubcontext("java:/comp");
             ic.createSubcontext("java:/comp/env");
             ic.createSubcontext("java:/comp/env/jdbc");
-
             ic.bind("java:/comp/env/jdbc/SesameDB", dataSource);
         } catch (NamingException e) {
             throw new RuntimeException(e);
