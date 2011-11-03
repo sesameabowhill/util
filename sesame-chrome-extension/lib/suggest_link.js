@@ -3,8 +3,10 @@ function SuggestLink() {
 		"cp" : {
 			"url": "https://members.sesamecommunications.com/%s/",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/%s/",
+			"url_iet": "https://md-iet.sesamecom.com/",
 			"title": "go to [<match>%s</match>] <match>Control Panel</match>",
 			"title_stage": "go to [<match>%s</match>] <match>Stage Control Panel</match>",
+			"title_iet": "go to [<match>%s</match>] <match>IET Control Panel</match>",
 			"need_client": true,
 			"suffix": true,
 			"clients_stage": {}
@@ -12,8 +14,10 @@ function SuggestLink() {
 		"pp" : {
 			"url": "https://login.sesamecommunications.com/%s/index.html",
 			"url_stage": "https://pp-stage1-1.sesamecommunications.com/%s/index.html",
+			"url_iet": "https://pp-iet.sesamecom.com/%s/index.html",
 			"title": "go to [<match>%s</match>] <match>Patient Pages</match>" ,
 			"title_stage": "go to [<match>%s</match>] <match>Stage Patient Pages</match>" ,
+			"title_iet": "go to [<match>%s</match>] <match>IET Patient Pages</match>" ,
 			"need_client": true,
 			"suffix": true,
 			"clients_stage": {}
@@ -30,16 +34,20 @@ function SuggestLink() {
 		"internal" : {
 			"url": "https://internal.sesamecommunications.com:8443/internal/member-information.html",
 			"url_stage": "http://ip-stage1-1.sesamecommunications.com:8080/internal/member-information.html",
+			"url_iet": "https://ip-iet.sesamecom.com/member-information.html",
 			"suffix": true,
 			"title": "go to <match>Internal</match>",
-			"title_stage": "go to <match>Stage Internal</match>"
+			"title_stage": "go to <match>Stage Internal</match>",
+			"title_iet": "go to <match>IET Internal</match>"
 		},
 		"invisalign" : {
 			"url": "https://members.sesamecommunications.com/support-tools/invisalign-processing/",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/support-tools/invisalign-processing/",
+			"url_iet": "https://ip-iet.sesamecom.com/support-tools/invisalign-processing/",
 			"suffix": true,
 			"title": "go to <match>Invisalign</match> tool",
-			"title_stage": "go to <match>Stage Invisalign</match> tool"
+			"title_stage": "go to <match>Stage Invisalign</match> tool",
+			"title_iet": "go to <match>IET Invisalign</match> tool"
 		},
 		"jira" : {
 			"url": "https://jira.sesamecommunications.com:8443/secure/QuickSearch.jspa?searchString=%s",
@@ -119,23 +127,29 @@ function SuggestLink() {
 		"fcs" : {
 			"url": "https://members.sesamecommunications.com/support-tools/sesame/fast_client_search/?search_param=%s",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/support-tools/sesame/fast_client_search/?search_param=%s",
+			"url_iet": "https://ip-iet.sesamecom.com/support-tools/sesame/fast_client_search/?search_param=%s",
 			"suffix": true,
 			"title": "Search for [<match>%s</match>] <match>client</match>",
-			"title_stage": "Search <match>Stage</match> for [%s] <match>client</match>"
+			"title_stage": "Search <match>Stage</match> for [%s] <match>client</match>",
+			"title_iet": "Search <match>IET</match> for [%s] <match>client</match>"
 		}, 
 		"visitor" : {
 			"url": "https://members.sesamecommunications.com/support-tools/sesame/fast_client_search/?find=visitor&search_param=%s",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/support-tools/sesame/fast_client_search/?find=visitor&search_param=%s",
+			"url_iet": "https://ip-iet.sesamecom.com/support-tools/sesame/fast_client_search/?find=visitor&search_param=%s",
 			"suffix": true,
 			"title": "Search for [<match>%s</match>] <match>visitor</match>",
-			"title_stage": "Search <match>Stage</match> for [<match>%s</match>] <match>visitor</match>"
+			"title_stage": "Search <match>Stage</match> for [<match>%s</match>] <match>visitor</match>",
+			"title_iet": "Search <match>IET</match> for [<match>%s</match>] <match>visitor</match>"
 		}, 
 		"slm" : {
 			"url": "https://members.sesamecommunications.com/support-tools/error_reporter/?search=%s",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/support-tools/error_reporter/?search=%s",
+			"url_iet": "https://ip-iet.sesamecom.com/support-tools/error_reporter/?search=%s",
 			"suffix": true,
 			"title": "Search for [<match>%s</match>] in <match>Errors</match>",
-			"title_stage": "Search for [<match>%s</match>] in <match>Stage Errors</match>"
+			"title_stage": "Search for [<match>%s</match>] in <match>Stage Errors</match>",
+			"title_iet": "Search for [<match>%s</match>] in <match>IET Errors</match>"
 		}
 	};
 	commands.error = commands.slm;
@@ -148,7 +162,7 @@ function SuggestLink() {
 	this.commands = commands;
 	
 	this.command_finder = new CommandFinder(Object.keys(commands));
-	this.suffix_finder = new CommandFinder([ "stage" ]);
+	this.suffix_finder = new CommandFinder([ "stage", "iet" ]);
 }
 
 SuggestLink.prototype.get_link_suggestions = function (str, client_names) {
