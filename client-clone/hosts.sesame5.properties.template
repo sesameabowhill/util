@@ -1,0 +1,25 @@
+source.web.host = members.sesamecommunications.com
+source.web.user = ivan
+source.web.password =
+source.web.folder = /home/ivan/client_clone
+
+#source.upload.host = digger.3treepoint.com
+#source.upload.user = ivan
+#source.upload.password =
+#source.upload.folder = /home/ivan/client_clone
+
+destination.host = sesame-linux
+destination.user = admin5
+destination.password = 
+destination.folder = /home/admin5/client_clone
+
+demo_data_source.url = https://tools.sesamecommunications.com:8443/jenkins/job/demo-bigbird/lastSuccessfulBuild/artifact/target/SesameDemo-Database.zip
+demo_data_source.file = SesameDemo-Database.zip
+demo_data_source.sql_file = demo_database.sql
+demo_data_source.user = ivan
+demo_data_source.db.host = sesame-centos
+demo_data_source.db.post = 3306
+demo_data_source.db.user = admin
+demo_data_source.db.password = higer4
+demo_data_source.db.database = sesame_md
+#demo_data_source.password = 
