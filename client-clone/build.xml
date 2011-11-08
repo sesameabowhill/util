@@ -8,16 +8,18 @@
     <property name="file.backup_upload_script" value="backup_upload_data.sh" />
     <property name="file.restore_script" value="restore_backup.sh" />
 
-	<property name="backup_script.skip_table.logs" value="--skip-table=email_contact_log --skip-table=email_sent_mail_log --skip-table=extractor_log --skip-table=extractor_log_history --skip-table=extractor_log_version_history --skip-table=feature_edit_log --skip-table=hits_count --skip-table=hits_log --skip-table=internal_action_log --skip-table=internal_http2_log --skip-table=ppn_activity_log --skip-table=ppn_article_queue --skip-table=ppn_email_queue --skip-table=referrer_email_log --skip-table=send2friend_log --skip-table=si_cache_image --skip-table=si_log --skip-table=si_upgrade_log --skip-table=si_upload_history --skip-table=si_upload_log --skip-table=si_upload_session --skip-table=si_web_log --skip-table=sms_log --skip-table=sms_message_history --skip-table=sms_queue --skip-table=upload_errors --skip-table=upload_filling_status --skip-table=upload_history --skip-table=upload_last --skip-table=upload_log --skip-table=upload_postprocessing_action --skip-table=upload_postprocessing_action_param --skip-table=upload_postprocessing_task --skip-table=upload_postprocessing_task_param --skip-table=upload_programs --skip-table=upload_requirement --skip-table=upload_rule --skip-table=upload_settings --skip-table=upload_step --skip-table=upload_summary --skip-table=upload_tasks --skip-table=upload_trace --skip-table=voice_message_history --skip-table=voice_qa_record --skip-table=voice_queue --skip-table=voice_system_transaction_log --skip-table=voice_transactions_log --skip-table=voice_xml_request_history" />
-	<property name="backup_script.skip_table.si" value="--skip-table=si_alerted_doctor_to_message --skip-table=si_cache_image --skip-table=si_client_settings --skip-table=si_client_task --skip-table=si_default_timepoint_name --skip-table=si_doctor --skip-table=si_doctor_access --skip-table=si_doctor_theme --skip-table=si_extractor_user_version --skip-table=si_image --skip-table=si_image_system --skip-table=si_image_to_message --skip-table=si_image_type --skip-table=si_log --skip-table=si_message --skip-table=si_message_attachment --skip-table=si_patient --skip-table=si_patient_link --skip-table=si_patient_profile --skip-table=si_patient_timepoint_link --skip-table=si_pms_referrer_link --skip-table=si_settings --skip-table=si_standard_message --skip-table=si_standard_task --skip-table=si_task_notification --skip-table=si_theme --skip-table=si_upgrade_log --skip-table=si_upgrade_package --skip-table=si_upgrade_package_file_version --skip-table=si_upgrade_package_group --skip-table=si_upload_history --skip-table=si_upload_log --skip-table=si_upload_session --skip-table=si_web_log" />
-	<property name="backup_script.skip_table.default" value="${backup_script.skip_table.logs} ${backup_script.skip_table.si}" />
+	  <property name="backup_script.skip_table.logs" value="--skip-table=email_contact_log --skip-table=email_sent_mail_log --skip-table=extractor_log --skip-table=extractor_log_history --skip-table=extractor_log_version_history --skip-table=feature_edit_log --skip-table=hits_count --skip-table=hits_log --skip-table=internal_action_log --skip-table=internal_http2_log --skip-table=ppn_activity_log --skip-table=ppn_article_queue --skip-table=ppn_email_queue --skip-table=referrer_email_log --skip-table=send2friend_log --skip-table=si_cache_image --skip-table=si_log --skip-table=si_upgrade_log --skip-table=si_upload_history --skip-table=si_upload_log --skip-table=si_upload_session --skip-table=si_web_log --skip-table=sms_log --skip-table=sms_message_history --skip-table=sms_queue --skip-table=upload_errors --skip-table=upload_filling_status --skip-table=upload_history --skip-table=upload_last --skip-table=upload_log --skip-table=upload_postprocessing_action --skip-table=upload_postprocessing_action_param --skip-table=upload_postprocessing_task --skip-table=upload_postprocessing_task_param --skip-table=upload_programs --skip-table=upload_requirement --skip-table=upload_rule --skip-table=upload_settings --skip-table=upload_step --skip-table=upload_summary --skip-table=upload_tasks --skip-table=upload_trace --skip-table=voice_message_history --skip-table=voice_qa_record --skip-table=voice_queue --skip-table=voice_system_transaction_log --skip-table=voice_transactions_log --skip-table=voice_xml_request_history" />
+	  <property name="backup_script.skip_table.si" value="--skip-table=si_alerted_doctor_to_message --skip-table=si_cache_image --skip-table=si_client_settings --skip-table=si_client_task --skip-table=si_default_timepoint_name --skip-table=si_doctor --skip-table=si_doctor_access --skip-table=si_doctor_theme --skip-table=si_extractor_user_version --skip-table=si_image --skip-table=si_image_system --skip-table=si_image_to_message --skip-table=si_image_type --skip-table=si_log --skip-table=si_message --skip-table=si_message_attachment --skip-table=si_patient --skip-table=si_patient_link --skip-table=si_patient_profile --skip-table=si_patient_timepoint_link --skip-table=si_pms_referrer_link --skip-table=si_settings --skip-table=si_standard_message --skip-table=si_standard_task --skip-table=si_task_notification --skip-table=si_theme --skip-table=si_upgrade_log --skip-table=si_upgrade_package --skip-table=si_upgrade_package_file_version --skip-table=si_upgrade_package_group --skip-table=si_upload_history --skip-table=si_upload_log --skip-table=si_upload_session --skip-table=si_web_log" />
+	  <property name="backup_script.skip_table.default" value="${backup_script.skip_table.logs} ${backup_script.skip_table.si}" />
 
     <taskdef resource="net/sf/antcontrib/antlib.xml"/>
 
     <target name="deploy" depends="load_config.sesame4, deploy.source.to_web, deploy.source.to_upload, deploy.to_destination" description="deploy latest version of scripts to sesame4 servers" />
     <target name="deploy5" depends="load_config.sesame5, deploy.source.to_web, deploy.to_destination" description="deploy latest version of scripts to sesame5 servers" />
+    <target name="deploy.iet" depends="load_config.iet, deploy.source.to_web, deploy.to_destination" description="deploy latest version of scripts to sesame5 servers" />
     <target name="clone" depends="load_config.sesame4, clone.web, clone.upload" description="clone sesame4 client from [source] to [description]: $client_db" />
-	<target name="clone5" depends="load_config.sesame5, clone.web" description="clone sesame5 client from [source] to [description]: $client_db, $fast" />
+	  <target name="clone5" depends="load_config.sesame5, clone.web" description="clone sesame5 client from [source] to [description]: $client_db, $fast" />
+	  <target name="clone.iet" depends="load_config.iet, clone.web" description="clone IET client from [source] to [description]: $client_db, $fast" />
 
     <target name="clone.web" depends="clone.set_skip_tables, clone.check_params, clone.source.web.make_archive, clone.source.web.download_archive, clone.destination.upload_archive, clone.destination.extract_archive, clone.destination.clear_up" />
     <target name="clone.upload" depends="clone.set_skip_tables, clone.check_params, clone.source.upload.gather_files, clone.source.upload.download_archive, clone.destination.upload_archive_from_upload, clone.destination.extract_archive_from_upload" />
@@ -25,29 +27,40 @@
     <!--target name="clone.web5" depends="clone.check_params, clone.source.web.make_archive, clone.source.web.download_archive, clone.destination.upload_archive, clone.destination.extract_archive, clone.destination.clear_up" /-->
     <!--target name="clone.web5" depends="clone.check_params, clone.source.web5.make_archive, clone.source.web.download_archive, clone.destination.upload_archive, clone.destination.extract_archive, clone.destination.clear_up" /-->
 
-	<target name="load_config.sesame4">
-	    <property file="hosts.sesame4.properties" />
-	</target>
+		<target name="load_config.sesame4">
+		    <property file="hosts.sesame4.properties" />
+		</target>
 
-	<target name="load_config.sesame5">
-	    <property file="hosts.sesame5.properties" />
-	</target>
+		<target name="load_config.sesame5">
+		    <property file="hosts.sesame5.properties" />
+		</target>
 
-	<target name="clone.set_skip_tables" depends="clone.set_skip_tables.empty, clone.set_skip_tables.default" />
+		<target name="load_config.iet" depends="load_config.iet.load, load_config.ask_password" />
 
-	<target name="clone.set_skip_tables.default" if="fast">
-		<property name="backup_script.skip_table" value=" ${backup_script.skip_table.default}" />
-		<echo>ignore [${backup_script.skip_table.default}] tables</echo>
-	</target>
+	  <target name="load_config.iet.load">
+		    <property file="hosts.iet.properties" />
+		</target>
 
-	<target name="clone.set_skip_tables.empty" unless="fast">
-		<property name="backup_script.skip_table" value="" />
-		<echo>load all tables</echo>
-	</target>
+		<target name="load_config.ask_password">
+			  <input addproperty="source.web.password" message="Password for [${source.web.user}@${source.web.host}]" />
+		</target>
 
-	<target name="clone.check_params">
+		<target name="clone.set_skip_tables" depends="clone.set_skip_tables.empty, clone.set_skip_tables.default" />
+
+		<target name="clone.set_skip_tables.default" if="fast">
+			<property name="backup_script.skip_table" value=" ${backup_script.skip_table.default}" />
+			<echo>ignore [${backup_script.skip_table.default}] tables</echo>
+		</target>
+
+		<target name="clone.set_skip_tables.empty" unless="fast">
+			<property name="backup_script.skip_table" value="" />
+			<echo>load all tables</echo>
+		</target>
+
+		<target name="clone.check_params">
         <fail unless="client_db">[client_db] is not specified</fail>
-        <echo>client_db [${client_db}]</echo>
+        <fail unless="destination.database">[destination.database] is not specified</fail>
+        <echo>client_db [${client_db}] to [${destination.database}]</echo>
         <property name="archive_file" value="_backup.${client_db}.tar.gz" />
         <property name="archive_file.upload" value="_backup_upload.${client_db}.tar.gz" />
         <property name="temp_dir.archive_file" value="_backup.${client_db}" />
@@ -73,10 +86,10 @@
             command="cd '${source.web.folder}'; rm -fv ${archive_file}; perl ${file.backup_script} ${client_db} --output-file=${archive_file}${backup_script.skip_table}"
             />
     </target>
-	
-	<target name="ask.source.web.password">
-		<input message="password for [${source.web.host}]" addproperty="source.web.password" />
-	</target>
+
+		<target name="ask.source.web.password">
+			<input message="password for [${source.web.host}]" addproperty="source.web.password" />
+		</target>
 
 	<!--target name="clone.source.web5.make_archive">
         <sshexec
@@ -94,7 +107,7 @@
             host="${destination.host}"
             username="${destination.user}"
             password="${destination.password}"
-            command="cd '${destination.folder}'; mkdir ${temp_dir.archive_file}; sh ${file.restore_script} ${archive_file} ${client_db} '${destination.folder}/${temp_dir.archive_file}'"
+            command="export persistSchema=${destination.database}; cd '${destination.folder}'; mkdir ${temp_dir.archive_file}; sh ${file.restore_script} ${archive_file} ${client_db} '${destination.folder}/${temp_dir.archive_file}'"
             />
     </target>
 
@@ -180,14 +193,14 @@
             <fileset dir="." includes="*.sh, *.pl" />
         </scp>
     </target>
-	
+
 	<target name="demo_data" depends="demo_data.get, demo_data.unzip, demo_data.apply" description="load and apply demo data" />
 
 	<target name="demo_data.get" depends="load_config.sesame5, demo_data.ask_password">
-		<get 
+		<get
 			src="${demo_data_source.url}"
-			username="${demo_data_source.user}" 
-			password="${demo_data_source.password}" 
+			username="${demo_data_source.user}"
+			password="${demo_data_source.password}"
 			dest="${demo_data_source.file}"
 			/>
 	</target>
@@ -202,7 +215,7 @@
 			<arg value="${demo_data_source.db.database}" />
 		</exec>
 	</target>
-	
+
 	<target name="demo_data.unzip" depends="load_config.sesame5">
 		<!--unzip src="${demo_data_source.file}" dest=".">
 			<fileset dir="." includes="${demo_data_source.sql_file}" />
@@ -213,9 +226,9 @@
 			<arg value="${demo_data_source.sql_file}" />
 		</exec>
 	</target>
-	
+
 	<target name="demo_data.ask_password">
 		<input addproperty="demo_data_source.password" message="Password for ${demo_data_source.file}" />
 	</target>
-	
+
 </project>

@@ -1,4 +1,5 @@
 .idea
 *.iml
 */target
+client-clone/backup_client_data.log
 

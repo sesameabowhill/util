@@ -27,14 +27,8 @@ then
     tmp_folder=~/tmp
 fi
 
-if test ! "$SESAME_SERVER"
-then
-    main_db_name=
-    uninstall_cmd="perl uninstall.pl $db_name"
-else
-    main_db_name=sesame_db
-    uninstall_cmd="perl -I$SESAME_ROOT/sesame/utils/ $SESAME_ROOT/sesame/utils/uninstall_member.pl --uninstall $db_name --data-backup-folder=$tmp_folder"
-fi
+main_db_name=
+uninstall_cmd="perl -I$SESAME_ROOT/sesame/utils/ $SESAME_ROOT/sesame/utils/uninstall_member.pl --uninstall $db_name --data-backup-folder=$tmp_folder"
 
 echo "temp folder [$tmp_folder]"
 echo "database [$db_name]"
@@ -64,17 +58,10 @@ then
     cd ..
 fi
 
-if test -e "client_db_$db_name.sql"
-then
-    echo "create doctors database"
-    mysqladmin -u$db_user -p$db_password create $db_name
-    mysql -u$db_user -p$db_password -f $db_name < client_db_$db_name.sql
-fi
-
 if test -e databases.sql
 then
     echo "copy main data"
-    mysql -u$db_user -p$db_password -f $main_db_name < databases.sql
+    perl $SESAME_ROOT/sesame/utils/mysql.pl -f < databases.sql
 fi
 
 echo "done"
