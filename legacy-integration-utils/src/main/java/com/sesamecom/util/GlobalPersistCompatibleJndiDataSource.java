@@ -63,6 +63,7 @@ public class GlobalPersistCompatibleJndiDataSource {
         dataSource.setJdbcUrl(url);
         dataSource.setUsername(user);
         dataSource.setPassword(pass);
+        dataSource.setConnectionTestStatement("/* ping */ SELECT 1");
 
         // BoneCP iterates its own properties rather than the ones you pass in, so there's no possibility of confusing
         // it by simply passing in all system properties.
