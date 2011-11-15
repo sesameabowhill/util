@@ -13,6 +13,7 @@
         <module>jetty-console-jndi-datasource-plugin</module>
         <module>legacy-integration-utils</module>
         <module>legacy-struts-app</module>
+        <module>cdyne-ws-client</module>
     </modules>
 
     <dependencies>
