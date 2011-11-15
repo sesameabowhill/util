@@ -46,7 +46,7 @@
         <repository>
             <id>s3repo</id>
             <name>Sesame S3 Repository</name>
-            <url>http://sesame-maven-public.s3.amazonaws.com/release</url>
+            <url>http://sesame-maven-public.s3-website-us-east-1.amazonaws.com/release</url>
         </repository>
     </repositories>
     <distributionManagement>
