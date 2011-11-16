@@ -1,6 +1,9 @@
 package com.sesamecom.cdyne.soap.client;
 
 import com.cdyne.ws.notifyws.AdvancedNotifyRequest;
+import com.cdyne.ws.notifyws.GetQueueIDStatusDocument;
+import com.cdyne.ws.notifyws.GetQueueIDStatusDocument.GetQueueIDStatus;
+import com.cdyne.ws.notifyws.GetQueueIDStatusResponseDocument;
 import com.cdyne.ws.notifyws.NotifyPhoneAdvancedDocument;
 import com.cdyne.ws.notifyws.NotifyPhoneAdvancedResponseDocument;
 import com.cdyne.ws.notifyws.NotifyPhoneAdvancedResponseDocument.NotifyPhoneAdvancedResponse;
@@ -8,6 +11,8 @@ import com.cdyne.ws.notifyws.NotifyReturn;
 import com.sesamecom.soap.generated.cdyne.PhoneNotifyStub;
 import java.rmi.RemoteException;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +26,7 @@ public class PhoneNotifyServiceAxis2Impl implements PhoneNotifyService
 
     private static final Log log = LogFactory.getLog(PhoneNotifyService.class);
 
+    @Override
     public long notifyPhoneAdvanced(
             String phoneNumberToDial,
             String transferNumber,
@@ -79,5 +85,27 @@ public class PhoneNotifyServiceAxis2Impl implements PhoneNotifyService
         }
 
         return queueId;
+    }
+
+    @Override
+    public String getStatus(long queueId) {
+
+        String status = null;
+        try {
+            PhoneNotifyStub stub = new PhoneNotifyStub();
+            GetQueueIDStatusDocument req = GetQueueIDStatusDocument.Factory.newInstance();
+            GetQueueIDStatus queueIdStatus = req.addNewGetQueueIDStatus();
+            queueIdStatus.setQueueID(queueId);
+            try {
+                GetQueueIDStatusResponseDocument res = stub.GetQueueIDStatus(req);
+                status = res.getGetQueueIDStatusResponse().getGetQueueIDStatusResult().getResponseText();
+            } catch (RemoteException ex) {
+                ex.printStackTrace();
+            }
+        } catch (AxisFault ex) {
+            ex.printStackTrace();
+        }
+
+        return status;
     }
 }

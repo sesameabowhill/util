@@ -65,7 +65,6 @@ public class PhoneNotifyTest extends TestCase {
                 );
 
         log.debug("queueId = "+queueId);
-        
         assertTrue( queueId > -1 );
     }
 }

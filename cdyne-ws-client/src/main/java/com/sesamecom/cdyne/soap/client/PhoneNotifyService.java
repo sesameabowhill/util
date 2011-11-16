@@ -29,5 +29,13 @@ public interface PhoneNotifyService {
             short ttsVolume,
             String statusChangePostUrl
             );
+
+    /**
+     * Calls GetQueueIDStatus, which returns a status on a particular QueueID.
+     * 
+     * @param queueId
+     * @return the current responseText associated with the queueId
+     */
+    public String getStatus(long queueId);
 }
 
