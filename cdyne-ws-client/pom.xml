@@ -78,6 +78,13 @@
       <artifactId>woden-api</artifactId>
       <version>1.0M9</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>3.0-rc2</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -99,12 +106,13 @@
         </executions>
       </plugin>
     </plugins>
-    <resources> 
-      <resource> 
+    <resources>
+      <resource>
         <!-- Necessary during runtime tests to get an xmlbeans class "visible" in the classpath -->
-        <directory>${project.build.directory}/generated-sources/axis2/wsdl2code/resources</directory> 
-        <filtering>false</filtering> 
-      </resource> 
-    </resources> 
+        <directory>${project.build.directory}/generated-sources/axis2/wsdl2code/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
   </build>
 </project>
+
