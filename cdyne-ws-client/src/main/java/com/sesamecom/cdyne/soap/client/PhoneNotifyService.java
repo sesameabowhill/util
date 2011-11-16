@@ -17,16 +17,16 @@ public interface PhoneNotifyService {
     public long notifyPhoneAdvanced(
             String phoneNumberToDial,
             String transferNumber,
-            int voiceId,
+            Integer voiceId,
             String callerIdNumber,
             String callerIdName,
             String textToSay,
             String licenceKey,
-            int tryCount,
-            int nextTryInSeconds,
+            Integer tryCount,
+            Integer nextTryInSeconds,
             java.util.Calendar utcScheduledDateTime,
-            short ttsRate,
-            short ttsVolume,
+            Short ttsRate,
+            Short ttsVolume,
             String statusChangePostUrl
             );
 

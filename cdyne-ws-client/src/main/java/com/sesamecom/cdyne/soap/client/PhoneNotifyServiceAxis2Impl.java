@@ -11,11 +11,9 @@ import com.cdyne.ws.notifyws.NotifyReturn;
 import com.sesamecom.soap.generated.cdyne.PhoneNotifyStub;
 import java.rmi.RemoteException;
 import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.axis2.AxisFault;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An AXIS 2 implementation of service PhoneNotifyAdvanced
@@ -24,22 +22,22 @@ import org.apache.commons.logging.LogFactory;
 public class PhoneNotifyServiceAxis2Impl implements PhoneNotifyService
 {
 
-    private static final Log log = LogFactory.getLog(PhoneNotifyService.class);
+    private static final Logger log = LoggerFactory.getLogger(PhoneNotifyService.class);
 
     @Override
     public long notifyPhoneAdvanced(
             String phoneNumberToDial,
             String transferNumber,
-            int voiceId,
+            Integer voiceId,
             String callerIdNumber,
             String callerIdName,
             String textToSay,
             String licenceKey,
-            int tryCount,
-            int nextTryInSeconds,
+            Integer tryCount,
+            Integer nextTryInSeconds,
             Calendar utcScheduledDateTime,
-            short ttsRate,
-            short ttsVolume,
+            Short ttsRate,
+            Short ttsVolume,
             String statusChangePostUrl
             ) {
 
@@ -74,14 +72,12 @@ public class PhoneNotifyServiceAxis2Impl implements PhoneNotifyService
                 NotifyReturn retu = resp.getNotifyPhoneAdvancedResult();
 
                 queueId = retu.getQueueID();
-                log.debug("queueId: "+queueId+", responseText: "+retu.getResponseText());
-                System.out.println("queueId: "+queueId+", responseText: "+retu.getResponseText());
 
-            } catch (RemoteException ex) {
-                ex.printStackTrace();
+            } catch (RemoteException re) {
+                log.error("error caught as remoteException", re);
             }
-        } catch (AxisFault ex) {
-            ex.printStackTrace();
+        } catch (AxisFault af) {
+            log.warn("error caught as axisFault", af);
         }
 
         return queueId;
@@ -99,11 +95,11 @@ public class PhoneNotifyServiceAxis2Impl implements PhoneNotifyService
             try {
                 GetQueueIDStatusResponseDocument res = stub.GetQueueIDStatus(req);
                 status = res.getGetQueueIDStatusResponse().getGetQueueIDStatusResult().getResponseText();
-            } catch (RemoteException ex) {
-                ex.printStackTrace();
+            } catch (RemoteException re) {
+                log.error("error caught as remoteException", re);
             }
-        } catch (AxisFault ex) {
-            ex.printStackTrace();
+        } catch (AxisFault af) {
+            log.warn("error caught as axisFault", af);
         }
 
         return status;
