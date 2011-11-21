@@ -1,0 +1,204 @@
+package com.sesamecom.common;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+/**
+ * Globally defines and provides read only access to per-environment configuration properties for sesame components.
+ * <p/>
+ * Properties are optionally read at class initialization from a file at the path defined by the system property
+ * sesameConfigFile.  The same properties can be defined directly using system properties, which will override values in
+ * sesameConfigFile.  Changes to this properties file are only picked up on JVM restart.
+ * <p/>
+ * A separate getter method for each property is defined in this class to allow for appropriate type conversions, and to
+ * provide a convenient way to throw an exception when you require a property that isn't defined.  The names of the
+ * properties read by the getter methods are included in their Javadoc comment.  When a required property is missing,
+ * ConfigPropertyMissingException is thrown.  When a property's value cannot be parsed, BadConfigPropertyValueException
+ * is thrown.
+ */
+public class EnvironmentConfig {
+    private static final Logger log = LoggerFactory.getLogger(EnvironmentConfig.class);
+
+    public static final String CONFIG_FILE_PATH_SYSTEM_PROPERTY = "sesameConfigFile";
+    private static final String CONFIG_FILE_PATH = System.getProperty(CONFIG_FILE_PATH_SYSTEM_PROPERTY);
+
+    private static enum Source {SYSTEM, FILE}
+
+    private static final Properties configFileProperties = loadConfigFileProperties();
+
+    /**
+     * The hostname of the MySQL instance to connect to for access to the analytics database.
+     * <p/>
+     * Property: analyticsHost
+     */
+    public static String getAnalyticsHost(ConfigRequirementType requirementType) {
+        return (String) getProperty("analyticsHost", String.class, requirementType);
+    }
+
+    /**
+     * The port of the MySQL instance to connect to for access to the analytics database.
+     * <p/>
+     * Property: analyticsPort
+     */
+    public static Integer getAnalyticsPort(ConfigRequirementType requirementType) {
+        return (Integer) getProperty("analyticsPort", Integer.class, requirementType);
+    }
+
+    /**
+     * The schema on the MySQL instance to use for access to the analytics database.
+     * <p/>
+     * Property: analyticsSchema
+     */
+    public static String getAnalyticsSchema(ConfigRequirementType requirementType) {
+        return (String) getProperty("analyticsSchema", String.class, requirementType);
+    }
+
+    /**
+     * The username to use when connecting to the analytics database.
+     * <p/>
+     * Property: analyticsUser
+     */
+    public static String getAnalyticsUser(ConfigRequirementType requirementType) {
+        return (String) getProperty("analyticsUser", String.class, requirementType);
+    }
+
+    /**
+     * The password to use when connecting to the analytics database.
+     * <p/>
+     * Property: analyticsPassword
+     */
+    public static String getAnalyticsPassword(ConfigRequirementType requirementType) {
+        return (String) getProperty("analyticsPassword", String.class, requirementType);
+    }
+
+    /**
+     * Provides raw, read-only access to all properties defined.  This can be useful when some properties are used to
+     * configure a third party component that knows how to get them from a Properties object.
+     */
+    public Properties getProperties() {
+        // TODO: needed for e.g. BoneCP!
+        return null;
+    }
+
+    /**
+     * Gets and parses a property given name, type, and requirementType.  Throws ConfigPropertyMissingException if a
+     * requirement type is REQUIRED and no value is defined, BadConfigPropertyValueException if a value is defined but
+     * cannot be parsed, and RuntimeException if the type specified is not supported.
+     */
+    private static Object getProperty(String propertyName, Class targetType, ConfigRequirementType requirementType) {
+        String systemValue = System.getProperty(propertyName);
+        String fileValue = configFileProperties.getProperty(propertyName);
+
+        // first determine where the value is coming from: config file or system properties
+        Source source;
+        String stringValue;
+        if (systemValue != null) {
+            stringValue = systemValue;
+            source = Source.SYSTEM;
+        } else {
+            stringValue = fileValue;
+            source = Source.FILE;
+        }
+
+        // bail out if we can't find it and it's required, return null if only the former.
+        if (stringValue == null) {
+            if (ConfigRequirementType.REQUIRED.equals(requirementType)) {
+                log.error(
+                    "requiredProperty->missing property: {}, configFilePath: {}",
+                    propertyName,
+                    CONFIG_FILE_PATH
+                );
+
+                throw new ConfigPropertyMissingException(propertyName, CONFIG_FILE_PATH);
+            }
+            else {
+                log.debug(
+                    "optionalProperty->missing property: {}, configFilePath: {}",
+                    propertyName,
+                    CONFIG_FILE_PATH
+                );
+                return null;
+            }
+        }
+
+        log.debug("value->found property: {}, value: '{}', source: {}, configFilePath: {}",
+            new Object[]{propertyName, stringValue, source, CONFIG_FILE_PATH});
+
+        Object value = null;
+
+        // now attempt to parse the value into the type requested.  bail out on parse errors.
+        if (Integer.class.equals(targetType)) {
+            try {
+                value = Integer.parseInt(stringValue);
+            } catch (NumberFormatException e) {
+                String message = String.format(
+                    "Unable to parse value '%s' for Integer property '%s' from source '%s'.",
+                    stringValue,
+                    propertyName,
+                    source == Source.FILE ? CONFIG_FILE_PATH : "system properties"
+                );
+
+                log.error("getProperty->invalidValue message: {}", message, e);
+                throw new BadConfigPropertyValueException(message, e);
+            }
+        } else if (String.class.equals(targetType)) {
+            value = stringValue;
+        } else {
+            String message = String.format(
+                "Don't know how to convert to type %s (on property %s).",
+                targetType,
+                propertyName
+            );
+
+            throw new RuntimeException(message);
+        }
+
+        return value;
+    }
+
+    /**
+     * Loads properties from the config file when available.  Throws RuntimeException if one is specified by cannot be
+     * loaded.
+     */
+    private static Properties loadConfigFileProperties() {
+        Properties properties = new Properties();
+
+        if (CONFIG_FILE_PATH != null) {
+            log.info("configFile->load path: {}", CONFIG_FILE_PATH);
+
+            File sesameConfigFile = new File(CONFIG_FILE_PATH);
+
+            if (!(sesameConfigFile.isFile() && sesameConfigFile.canRead())) {
+                String message = String.format(
+                    "Path provided in system property '%s' ('%s') is not that of a readable file.",
+                    CONFIG_FILE_PATH_SYSTEM_PROPERTY,
+                    CONFIG_FILE_PATH
+                );
+
+                log.error(message);
+                throw new RuntimeException(message);
+            }
+
+            try {
+                configFileProperties.load(new FileInputStream(sesameConfigFile));
+            } catch (Throwable e) {
+                String message = String.format(
+                    "Unable to load path provided in system property '%s' ('%s').",
+                    CONFIG_FILE_PATH_SYSTEM_PROPERTY,
+                    CONFIG_FILE_PATH
+                );
+
+                log.error(message, e);
+                throw new RuntimeException(message, e);
+            }
+        }
+
+        return properties;
+    }
+}
+
