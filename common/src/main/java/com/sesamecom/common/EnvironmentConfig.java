@@ -5,8 +5,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
+
+import static com.sesamecom.common.ConfigRequirementType.*;
 
 /**
  * Globally defines and provides read only access to per-environment configuration properties for sesame components.
@@ -20,11 +21,14 @@ import java.util.Properties;
  * properties read by the getter methods are included in their Javadoc comment.  When a required property is missing,
  * ConfigPropertyMissingException is thrown.  When a property's value cannot be parsed, BadConfigPropertyValueException
  * is thrown.
+ * <p/>
+ * Each getter method has an overload that accepts a default value to return for when the property is optional.  i.e.
+ * These defaults are not defined in this class, but by the caller.
  */
 public class EnvironmentConfig {
     private static final Logger log = LoggerFactory.getLogger(EnvironmentConfig.class);
 
-    public static final String CONFIG_FILE_PATH_SYSTEM_PROPERTY = "sesameConfigFile";
+    private static final String CONFIG_FILE_PATH_SYSTEM_PROPERTY = "sesameConfigFile";
     private static final String CONFIG_FILE_PATH = System.getProperty(CONFIG_FILE_PATH_SYSTEM_PROPERTY);
 
     private static enum Source {SYSTEM, FILE}
@@ -36,8 +40,12 @@ public class EnvironmentConfig {
      * <p/>
      * Property: analyticsHost
      */
-    public static String getAnalyticsHost(ConfigRequirementType requirementType) {
-        return (String) getProperty("analyticsHost", String.class, requirementType);
+    public static String getAnalyticsHost(String defaultValue) {
+        return (String) getProperty("analyticsHost", String.class, OPTIONAL, defaultValue);
+    }
+
+    public static String getAnalyticsHost() {
+        return (String) getProperty("analyticsHost", String.class);
     }
 
     /**
@@ -45,8 +53,12 @@ public class EnvironmentConfig {
      * <p/>
      * Property: analyticsPort
      */
-    public static Integer getAnalyticsPort(ConfigRequirementType requirementType) {
-        return (Integer) getProperty("analyticsPort", Integer.class, requirementType);
+    public static Integer getAnalyticsPort(Integer defaultValue) {
+        return (Integer) getProperty("analyticsPort", Integer.class, OPTIONAL, defaultValue);
+    }
+
+    public static Integer getAnalyticsPort() {
+        return (Integer) getProperty("analyticsPort", Integer.class);
     }
 
     /**
@@ -54,8 +66,12 @@ public class EnvironmentConfig {
      * <p/>
      * Property: analyticsSchema
      */
-    public static String getAnalyticsSchema(ConfigRequirementType requirementType) {
-        return (String) getProperty("analyticsSchema", String.class, requirementType);
+    public static String getAnalyticsSchema(String defaultValue) {
+        return (String) getProperty("analyticsSchema", String.class, OPTIONAL, defaultValue);
+    }
+
+    public static String getAnalyticsSchema() {
+        return (String) getProperty("analyticsSchema", String.class);
     }
 
     /**
@@ -63,8 +79,12 @@ public class EnvironmentConfig {
      * <p/>
      * Property: analyticsUser
      */
-    public static String getAnalyticsUser(ConfigRequirementType requirementType) {
-        return (String) getProperty("analyticsUser", String.class, requirementType);
+    public static String getAnalyticsUser(String defaultValue) {
+        return (String) getProperty("analyticsUser", String.class, OPTIONAL, defaultValue);
+    }
+
+    public static String getAnalyticsUser() {
+        return (String) getProperty("analyticsUser", String.class);
     }
 
     /**
@@ -72,8 +92,27 @@ public class EnvironmentConfig {
      * <p/>
      * Property: analyticsPassword
      */
-    public static String getAnalyticsPassword(ConfigRequirementType requirementType) {
-        return (String) getProperty("analyticsPassword", String.class, requirementType);
+    public static String getAnalyticsPassword(String defaultValue) {
+        return (String) getProperty("analyticsPassword", String.class, OPTIONAL, defaultValue);
+    }
+
+    public static String getAnalyticsPassword() {
+        return (String) getProperty("analyticsPassword", String.class);
+    }
+
+    /**
+     * Whether or not analytics ETLs should use MySQL's INSERT INTO .. SELECT FROM .. instead of buffering the results
+     * of select statements and issuing individual inserts.
+     * <p/>
+     * <b>Note that if this is enabled, the MySQL server at analyticsHost must have innodb_locks_unsafe_for_binlog
+     * enabled, or ETLs will encounter locking problems!</b>
+     */
+    public static Boolean getAnalyticsEtlUseInsertIntoSelectFrom(Boolean defaultValue) {
+        return (Boolean) getProperty("analyticsEtlUseInsertIntoSelectFrom", Boolean.class, OPTIONAL, defaultValue);
+    }
+
+    public static Boolean getAnalyticsEtlUseInsertIntoSelectFrom() {
+        return (Boolean) getProperty("analyticsEtlUseInsertIntoSelectFrom", Boolean.class);
     }
 
     /**
@@ -85,12 +124,16 @@ public class EnvironmentConfig {
         return null;
     }
 
+    private static Object getProperty(String propertyName, Class targetType) {
+        return getProperty(propertyName, targetType, REQUIRED, null);
+    }
+
     /**
      * Gets and parses a property given name, type, and requirementType.  Throws ConfigPropertyMissingException if a
      * requirement type is REQUIRED and no value is defined, BadConfigPropertyValueException if a value is defined but
      * cannot be parsed, and RuntimeException if the type specified is not supported.
      */
-    private static Object getProperty(String propertyName, Class targetType, ConfigRequirementType requirementType) {
+    private static Object getProperty(String propertyName, Class targetType, ConfigRequirementType requirementType, Object defaultValue) {
         String systemValue = System.getProperty(propertyName);
         String fileValue = configFileProperties.getProperty(propertyName);
 
@@ -115,14 +158,14 @@ public class EnvironmentConfig {
                 );
 
                 throw new ConfigPropertyMissingException(propertyName, CONFIG_FILE_PATH);
-            }
-            else {
+            } else {
                 log.debug(
                     "optionalProperty->missing property: {}, configFilePath: {}",
                     propertyName,
                     CONFIG_FILE_PATH
                 );
-                return null;
+
+                return defaultValue;
             }
         }
 
@@ -136,18 +179,20 @@ public class EnvironmentConfig {
             try {
                 value = Integer.parseInt(stringValue);
             } catch (NumberFormatException e) {
-                String message = String.format(
-                    "Unable to parse value '%s' for Integer property '%s' from source '%s'.",
-                    stringValue,
-                    propertyName,
-                    source == Source.FILE ? CONFIG_FILE_PATH : "system properties"
-                );
-
-                log.error("getProperty->invalidValue message: {}", message, e);
-                throw new BadConfigPropertyValueException(message, e);
+                throwBadValue(stringValue, propertyName, targetType, source, e);
             }
+
+        } else if (Boolean.class.equals(targetType)) {
+            if ("true".equals(stringValue))
+                value = true;
+            else if ("false".equals(stringValue))
+                value = false;
+            else
+                throwBadValue(stringValue, propertyName, targetType, source, null);
+
         } else if (String.class.equals(targetType)) {
             value = stringValue;
+
         } else {
             String message = String.format(
                 "Don't know how to convert to type %s (on property %s).",
@@ -159,6 +204,19 @@ public class EnvironmentConfig {
         }
 
         return value;
+    }
+
+    private static void throwBadValue(String stringValue, String propertyName, Class targetType, Source source, Throwable e) {
+        String message = String.format(
+            "Unable to parse value '%s' for %s property '%s' from source %s.",
+            stringValue,
+            propertyName,
+            targetType.getSimpleName(),
+            source == Source.FILE ? CONFIG_FILE_PATH : "system properties"
+        );
+
+        log.error("getProperty->badValue message: {}", message, e);
+        throw new BadConfigPropertyValueException(message, e);
     }
 
     /**

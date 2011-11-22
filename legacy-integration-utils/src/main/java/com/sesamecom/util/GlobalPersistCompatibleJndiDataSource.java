@@ -19,7 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * -Dbonecp.idleMaxAgeInMinutes=240
  * -Dbonecp.idleConnectionTestPeriodInMinutes=60
- * -Dbonecp.connectionTestStatement="SELECT 1"
  * -Dbonecp.partitionCount=3
  * -Dbonecp.acquireIncrement=10
  * -Dbonecp.maxConnectionsPerPartition=5
