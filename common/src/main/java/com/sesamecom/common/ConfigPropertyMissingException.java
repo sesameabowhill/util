@@ -4,11 +4,11 @@ package com.sesamecom.common;
  * Thrown when attempting to access a required configuration property that isn't defined.
  */
 public class ConfigPropertyMissingException extends RuntimeException {
-    public ConfigPropertyMissingException(String fileTried, String propertyName) {
+    public ConfigPropertyMissingException(String propertyName, String fileTried) {
         super(String.format(
-            "Required property '%s' not defined.  Tried system properties and file at '%s'.",
+            "Required property '%s' not defined.  Tried system properties%s..",
             propertyName,
-            fileTried
+            fileTried == null ? "" : " and file at " + fileTried
         ));
     }
 }

@@ -13,8 +13,8 @@ import static com.sesamecom.common.ConfigRequirementType.*;
  * Globally defines and provides read only access to per-environment configuration properties for sesame components.
  * <p/>
  * Properties are optionally read at class initialization from a file at the path defined by the system property
- * sesameConfigFile.  The same properties can be defined directly using system properties, which will override values in
- * sesameConfigFile.  Changes to this properties file are only picked up on JVM restart.
+ * sesameConfigurationFile.  The same properties can be defined directly using system properties, which will override
+ * values in sesameConfigurationFile.  Changes to this properties file are only picked up on JVM restart.
  * <p/>
  * A separate getter method for each property is defined in this class to allow for appropriate type conversions, and to
  * provide a convenient way to throw an exception when you require a property that isn't defined.  The names of the
@@ -28,7 +28,7 @@ import static com.sesamecom.common.ConfigRequirementType.*;
 public class EnvironmentConfig {
     private static final Logger log = LoggerFactory.getLogger(EnvironmentConfig.class);
 
-    private static final String CONFIG_FILE_PATH_SYSTEM_PROPERTY = "sesameConfigFile";
+    private static final String CONFIG_FILE_PATH_SYSTEM_PROPERTY = "sesameConfigurationFile";
     private static final String CONFIG_FILE_PATH = System.getProperty(CONFIG_FILE_PATH_SYSTEM_PROPERTY);
 
     private static enum Source {SYSTEM, FILE}
@@ -229,9 +229,9 @@ public class EnvironmentConfig {
         if (CONFIG_FILE_PATH != null) {
             log.info("configFile->load path: {}", CONFIG_FILE_PATH);
 
-            File sesameConfigFile = new File(CONFIG_FILE_PATH);
+            File sesameConfigurationFile = new File(CONFIG_FILE_PATH);
 
-            if (!(sesameConfigFile.isFile() && sesameConfigFile.canRead())) {
+            if (!(sesameConfigurationFile.isFile() && sesameConfigurationFile.canRead())) {
                 String message = String.format(
                     "Path provided in system property '%s' ('%s') is not that of a readable file.",
                     CONFIG_FILE_PATH_SYSTEM_PROPERTY,
@@ -243,7 +243,7 @@ public class EnvironmentConfig {
             }
 
             try {
-                configFileProperties.load(new FileInputStream(sesameConfigFile));
+                properties.load(new FileInputStream(sesameConfigurationFile));
             } catch (Throwable e) {
                 String message = String.format(
                     "Unable to load path provided in system property '%s' ('%s').",
