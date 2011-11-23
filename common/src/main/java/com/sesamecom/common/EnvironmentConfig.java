@@ -116,6 +116,34 @@ public class EnvironmentConfig {
     }
 
     /**
+     * How many records to put in each batched insert in the analytics ETLs.  Only effects fact table loading when
+     * analyticsEtlUseInsertIntoSelectFrom is false, but always effects dimension table loading.
+     *
+     * Property: analyticsEtlBatchSize
+     */
+    public static Integer getAnalyticsEtlBatchSize(Integer defaultValue) {
+        return (Integer) getProperty("analyticsEtlBatchSize", Integer.class, OPTIONAL, defaultValue);
+    }
+
+    public static Integer getAnalyticsEtlBatchSize() {
+        return (Integer) getProperty("analyticsEtlBatchSize", Integer.class);
+    }
+
+    /**
+     * How many records to insert during one transaction in the analytics ETLs.  Only effects fact table loading when
+     * analyticsEtlUseInsertIntoSelectFrom is false, but always effects dimension table loading.
+     *
+     * Property: analyticsEtlTransactionSize
+     */
+    public static Integer getAnalyticsEtlTransactionSize(Integer defaultValue) {
+        return (Integer) getProperty("analyticsEtlTransactionSize", Integer.class, OPTIONAL, defaultValue);
+    }
+
+    public static Integer getAnalyticsEtlTransactionSize() {
+        return (Integer) getProperty("analyticsEtlTransactionSize", Integer.class);
+    }
+
+    /**
      * Provides raw, read-only access to all properties defined.  This can be useful when some properties are used to
      * configure a third party component that knows how to get them from a Properties object.
      */
