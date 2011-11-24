@@ -157,6 +157,19 @@ public class EnvironmentConfig {
     }
 
     /**
+     * How many days worth of data to refresh when doing ranged refreshes.
+     * <p/>
+     * Property: analyticsEtlRefreshDayRange
+     */
+    public static Integer getAnalyticsEtlRefreshDayRange(Integer defaultValue) {
+        return (Integer) getProperty("analyticsEtlRefreshDayRange", Integer.class, OPTIONAL, defaultValue);
+    }
+
+    public static Integer getAnalyticsEtlRefreshDayRange() {
+        return (Integer) getProperty("analyticsEtlRefreshDayRange", Integer.class);
+    }
+
+    /**
      * Provides raw, read-only access to all properties defined.  This can be useful when some properties are used to
      * configure a third party component that knows how to get them from a Properties object.
      */
@@ -200,10 +213,9 @@ public class EnvironmentConfig {
 
                 throw new ConfigPropertyMissingException(propertyName, CONFIG_FILE_PATH);
             } else {
-                log.debug(
-                    "optionalProperty->missing property: {}, configFilePath: {}",
-                    propertyName,
-                    CONFIG_FILE_PATH
+                log.info(
+                    "optionalProperty->usingDefault property: {}, value: {}, configFilePath: {}",
+                    new Object[]{propertyName, defaultValue, CONFIG_FILE_PATH}
                 );
 
                 return defaultValue;
