@@ -170,6 +170,15 @@ public class EnvironmentConfig {
     }
 
     /**
+     * The Camel endpoint to listen for ad-hoc ETL commands on.
+     * <p/>
+     * Property: analyticsEtlAdHocCommandEndpoint
+     */
+    public static String getAnalyticsEtlAdHocCommandEndpoint() {
+        return (String) getProperty("analyticsEtlAdHocCommandEndpoint", String.class);
+    }
+
+    /**
      * Provides raw, read-only access to all properties defined.  This can be useful when some properties are used to
      * configure a third party component that knows how to get them from a Properties object.
      */
@@ -202,7 +211,7 @@ public class EnvironmentConfig {
             source = Source.FILE;
         }
 
-        // bail out if we can't find it and it's required, return null if only the former.
+        // bail out if we can't find it and it's required, return defaultValue if only the former.
         if (stringValue == null) {
             if (ConfigRequirementType.REQUIRED.equals(requirementType)) {
                 log.error(

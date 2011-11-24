@@ -6,9 +6,9 @@ package com.sesamecom.common;
 public class ConfigPropertyMissingException extends RuntimeException {
     public ConfigPropertyMissingException(String propertyName, String fileTried) {
         super(String.format(
-            "Required property '%s' not defined.  Tried system properties%s..",
+            "Required property '%s' not defined.  Tried system properties %s.",
             propertyName,
-            fileTried == null ? "" : " and file at " + fileTried
+            fileTried == null ? "only (no sesameConfigurationFile specified)" : "and file at " + fileTried
         ));
     }
 }
