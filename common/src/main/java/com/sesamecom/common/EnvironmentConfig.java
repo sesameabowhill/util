@@ -118,7 +118,7 @@ public class EnvironmentConfig {
     /**
      * How many records to put in each batched insert in the analytics ETLs.  Only effects fact table loading when
      * analyticsEtlUseInsertIntoSelectFrom is false, but always effects dimension table loading.
-     *
+     * <p/>
      * Property: analyticsEtlBatchSize
      */
     public static Integer getAnalyticsEtlBatchSize(Integer defaultValue) {
@@ -132,7 +132,7 @@ public class EnvironmentConfig {
     /**
      * How many records to insert during one transaction in the analytics ETLs.  Only effects fact table loading when
      * analyticsEtlUseInsertIntoSelectFrom is false, but always effects dimension table loading.
-     *
+     * <p/>
      * Property: analyticsEtlTransactionSize
      */
     public static Integer getAnalyticsEtlTransactionSize(Integer defaultValue) {
@@ -141,6 +141,19 @@ public class EnvironmentConfig {
 
     public static Integer getAnalyticsEtlTransactionSize() {
         return (Integer) getProperty("analyticsEtlTransactionSize", Integer.class);
+    }
+
+    /**
+     * Concurrency level to use for ETLs.  Corresponds to number of simultaneous database connections and queries.
+     * <p/>
+     * Property: analyticsEtlConcurrencyCount
+     */
+    public static Integer getAnalyticsEtlConcurrencyCount(Integer defaultValue) {
+        return (Integer) getProperty("analyticsEtlConcurrencyCount", Integer.class, OPTIONAL, defaultValue);
+    }
+
+    public static Integer getAnalyticsEtlConcurrencyCount() {
+        return (Integer) getProperty("analyticsEtlConcurrencyCount", Integer.class);
     }
 
     /**
