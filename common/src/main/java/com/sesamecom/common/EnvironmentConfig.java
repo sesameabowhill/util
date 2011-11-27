@@ -7,7 +7,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-import static com.sesamecom.common.ConfigRequirementType.*;
+import static com.sesamecom.common.ConfigRequirementType.OPTIONAL;
+import static com.sesamecom.common.ConfigRequirementType.REQUIRED;
 
 /**
  * Globally defines and provides read only access to per-environment configuration properties for sesame components.
@@ -223,7 +224,7 @@ public class EnvironmentConfig {
                 throw new ConfigPropertyMissingException(propertyName, CONFIG_FILE_PATH);
             } else {
                 log.info(
-                    "optionalProperty->usingDefault property: {}, value: {}, configFilePath: {}",
+                    "optionalProperty->usingDefault property: {}, defaultValue: {}, configFilePath: {}",
                     new Object[]{propertyName, defaultValue, CONFIG_FILE_PATH}
                 );
 
