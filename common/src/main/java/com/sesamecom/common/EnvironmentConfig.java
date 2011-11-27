@@ -37,6 +37,15 @@ public class EnvironmentConfig {
     private static final Properties configFileProperties = loadConfigFileProperties();
 
     /**
+     * The name of the schema for the transactional database.
+     * <p/>
+     * Property: persistSchema
+     */
+    public static String getPersistSchema() {
+        return (String) getProperty("persistSchema", String.class);
+    }
+
+    /**
      * The hostname of the MySQL instance to connect to for access to the analytics database.
      * <p/>
      * Property: analyticsHost
