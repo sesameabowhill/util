@@ -171,12 +171,21 @@ public class EnvironmentConfig {
     }
 
     /**
-     * The Camel endpoint to listen for ad-hoc ETL commands on.
+     * The Camel endpoint the ETL service listens for ad-hoc commands on.
      * <p/>
      * Property: analyticsEtlAdHocCommandEndpoint
      */
     public static String getAnalyticsEtlAdHocCommandEndpoint() {
         return (String) getProperty("analyticsEtlAdHocCommandEndpoint", String.class);
+    }
+
+    /**
+     * The Camel endpoint the OLAP service listens for ad-hoc commands on.
+     * <p/>
+     * Property: analyticsOlapAdHocCommandEndpoint
+     */
+    public static String getAnalyticsOlapAdHocCommandEndpoint() {
+        return (String) getProperty("analyticsOlapAdHocCommandEndpoint", String.class);
     }
 
     /**
