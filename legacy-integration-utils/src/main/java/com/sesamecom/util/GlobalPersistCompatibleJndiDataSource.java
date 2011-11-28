@@ -7,12 +7,13 @@ import org.slf4j.LoggerFactory;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Establishes a JNDI DataSource at java:comp/env/jdbc/SesameDB, using the connection parameter system properties
- * from persist (persistHost, persistPort, persistSchema, persistUser, and persistPassword).  For compatability with
+ * from persist (persistHost, persistPort, persistSchema, persistUser, and persistPassword).  For compatibility with
  * some broken code, registers the same DataSource at java:/comp/env/jdbc/SesameDB (note the leading slash).
  *
  * DataSource is connection pooled using BoneCP, so you'll need to configure it via its system properties.  e.g.:
@@ -29,8 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class GlobalPersistCompatibleJndiDataSource {
     private static Logger log = LoggerFactory.getLogger(GlobalPersistCompatibleJndiDataSource.class);
+    private static final String disablePooling = System.getProperty("jndiDataSourceDisablePooling");
 
-    private static BoneCPDataSource dataSource;
+    private static DataSource dataSource;
 
     public static void start() {
         System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.naming.java.javaURLContextFactory");
@@ -58,22 +60,30 @@ public class GlobalPersistCompatibleJndiDataSource {
             throw new RuntimeException(e);
         }
 
-        dataSource = new BoneCPDataSource();
-        dataSource.setJdbcUrl(url);
-        dataSource.setUsername(user);
-        dataSource.setPassword(pass);
-        dataSource.setConnectionTestStatement("/* ping */ SELECT 1");
-
-        // BoneCP iterates its own properties rather than the ones you pass in, so there's no possibility of confusing
-        // it by simply passing in all system properties.
-        try {
-            dataSource.setProperties(System.getProperties());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (disablePooling != null && disablePooling.equals("true")) {
+            log.info("connectionPooling->disabled");
+            dataSource = new UnpooledDataSource(url, user, pass);
         }
+        else {
+            BoneCPDataSource boneCpDataSource = new BoneCPDataSource();
+            boneCpDataSource.setJdbcUrl(url);
+            boneCpDataSource.setUsername(user);
+            boneCpDataSource.setPassword(pass);
+            boneCpDataSource.setConnectionTestStatement("/* ping */ SELECT 1");
 
-        // the legacy apps weren't designed to use a pool, and so their connections must be rolled back when checked in.
-        dataSource.setConnectionHook(new RollBackOnCheckInConnectionHook());
+            // BoneCP iterates its own properties rather than the ones you pass in, so there's no possibility of
+            // confusing it by simply passing in all system properties.
+            try {
+                boneCpDataSource.setProperties(System.getProperties());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            // the legacy apps weren't designed to use a pool, and so their connections must be rolled back when checked
+            // in.
+            boneCpDataSource.setConnectionHook(new RollBackOnCheckInConnectionHook());
+            dataSource = boneCpDataSource;
+        }
 
         try {
             InitialContext ic = new InitialContext();
@@ -97,6 +107,7 @@ public class GlobalPersistCompatibleJndiDataSource {
     }
 
     public static void stop() {
-        dataSource.close();
+        if (dataSource instanceof BoneCPDataSource)
+            ((BoneCPDataSource) dataSource).close();
     }
 }
