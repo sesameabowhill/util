@@ -9,7 +9,7 @@
     <parent>
         <artifactId>jetty-console-plugins</artifactId>
         <groupId>org.simplericity.jettyconsole</groupId>
-        <version>1.43-sesame</version>
+        <version>1.44-SNAPSHOT</version>
     </parent>
 
     <dependencies>
