@@ -198,6 +198,15 @@ public class EnvironmentConfig {
     }
 
     /**
+     * The environment definition for "SESAME_COMMON".
+     * <p/>
+     * Property: sesameCommon
+     */
+    public static String getSesameCommon() {
+        return (String) getProperty("sesameCommon", String.class);
+    }
+
+    /**
      * Provides raw, read-only access to all properties defined.  This can be useful when some properties are used to
      * configure a third party component that knows how to get them from a Properties object.
      */
