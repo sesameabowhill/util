@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="utils" default="build">
+
+	<property environment="env" />
+
+	<property file="download.zipcodes.properties" />
+
+	<target name="build" depends="download.zip.usa, download.zip.canada, unzip.usa, unzip.canada, build.result" />
+
+	<target name="build_and_deploy" depends="build, deploy.sesame4, deploy.sesame5" description="load new zip code from ZipCodeWorld and deploy them to 4.6 and 5.0" />
+
+	<target name="build.result">
+		<exec failonerror="true" executable="perl">
+			<arg value="csv_to_sql.pl"/>
+			<arg value="--input=${zipcode.csv.usa}"/>
+			<arg value="--input-columns=${zipcode.columns.usa}"/>
+			<arg value="--input=${zipcode.csv.canada}"/>
+			<arg value="--input-columns=${zipcode.columns.canada}"/>
+			<!--arg value="- -output=${result.file.sesame4}"/>
+			<arg value="- -table=${result.table.sesame4}"/-->
+			<arg value="--output=${result.file.sesame5}"/>
+			<arg value="--table=${result.table.sesame5}"/>
+			<arg value="--important-area-code=432"/>
+			<arg value="--important-area-code=661"/>
+			<arg value="--important-area-code=708"/>
+			<arg value="--important-area-code=845"/>
+			<arg value="--important-area-code=909"/>
+			<arg value="--important-area-code=916"/>
+		</exec>
+	</target>
+
+	<target name="unzip.usa">
+		<unzip src="${zipcode.file.usa}" dest=".">
+			<patternset>
+				<include name="${zipcode.csv.usa}"/>
+			</patternset>
+		</unzip>
+	</target>
+
+	<target name="unzip.canada">
+		<unzip src="${zipcode.file.canada}" dest=".">
+			<patternset>
+				<include name="${zipcode.csv.canada}"/>
+			</patternset>
+		</unzip>
+	</target>
+
+	<target name="download.zip.usa" depends="ask.password.usa">
+		<exec failonerror="true" executable="wget">
+			<arg value="${zipcode.url.usa}" />
+			<arg value="--quiet" />
+			<arg value="--output-document=${zipcode.file.usa}" />
+			<arg value="--http-user=${zipcodeworld.login.usa}" />
+			<arg value="--http-password=${zipcodeworld.password.usa}" />
+		</exec>
+	</target>
+
+	<target name="download.zip.canada" depends="ask.password.canada">
+		<exec failonerror="true" executable="wget">
+			<arg value="${zipcode.url.canada}" />
+			<arg value="--quiet" />
+			<arg value="--output-document=${zipcode.file.canada}" />
+            <arg value="--http-user=${zipcodeworld.login.canada}" />
+            <arg value="--http-password=${zipcodeworld.password.canada}" />
+		</exec>
+	</target>
+
+	<target name="ask.password.usa">
+		<input addproperty="zipcodeworld.password.usa" message="Password for USA zipcodes" />
+	</target>
+
+	<target name="ask.password.canada">
+		<input addproperty="zipcodeworld.password.canada" message="Password for Canada zipcodes" />
+	</target>
+
+	<target name="deploy.sesame4">
+		<antcall target="deploy.to_server">
+			<param name="zipcode.file" value="${result.file.sesame4}" />
+			<param name="to_server" value="core2" />
+		</antcall>
+	</target>
+
+	<target name="deploy.sesame5">
+		<antcall target="deploy.to_server">
+			<param name="zipcode.file" value="${result.file.sesame5}" />
+			<param name="to_server" value="members" />
+		</antcall>
+	</target>
+
+	<target name="deploy.to_server" depends="deploy.make_archive, deploy.upload_archive, deploy.fill_data"/>
+
+	<target name="deploy.make_archive">
+		<zip destfile="${zipcode.file}.zip">
+			<fileset file="${zipcode.file}" />
+		</zip>
+	</target>
+
+	<target name="deploy.load_server_params">
+		<property file="${to_server}.properties" prefix="server" />
+		<input addproperty="server.password">enter password for [${server.user}@${server.host}]</input>
+	</target>
+
+	<target name="deploy.upload_archive" depends="deploy.load_server_params">
+        <scp
+            trust="true"
+			file="${zipcode.file}.zip"
+			todir="${server.user}:${server.password}@${server.host}:${zipcode.file}.zip"
+		/>
+	</target>
+
+	<target name="deploy.fill_data">
+        <sshexec
+            trust="true"
+            host="${server.host}"
+            username="${server.user}"
+            password="${server.password}"
+            command="rm -v ${zipcode.file}; unzip ${zipcode.file}.zip; ${server.mysql} &lt; ${zipcode.file}"
+            />
+	</target>
+
+
+</project>

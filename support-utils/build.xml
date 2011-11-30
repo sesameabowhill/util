@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: build.xml 1074 2009-08-26 15:52:34Z ivan $ -->
+<project name="utils" default="deploy">
+	<property environment="env" />
+
+	<property name="server" value="sesame-linux" />
+
+	<target name="deploy" depends="deploy.load_server_config, deploy.do" description="deploy utils (server $server)" />
+
+	<target name="deploy.load_server_config">
+		<property file="server.${server}.properties" />
+		<fail unless="server.host">${server.host} is not set</fail>
+		<input message="enter password for [${server.host}] server" addproperty="server.password" />
+	</target>
+
+	<target name="deploy.do">
+		<scp verbose="true" trust="true" todir="${server.user}:${server.password}@${server.host}:${server.folder}">
+			<fileset dir=".">
+				<include name="**/*" />
+				<exclude name="**/.svn/**/*" />
+				<exclude name="**/_*" />
+				<exclude name="*" />
+				<exclude name="zip_codes/*.csv" />
+				<exclude name="zip_codes/*.CSV" />
+				<exclude name="zip_codes/*.txt" />
+				<exclude name="zip_codes/*.TXT" />
+				<exclude name=".**/*" />
+				<exclude name=".*" />
+			</fileset>
+		</scp>
+	</target>
+
+</project>
+
