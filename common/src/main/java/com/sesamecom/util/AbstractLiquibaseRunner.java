@@ -1,5 +1,6 @@
 package com.sesamecom.util;
 
+import com.google.common.collect.ImmutableMap;
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
@@ -7,33 +8,46 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Singleton;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
- * Convenience class for running Liquibase updates.
+ * Abstraction for classes that run Liquibase updates.
  */
-@Singleton
-public class LiquibaseRunner {
-    private static final Logger log = LoggerFactory.getLogger(LiquibaseRunner.class);
+public abstract class AbstractLiquibaseRunner {
+    private static final Logger log = LoggerFactory.getLogger(AbstractLiquibaseRunner.class);
 
-    public void update(String changelogPath, String context, DataSource dataSource) {
+    protected abstract String getChangelogPath();
+
+    protected abstract String getContext();
+
+    protected abstract DataSource getDataSource();
+
+    protected Map<String, Object> getParameters() {
+        return ImmutableMap.of();
+    }
+
+    public void update() {
         Connection connection = null;
         try {
-            connection = dataSource.getConnection();
+            connection = getDataSource().getConnection();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
         try {
             Liquibase liquibase = new Liquibase(
-                changelogPath,
+                getChangelogPath(),
                 new ClassLoaderResourceAccessor(),
                 new JdbcConnection(connection)
             );
-            liquibase.update(context);
+
+            for (Map.Entry<String, Object> entry : getParameters().entrySet())
+                liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+
+            liquibase.update(getContext());
 
         } catch (LiquibaseException e) {
             throw new RuntimeException(e);

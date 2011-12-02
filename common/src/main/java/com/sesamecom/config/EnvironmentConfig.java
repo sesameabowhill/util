@@ -327,8 +327,8 @@ public class EnvironmentConfig {
         String message = String.format(
             "Unable to parse value '%s' for %s property '%s' from source %s.",
             stringValue,
-            propertyName,
             targetType.getSimpleName(),
+            propertyName,
             source == Source.FILE ? configFilePath : "system properties"
         );
 

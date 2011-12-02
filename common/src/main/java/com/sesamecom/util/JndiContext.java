@@ -24,6 +24,9 @@ import static org.apache.commons.lang.StringUtils.split;
  * NamingManager.  Will alternatively just proxy to an existing InitialContext if one is available, so it's safe to use
  * both in and outside of a container like Tomcat.  In proxy mode you can call bind without all of the ridiculous
  * createSubcontext calls.
+ *
+ * TODO: should really back this with spring-test's MockJndiContext!
+ *
  */
 @Singleton
 public class JndiContext extends InitialContext implements InitialContextFactoryBuilder, InitialContextFactory {
