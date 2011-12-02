@@ -106,32 +106,6 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.simplericity.jettyconsole</groupId>
-                <artifactId>jetty-console-maven-plugin</artifactId>
-                <version>1.44</version>
-                <configuration>
-                    <additionalDependencies>
-                        <!-- TODO: prevents jetty-console from including slf4j-simple, but still causes SLF4J warnings,
-                             because a logback jar is also included in the WAR.  weird classloader errors if you mark
-                             it "provided", too. -->
-                        <additionalDependency>
-                            <groupId>ch.qos.logback</groupId>
-                            <artifactId>logback-classic</artifactId>
-                            <version>0.9.29</version>
-                        </additionalDependency>
-                        <additionalDependency>
-                            <artifactId>jetty-console-jsp-plugin</artifactId>
-                        </additionalDependency>
-                    </additionalDependencies>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>createconsole</id>
-                        <phase>none</phase>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
         <extensions>
           <extension>

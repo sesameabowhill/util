@@ -1,4 +1,4 @@
-package com.sesamecom.datasource;
+package com.sesamecom.util;
 
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
