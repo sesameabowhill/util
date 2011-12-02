@@ -1,4 +1,4 @@
-package com.sesamecom.util;
+package com.sesamecom.datasource;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -6,27 +6,37 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class UnpooledDataSource implements DataSource {
-    private String url;
-    private String username;
-    private String password;
+/**
+ * A trivial DataSource that just calls the driver manager each time.
+ */
+public abstract class AbstractBasicDataSourceProvider extends AbstractDataSourceProvider implements DataSource {
     private PrintWriter logWriter;
     private Integer loginTimeout;
+    private JdbcUrlFactory urlFactory;
 
-    public UnpooledDataSource(String url, String username, String password) {
-        this.url = url;
-        this.username = username;
-        this.password = password;
+    protected AbstractBasicDataSourceProvider(JdbcUrlFactory urlFactory) {
+        this.urlFactory = urlFactory;
+    }
+
+    @Override
+    public DataSource get() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return this;
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, username, password);
+        return DriverManager.getConnection(urlFactory.makeUrl(host, port, schema), user, password);
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        return DriverManager.getConnection(url, username, password);
+        return getConnection();
     }
 
     @Override

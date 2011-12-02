@@ -1,4 +1,4 @@
-package com.sesamecom.common;
+package com.sesamecom.config;
 
 /**
  * Thrown when attempting to access a required configuration property that isn't defined.

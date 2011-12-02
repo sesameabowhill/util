@@ -1,4 +1,4 @@
-package com.sesamecom.util;
+package com.sesamecom.datasource;
 
 import com.jolbox.bonecp.ConnectionHandle;
 import com.jolbox.bonecp.hooks.AbstractConnectionHook;
@@ -25,9 +25,13 @@ public class RollBackOnCheckInConnectionHook extends AbstractConnectionHook {
             // back up to e.g. iBATIS as a RuntimeException, as we're unable to throw our own SQLExceptions due to our
             // signature.
 
+            // TODO: newer bonecp is supposed to have auto rollback as a built-in option
+
             Connection internalConnection = connection.getInternalConnection();
-            if (!internalConnection.getAutoCommit())
+            if (!internalConnection.isClosed() && !internalConnection.getAutoCommit()) {
                 internalConnection.rollback();
+                internalConnection.setAutoCommit(true);
+            }
 
         } catch (SQLException e) {
             log.warn("rollback->failed cause: SQLException while rolling back connection onCheckIn.", e);

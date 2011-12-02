@@ -21,56 +21,10 @@
     </properties>
 
     <dependencies>
-        <!-- HACK: seems like these two should have the same version, but 5.5.23 naming-factory alone doesn't include
-             "StringManager" as a dependency, and naming-common contains it but peters out at 5.0.28 -->
         <dependency>
-            <groupId>tomcat</groupId>
-            <artifactId>naming-factory</artifactId>
-            <version>5.5.23</version>
-        </dependency>
-        <dependency>
-            <groupId>tomcat</groupId>
-            <artifactId>naming-common</artifactId>
-            <version>5.0.28</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.jolbox</groupId>
-            <artifactId>bonecp</artifactId>
-            <version>0.7.1.RELEASE</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!-- TODO: there should be a top-level POM for all Sesame projects that contains
-             version numbers for these shared components. -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>r09</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jolbox</groupId>
-            <artifactId>bonecp-provider</artifactId>
-            <version>0.7.1.RELEASE</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.16</version>
+            <groupId>com.sesamecom</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

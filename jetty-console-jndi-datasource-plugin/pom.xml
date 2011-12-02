@@ -9,7 +9,7 @@
     <parent>
         <artifactId>jetty-console-plugins</artifactId>
         <groupId>org.simplericity.jettyconsole</groupId>
-        <version>1.44-SNAPSHOT</version>
+        <version>1.44</version>
     </parent>
 
     <dependencies>
@@ -47,6 +47,9 @@
             <id>s3repo</id>
             <name>Sesame S3 Repository</name>
             <url>http://sesame-maven-public.s3-website-us-east-1.amazonaws.com/release</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
     <distributionManagement>
