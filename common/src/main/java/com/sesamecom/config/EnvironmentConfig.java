@@ -48,8 +48,8 @@ public class EnvironmentConfig {
     }
 
     /**
-     * Causes persist to use a basic, non-pooling JDBC DataSource.  This should only be used for testing and
-     * development!
+     * Causes persist and analytics to use a basic, non-pooling JDBC DataSource.  <b></b>This should only be used for
+     * testing and development!</b>
      */
     public static Boolean getUseBasicDataSource(Boolean defaultValue) {
         return getProperty("useBasicDataSource", Boolean.class, OPTIONAL, defaultValue);
@@ -216,6 +216,10 @@ public class EnvironmentConfig {
      * <p/>
      * Property: analyticsOlapAdHocCommandEndpoint
      */
+    public static String getAnalyticsOlapAdHocCommandEndpoint(String defaultValue) {
+        return getProperty("analyticsOlapAdHocCommandEndpoint", String.class, OPTIONAL, defaultValue);
+    }
+
     public static String getAnalyticsOlapAdHocCommandEndpoint() {
         return getProperty("analyticsOlapAdHocCommandEndpoint", String.class);
     }
