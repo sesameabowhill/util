@@ -39,6 +39,35 @@ public class EnvironmentConfig {
     private static final Properties properties = resolveProperties();
 
     /**
+     * Used to let the application know it is in dev mode.  Provides dev features like auto-login.
+     * <p/>
+     * Property: mdDevMode
+     */
+    public static Boolean getDevMode(Boolean defaultValue) {
+        return getProperty("mdDevMode", Boolean.class, OPTIONAL, defaultValue);
+    }
+
+    /**
+     * Used to let the application know it is in dem mode.  Uses local data for website analytics.
+     * <p/>
+     * Property: mdDemoMode
+     */
+    public static Boolean getDemoMode(Boolean defaultValue) {
+        return getProperty("mdDemoMode", Boolean.class, OPTIONAL, defaultValue);
+    }
+
+    /**
+     * Used to let the application know it is in production mode.  JIRA tickets created by MD will be created in
+     * their correct projects, not Test Project (TP).
+     * <p/>
+     * Property: mdProdMode
+     */
+    public static Boolean getProductionMode(Boolean defaultValue) {
+        return getProperty("mdProdMode", Boolean.class, OPTIONAL, defaultValue);
+    }
+
+    
+    /**
      * Used to prevent Liquibase from running when SesamePersistService starts up.
      * <p/>
      * Property: skipLiquibaseUpdate
