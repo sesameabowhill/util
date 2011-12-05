@@ -66,6 +66,14 @@ public class EnvironmentConfig {
         return getProperty("mdProdMode", Boolean.class, OPTIONAL, defaultValue);
     }
 
+    /**
+     * Returns the theme to use for MD.
+     * <p/>
+     * Property: dashboardTheme
+     */
+    public static String getDashboardTheme(String defaultTheme) {
+        return getProperty("dashboardTheme", String.class, OPTIONAL, defaultTheme);
+    }
     
     /**
      * Used to prevent Liquibase from running when SesamePersistService starts up.
