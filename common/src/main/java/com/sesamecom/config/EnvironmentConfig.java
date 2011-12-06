@@ -3,10 +3,11 @@ package com.sesamecom.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 import static com.sesamecom.config.ConfigRequirementType.OPTIONAL;
 import static com.sesamecom.config.ConfigRequirementType.REQUIRED;
@@ -317,7 +318,7 @@ public class EnvironmentConfig {
                 throw new ConfigPropertyMissingException(propertyName, configFilePath);
             } else {
                 log.info(
-                    "optionalProperty->usingDefault property: {}, defaultValue: {}, configFilePath: {}",
+                    "optionalProperty->defaultValueUsed property: {}, defaultValue: {}, configFilePath: {}",
                     new Object[]{propertyName, defaultValue, getConfigPathOrMissingMessage()}
                 );
 
