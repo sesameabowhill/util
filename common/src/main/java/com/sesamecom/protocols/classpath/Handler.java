@@ -12,6 +12,8 @@ import java.net.URLStreamHandler;
  *
  * Complements of: http://stackoverflow.com/questions/861500/url-to-load-resources-from-the-classpath-in-java
  *
+ * WARNING: Worked in an app all the way until it was bundled in a WAR, so not sure if it's actually useful.
+ *
  */
 public class Handler extends URLStreamHandler {
     private static boolean installed = false;
