@@ -1,11 +1,8 @@
 package com.sesamecom.util;
 
-import com.sun.istack.internal.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.io.InputStream;
