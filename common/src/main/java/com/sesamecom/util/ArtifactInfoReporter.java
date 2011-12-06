@@ -1,8 +1,11 @@
 package com.sesamecom.util;
 
+import com.sun.istack.internal.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,8 +28,8 @@ public class ArtifactInfoReporter {
         }
 
         Attributes attributes = manifest.getMainAttributes();
-        
-        if (attributes.getValue("JenkinsBuildTag") != null && ! "null".equals(attributes.getValue("JenkinsBuildTag")))
+
+        if (attributes.getValue("JenkinsBuildTag") != null && !"null".equals(attributes.getValue("JenkinsBuildTag")))
             log.info("artifact->buildInformation buildTag: {}, buildId: {}, buildUrl: {}, gitBranch: {}, gitCommit: {}",
                 new Object[]{
                     attributes.getValue("JenkinsBuildTag"),
@@ -40,6 +43,8 @@ public class ArtifactInfoReporter {
 
     public static void logBuildServerInfoIfPresent(ServletContext servletContext) {
         InputStream inputStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
-        logBuildServerInfoIfPresent(inputStream);
+
+        if (inputStream != null)
+            logBuildServerInfoIfPresent(inputStream);
     }
 }
