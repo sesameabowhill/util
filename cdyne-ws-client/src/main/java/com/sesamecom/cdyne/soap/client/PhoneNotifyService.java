@@ -37,5 +37,18 @@ public interface PhoneNotifyService {
      * @return the current responseText associated with the queueId
      */
     public String getStatus(long queueId);
+
+    /**
+     * Calls GetTTSInULAW, which allows you to convert text into a ULAW encoded sound file.
+     * (May require an additional License Key)
+     *
+     *  @param textToSay
+     *  @param voiceID
+     *  @param ttsRate
+     *  @param ttsVolume
+     *  @param licenseKey
+     * @return ULAW encoded sound file
+     */
+    public byte[] getTTSinULAW(String textToSay, int voiceId, short ttsRate, short ttsVolume, String licenseKey);
 }
 

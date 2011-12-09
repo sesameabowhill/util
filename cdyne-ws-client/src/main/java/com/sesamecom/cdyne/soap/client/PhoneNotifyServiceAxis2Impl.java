@@ -4,6 +4,9 @@ import com.cdyne.ws.notifyws.AdvancedNotifyRequest;
 import com.cdyne.ws.notifyws.GetQueueIDStatusDocument;
 import com.cdyne.ws.notifyws.GetQueueIDStatusDocument.GetQueueIDStatus;
 import com.cdyne.ws.notifyws.GetQueueIDStatusResponseDocument;
+import com.cdyne.ws.notifyws.GetTTSInULAWDocument;
+import com.cdyne.ws.notifyws.GetTTSInULAWDocument.GetTTSInULAW;
+import com.cdyne.ws.notifyws.GetTTSInULAWResponseDocument;
 import com.cdyne.ws.notifyws.NotifyPhoneAdvancedDocument;
 import com.cdyne.ws.notifyws.NotifyPhoneAdvancedResponseDocument;
 import com.cdyne.ws.notifyws.NotifyPhoneAdvancedResponseDocument.NotifyPhoneAdvancedResponse;
@@ -11,6 +14,7 @@ import com.cdyne.ws.notifyws.NotifyReturn;
 import com.sesamecom.soap.generated.cdyne.PhoneNotifyStub;
 import java.rmi.RemoteException;
 import java.util.Calendar;
+import java.util.logging.Level;
 import org.apache.axis2.AxisFault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,5 +107,29 @@ public class PhoneNotifyServiceAxis2Impl implements PhoneNotifyService
         }
 
         return status;
+    }
+
+    @Override
+    public byte[] getTTSinULAW(String textToSay, int voiceId, short ttsRate, short ttsVolume, String licenseKey) {
+        byte[] ulaw = null;
+        try {
+            PhoneNotifyStub stub = new PhoneNotifyStub();
+            GetTTSInULAWDocument reqDoc = GetTTSInULAWDocument.Factory.newInstance();
+            GetTTSInULAW req = reqDoc.addNewGetTTSInULAW();
+            req.setTextToSay(textToSay);
+            req.setVoiceID(voiceId);
+            req.setTTSrate(ttsRate);
+            req.setTTSvolume(ttsVolume);
+            req.setLicenseKey(licenseKey);
+            try {
+                GetTTSInULAWResponseDocument resDoc = stub.GetTTSInULAW(reqDoc);
+                ulaw = resDoc.getGetTTSInULAWResponse().getGetTTSInULAWResult();
+            } catch (RemoteException re) {
+                log.error("error caught as remoteException", re);
+            }
+        } catch (AxisFault af) {
+            log.warn("error caught as axisFault", af);
+        }
+        return ulaw;
     }
 }
