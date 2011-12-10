@@ -67,16 +67,4 @@ public class PhoneNotifyTest extends TestCase {
         log.debug("queueId = "+queueId);
         assertTrue( queueId > -1 );
     }
-
-    public void testGetSound() {
-        String licenseKey = System.getProperty("licenseKey");
-        String textToSay = System.getProperty("textToSay");
-        if(textToSay == null)
-            textToSay = "Maven";
-
-        System.out.println("converting: "+textToSay+" with licence key: "+licenseKey+" to sound");
-
-        PhoneNotifyService service = new PhoneNotifyServiceAxis2Impl();
-        assertNotNull(service.getTTSinULAW(textToSay, 1, new Short("1"), new Short("100"), licenseKey));
-    }
 }
