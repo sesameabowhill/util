@@ -38,6 +38,13 @@ public class ArtifactInfoReporter {
             );
     }
 
+    public static void logBuildServerInfoIfPresent(ClassLoader classLoader) {
+        InputStream inputStream = classLoader.getResourceAsStream("/META-INF/MANIFEST.MF");
+
+        if (inputStream != null)
+            logBuildServerInfoIfPresent(inputStream);
+    }
+
     public static void logBuildServerInfoIfPresent(ServletContext servletContext) {
         InputStream inputStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
 
