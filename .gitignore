@@ -4,4 +4,6 @@
 *.iws
 */target
 client-clone/backup_client_data.log
+client-clone/SesameDemo-Database.zip
+client-clone/demo_database.sql
 

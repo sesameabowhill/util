@@ -400,34 +400,22 @@ sub read_config_file {
 
 {
 	my $db_options;
-	my $is_sesame_5;
 	my $dbi;
 
 	sub init_database_access {
 		my ($class, $db_connection_string) = @_;
 
-		$is_sesame_5 = exists $ENV{'SESAME_SERVER'} && length $ENV{'SESAME_SERVER'};
-		if ($is_sesame_5) {
-			$logger->info("current sesame version is [5]");
-			my $core_config_file = File::Spec->join($ENV{'SESAME_ROOT'}, 'sesame', 'config', 'sesame_core.conf');
-			my $core_config = $class->read_config_file($core_config_file);
-			$db_options = {
-				'db_host'     => $core_config->{'database_access'}{'server_address'},
-				'db_port'     => $core_config->{'database_access'}{'server_port'},
-				'db_user'     => $core_config->{'database_access'}{'user'},
-				'db_password' => $core_config->{'database_access'}{'password'},
-				'db_name'     => $core_config->{'database_access'}{'database_name'},
-			};
-		}
-		else {
-			$logger->info("current sesame version is [4]");
-			$db_options = {
-				'db_host'     => $ENV{'SESAME_DB_SERVER'},
-				'db_port'     => 3306,
-				'db_user'     => 'roadmin',
-				'db_password' => 'mdu3hw',
-			};
-		}
+		$ENV{'SESAME_ROOT'} //= '/home/sites';
+		$logger->info("current sesame version is [5]");
+		my $core_config_file = File::Spec->join($ENV{'SESAME_ROOT'}, 'sesame', 'config', 'sesame_core.conf');
+		my $core_config = $class->read_config_file($core_config_file);
+		$db_options = {
+			'db_host'     => $core_config->{'database_access'}{'server_address'},
+			'db_port'     => $core_config->{'database_access'}{'server_port'},
+			'db_user'     => $core_config->{'database_access'}{'user'},
+			'db_password' => $core_config->{'database_access'}{'password'},
+			'db_name'     => $core_config->{'database_access'}{'database_name'},
+		};
 		if (defined $db_connection_string) {
 			## admin:higer4@127.0.0.1:3306/sesame_db
 			if ($db_connection_string =~ m{^(\w+):(\w+)\@([\w.-]+)(?::(\d+))?(?:/(\w+))?$}) {
@@ -438,7 +426,7 @@ sub read_config_file {
 					'db_port'     => ($4 || 3306),
 					'db_name'     => $5,
 				};
-				if ($is_sesame_5 && ! defined $db_options->{'db_name'}) {
+				if (! defined $db_options->{'db_name'}) {
 					die "database name is not specified in [$db_connection_string] to work for [5]";
 				}
 			}
@@ -452,12 +440,7 @@ sub read_config_file {
 	sub new_client {
 		my ($class, $params) = @_;
 
-		if ($is_sesame_5) {
-			return Client::Sesame_5->new($params);
-		}
-		else {
-			return Client::Sesame_4->new($params);
-		}
+		return Client::Sesame_5->new($params);
 	}
 
 	sub get_mysql_cmd_options {

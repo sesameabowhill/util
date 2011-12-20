@@ -16,10 +16,10 @@
 
     <target name="deploy" depends="load_config.sesame4, deploy.source.to_web, deploy.source.to_upload, deploy.to_destination" description="deploy latest version of scripts to sesame4 servers" />
     <target name="deploy5" depends="load_config.sesame5, deploy.source.to_web, deploy.to_destination" description="deploy latest version of scripts to sesame5 servers" />
-    <target name="deploy.iet" depends="load_config.iet, deploy.source.to_web, deploy.to_destination" description="deploy latest version of scripts to sesame5 servers" />
+    <target name="deploy6" depends="load_config.sesame6, deploy.source.to_web, deploy.to_destination" description="deploy latest version of scripts to sesame6 servers" />
     <target name="clone" depends="load_config.sesame4, clone.web, clone.upload" description="clone sesame4 client from [source] to [description]: $client_db" />
 	  <target name="clone5" depends="load_config.sesame5, clone.web" description="clone sesame5 client from [source] to [description]: $client_db, $fast" />
-	  <target name="clone.iet" depends="load_config.iet, clone.web" description="clone IET client from [source] to [description]: $client_db, $fast" />
+	  <target name="clone6" depends="load_config.sesame6, clone.web" description="clone IET client from [source] to [description]: $client_db, $fast" />
 
     <target name="clone.web" depends="clone.set_skip_tables, clone.check_params, clone.source.web.make_archive, clone.source.web.download_archive, clone.destination.upload_archive, clone.destination.extract_archive, clone.destination.clear_up" />
     <target name="clone.upload" depends="clone.set_skip_tables, clone.check_params, clone.source.upload.gather_files, clone.source.upload.download_archive, clone.destination.upload_archive_from_upload, clone.destination.extract_archive_from_upload" />
@@ -35,10 +35,10 @@
 		    <property file="hosts.sesame5.properties" />
 		</target>
 
-		<target name="load_config.iet" depends="load_config.iet.load, load_config.ask_password" />
+		<target name="load_config.sesame6" depends="load_config.sesame6.load, load_config.ask_password" />
 
-	  <target name="load_config.iet.load">
-		    <property file="hosts.iet.properties" />
+		<target name="load_config.sesame6.load">
+		    <property file="hosts.sesame6.properties" />
 		</target>
 
 		<target name="load_config.ask_password">

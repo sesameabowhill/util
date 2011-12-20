@@ -1,0 +1,11 @@
+Different utility projects:
+* adminer - MySQL DB administrator with some Sesame specific plugins (http://www.adminer.org/)
+* cdyne-ws-client - CDyne Web Service wrapper (http://wiki.cdyne.com/index.php/Phone_Notify!)
+* client-clone - ant script to clone data of single client
+* common - configuration component shared between different project
+* jcityhash - CityHash wrappers for java (http://code.google.com/p/cityhash/)
+* jetty-console-jndi-datasource-plugin
+* legacy-integration-utils
+* legacy-struts-app
+* sesame-chrome-extension - Sesame Support Chrome Extension (http://wiki.sesamecommunications.com:8090/display/PD/Chrome+Support+Helper+Extension)
+* support-utils - various command line utilities
