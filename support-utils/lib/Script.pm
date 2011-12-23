@@ -60,7 +60,11 @@ sub simple_client_loop {
 	    $logger->printf("done in %d:%02d", $work_time / 60, $work_time % 60);
 	}
 	else {
-	    print "Usage: $0 <database1> [database2...]\n";
+	    printf(
+	    	"Usage: %s %s<database1> [database2...]\n",
+	    	$0,
+	    	( exists $params->{'options'} ? $params->{'options'}." " : "" )
+	    );
 	    exit(1);
 	}
 }

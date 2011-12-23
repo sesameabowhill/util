@@ -125,6 +125,15 @@ sub get_all_emails {
 	);
 }
 
+sub get_all_sent_emails_with_body {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		$self->_get_email_sent_mail_log_select()." LEFT JOIN visitor v ON (v.id=l.visitor_id) WHERE v.client_id=? AND NOT sml_body LIKE 'file://%'",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+	);
+}
 
 sub _get_emails_select {
 	my ($self) = @_;
@@ -954,6 +963,18 @@ DELETE FROM email WHERE id=%s AND visitor_id=%s AND client_id=%s LIMIT 1
 SQL
 }
 
+sub set_sent_email_body {
+	my ($self, $id, $body) = @_;
+
+	$self->_do_query(
+		"UPDATE email_sent_mail_log SET sml_body=%s WHERE id=%s LIMIT 1",
+		[
+			$body,
+			$id,
+		],
+	);
+}
+
 sub set_visitor_address_id {
 	my ($self, $visitor_id, $address_id) = @_;
 
@@ -1122,10 +1143,16 @@ sub get_sent_mail_log_by_visitor_id {
 	my ($self, $visitor_id) = @_;
 
 	return $self->{'dbh'}->selectall_arrayref(
-		"SELECT id, visitor_id, sml_belongsto AS BelongsTo, sml_email AS Email, sml_name AS Name, sml_mail_type, sml_date AS DateTime, sml_mail_id, sml_body, sml_body_hash, contact_log_id FROM email_sent_mail_log WHERE visitor_id=?",
+		$self->_get_email_sent_mail_log_select()." WHERE visitor_id=?",
 		{ 'Slice' => {} },
         $visitor_id,
 	);
+}
+
+sub _get_email_sent_mail_log_select {
+	my ($self) = @_;
+
+	return "SELECT l.id, l.visitor_id, l.ml_belongsto AS BelongsTo, sml_email AS Email, sml_name AS Name, sml_mail_type, sml_date AS DateTime, sml_mail_id, sml_body, sml_body_hash, contact_log_id FROM email_sent_mail_log l";
 }
 
 sub get_email_appointment_schedule {
