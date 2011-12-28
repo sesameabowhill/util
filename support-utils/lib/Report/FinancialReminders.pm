@@ -6,6 +6,10 @@ use warnings;
 
 use List::Util qw( first maxstr minstr );
 
+use lib '..';
+
+use base 'Report::OnlinePaymentStat';
+
 use DateUtils;
 
 use constant 'FINANCIAL_REMINDER_TYPE' => 2;
@@ -70,11 +74,9 @@ sub get_unique_description {
 
 
 sub generate_report {
-    my ($class, $client_data) = @_;
+    my ($class, $client_data, $logger) = @_;
 
-	my $reminder_settings = $client_data->get_email_reminder_settings();
-	my $financial_reminder_setting = first { $_->{'type'} eq 'financial' } @$reminder_settings;
-	my $ccp_id = $client_data->get_ccp_id();
+	my $is_ccp_enabled = $client_data->is_ccp_enabled();
 
 	my %unique_patient_names;
 	for my $pat (@{ $client_data->get_all_patients() }) {
@@ -96,7 +98,7 @@ sub generate_report {
 	my @payment_priority = ('online', 'insurance', 'card', 'check', 'money');
 
 	my $count_financial_reminder_sent = $client_data->count_sent_emails_by_type(FINANCIAL_REMINDER_TYPE);
-	printf "[%d] financial reminders sent\n", $count_financial_reminder_sent;
+	$logger->printf("%s: [%d] financial reminders sent", $client_data->get_username(), $count_financial_reminder_sent);
 
 	my $patients = $client_data->get_all_patients();
 
@@ -106,6 +108,8 @@ sub generate_report {
 	my @data;
 	my $processed_patients = 0;
 	for my $patient (@$patients) {
+		$logger->printf_slow("%s: process patient [%s]", $client_data->get_username(), $patient->{'PId'});
+
 		my $email_count = $client_data->count_emails_by_pid($patient->{'PId'});
 		my $appointments_intervals = get_appointments_intervals(
 			$client_data,
@@ -125,8 +129,9 @@ sub generate_report {
 			) :
 			{}
 		);
-		my $cc_payments = ($ccp_id ?
-			get_cc_payments_within_interval(
+		my $cc_payments = ($is_ccp_enabled ?
+			$class->get_cc_payments_within_interval(
+				$logger,
 				$client_data,
 				$patient->{'PId'},
 				$appointments_intervals,
@@ -158,21 +163,22 @@ sub generate_report {
 						$cc_payment->{'FirstDate'},
 						$financial_reminder->{'FirstDate'},
 					);
+					$logger->register_category('patient paid online');
 				}
 				else {
-					## no online payment
+					$logger->register_category('patient did not pay online after financial reminder');
 				}
 			}
 			else {
-				## no financial reminder
+				$logger->register_category('patient did not recieve financial reminder');
 			}
 			push(
 				@data,
 				{
 					'username'                       => $client_data->get_db_name(),
 					'is active'                      => $client_data->is_active(),
-					'financial reminder enabled'     => (defined $financial_reminder_setting ? $financial_reminder_setting->{'is_enabled'} : 0),
-					'online payment enabled'         => ($ccp_id ? 1 : 0),
+					'financial reminder enabled'     => ($class->is_financial_reminder_enabled($client_data)),
+					'online payment enabled'         => ($is_ccp_enabled ? 1 : 0),
 					'patient id'                     => $patient->{'PId'},
 					'patient is active'              => $patient->{'Active'},
 					'patient email count'            => $email_count,
@@ -191,11 +197,8 @@ sub generate_report {
 				}
 			);
 		}
-		if (!(++$processed_patients%1000)) {
-			printf "[%d] patients processed\n", $processed_patients;
-		}
 	}
-	printf "[%d] patients processed\n", $processed_patients;
+	$logger->printf("%s: [%d] patients processed", $client_data->get_username(), $processed_patients);
 
 	return \@data;
 }
@@ -328,9 +331,9 @@ sub get_payments_within_intervals {
 }
 
 sub get_cc_payments_within_interval {
-	my ($client_data, $pid, $appointments_intervals) = @_;
+	my ($class, $logger, $client_data, $pid, $appointments_intervals) = @_;
 
-	my $cc_payments = get_cc_payments_by_pid($client_data, $pid);
+	my $cc_payments = $class->get_cc_payments_by_pid($logger, $client_data, $pid);
 	my %payments;
 	if (defined $cc_payments) {
 		for my $payment (@$cc_payments) {
@@ -356,7 +359,7 @@ sub get_cc_payments_within_interval {
 }
 
 sub get_cc_payments_by_pid {
-	my ($client_data, $pid) = @_;
+	my ($class, $logger, $client_data, $pid) = @_;
 
 	my $patient_cc_payment = $client_data->get_cached_data(
 		'patient_cc_payment',
@@ -364,17 +367,9 @@ sub get_cc_payments_by_pid {
 			my %patient_payments;
 			my $payments = $client_data->get_complete_cc_payments();
 			for my $payment (@$payments) {
-				my $candidate_manager = CandidateManager->new(
-					{
-						'comment' => 1,
-						'email' => 2,
-						'name' => 3,
-					}
-				);
-				get_patient_candidates_for_payment(
+				my $candidate_manager = $class->get_patient_candidates_for_payment(
 					$client_data,
 					$payment,
-					$candidate_manager,
 				);
 				my $pid = $candidate_manager->get_single_candidate();
 				if (defined $pid) {
@@ -388,14 +383,15 @@ sub get_cc_payments_by_pid {
 					);
 				}
 				else {
-					printf(
-						"can't find patient by payment [%s]\n",
-						join('-',
-							map {$payment->{$_}}
-							grep {$payment->{$_}}
-							('FName', 'LName', 'Comment', 'Email')
-						),
+					$logger->printf(
+						"%s: can't find patient by payment: first name [%s], last name [%s], email [%s], comment [%s]",
+						$client_data->get_username(),
+						$payment->{'FName'},
+						$payment->{'LName'},
+						$payment->{'Email'} // '',
+						$payment->{'Comment'} // '',
 					);
+					$logger->register_category('no patient for payment found');
 				}
 			}
 			return \%patient_payments;
@@ -405,25 +401,10 @@ sub get_cc_payments_by_pid {
 	return $patient_cc_payment->{$pid};
 }
 
-sub get_patient_candidates_for_payment {
-	my ($client_data, $payment, $candidate_manager) = @_;
-
-	my $comment = ($payment->{'Comment'} || '');
-	$comment =~ s/\s+$//;
-	if (length $comment) {
-		for my $patient (@{ $client_data->get_patients_by_name($comment) }) {
-			$candidate_manager->add_candidate('comment', $patient->{'PId'});
-		}
-	}
-	for my $patient (@{ $client_data->get_patients_by_name($payment->{'FName'}, $payment->{'LName'}) }) {
-		$candidate_manager->add_candidate('name', $patient->{'PId'});
-	}
-}
-
 sub get_payments {
 	my ($ledgers) = @_;
 
-	my @payments = grep {uc $_->{'Type'} eq 'P'} @$ledgers;
+	my @payments = grep {uc $_->{'Type'} eq 'P' || $_->{'Type'} eq 'payment'} @$ledgers;
 	my %unique_desc = map {clear_payment_description($_) => 1} @payments;
 	return ( scalar @payments, \%unique_desc );
 }
@@ -431,7 +412,7 @@ sub get_payments {
 sub get_insurances {
 	my ($ledgers) = @_;
 
-	my @insurances = grep {uc $_->{'Type'} eq 'I'} @$ledgers;
+	my @insurances = grep {uc $_->{'Type'} eq 'I' || $_->{'Type'} eq 'insurance payment'} @$ledgers;
 	return scalar @insurances;
 }
 
@@ -508,7 +489,7 @@ sub clear_payment_description {
 sub append_payment_type {
 	my ($types, $ledgers) = @_;
 
-	for my $l (grep {uc $_->{'Type'} eq 'P'} @$ledgers) {
+	for my $l (grep {uc $_->{'Type'} eq 'P' || $_->{'Type'} eq 'payment'} @$ledgers) {
 		my $type = get_payment_type_by_descrition($l->{'Description'});
 		if (defined $type) {
 			$types->{$type} ++;

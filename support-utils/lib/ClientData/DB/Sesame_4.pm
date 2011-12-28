@@ -239,6 +239,12 @@ sub get_ccp_id {
 	);
 }
 
+sub is_ccp_enabled {
+	my ($self) = @_;
+
+	return $self->get_ccp_id();
+}
+
 sub get_voice_id {
 	my ($self) = @_;
 

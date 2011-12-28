@@ -109,6 +109,75 @@ sub get_emails_by_pid {
 	);
 }
 
+sub get_appointments_by_pid {
+    my ($self, $pid) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT Date(datetime) AS Date, MAX(ifnull(state='confirmed',0)) AS Confirm, duration_minutes AS Duration FROM appointment WHERE patient_id=? GROUP BY Date ORDER BY Date",
+		{ 'Slice' => {} },
+        $pid,
+    );
+}
+
+sub get_accounts_by_pid {
+	my ($self, $pid) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+		"SELECT a.id AS AccountId, insurance_contract_id AS IId ".
+		"FROM account a ".
+		"LEFT JOIN responsible_patient rp ON (a.responsible_patient_id=rp.id AND a.client_id=rp.client_id) ".
+		"WHERE rp.patient_id=? AND rp.client_id=?",
+		{ 'Slice' => {} },
+		$pid,
+		$self->{'client_id'},
+    );
+}
+
+sub get_ledgers_by_account_date_interval {
+    my ($self, $account, $from, $to) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT datetime AS DateTime, amount AS Amount, description AS Description, type AS Type FROM ledger WHERE account_id=? AND datetime BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 00:00:00') - INTERVAL 1 SECOND ORDER BY datetime",
+		{ 'Slice' => {} },
+        $account,
+        $from,
+        $to,
+    );
+}
+
+sub get_sent_emails_by_pid_type {
+	my ($self, $pid, $type) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        $self->_get_email_sent_mail_log_select()." WHERE sml_mail_type=? AND visitor_id=? ORDER BY sml_date",
+		{ 'Slice' => {} },
+        $type,
+        $pid,
+    );
+}
+
+sub count_emails_by_pid {
+	my ($self, $pid) = @_;
+
+	return scalar $self->{'dbh'}->selectrow_array(
+		"SELECT count(*) FROM email WHERE visitor_id=? AND client_id=?",
+		undef,
+		$pid,
+        $self->{'client_id'},
+	);
+}
+
+sub get_complete_cc_payments {
+    my ($self) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT Time AS DateTime, Provider, FName, LName, Email, Comment, Amount, PaymentType AS Type FROM opse_payment_log WHERE client_id=? AND if(Provider='PRI', TResult='OK', Provider='Malse') ORDER BY Time",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+    );
+}
+
+
 sub get_emails_by_responsible {
 	my ($self, $rid) = @_;
 
@@ -233,7 +302,7 @@ sub _get_visitors_by_name {
 sub _get_visitor_columns {
     my ($self) = @_;
 
-    return 'id, pms_id, address_id, address_id_in_pms, type, first_name AS FName, last_name AS LName, birthday AS BDate, blocked, blocked_source, privacy, password, no_email, active, active_in_pms';
+    return 'id, pms_id, address_id, address_id_in_pms, type, first_name AS FName, last_name AS LName, birthday AS BDate, blocked, blocked_source, privacy, password, no_email, active, active AS Active, active_in_pms';
 }
 
 sub get_all_patients {
@@ -243,6 +312,30 @@ sub get_all_patients {
         "SELECT id AS PId, ".$self->_get_visitor_columns()." FROM visitor WHERE type='patient' AND client_id=?",
 		{ 'Slice' => {} },
 		$self->{'client_id'},
+    );
+}
+
+sub get_ledgers_date_interval {
+    my ($self) = @_;
+
+    return $self->{'dbh'}->selectrow_hashref(
+        "SELECT DATE(MAX(datetime)) as max, DATE(MIN(datetime)) as min FROM ledger WHERE client_id=?",
+        undef,
+        $self->{'client_id'},
+    );
+}
+
+sub count_sent_emails_by_type {
+	my ($self, $type) = @_;
+
+    return scalar $self->{'dbh'}->selectrow_array(
+        "SELECT count(*) FROM email_contact_log l ".
+        "LEFT JOIN visitor v ON (v.id=l.visitor_id) ".
+        "WHERE v.client_id=? AND clog_mail_type=? AND clog_code=?",
+        undef,
+        $self->{'client_id'},
+		$type,
+		1,
     );
 }
 
@@ -289,6 +382,17 @@ sub get_visitor_by_id {
     );
 }
 
+sub get_visitor_ids_by_email {
+    my ($self, $email) = @_;
+
+	return $self->{'dbh'}->selectcol_arrayref(
+        "SELECT visitor_id FROM email WHERE email=? AND client_id=?",
+		undef,
+		$email,
+		$self->{'client_id'},
+    );
+}
+
 sub get_patients_by_pms_id {
     my ($self, $visitor_pms_id) = @_;
 
@@ -309,6 +413,18 @@ sub get_responsibles_by_pms_id {
 		{ 'Slice' => {} },
 		"responsible",
 		$visitor_pms_id,
+		$self->{'client_id'},
+    );
+}
+
+sub get_responsible_by_id {
+    my ($self, $id) = @_;
+
+    return $self->{'dbh'}->selectrow_hashref(
+        "SELECT id AS RId, ".$self->_get_visitor_columns()." FROM visitor WHERE type=? AND id=? AND client_id=?",
+		undef,
+		"responsible",
+		$id,
 		$self->{'client_id'},
     );
 }
@@ -1152,7 +1268,7 @@ sub get_sent_mail_log_by_visitor_id {
 sub _get_email_sent_mail_log_select {
 	my ($self) = @_;
 
-	return "SELECT l.id, l.visitor_id, l.ml_belongsto AS BelongsTo, sml_email AS Email, sml_name AS Name, sml_mail_type, sml_date AS DateTime, sml_mail_id, sml_body, sml_body_hash, contact_log_id FROM email_sent_mail_log l";
+	return "SELECT l.id, l.visitor_id, sml_email AS Email, sml_name AS Name, sml_mail_type, sml_date AS DateTime, sml_mail_id, sml_body, sml_body_hash, contact_log_id FROM email_sent_mail_log l";
 }
 
 sub get_email_appointment_schedule {
@@ -1221,6 +1337,16 @@ sub delete_holiday_setting {
 		],
 	);
 
+}
+
+sub is_ccp_enabled {
+	my ($self) = @_;
+
+	return scalar $self->{'dbh'}->selectrow_array(
+		"SELECT count(*) FROM opse_client_settings WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+	);
 }
 
 1;

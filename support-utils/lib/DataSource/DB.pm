@@ -183,6 +183,15 @@ sub expand_client_group {
 		}
 		push(@clients, @$usernames);
 	}
+	for my $client_db (@clients) {
+		if ($client_db =~ m{^\d+$}) {
+			my $client_data = $self->get_client_data_by_id($client_db);
+			unless (defined $client_data->get_username()) {
+				die "can't find client by id [$client_db]";
+			}
+			$client_db = $client_data->get_username();
+		}
+	}
 	my %unique_usernames;
 	## remove duplicates
 	@clients = grep { !$unique_usernames{$_}++ } @clients;

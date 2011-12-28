@@ -1,6 +1,9 @@
 ## $Id$
 package ClientData::DB::OrthoPat_4;
 
+use strict;
+use warnings;
+
 use base qw( ClientData::DB::Ortho_4 );
 
 sub get_full_type {

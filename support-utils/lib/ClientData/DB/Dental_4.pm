@@ -1,6 +1,7 @@
 package ClientData::DB::Dental_4;
 
 use strict;
+use warnings;
 
 use base qw( ClientData::DB::Sesame_4 );
 
