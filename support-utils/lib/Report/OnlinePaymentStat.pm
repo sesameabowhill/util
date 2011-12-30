@@ -98,7 +98,8 @@ sub generate_report {
 			push(@data, $data);
 		}
 	}
-	return $class->group_by_patient(\@data);
+	return \@data;
+	#return $class->group_by_patient(\@data);
 }
 
 sub group_by_patient {
