@@ -408,6 +408,7 @@ sub read_config_file {
 		$ENV{'SESAME_ROOT'} //= '/home/sites';
 		$logger->info("current sesame version is [5]");
 		my $core_config_file = File::Spec->join($ENV{'SESAME_ROOT'}, 'sesame', 'config', 'sesame_core.conf');
+		$logger->info("read config [$core_config_file]");
 		my $core_config = $class->read_config_file($core_config_file);
 		$db_options = {
 			'db_host'     => $core_config->{'database_access'}{'server_address'},
@@ -426,6 +427,7 @@ sub read_config_file {
 					'db_port'     => ($4 || 3306),
 					'db_name'     => $5,
 				};
+				$logger->info("override DB connection parameters by [$db_connection_string]");
 				if (! defined $db_options->{'db_name'}) {
 					die "database name is not specified in [$db_connection_string] to work for [5]";
 				}
