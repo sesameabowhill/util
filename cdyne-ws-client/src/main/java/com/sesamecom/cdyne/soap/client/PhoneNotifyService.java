@@ -1,5 +1,7 @@
 package com.sesamecom.cdyne.soap.client;
 
+import java.util.Calendar;
+
 /**
  * Defines an interface for calling the CDYNE PhoneNotify Web Services
  */
@@ -21,14 +23,13 @@ public interface PhoneNotifyService {
             String callerIdNumber,
             String callerIdName,
             String textToSay,
-            String licenceKey,
             int tryCount,
             int nextTryInSeconds,
-            java.util.Calendar utcScheduledDateTime,
+            Calendar utcScheduledDateTime,
             short ttsRate,
             short ttsVolume,
             String statusChangePostUrl
-            );
+    );
 
     /**
      * Calls GetQueueIDStatus, which returns a status on a particular QueueID.
@@ -42,13 +43,14 @@ public interface PhoneNotifyService {
      * Calls GetTTSInULAW, which allows you to convert text into a ULAW encoded sound file.
      * (May require an additional License Key)
      *
-     *  @param textToSay
-     *  @param voiceID
+     *
+     * @param textToSay
      *  @param ttsRate
      *  @param ttsVolume
-     *  @param licenseKey
-     * @return ULAW encoded sound file
+     *  @return ULAW encoded sound file
      */
-    public byte[] getTTSinULAW(String textToSay, int voiceId, short ttsRate, short ttsVolume, String licenseKey);
+    public byte[] getTTSinULAW(String textToSay, int voiceId, short ttsRate, short ttsVolume);
+
+    public byte[] getTTSinMP3(String textToSay, int voiceId, short ttsRate, short ttsVolume);
 }
 

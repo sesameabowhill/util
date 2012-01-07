@@ -55,7 +55,7 @@ public class PhoneNotifyTest extends TestCase {
                 "11234567890", // callerIdNumber
                 "Maven Johnson", // callerIdName
                 textToSay, // textToSay
-                licenseKey, // licenseKey
+                // licenseKey
                 1, // tryCount
                 0, // nextTryInSeconds
                 new DateTime().withZone(DateTimeZone.UTC).toCalendar(Locale.US), // utcScheduledDateTime
