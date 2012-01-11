@@ -17,7 +17,7 @@ public class SmsNotifyServiceAxis2Impl implements SmsNotifyService {
     private static final String SMS_LICENSE_KEY = "97050845-77d1-450b-9c14-3f813b86754c";
 
     @Override
-    public String simpleSmsSendWithPostback(String phoneNumber, String licenseKey, String message, String postbackUrl) {
+    public String simpleSmsSendWithPostback(String phoneNumber, String message, String postbackUrl) {
         String messageId = "";
 
         try {

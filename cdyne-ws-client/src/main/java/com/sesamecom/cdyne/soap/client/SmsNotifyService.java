@@ -5,7 +5,7 @@ package com.sesamecom.cdyne.soap.client;
  */
 public interface SmsNotifyService {
 
-    public String simpleSmsSendWithPostback (String phoneNumber, String licenseKey, String message, String postbackUrl);
+    public String simpleSmsSendWithPostback (String phoneNumber, String message, String postbackUrl);
 
     /**
      * Calls GetMessageStatus, which returns a status on a particular QueueID.
