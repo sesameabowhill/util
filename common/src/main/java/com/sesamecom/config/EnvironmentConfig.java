@@ -281,6 +281,55 @@ public class EnvironmentConfig {
     }
 
     /**
+     *  Returns the configured AWS accessKey
+     */
+    public static String getAWSAccessKey() {
+        return getProperty("awsAccessKey", String.class);
+    }
+
+    /**
+     *  Returns the configured AWS secretKey
+     */
+    public static String getAWSSecretKey() {
+        return getProperty("awsSecretKey", String.class);
+    }
+
+    /**
+     * Returns the SI Upload Visit Batch endpoint for messaging
+     */
+    public static String getSIUploadVisitBatchCommandEndpoint() {
+        return getProperty("siUploadVisitBatchCommandEndpoint", String.class);
+    }
+
+    /**
+     * Returns the SI Upload Visit bucket where unpacked images are stored
+     */
+    public static String getSIUploadClientImagesBucket(String defaultValue) {
+        return getProperty("siUploadClientImagesBucket", String.class, OPTIONAL, defaultValue);
+    }
+
+    /**
+     * Returns the SI Upload Visit bucket where archives of images are uploaded
+     */
+    public static String getSIUploadVisitArchiveBucket(String defaultValue) {
+        return getProperty("siUploadVisitArchiveBucket", String.class, OPTIONAL, defaultValue);
+    }
+
+    /**
+     * Returns a worker count for SI Upload Batch processing
+     */
+    public static Integer getSIUploadBatchProcessorConcurrencyCount(Integer defaultValue) {
+        return getProperty("siUploadBatchProcessorConcurrencyCount", Integer.class, OPTIONAL, defaultValue);
+    }
+
+    /**
+     * Returns the AWS S3 endpoint
+     */
+    public static String getS3Endpoint(String defaultValue) {
+        return getProperty("s3Endpoint", String.class, OPTIONAL, defaultValue);
+    }
+
+    /**
      * Provides raw, read-only access to all properties defined.  This can be useful when some properties are used to
      * configure a third party component that knows how to get them from a Properties object.
      */
