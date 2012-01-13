@@ -5,6 +5,7 @@ import com.cdyne.sms2.impl.SMSRequestImpl;
 import com.microsoft.schemas._2003._10.serialization.arrays.impl.ArrayOfstringImpl;
 import com.sesamecom.soap.generated.cdyne.SmsStub;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.ServiceClient;
 import org.datacontract.schemas._2004._07.smsws.SMSAdvancedRequestDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,8 @@ public class SmsNotifyServiceAxis2Impl implements SmsNotifyService {
 
         try {
             SmsStub smsStub = new SmsStub();
+            ServiceClient sc = smsStub._getServiceClient();
+            sc.engageModule("addressing");
             
             SimpleSMSsendWithPostbackDocument sspd = SimpleSMSsendWithPostbackDocument.Factory.newInstance();
             SimpleSMSsendWithPostbackDocument.SimpleSMSsendWithPostback simpleSMSsendWithPostback = 

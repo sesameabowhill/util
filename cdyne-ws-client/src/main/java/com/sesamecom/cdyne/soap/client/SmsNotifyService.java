@@ -5,6 +5,14 @@ package com.sesamecom.cdyne.soap.client;
  */
 public interface SmsNotifyService {
 
+    /**
+     * This method calls CDYNE's SimpleSMSWithPostback method, will send out a text message to
+     * the phone number specified.
+     * @param phoneNumber
+     * @param message
+     * @param postbackUrl
+     * @return
+     */
     public String simpleSmsSendWithPostback (String phoneNumber, String message, String postbackUrl);
 
     /**
