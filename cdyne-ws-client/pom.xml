@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sesamecom</groupId>
     <artifactId>cdyne-ws-client</artifactId>
-    <version>1.0</version>
+    <version>1.0-SNAPSHOT</version>
 
     <name>cdyne-ws-client</name>
     <url>http://maven.apache.org</url>
