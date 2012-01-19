@@ -272,6 +272,16 @@ public class EnvironmentConfig {
     }
 
     /**
+     * The environment definition for "SESAME_WEB".
+     * <p/>
+     * Property: sesameWeb
+     */
+    public static String getSesameWeb() {
+        return getProperty("sesameWeb", String.class);
+    }
+
+    /**
+    /**
      * The Liquibase context to run under when migration is performed for the persist database.
      * <p/>
      * Property: persistLiquibaseContext
