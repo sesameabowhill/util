@@ -31,7 +31,7 @@ sub extract_sent_mail_log {
 	my $date = DateUtils->now()->as_mysql_date();
 
 	for my $email (@{ $client_data->get_all_sent_emails_with_body() }) {
-		my $file_name = _put_message_to_file($folder, $date, $email->{'Body'});
+		my $file_name = _put_message_to_file($client_data->get_username(), $folder, $date, $email->{'Body'});
 		$client_data->set_sent_email_body($email->{'id'}, "file://".$file_name);
 		$logger->printf_slow("save email body [$file_name]");
 		$logger->register_category("body saved to file");
@@ -39,11 +39,13 @@ sub extract_sent_mail_log {
 }
 
 sub _put_message_to_file {
-	my ($root_folder, $mail_date, $body) = @_;
+	my ($username, $root_folder, $mail_date, $body) = @_;
 
 	## generate file name the same way as git does
 	my $hash = sha1_hex($body);
 	my $folder = File::Spec->join(
+		'sent-mail-log',
+		$username,
 		$mail_date,
 		substr($hash, 0, 2)
 	);

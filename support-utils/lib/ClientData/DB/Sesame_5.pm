@@ -1268,7 +1268,7 @@ sub get_sent_mail_log_by_visitor_id {
 sub _get_email_sent_mail_log_select {
 	my ($self) = @_;
 
-	return "SELECT l.id, l.visitor_id, sml_email AS Email, sml_name AS Name, sml_mail_type, sml_date AS DateTime, sml_mail_id, sml_body, sml_body_hash, contact_log_id FROM email_sent_mail_log l";
+	return "SELECT l.id, l.visitor_id, sml_email AS Email, sml_name AS Name, sml_mail_type, sml_date AS DateTime, sml_mail_id, sml_body AS Body, sml_body_hash, contact_log_id FROM email_sent_mail_log l";
 }
 
 sub get_email_appointment_schedule {
