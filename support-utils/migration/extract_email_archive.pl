@@ -44,7 +44,7 @@ sub _put_message_to_file {
 	## generate file name the same way as git does
 	my $hash = sha1_hex($body);
 	my $folder = File::Spec->join(
-		'sent-mail-log',
+		'sent-mail-log2',
 		$username,
 		$mail_date,
 		substr($hash, 0, 2)
