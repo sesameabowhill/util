@@ -8,6 +8,12 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <scm>
+      <connection>scm:git:git@github.com:sesacom/util.git</connection>
+      <url>scm:git:git@github.com:sesacom/util.git</url>
+      <developerConnection>scm:git:git@github.com:sesacom/util.git</developerConnection>
+    </scm>
+
     <modules>
         <module>jcityhash</module>
         <module>jetty-console-jndi-datasource-plugin</module>
