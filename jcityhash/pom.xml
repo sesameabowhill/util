@@ -6,7 +6,7 @@
 
     <groupId>com.sesamecom</groupId>
     <artifactId>jcityhash</artifactId>
-    <version>1.0.2</version>
+    <version>1.1-SNAPSHOT</version>
 
     <!-- switch this to "nar" to build a copy of the jnilib for a new platform.  try to run the tests, and copy the
          jnilib file to the package indicated by the failure output in src/main/resources.  then switch the packaging
@@ -16,7 +16,7 @@
     <parent>
       <groupId>com.sesamecom</groupId>
       <artifactId>util</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.1-SNAPSHOT</version>
       <relativePath>../</relativePath>
     </parent>
 
@@ -28,18 +28,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>duns-plugin-repository</id>
-            <name>Duns Plugin Repository</name>
-            <url>http://duns.github.com/maven-snapshots/</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
     <build>
         <plugins>
