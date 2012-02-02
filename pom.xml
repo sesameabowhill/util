@@ -69,19 +69,5 @@
             <url>s3://sesame-maven-public/release</url>
         </repository>
     </distributionManagement>
-    <repositories>
-        <repository>
-            <id>s3repo</id>
-            <name>Sesame S3 Repository</name>
-            <url>http://sesame-maven-public.s3-website-us-east-1.amazonaws.com/release</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>s3repo</id>
-            <name>Sesame S3 Repository</name>
-            <url>http://sesame-maven-public.s3-website-us-east-1.amazonaws.com/release</url>
-        </pluginRepository>
-    </pluginRepositories>
 </project>
 
