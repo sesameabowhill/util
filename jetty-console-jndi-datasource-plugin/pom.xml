@@ -16,7 +16,7 @@
         <dependency>
             <groupId>com.sesamecom</groupId>
             <artifactId>legacy-integration-utils</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -34,29 +34,6 @@
                 </executions>
             </plugin>
         </plugins>
-        <extensions>
-            <extension>
-                <groupId>org.springframework.build.aws</groupId>
-                <artifactId>org.springframework.build.aws.maven</artifactId>
-                <version>3.0.0.RELEASE</version>
-            </extension>
-        </extensions>
     </build>
-    <repositories>
-        <repository>
-            <id>s3repo</id>
-            <name>Sesame S3 Repository</name>
-            <url>http://sesame-maven-public.s3-website-us-east-1.amazonaws.com/release</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-    <distributionManagement>
-        <repository>
-            <id>sesame-maven</id>
-            <name>Sesame S3 Repository</name>
-            <url>s3://sesame-maven-public/release</url>
-        </repository>
-    </distributionManagement>
 </project>
+

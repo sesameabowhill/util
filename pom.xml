@@ -16,11 +16,13 @@
 
     <modules>
         <module>jcityhash</module>
-        <module>jetty-console-jndi-datasource-plugin</module>
         <module>legacy-integration-utils</module>
         <module>legacy-struts-app</module>
         <module>common</module>
         <module>cdyne-ws-client</module>
+        <!-- can't be incorporated into new version scheme, and has a low rate of change,
+             so simply excluding from the build. -->
+        <!--module>jetty-console-jndi-datasource-plugin</module-->
     </modules>
 
     <dependencies>
@@ -54,20 +56,6 @@
                 </configuration>
             </plugin>
         </plugins>
-        <extensions>
-            <extension>
-                <groupId>org.springframework.build.aws</groupId>
-                <artifactId>org.springframework.build.aws.maven</artifactId>
-                <version>3.0.0.RELEASE</version>
-            </extension>
-        </extensions>
     </build>
-    <distributionManagement>
-        <repository>
-            <id>sesame-maven</id>
-            <name>Sesame S3 Repository</name>
-            <url>s3://sesame-maven-public/release</url>
-        </repository>
-    </distributionManagement>
 </project>
 
