@@ -17,7 +17,6 @@
     <modules>
         <module>jcityhash</module>
         <module>legacy-integration-utils</module>
-        <module>legacy-struts-app</module>
         <module>common</module>
         <module>cdyne-ws-client</module>
         <!-- can't be incorporated into new version scheme, and has a low rate of change,
