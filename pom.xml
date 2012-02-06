@@ -32,6 +32,14 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+      <repository>
+        <id>sesame-artifactory-release</id>
+        <name>Sesame Artifactory Release</name>
+        <url>http://artifactory.sesamecom.com/artifactory/libs-release-local</url>
+      </repository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>

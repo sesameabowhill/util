@@ -16,9 +16,17 @@
         <dependency>
             <groupId>com.sesamecom</groupId>
             <artifactId>legacy-integration-utils</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>sesame-artifactory</id>
+            <name>sesame-artifactory-releases</name>
+            <url>http://artifactory.sesamecom.com/artifactory/libs-release-local</url>
+        </repository>
+    </distributionManagement>
 
     <build>
         <plugins>
