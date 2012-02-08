@@ -4,12 +4,12 @@
 
     <groupId>com.sesamecom</groupId>
     <artifactId>common</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
 
     <parent>
       <groupId>com.sesamecom</groupId>
       <artifactId>util</artifactId>
-      <version>1.0.4-SNAPSHOT</version>
+      <version>1.0.3-SNAPSHOT</version>
       <relativePath>../</relativePath>
     </parent>
 
