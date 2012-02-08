@@ -12,6 +12,14 @@
 	var last_graph;
 	var link_suggest = new SuggestLink();
 
+	function get_sesame_version() {
+		if (localStorage["graph_type"]) {
+			if (localStorage["graph_type"] == "upload_queue_6" || localStorage["graph_type"] == "error_count_6") {
+				return '6';
+			}
+		}
+		return '5';
+	}
 	function get_current_graph_params() {
 		if (! localStorage["graph_type"]) { // set default value
 			// set default graph_type
@@ -28,7 +36,7 @@
 			}
 		}
 		if (! last_graph) {
-			if (localStorage["graph_type"] == "error_count") {
+			if (localStorage["graph_type"] == "error_count_5" || localStorage["graph_type"] == "error_count_6") {
 				last_graph = {
 					"type": localStorage["graph_type"],
 					"data_url": get_url("error_count") + "?action=error_stat",
@@ -43,7 +51,7 @@
 					"last_error_count": null
 				};
 			}
-			else if (localStorage["graph_type"] == "upload_queue_5") {
+			else if (localStorage["graph_type"] == "upload_queue_5" || localStorage["graph_type"] == "upload_queue_6") {
 				last_graph = {
 					"type": localStorage["graph_type"],
 					"data_url": get_url("upload_queue_5"),
@@ -65,13 +73,22 @@
 
  	function get_url(name) {
  		var urls = {
- 			'fcs_5': "https://members.sesamecommunications.com/support-tools/sesame/fast_client_search/",
- 			'fcs_stage': "https://cp-stage1-1.sesamecommunications.com/support-tools/sesame/fast_client_search/",
- 			'upload_queue_5': "https://members.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=upload_queue_5",
- 			'client_api': "https://members.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=client_list",
- 			'error_count': "https://members.sesamecommunications.com/support-tools/error_reporter/"
+			'5': {
+	 			'fcs_5': "https://members.sesamecommunications.com/support-tools/sesame/fast_client_search/",
+ 				'fcs_stage': "https://cp-stage1-1.sesamecommunications.com/support-tools/sesame/fast_client_search/",
+ 				'upload_queue_5': "https://members.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=upload_queue_5",
+ 				'client_api': "https://members.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=client_list",
+	 			'error_count': "https://members.sesamecommunications.com/support-tools/error_reporter/"
+			},
+			'6': {
+	 			'fcs_5': "https://admin.sesamecommunications.com/support-tools/sesame/fast_client_search/",
+ 				'fcs_stage': "https://ip-iet.sesamecom.com/support-tools/sesame/fast_client_search/",
+ 				'upload_queue_5': "https://admin.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=upload_queue_5",
+ 				'client_api': "https://admin.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=client_list",
+	 			'error_count': "https://admin.sesamecommunications.com/support-tools/error_reporter/"
+			}
  		};
- 		return urls[name];
+ 		return urls[get_sesame_version()][name];
 	}
 
 	

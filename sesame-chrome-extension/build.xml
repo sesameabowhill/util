@@ -50,7 +50,7 @@
 	<target name="version.write">
 		<exec executable="python" failonerror="true" outputproperty="last_version">
 			<arg value="-c" />
-			<arg value="import json; v = json.load(open('_version.json')); v['v3']+=1; json.dump(v, open('_version.json', 'w')); print '%d.%d.%d' % (v['v1'], v['v2'], v['v3'])"/>
+			<arg value="import json; v = json.load(open('.version.json')); v['v3']+=1; json.dump(v, open('.version.json', 'w')); print '%d.%d.%d' % (v['v1'], v['v2'], v['v3'])"/>
 		</exec>
 		<echo>last_version [${last_version}]</echo>
 		<echo file="${file.last_version}">last_version=${last_version}</echo>
@@ -71,6 +71,7 @@
 				<include name="**/*" />
 				<exclude name="**/.svn/**/*" />
 				<exclude name="**/_*" />
+				<exclude name="**/.*" />
 				<exclude name="tests" />
 				<exclude name="tests/**/*" />
 				<exclude name="build.xml" />
