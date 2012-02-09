@@ -4,9 +4,11 @@ function SuggestLink() {
 			"url": "https://members.sesamecommunications.com/%s/",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/%s/",
 			"url_iet": "https://md-iet.sesamecom.com/",
-			"title": "go to [<match>%s</match>] <match>Control Panel</match>",
-			"title_stage": "go to [<match>%s</match>] <match>Stage Control Panel</match>",
-			"title_iet": "go to [<match>%s</match>] <match>IET Control Panel</match>",
+			"url_bb": "https://member.sesamecommunications.com/",
+			"title": "go to [<match>%s</match>] <match>5.0 Control Panel</match>",
+			"title_stage": "go to [<match>%s</match>] <match>5.0 Stage Control Panel</match>",
+			"title_iet": "go to [<match>%s</match>] <match>IET Member Dashboard</match>",
+			"title_bb": "go to [<match>%s</match>] <match>24/7 Member Dashboard</match>",
 			"need_client": true,
 			"suffix": true,
 			"clients_stage": {}
@@ -15,9 +17,11 @@ function SuggestLink() {
 			"url": "https://login.sesamecommunications.com/%s/index.html",
 			"url_stage": "https://pp-stage1-1.sesamecommunications.com/%s/index.html",
 			"url_iet": "https://pp-iet.sesamecom.com/%s/index.html",
-			"title": "go to [<match>%s</match>] <match>Patient Pages</match>" ,
-			"title_stage": "go to [<match>%s</match>] <match>Stage Patient Pages</match>" ,
+			"url_bb": "https://patient.sesamecommunications.com/%s/index.html",
+			"title": "go to [<match>%s</match>] <match>5.0 Patient Pages</match>" ,
+			"title_stage": "go to [<match>%s</match>] <match>5.0 Stage Patient Pages</match>" ,
 			"title_iet": "go to [<match>%s</match>] <match>IET Patient Pages</match>" ,
+			"title_bb": "go to [<match>%s</match>] <match>24/7 Patient Portal</match>" ,
 			"need_client": true,
 			"suffix": true,
 			"clients_stage": {}
@@ -25,8 +29,8 @@ function SuggestLink() {
 		"staff" : {
 			"url": "https://members.sesamecommunications.com/%s/staff.cgi",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/%s/staff.cgi",
-			"title": "go to [<match>%s</match>] <match>Staff Access</match> (Patient Pages)" ,
-			"title_stage": "go to [<match>%s</match>] <match>Stage Staff Access</match> (Patient Pages)" ,
+			"title": "go to [<match>%s</match>] <match>5.0 Staff Access</match> (Patient Pages)" ,
+			"title_stage": "go to [<match>%s</match>] <match>5.0 Stage Staff Access</match> (Patient Pages)" ,
 			"need_client": true,
 			"suffix": true,
 			"clients_stage": {}
@@ -35,19 +39,23 @@ function SuggestLink() {
 			"url": "https://internal.sesamecommunications.com:8443/internal/member-information.html",
 			"url_stage": "http://ip-stage1-1.sesamecommunications.com:8080/internal/member-information.html",
 			"url_iet": "https://ip-iet.sesamecom.com/member-information.html",
+			"url_bb": "https://admin.sesamecommunications.com/member-information.html",
 			"suffix": true,
-			"title": "go to <match>Internal</match>",
-			"title_stage": "go to <match>Stage Internal</match>",
-			"title_iet": "go to <match>IET Internal</match>"
+			"title": "go to <match>5.0 Internal</match>",
+			"title_stage": "go to <match>5.0 Stage Internal</match>",
+			"title_iet": "go to <match>IET Internal</match>",
+			"title_bb": "go to <match>24/7 Internal</match>"
 		},
 		"invisalign" : {
 			"url": "https://members.sesamecommunications.com/support-tools/invisalign-processing/",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/support-tools/invisalign-processing/",
 			"url_iet": "https://ip-iet.sesamecom.com/support-tools/invisalign-processing/",
+			"url_iet": "https://admin.sesamecommunications.com/support-tools/invisalign-processing/",
 			"suffix": true,
-			"title": "go to <match>Invisalign</match> tool",
-			"title_stage": "go to <match>Stage Invisalign</match> tool",
-			"title_iet": "go to <match>IET Invisalign</match> tool"
+			"title": "go to <match>5.0 Invisalign</match> tool",
+			"title_stage": "go to <match>5.0 Stage Invisalign</match> tool",
+			"title_iet": "go to <match>IET Invisalign</match> tool",
+			"title_bb": "go to <match>24/7 Invisalign</match> tool"
 		},
 		"jira" : {
 			"url": "https://jira.sesamecommunications.com:8443/secure/QuickSearch.jspa?searchString=%s",
@@ -59,7 +67,7 @@ function SuggestLink() {
 		}, 
 		"demo" : {
 			"url": "http://demo-stage.sesamecommunications.com/sesame_demo/login.cgi?user=%s",
-			"title": "go to <match>Demo</match> [<match>%s</match>]",
+			"title": "go to <match>5.0 Demo</match> [<match>%s</match>]",
 			"clients": {
 				"1": "dental_demo_1",
 				"2": "ortho_demo_2",
@@ -71,85 +79,97 @@ function SuggestLink() {
 		"upload_logs" : {
 			"url": "https://internal.sesamecommunications.com:8443/UploadLogs/index.html",
 			"url_stage": "https://ip-stage1-1.sesamecommunications.com:8443/UploadLogs/index.html",
+			"url_bb": "https://sync-logs.sesamecommunications.com/",
 			"suffix": true,
-			"title": "go to <match>Upload Logs</match>",
-			"title_stage": "go to <match>Stage Upload Logs</match>"
+			"title": "go to <match>5.0 Upload Logs</match>",
+			"title_stage": "go to <match>5.0 Stage Upload Logs</match>",
+			"title_bb": "go to <match>24/7 Upload Logs</match>"
 		},
 		"ppn" : {
 			"url": "https://members.sesamecommunications.com/support-tools/ppn-console/",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/support-tools/ppn-console/",
 			"suffix": true,
-			"title": "go to <match>PPN Console</match> (Newsletters)",
-			"title_stage": "go to <match>Stage PPN Console</match> (Newsletters)"
+			"title": "go to <match>5.0 PPN Console</match> (Newsletters)",
+			"title_stage": "go to <match>5.0 Stage PPN Console</match> (Newsletters)"
 		},
 		"si_logs" : {
 			"url": "https://internal.sesamecommunications.com:8443/si-monitoring/",
 			"url_stage": "https://ip-stage1-1.sesamecommunications.com:8443/si-monitoring/",
+			"url_stage": "https://si-ul-iet.sesamecom.com/",
 			"suffix": true,
-			"title": "go to <match>SI Logs</match>",
-			"title_stage": "go to <match>Stage SI Logs</match>"
+			"title": "go to <match>5.0 SI Logs</match>",
+			"title_stage": "go to <match>5.0 Stage SI Logs</match>",
+			"title_bb": "go to <match>24/7 SI Logs</match>"
 		},
 		"new_client" : {
 			"url": "https://members.sesamecommunications.com/install/member/default.htm",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/install/member/default.htm",
+			"url_bb": "https://admin.sesamecommunications.com/install/member/default.htm",
 			"suffix": true,
-			"title": "go to <match>New Client Installer</match>",
-			"title_stage": "go to <match>Stage New Client Installer</match>"
+			"title": "go to <match>5.0 New Client Installer</match>",
+			"title_stage": "go to <match>5.0 Stage New Client Installer</match>",
+			"title_bb": "go to <match>24/7 New Client Installer</match>"
 		},
 		"voice" : {
 			"url": "https://members.sesamecommunications.com/install/voice/",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/install/voice/",
 			"suffix": true,
-			"title": "go to <match>Voice Installer</match>",
-			"title_stage": "go to <match>Stage Voice Installer</match>"
+			"title": "go to <match>5.0 Voice Installer</match>",
+			"title_stage": "go to <match>5.0 Stage Voice Installer</match>"
 		},
 		"opse" : {
 			"url": "https://members.sesamecommunications.com/install/opse/",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/install/opse/",
 			"suffix": true,
-			"title": "go to <match>Credit Card Payment Installer</match>",
-			"title_stage": "go to <match>Stage Credit Card Payment Installer</match>"
+			"title": "go to <match>5.0 Credit Card Payment Installer</match>",
+			"title_stage": "go to <match>5.0 Stage Credit Card Payment Installer</match>"
 		},
 		"hhf" : {
 			"url": "https://members.sesamecommunications.com/install/hhf/",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/install/hhf/",
 			"suffix": true,
-			"title": "go to <match>HHF Installer</match> (Patient Forms)",
-			"title_stage": "go to <match>Stage HHF Installer</match> (Patient Forms)"
+			"title": "go to <match>5.0 HHF Installer</match> (Patient Forms)",
+			"title_stage": "go to <match>5.0 Stage HHF Installer</match> (Patient Forms)"
 		},
 		"sms" : {
 			"url": "https://members.sesamecommunications.com/install/sms/",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/install/sms/",
 			"suffix": true,
-			"title": "go to <match>SMS Installer</match>",
-			"title_stage": "go to <match>Stage SMS Installer</match>"
+			"title": "go to <match>5.0 SMS Installer</match>",
+			"title_stage": "go to <match>5.0 Stage SMS Installer</match>"
 		},
 		"fcs" : {
 			"url": "https://members.sesamecommunications.com/support-tools/sesame/fast_client_search/?search_param=%s",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/support-tools/sesame/fast_client_search/?search_param=%s",
 			"url_iet": "https://ip-iet.sesamecom.com/support-tools/sesame/fast_client_search/?search_param=%s",
+			"url_bb": "https://admin.sesamecommunications.com/support-tools/sesame/fast_client_search/?search_param=%s",
 			"suffix": true,
-			"title": "Search for [<match>%s</match>] <match>client</match>",
-			"title_stage": "Search <match>Stage</match> for [%s] <match>client</match>",
-			"title_iet": "Search <match>IET</match> for [%s] <match>client</match>"
+			"title": "Search <match>5.0</match> for [<match>%s</match>] <match>client</match>",
+			"title_stage": "Search <match>5.0 Stage</match> for [%s] <match>client</match>",
+			"title_iet": "Search <match>IET</match> for [%s] <match>client</match>",
+			"title_bb": "Search <match>24/7</match> for [%s] <match>client</match>"
 		}, 
 		"visitor" : {
 			"url": "https://members.sesamecommunications.com/support-tools/sesame/fast_client_search/?find=visitor&search_param=%s",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/support-tools/sesame/fast_client_search/?find=visitor&search_param=%s",
 			"url_iet": "https://ip-iet.sesamecom.com/support-tools/sesame/fast_client_search/?find=visitor&search_param=%s",
+			"url_bb": "https://admin.sesamecommunications.com/support-tools/sesame/fast_client_search/?find=visitor&search_param=%s",
 			"suffix": true,
-			"title": "Search for [<match>%s</match>] <match>visitor</match>",
-			"title_stage": "Search <match>Stage</match> for [<match>%s</match>] <match>visitor</match>",
-			"title_iet": "Search <match>IET</match> for [<match>%s</match>] <match>visitor</match>"
+			"title": "Search <match>5.0</match> for [<match>%s</match>] <match>visitor</match>",
+			"title_stage": "Search <match>5.0 Stage</match> for [<match>%s</match>] <match>visitor</match>",
+			"title_iet": "Search <match>IET</match> for [<match>%s</match>] <match>visitor</match>",
+			"title_bb": "Search <match>24/7</match> for [<match>%s</match>] <match>visitor</match>"
 		}, 
 		"slm" : {
 			"url": "https://members.sesamecommunications.com/support-tools/error_reporter/?search=%s",
 			"url_stage": "https://cp-stage1-1.sesamecommunications.com/support-tools/error_reporter/?search=%s",
 			"url_iet": "https://ip-iet.sesamecom.com/support-tools/error_reporter/?search=%s",
+			"url_bb": "https://admin.sesamecommunications.com/support-tools/error_reporter/?search=%s",
 			"suffix": true,
-			"title": "Search for [<match>%s</match>] in <match>Errors</match>",
-			"title_stage": "Search for [<match>%s</match>] in <match>Stage Errors</match>",
-			"title_iet": "Search for [<match>%s</match>] in <match>IET Errors</match>"
+			"title": "Search <match>5.0</match> for [<match>%s</match>] in <match>5.0 Errors</match>",
+			"title_stage": "Search for [<match>%s</match>] in <match>5.0 Stage Errors</match>",
+			"title_iet": "Search for [<match>%s</match>] in <match>IET Errors</match>",
+			"title_bb": "Search for [<match>%s</match>] in <match>24/7 Errors</match>"
 		}
 	};
 	commands.error = commands.slm;
@@ -162,7 +182,7 @@ function SuggestLink() {
 	this.commands = commands;
 	
 	this.command_finder = new CommandFinder(Object.keys(commands));
-	this.suffix_finder = new CommandFinder([ "stage", "iet" ]);
+	this.suffix_finder = new CommandFinder([ "stage", "iet", "bb" ]);
 }
 
 SuggestLink.prototype.get_link_suggestions = function (str, client_names) {

@@ -331,6 +331,56 @@ public class EnvironmentConfig {
     }
 
     /**
+     * Get camel endpoint definition for PMS Upload Inject Events
+     * @return URI of endpoint
+     */
+    public static String getPmsUploadInjectEventEndpoint() {
+        return getProperty("pmsUploadInjectEventEndpoint", String.class);
+    }
+
+    /**
+     * Get camel endpoint definition for PMS Upload Inject Events
+     * @param defaultEndpoint - default value if endpoint is not defined in configuration
+     * @return URI of endpoint
+     */
+    public static String getPmsUploadInjectEventEndpoint(String defaultEndpoint) {
+        return getProperty("pmsUploadInjectEventEndpoint", String.class, OPTIONAL, defaultEndpoint);
+    }
+
+    /**
+     * Return endpoint for Send service. Used to recieve events.
+     * @return string representation of endpoint
+     */
+    public static String getSendServiceEndpoint() {
+        return getProperty("sendServiceEndpoint", String.class);
+    }
+
+    /**
+     * Get endpoint for setting change events.
+     * @return string representation of end point.
+     */
+    public static String getSendSettingsChangeEndpoint() {
+        return getProperty("sendSettingsChangeEndpoint", String.class);
+    }    
+    
+    public static String getSendSettingsChangeEndpoint(String defaultEndpoint) {
+        return getProperty("sendSettingsChangeEndpoint", String.class, OPTIONAL, defaultEndpoint);
+    }
+
+
+    /**
+     * Get number of worker threads in Send service.
+     * @return number of workers
+     */
+    public static Integer getSendServiceConcurrencyCount() {
+        return getProperty("sendServiceConcurrencyCount", Integer.class);
+    }
+
+    public static Integer getSendServiceConcurrencyCount(int defaultCount) {
+        return getProperty("sendServiceConcurrencyCount", Integer.class, OPTIONAL, defaultCount);
+    }
+
+    /**
      * Provides raw, read-only access to all properties defined.  This can be useful when some properties are used to
      * configure a third party component that knows how to get them from a Properties object.
      */

@@ -4,6 +4,8 @@
     <artifactId>cdyne-ws-client</artifactId>
     <version>1.0.4-SNAPSHOT</version>
 
+    <packaging>jar</packaging>
+
     <parent>
         <groupId>com.sesamecom</groupId>
         <artifactId>util</artifactId>
