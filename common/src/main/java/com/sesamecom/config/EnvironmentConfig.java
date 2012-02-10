@@ -344,8 +344,8 @@ public class EnvironmentConfig {
      * @param defaultEndpoint - default value if endpoint is not defined in configuration
      * @return URI of endpoint
      */
-    public static String getPmsUploadInjectEventEndpoint(String defaultEndpoint) {
-        return getProperty("pmsUploadInjectEventEndpoint", String.class, OPTIONAL, defaultEndpoint);
+    public static String getPmsUploadIngestEventEndpoint(String defaultEndpoint) {
+        return getProperty("pmsUploadIngestEventEndpoint", String.class, OPTIONAL, defaultEndpoint);
     }
 
     /**
@@ -379,6 +379,39 @@ public class EnvironmentConfig {
 
     public static Integer getSendServiceConcurrencyCount(int defaultCount) {
         return getProperty("sendServiceConcurrencyCount", Integer.class, OPTIONAL, defaultCount);
+    }
+
+    /**
+     * Get host name of SMTP server use for email sending.
+     * @return host name
+     */
+    public static String getSmtpHost() {
+        return getProperty("smtpHost", String.class, OPTIONAL, "localhost");
+    }
+
+    /**
+     * Get port for SMTP server used for email sending.
+     * @return port number
+     */
+    public static Integer getSmtpPort() {
+        return getProperty("smtpPort", Integer.class, OPTIONAL, 25);
+    }
+
+    /**
+     * Get user name for SMTP server used for email sending.
+     * Not authentification will be performed if password is empty.
+     * @return return user name or NULL if user is not set.
+     */
+    public static String getSmtpUser() {
+        return getProperty("smtpUser", String.class, OPTIONAL, null);
+    }
+
+    /**
+     * Get password for SMTP server used for email sending. This is required if user is set.
+     * @return password
+     */
+    public static String getSmtpPassword() {
+        return getProperty("smtpPassword", String.class);
     }
 
     /**

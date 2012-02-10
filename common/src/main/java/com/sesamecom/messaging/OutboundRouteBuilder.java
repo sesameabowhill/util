@@ -13,17 +13,13 @@ import org.slf4j.LoggerFactory;
 public class OutboundRouteBuilder extends RouteBuilder {
     private static final Logger log = LoggerFactory.getLogger(OutboundRouteBuilder.class);
 
-//    public static final String OLAP_COMMAND_OUTBOUND_ENDPOINT = "direct:olapAdHocCommandOutboundEndpoint";
-//    public static final String ETL_COMMAND_OUTBOUND_ENDPOINT = "direct:etlAdHocCommandOutboundEndpoint";
-//    public static final String SEND_SETTINGS_CHANGE_OUTBOUND_ENDPOINT = "direct:sendSettingsChangeOutboundEndpoint";
-//    public static final String INJEST_EVENT_OUTBOUND_ENDPOINT = "direct:injestEventOutboundEndpoint";
     private static final String DISABLED = "direct:disabled";
 
     public void configure() throws Exception {
         createJsonRoute(OutboundEndpoint.OlapCommand.toCamelFormat(), EnvironmentConfig.getAnalyticsOlapAdHocCommandEndpoint());
         createJsonRoute(OutboundEndpoint.EtlCommand.toCamelFormat(), EnvironmentConfig.getAnalyticsEtlAdHocCommandEndpoint());
         createJsonRoute(OutboundEndpoint.SendSettingsChange.toCamelFormat(), EnvironmentConfig.getSendSettingsChangeEndpoint(DISABLED));
-        createJsonRoute(OutboundEndpoint.InjestEvent.toCamelFormat(), EnvironmentConfig.getPmsUploadInjectEventEndpoint(DISABLED));
+        createJsonRoute(OutboundEndpoint.IngestEvent.toCamelFormat(), EnvironmentConfig.getPmsUploadIngestEventEndpoint(DISABLED));
     }
     
     private void createJsonRoute(String internal, String outbound) {
