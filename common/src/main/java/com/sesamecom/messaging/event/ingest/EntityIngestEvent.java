@@ -1,4 +1,4 @@
-package com.sesamecom.messaging.event.injest;
+package com.sesamecom.messaging.event.ingest;
 
 import com.sesamecom.messaging.event.MarshaledEvent;
 
@@ -7,25 +7,25 @@ import java.io.Serializable;
 /**
  * Represents insert/update/delete event for individual entities.
  */
-public class EntityInjestEvent extends MarshaledEvent implements Serializable {
-    private EntityInjestAction action;
+public class EntityIngestEvent extends MarshaledEvent implements Serializable {
+    private EntityIngestAction action;
     private Integer memberId;
     private String id;
 
-    public EntityInjestEvent() {
+    public EntityIngestEvent() {
     }
 
-    public EntityInjestEvent(Integer memberId, EntityInjestAction action, String id) {
+    public EntityIngestEvent(Integer memberId, EntityIngestAction action, String id) {
         this.action = action;
         this.id = id;
         this.memberId = memberId;
     }
 
-    public EntityInjestAction getAction() {
+    public EntityIngestAction getAction() {
         return action;
     }
 
-    public void setAction(EntityInjestAction action) {
+    public void setAction(EntityIngestAction action) {
         this.action = action;
     }
 
