@@ -5,6 +5,7 @@ import com.sesamecom.datasource.AbstractBoneCpDataSourceProvider;
 import com.sesamecom.datasource.MysqlJdbcUrlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
 import javax.inject.Provider;
 import javax.naming.NamingException;
@@ -25,9 +26,6 @@ public class GlobalPersistCompatibleJndiDataSource {
         log.info("Bootstrapping JNDI DataSource @ java:comp/env/jdbc/SesamePersistDB");
 
         try {
-            JndiContext jndiContext = new JndiContext();
-            jndiContext.start();
-
             Provider<DataSource> dataSourceProvider = new AbstractBoneCpDataSourceProvider(new MysqlJdbcUrlFactory()) {
                 @Override
                 protected String getConfigNamespace() {
@@ -37,7 +35,13 @@ public class GlobalPersistCompatibleJndiDataSource {
 
             dataSource = dataSourceProvider.get();
 
-            jndiContext.bind("java:comp/env/jdbc/SesamePersistDB", dataSource);
+            SimpleNamingContextBuilder contextBuilder = SimpleNamingContextBuilder.getCurrentContextBuilder();
+            if (contextBuilder == null) {
+                contextBuilder = new SimpleNamingContextBuilder();
+                contextBuilder.activate();
+            }
+
+            contextBuilder.bind("java:comp/env/jdbc/SesamePersistDB", dataSource);
 
         } catch (NamingException e) {
             throw new RuntimeException(e);
