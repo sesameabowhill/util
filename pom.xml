@@ -16,7 +16,7 @@
         <module>jcityhash</module>
         <module>legacy-integration-utils</module>
         <module>common</module>
-        <module>cdyne-ws-client</module>
+        <!--module>cdyne-ws-client</module-->
 
         <!-- disabling this as it can't be made to conform to the new version number
              scheme (it inherits 1.44 from its 3rd party parent), and seems stable

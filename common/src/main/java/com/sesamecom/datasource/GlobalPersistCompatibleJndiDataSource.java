@@ -1,8 +1,6 @@
-package com.sesamecom.util;
+package com.sesamecom.datasource;
 
 import com.jolbox.bonecp.BoneCPDataSource;
-import com.sesamecom.datasource.AbstractBoneCpDataSourceProvider;
-import com.sesamecom.datasource.MysqlJdbcUrlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
@@ -16,6 +14,9 @@ import javax.sql.DataSource;
  * properties from persist (persistHost, persistPort, persistSchema, persistUser, and persistPassword).
  * <p/>
  * DataSource is connection pooled using BoneCP, which you'll need to configure via its EnvironmentConfig properties.
+ * <p/>
+ * This is designed as a shim for applications that use iBATIS but not persist.  (SesamePersistService also shares its
+ * underlying DataSource at this JNDI location.)
  */
 public class GlobalPersistCompatibleJndiDataSource {
     private static Logger log = LoggerFactory.getLogger(GlobalPersistCompatibleJndiDataSource.class);
