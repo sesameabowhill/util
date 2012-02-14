@@ -38,6 +38,7 @@ public class EnvironmentConfig {
 
     private static final Map<String, Source> propertySource = new HashMap();
     private static final Properties properties = resolveProperties();
+    private static final Map<String, Object> valueCache = new HashMap<String, Object>();
 
     /**
      * Used to let the application know it is in dev mode.  Provides dev features like auto-login.
@@ -404,13 +405,18 @@ public class EnvironmentConfig {
      * cannot be parsed, and RuntimeException if the type specified is not supported.
      */
     private static <T> T getProperty(String propertyName, Class<T> targetType, ConfigRequirementType requirementType, T defaultValue) {
+        // we have already resolved and parsed this property value, so simply return the result of the previous
+        // call.
+        if (valueCache.containsKey(propertyName))
+            return (T) valueCache.get(propertyName);
+
         String stringValue = (String) properties.get(propertyName);
 
         // bail out if we can't find it and it's required, return defaultValue if only the former.
         if (stringValue == null) {
             if (ConfigRequirementType.REQUIRED.equals(requirementType)) {
                 log.error(
-                    "requiredProperty->missing property: {}, configFilePath: {}",
+                    "requiredProperty->missing name: {}, configFilePath: {}",
                     propertyName,
                     getConfigPathOrMissingMessage()
                 );
@@ -418,7 +424,7 @@ public class EnvironmentConfig {
                 throw new ConfigPropertyMissingException(propertyName, configFilePath);
             } else {
                 log.info(
-                    "optionalProperty->defaultValueUsed property: {}, defaultValue: {}, configFilePath: {}",
+                    "optionalProperty->defaultValueUsed name: {}, defaultValue: {}, configFilePath: {}",
                     new Object[]{propertyName, defaultValue, getConfigPathOrMissingMessage()}
                 );
 
@@ -428,7 +434,7 @@ public class EnvironmentConfig {
 
         Source source = propertySource.get(propertyName);
 
-        log.debug("value->found property: {}, value: '{}', source: {}, configFilePath: {}",
+        log.info("property->resolved name: {}, value: '{}', source: {}, configFilePath: {}",
             new Object[]{propertyName, stringValue, source, getConfigPathOrMissingMessage()});
 
         Object value = null;
@@ -461,6 +467,9 @@ public class EnvironmentConfig {
 
             throw new RuntimeException(message);
         }
+
+        // cache for any subsequent calls.
+        valueCache.put(propertyName, value);
 
         return (T) value;
     }
