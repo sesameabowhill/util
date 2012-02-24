@@ -3,7 +3,7 @@ package com.sesamecom.messaging.event;
 import org.joda.time.LocalDate;
 
 /**
- * Refresh all facts for a member whose time dimension members are within the given range, inclusive.
+ * Refresh all ranged facts for a member, where time dimension values are within the given range inclusive.
  */
 public final class RefreshMemberRanged extends MarshaledEvent implements RefreshSupervisorCommand {
     private String username;
