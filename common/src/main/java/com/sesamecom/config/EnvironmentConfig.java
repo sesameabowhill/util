@@ -368,7 +368,6 @@ public class EnvironmentConfig {
         return getProperty("sendSettingsChangeEndpoint", String.class, OPTIONAL, defaultEndpoint);
     }
 
-
     /**
      * Get number of worker threads in Send service.
      * @return number of workers
@@ -415,8 +414,15 @@ public class EnvironmentConfig {
     }
 
     /**
+     * CloudWatch environment name to publish metrics under.
+     */
+    public static String getCloudWatchEnvironmentName() {
+        return getProperty("cloudWatchEnvironmentName", String.class, OPTIONAL, null);
+    }
+
+    /**
      * Provides raw, read-only access to all properties defined.  This can be useful when some properties are used to
-     * configure a third party component that knows how to get them from a Properties object.
+     * configure a third party component that knows how to get them from a Properties object (like BoneCP).
      */
     public static Properties getProperties() {
         return new Properties(properties);
