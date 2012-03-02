@@ -420,9 +420,18 @@ public class EnvironmentConfig {
 
     /**
      * CloudWatch environment name to publish metrics under.
+     * @return CloudWatch name as string
      */
     public static String getCloudWatchEnvironmentName() {
         return getProperty("cloudWatchEnvironmentName", String.class, OPTIONAL, null, false);
+    }
+
+    /**
+     * Get Domain name of Reactivation for Simple Workflow service.
+     * @return domain name
+     */
+    public static String getSwfDomainForReactivation() {
+        return getProperty("swfDomainForReactivation", String.class, OPTIONAL, null, false);
     }
 
     /**
