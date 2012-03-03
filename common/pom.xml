@@ -116,7 +116,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.3.2</version>
+            <version>1.3.3</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -127,7 +127,8 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>3.0.6.RELEASE</version>
+            <version>3.0.6.RELEASE</version> <!-- this can be problematic, because AWS SDK can pull newer verison -->
+             <!--- looks like current version of Intellij doesn't can't find version by range if letters are used -->
             <exclusions>
                 <!-- we use log4j-over-slf4j instead -->
                 <exclusion>
@@ -144,7 +145,18 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>3.0.6.RELEASE</version>
+            <version>3.0.6.RELEASE</version> <!-- this can be problematic, because AWS SDK can pull newer verison -->
+            <!--- looks like current version of Intellij doesn't can't find version by range if letters are used -->
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>[1.8,)</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>[1.8,)</version>
         </dependency>
     </dependencies>
 </project>
