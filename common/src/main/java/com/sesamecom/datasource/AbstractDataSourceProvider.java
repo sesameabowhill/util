@@ -30,6 +30,6 @@ public abstract class AbstractDataSourceProvider implements Provider<DataSource>
         port = getProperty(namespace + "Port", Integer.class);
         schema = getProperty(namespace + "Schema", String.class);
         user = getProperty(namespace + "User", String.class);
-        password = getProperty(namespace + "Password", String.class);
+        password = getProperty(namespace + "Password", String.class, true);
     }
 }

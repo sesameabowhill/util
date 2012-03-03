@@ -46,7 +46,7 @@ public class EnvironmentConfig {
      * Property: mdDevMode
      */
     public static Boolean getDevMode(Boolean defaultValue) {
-        return getProperty("mdDevMode", Boolean.class, OPTIONAL, defaultValue);
+        return getProperty("mdDevMode", Boolean.class, OPTIONAL, defaultValue, false);
     }
 
     /**
@@ -55,7 +55,7 @@ public class EnvironmentConfig {
      * Property: mdDemoMode
      */
     public static Boolean getDemoMode(Boolean defaultValue) {
-        return getProperty("mdDemoMode", Boolean.class, OPTIONAL, defaultValue);
+        return getProperty("mdDemoMode", Boolean.class, OPTIONAL, defaultValue, false);
     }
 
     /**
@@ -65,7 +65,7 @@ public class EnvironmentConfig {
      * Property: mdProdMode
      */
     public static Boolean getProductionMode(Boolean defaultValue) {
-        return getProperty("mdProdMode", Boolean.class, OPTIONAL, defaultValue);
+        return getProperty("mdProdMode", Boolean.class, OPTIONAL, defaultValue, false);
     }
 
     /**
@@ -74,7 +74,7 @@ public class EnvironmentConfig {
      * Property: dashboardTheme
      */
     public static String getDashboardTheme(String defaultTheme) {
-        return getProperty("dashboardTheme", String.class, OPTIONAL, defaultTheme);
+        return getProperty("dashboardTheme", String.class, OPTIONAL, defaultTheme, false);
     }
     
     /**
@@ -83,7 +83,7 @@ public class EnvironmentConfig {
      * Property: skipLiquibaseUpdate
      */
     public static Boolean getSkipLiquibaseUpdate(Boolean defaultValue) {
-        return getProperty("skipLiquibaseUpdate", Boolean.class, OPTIONAL, defaultValue);
+        return getProperty("skipLiquibaseUpdate", Boolean.class, OPTIONAL, defaultValue, false);
     }
 
     /**
@@ -91,7 +91,7 @@ public class EnvironmentConfig {
      * testing and development!</b>
      */
     public static Boolean getUseBasicDataSource(Boolean defaultValue) {
-        return getProperty("useBasicDataSource", Boolean.class, OPTIONAL, defaultValue);
+        return getProperty("useBasicDataSource", Boolean.class, OPTIONAL, defaultValue, false);
     }
 
     /**
@@ -109,7 +109,7 @@ public class EnvironmentConfig {
      * Property: persistPort
      */
     public static Integer getPersistPort(Integer defaultValue) {
-        return getProperty("persistPort", Integer.class, OPTIONAL, defaultValue);
+        return getProperty("persistPort", Integer.class, OPTIONAL, defaultValue, false);
     }
 
     public static Integer getPersistPort() {
@@ -140,7 +140,7 @@ public class EnvironmentConfig {
      * Property: persistPassword
      */
     public static String getPersistPassword() {
-        return getProperty("persistPassword", String.class);
+        return getProperty("persistPassword", String.class, REQUIRED, null, true);
     }
 
     /**
@@ -158,7 +158,7 @@ public class EnvironmentConfig {
      * Property: analyticsPort
      */
     public static Integer getAnalyticsPort(Integer defaultValue) {
-        return getProperty("analyticsPort", Integer.class, OPTIONAL, defaultValue);
+        return getProperty("analyticsPort", Integer.class, OPTIONAL, defaultValue, false);
     }
 
     public static Integer getAnalyticsPort() {
@@ -189,7 +189,7 @@ public class EnvironmentConfig {
      * Property: analyticsPassword
      */
     public static String getAnalyticsPassword() {
-        return getProperty("analyticsPassword", String.class);
+        return getProperty("analyticsPassword", String.class, REQUIRED, null, true);
     }
 
     /**
@@ -200,7 +200,7 @@ public class EnvironmentConfig {
      * enabled, or ETLs will encounter locking problems!</b>
      */
     public static Boolean getAnalyticsEtlUseInsertIntoSelectFrom(Boolean defaultValue) {
-        return (Boolean) getProperty("analyticsEtlUseInsertIntoSelectFrom", Boolean.class, OPTIONAL, defaultValue);
+        return (Boolean) getProperty("analyticsEtlUseInsertIntoSelectFrom", Boolean.class, OPTIONAL, defaultValue, false);
     }
 
     /**
@@ -210,7 +210,7 @@ public class EnvironmentConfig {
      * Property: analyticsEtlBatchSize
      */
     public static Integer getAnalyticsEtlBatchSize(Integer defaultValue) {
-        return getProperty("analyticsEtlBatchSize", Integer.class, OPTIONAL, defaultValue);
+        return getProperty("analyticsEtlBatchSize", Integer.class, OPTIONAL, defaultValue, false);
     }
 
     /**
@@ -220,7 +220,7 @@ public class EnvironmentConfig {
      * Property: analyticsEtlTransactionSize
      */
     public static Integer getAnalyticsEtlTransactionSize(Integer defaultValue) {
-        return getProperty("analyticsEtlTransactionSize", Integer.class, OPTIONAL, defaultValue);
+        return getProperty("analyticsEtlTransactionSize", Integer.class, OPTIONAL, defaultValue, false);
     }
 
     /**
@@ -229,7 +229,7 @@ public class EnvironmentConfig {
      * Property: analyticsEtlConcurrencyCount
      */
     public static Integer getAnalyticsEtlConcurrencyCount(Integer defaultValue) {
-        return getProperty("analyticsEtlConcurrencyCount", Integer.class, OPTIONAL, defaultValue);
+        return getProperty("analyticsEtlConcurrencyCount", Integer.class, OPTIONAL, defaultValue, false);
     }
 
     /**
@@ -238,7 +238,7 @@ public class EnvironmentConfig {
      * Property: analyticsEtlRefreshDayRange
      */
     public static Integer getAnalyticsEtlRefreshDayRange(Integer defaultValue) {
-        return getProperty("analyticsEtlRefreshDayRange", Integer.class, OPTIONAL, defaultValue);
+        return getProperty("analyticsEtlRefreshDayRange", Integer.class, OPTIONAL, defaultValue, false);
     }
 
     /**
@@ -256,7 +256,7 @@ public class EnvironmentConfig {
      * Property: analyticsOlapAdHocCommandEndpoint
      */
     public static String getAnalyticsOlapAdHocCommandEndpoint(String defaultValue) {
-        return getProperty("analyticsOlapAdHocCommandEndpoint", String.class, OPTIONAL, defaultValue);
+        return getProperty("analyticsOlapAdHocCommandEndpoint", String.class, OPTIONAL, defaultValue, false);
     }
 
     public static String getAnalyticsOlapAdHocCommandEndpoint() {
@@ -277,23 +277,28 @@ public class EnvironmentConfig {
      * The Liquibase context to run under when migration is performed for the persist database.
      * <p/>
      * Property: persistLiquibaseContext
+     * @param defaultValue will be used if nothing is specified in config
+     * @return context as string
      */
     public static String getPersistLiquibaseContext(String defaultValue) {
-        return getProperty("persistLiquibaseContext", String.class, OPTIONAL, defaultValue);
+        return getProperty("persistLiquibaseContext", String.class, OPTIONAL, defaultValue, false);
     }
 
     /**
-     *  Returns the configured AWS accessKey
+     * Returns the configured AWS accessKey. To get one visit:
+     * http://aws-portal.amazon.com/gp/aws/developer/account/index.html?action=access-key
+     * @return key as string
      */
     public static String getAWSAccessKey() {
         return getProperty("awsAccessKey", String.class);
     }
 
     /**
-     *  Returns the configured AWS secretKey
+     * Returns the configured AWS secretKey.
+     * @return secret as string
      */
     public static String getAWSSecretKey() {
-        return getProperty("awsSecretKey", String.class);
+        return getProperty("awsSecretKey", String.class, REQUIRED, null, true);
     }
 
     /**
@@ -307,36 +312,36 @@ public class EnvironmentConfig {
      * Returns the SI Upload Visit bucket where unpacked images are stored
      */
     public static String getSIUploadClientImagesBucket(String defaultValue) {
-        return getProperty("siUploadClientImagesBucket", String.class, OPTIONAL, defaultValue);
+        return getProperty("siUploadClientImagesBucket", String.class, OPTIONAL, defaultValue, false);
     }
 
     /**
      * Returns the SI Upload Visit bucket where archives of images are uploaded
      */
     public static String getSIUploadVisitArchiveBucket(String defaultValue) {
-        return getProperty("siUploadVisitArchiveBucket", String.class, OPTIONAL, defaultValue);
+        return getProperty("siUploadVisitArchiveBucket", String.class, OPTIONAL, defaultValue, false);
     }
 
     /**
      * Returns a worker count for SI Upload Batch processing
      */
     public static Integer getSIUploadBatchProcessorConcurrencyCount(Integer defaultValue) {
-        return getProperty("siUploadBatchProcessorConcurrencyCount", Integer.class, OPTIONAL, defaultValue);
+        return getProperty("siUploadBatchProcessorConcurrencyCount", Integer.class, OPTIONAL, defaultValue, false);
     }
 
     /**
      * Returns the AWS S3 endpoint
      */
     public static String getS3Endpoint(String defaultValue) {
-        return getProperty("s3Endpoint", String.class, OPTIONAL, defaultValue);
+        return getProperty("s3Endpoint", String.class, OPTIONAL, defaultValue, false);
     }
 
     /**
      * Get camel endpoint definition for PMS Upload Inject Events
      * @return URI of endpoint
      */
-    public static String getPmsUploadInjectEventEndpoint() {
-        return getProperty("pmsUploadInjectEventEndpoint", String.class);
+    public static String getPmsUploadIngestEventEndpoint() {
+        return getProperty("pmsUploadIngestEventEndpoint", String.class);
     }
 
     /**
@@ -345,7 +350,7 @@ public class EnvironmentConfig {
      * @return URI of endpoint
      */
     public static String getPmsUploadIngestEventEndpoint(String defaultEndpoint) {
-        return getProperty("pmsUploadIngestEventEndpoint", String.class, OPTIONAL, defaultEndpoint);
+        return getProperty("pmsUploadIngestEventEndpoint", String.class, OPTIONAL, defaultEndpoint, false);
     }
 
     /**
@@ -365,7 +370,7 @@ public class EnvironmentConfig {
     }    
     
     public static String getSendSettingsChangeEndpoint(String defaultEndpoint) {
-        return getProperty("sendSettingsChangeEndpoint", String.class, OPTIONAL, defaultEndpoint);
+        return getProperty("sendSettingsChangeEndpoint", String.class, OPTIONAL, defaultEndpoint, false);
     }
 
 
@@ -378,7 +383,7 @@ public class EnvironmentConfig {
     }
 
     public static Integer getSendServiceConcurrencyCount(int defaultCount) {
-        return getProperty("sendServiceConcurrencyCount", Integer.class, OPTIONAL, defaultCount);
+        return getProperty("sendServiceConcurrencyCount", Integer.class, OPTIONAL, defaultCount, false);
     }
 
     /**
@@ -386,7 +391,7 @@ public class EnvironmentConfig {
      * @return host name
      */
     public static String getSmtpHost() {
-        return getProperty("smtpHost", String.class, OPTIONAL, "localhost");
+        return getProperty("smtpHost", String.class, OPTIONAL, "localhost", false);
     }
 
     /**
@@ -394,7 +399,7 @@ public class EnvironmentConfig {
      * @return port number
      */
     public static Integer getSmtpPort() {
-        return getProperty("smtpPort", Integer.class, OPTIONAL, 25);
+        return getProperty("smtpPort", Integer.class, OPTIONAL, 25, false);
     }
 
     /**
@@ -403,7 +408,7 @@ public class EnvironmentConfig {
      * @return return user name or NULL if user is not set.
      */
     public static String getSmtpUser() {
-        return getProperty("smtpUser", String.class, OPTIONAL, null);
+        return getProperty("smtpUser", String.class, OPTIONAL, null, false);
     }
 
     /**
@@ -411,7 +416,14 @@ public class EnvironmentConfig {
      * @return password
      */
     public static String getSmtpPassword() {
-        return getProperty("smtpPassword", String.class);
+        return getProperty("smtpPassword", String.class, REQUIRED, null, true);
+    }
+
+    /**
+     * CloudWatch environment name to publish metrics under.
+     */
+    public static String getCloudWatchEnvironmentName() {
+        return getProperty("cloudWatchEnvironmentName", String.class, OPTIONAL, null, false);
     }
 
     /**
@@ -429,15 +441,31 @@ public class EnvironmentConfig {
      * public to support a few special cases.
      */
     public static <T> T getProperty(String propertyName, Class<T> targetType) {
-        return getProperty(propertyName, targetType, REQUIRED, null);
+        return getProperty(propertyName, targetType, REQUIRED, null, false);
+    }
+
+    /**
+     * <b>Please avoid using this method!</p>
+     * <p/>
+     * Instead create a getter for your property, so it can be documented and its use easily traced.  This is only made
+     * public to support a few special cases.
+     */
+    public static <T> T getProperty(String propertyName, Class<T> targetType, boolean isValueSecret) {
+        return getProperty(propertyName, targetType, REQUIRED, null, isValueSecret);
     }
 
     /**
      * Gets and parses a property given name, type, and requirementType.  Throws ConfigPropertyMissingException if a
      * requirement type is REQUIRED and no value is defined, BadConfigPropertyValueException if a value is defined but
      * cannot be parsed, and RuntimeException if the type specified is not supported.
+     * @param propertyName name of property
+     * @param targetType type to covert return value to
+     * @param requirementType is parameter required
+     * @param defaultValue value used byt default
+     * @param isValueSecret secret value will not be printed in logs
+     * @return value of property or default value if property is not set
      */
-    private static <T> T getProperty(String propertyName, Class<T> targetType, ConfigRequirementType requirementType, T defaultValue) {
+    private static <T> T getProperty(String propertyName, Class<T> targetType, ConfigRequirementType requirementType, T defaultValue, boolean isValueSecret) {
         // we have already resolved and parsed this property value, so simply return the result of the previous
         // call.
         if (valueCache.containsKey(propertyName))
@@ -468,7 +496,7 @@ public class EnvironmentConfig {
         Source source = propertySource.get(propertyName);
 
         log.info("property->resolved name: {}, value: '{}', source: {}, configFilePath: {}",
-            new Object[]{propertyName, stringValue, source, getConfigPathOrMissingMessage()});
+            new Object[]{propertyName, getSecretValue(stringValue, isValueSecret), source, getConfigPathOrMissingMessage()});
 
         Object value = null;
 
@@ -505,6 +533,24 @@ public class EnvironmentConfig {
         valueCache.put(propertyName, value);
 
         return (T) value;
+    }
+
+    private static String getSecretValue(String value, boolean isValueSecret) {
+        if (null == value) {
+            return value;
+        } else {
+            // hardcode Password because there are
+            if (isValueSecret) {
+                // replace all characters in the value with '*'
+                StringBuilder secret = new StringBuilder();
+                for (int i = 0; i<value.length(); ++i) {
+                    secret.append('*');
+                }
+                return secret.toString();
+            } else {
+                return value;
+            }
+        }
     }
 
     private static void throwBadValue(String stringValue, String propertyName, Class targetType, Source source, Throwable e) {
