@@ -2,7 +2,9 @@ package com.sesamecom.monitoring;
 
 /**
  * Represents descriptive statistics about a value sampled over some period.  For example, job completion time in
- * seconds, or queue size in count of queue items.
+ * seconds, or queue size in count of queue items.  Simply collect samples continuously for some period (one minute is
+ * usually good), summarize them in an instance of OperationalStatistic, and pass it to {@link
+ * OperationalStatisticPublisher#publish(OperationalStatistic)}.
  */
 public class OperationalStatistic {
     private String component;
