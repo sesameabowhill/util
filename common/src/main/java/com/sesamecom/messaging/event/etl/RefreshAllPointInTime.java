@@ -1,19 +1,20 @@
-package com.sesamecom.messaging.event;
+package com.sesamecom.messaging.event.etl;
 
+import com.sesamecom.messaging.event.MarshaledEvent;
 import org.joda.time.LocalDate;
 
 /**
  * Refresh all point-in-time facts for a member, using the supplied LocalDate as the time dimension value, which should
- * always be a representation of "yesterday" in their local time zone unless testing.
+ * always be a representation of "yesterday" in their local time zone.
  */
-public class RefreshMemberPointInTime extends MarshaledEvent implements RefreshSupervisorCommand {
+public class RefreshAllPointInTime extends MarshaledEvent implements RefreshSupervisorCommand {
     private String username;
     private LocalDate recordDate;
 
-    public RefreshMemberPointInTime() {
+    public RefreshAllPointInTime() {
     }
 
-    public RefreshMemberPointInTime(String username, LocalDate recordDate) {
+    public RefreshAllPointInTime(String username, LocalDate recordDate) {
         this.username = username;
         this.recordDate = recordDate;
     }
@@ -36,7 +37,7 @@ public class RefreshMemberPointInTime extends MarshaledEvent implements RefreshS
 
     @Override
     public String toString() {
-        return "RefreshMemberPointInTime{" +
+        return "RefreshAllPointInTime{" +
             "username='" + username + '\'' +
             ", timeDimensionMember=" + recordDate +
             '}';

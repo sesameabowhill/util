@@ -1,4 +1,4 @@
-package com.sesamecom.messaging.event;
+package com.sesamecom.messaging.event.etl;
 
 import java.io.Serializable;
 
