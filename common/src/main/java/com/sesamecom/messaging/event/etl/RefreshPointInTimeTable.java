@@ -43,4 +43,13 @@ public class RefreshPointInTimeTable extends MarshaledEvent implements RefreshSu
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
+
+    @Override
+    public String toString() {
+        return "RefreshPointInTimeTable{" +
+            "username='" + username + '\'' +
+            ", recordDate=" + recordDate +
+            ", tableName='" + tableName + '\'' +
+            '}';
+    }
 }
