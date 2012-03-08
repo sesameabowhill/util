@@ -10,4 +10,12 @@ final public class ReactivationFeatureStatusChanged extends MemberFeatureStatusC
     public ReactivationFeatureStatusChanged(Integer memberId, Boolean enabled) {
         super(memberId, enabled);
     }
+
+    @Override
+    public String toString() {
+        return "ReactivationFeatureStatusChanged{" +
+                "memberId=" + getMemberId() +
+                ", enabled=" + isEnabled() +
+                '}';
+    }
 }
