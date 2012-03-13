@@ -1,22 +1,25 @@
-package com.sesamecom.messaging.event;
+package com.sesamecom.messaging.event.etl;
 
+import com.sesamecom.messaging.event.MarshaledEvent;
 import org.joda.time.LocalDate;
 
 /**
- * Refresh all facts for a member whose time dimension members are within the given range, inclusive.
+ * Refresh a member's facts in a single ranged fact table for a given range.
  */
-public final class RefreshMemberRanged extends MarshaledEvent implements RefreshSupervisorCommand {
+public class RefreshRangedTable extends MarshaledEvent implements RefreshSupervisorCommand {
     private String username;
     private LocalDate windowStart;
     private LocalDate windowEnd;
+    private String tableName;
 
-    public RefreshMemberRanged() {
+    public RefreshRangedTable() {
     }
 
-    public RefreshMemberRanged(String username, LocalDate windowStart, LocalDate windowEnd) {
+    public RefreshRangedTable(String username, LocalDate windowStart, LocalDate windowEnd, String tableName) {
         this.username = username;
         this.windowStart = windowStart;
         this.windowEnd = windowEnd;
+        this.tableName = tableName;
     }
 
     public String getUsername() {
@@ -43,12 +46,21 @@ public final class RefreshMemberRanged extends MarshaledEvent implements Refresh
         this.windowEnd = windowEnd;
     }
 
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
     @Override
     public String toString() {
-        return "RefreshMemberRanged{" +
+        return "RefreshRangedTable{" +
             "username='" + username + '\'' +
             ", windowStart=" + windowStart +
             ", windowEnd=" + windowEnd +
+            ", tableName='" + tableName + '\'' +
             '}';
     }
 }

@@ -1,5 +1,6 @@
-package com.sesamecom.messaging.event;
+package com.sesamecom.messaging.event.etl;
 
+import com.sesamecom.messaging.event.MarshaledEvent;
 import com.sesamecom.messaging.util.DateTimeZoneDeserializer;
 import com.sesamecom.messaging.util.DateTimeZoneSerializer;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
@@ -9,13 +10,13 @@ import org.joda.time.DateTimeZone;
 /**
  * Refresh all members in the given time zone.
  */
-public final class RefreshMembersInTimeZone extends MarshaledEvent implements RefreshSupervisorCommand {
+public final class RefreshAllMembersInZone extends MarshaledEvent implements RefreshSupervisorCommand {
     private DateTimeZone timeZone;
 
-    public RefreshMembersInTimeZone() {
+    public RefreshAllMembersInZone() {
     }
 
-    public RefreshMembersInTimeZone(DateTimeZone timeZone) {
+    public RefreshAllMembersInZone(DateTimeZone timeZone) {
         this.timeZone = timeZone;
     }
 
@@ -31,7 +32,7 @@ public final class RefreshMembersInTimeZone extends MarshaledEvent implements Re
 
     @Override
     public String toString() {
-        return "RefreshMembersInTimeZone{" +
+        return "RefreshAllMembersInZone{" +
             "timeZone=" + timeZone +
             '}';
     }
