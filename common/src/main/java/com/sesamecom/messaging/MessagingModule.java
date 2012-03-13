@@ -12,6 +12,6 @@ public class MessagingModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(CamelContext.class).toProvider(CamelContextProvider.class)
-                .in(Singleton.class);
+            .in(Singleton.class);
     }
 }

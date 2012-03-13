@@ -7,7 +7,8 @@ public enum OutboundEndpoint {
     OlapCommand("direct:olapAdHocCommandOutboundEndpoint"),
     EtlCommand("direct:etlAdHocCommandOutboundEndpoint"),
     SendSettingsChange("direct:sendSettingsChangeOutboundEndpoint"),
-    IngestEvent("direct:ingestEventOutboundEndpoint");
+    IngestEvent("direct:ingestEventOutboundEndpoint"),
+    Disabled("direct:disabled");
     
     private String endpoint;
 
