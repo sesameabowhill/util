@@ -7,6 +7,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.sesamecom.messaging.event.etl.Shutdown;
+import org.apache.camel.CamelContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class OutboundRouteBuilderTest {
+    @Inject
+    private CamelContext camelContext;
     @Inject
     private MessagingEventProducer producer;
 
@@ -33,15 +36,17 @@ public class OutboundRouteBuilderTest {
     private MockAppender appender;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         Injector injector = Guice.createInjector(new MessagingModule());
         injector.injectMembers(this);
 
-        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+        camelContext.start();
+
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         appender = new MockAppender();
-        appender.setContext(context);
+        appender.setContext(loggerContext);
         appender.start();
-        context.getLogger("").addAppender(appender);
+        loggerContext.getLogger("").addAppender(appender);
     }
 
     @Test

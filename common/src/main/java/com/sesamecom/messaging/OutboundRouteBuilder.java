@@ -20,7 +20,7 @@ public class OutboundRouteBuilder extends RouteBuilder {
         createJsonRoute(EtlCommand.toCamelFormat(), EnvironmentConfig.getAnalyticsEtlAdHocCommandEndpoint());
         createJsonRoute(SendSettingsChange.toCamelFormat(), EnvironmentConfig.getSendSettingsChangeEndpoint(Disabled.toCamelFormat()));
         createJsonRoute(IngestEvent.toCamelFormat(), EnvironmentConfig.getPmsUploadIngestEventEndpoint(Disabled.toCamelFormat()));
-        from(Disabled.toCamelFormat()).to("file:///tmp");
+        from(Disabled.toCamelFormat()).stop();
     }
     
     private void createJsonRoute(String internal, String outbound) {
