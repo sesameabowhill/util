@@ -1,11 +1,11 @@
 package com.sesamecom.messaging;
 
-import com.sesamecom.config.EnvironmentConfig;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.sesamecom.config.EnvironmentConfig.*;
 import static com.sesamecom.messaging.OutboundEndpoint.*;
 
 /**
@@ -16,10 +16,10 @@ public class OutboundRouteBuilder extends RouteBuilder {
     private static final Logger log = LoggerFactory.getLogger(OutboundRouteBuilder.class);
 
     public void configure() throws Exception {
-        createJsonRoute(OlapCommand.toCamelFormat(), EnvironmentConfig.getAnalyticsOlapAdHocCommandEndpoint());
-        createJsonRoute(EtlCommand.toCamelFormat(), EnvironmentConfig.getAnalyticsEtlAdHocCommandEndpoint());
-        createJsonRoute(SendSettingsChange.toCamelFormat(), EnvironmentConfig.getSendSettingsChangeEndpoint(Disabled.toCamelFormat()));
-        createJsonRoute(IngestEvent.toCamelFormat(), EnvironmentConfig.getPmsUploadIngestEventEndpoint(Disabled.toCamelFormat()));
+        createJsonRoute(OlapCommand.toCamelFormat(), getAnalyticsOlapAdHocCommandEndpoint(Disabled.toCamelFormat()));
+        createJsonRoute(EtlCommand.toCamelFormat(), getAnalyticsEtlAdHocCommandEndpoint(Disabled.toCamelFormat()));
+        createJsonRoute(SendSettingsChange.toCamelFormat(), getSendSettingsChangeEndpoint(Disabled.toCamelFormat()));
+        createJsonRoute(IngestEvent.toCamelFormat(), getPmsUploadIngestEventEndpoint(Disabled.toCamelFormat()));
         from(Disabled.toCamelFormat()).stop();
     }
     
