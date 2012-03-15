@@ -246,8 +246,8 @@ public class EnvironmentConfig {
      * <p/>
      * Property: analyticsEtlAdHocCommandEndpoint
      */
-    public static String getAnalyticsEtlAdHocCommandEndpoint() {
-        return getProperty("analyticsEtlAdHocCommandEndpoint", String.class);
+    public static String getAnalyticsEtlAdHocCommandEndpoint(String defaultValue) {
+        return getProperty("analyticsEtlAdHocCommandEndpoint", String.class, OPTIONAL, defaultValue, false);
     }
 
     /**
@@ -257,10 +257,6 @@ public class EnvironmentConfig {
      */
     public static String getAnalyticsOlapAdHocCommandEndpoint(String defaultValue) {
         return getProperty("analyticsOlapAdHocCommandEndpoint", String.class, OPTIONAL, defaultValue, false);
-    }
-
-    public static String getAnalyticsOlapAdHocCommandEndpoint() {
-        return getProperty("analyticsOlapAdHocCommandEndpoint", String.class);
     }
 
     /**
@@ -492,7 +488,7 @@ public class EnvironmentConfig {
 
                 throw new ConfigPropertyMissingException(propertyName, configFilePath);
             } else {
-                log.info(
+                log.warn(
                     "optionalProperty->defaultValueUsed name: {}, defaultValue: {}, configFilePath: {}",
                     new Object[]{propertyName, defaultValue, getConfigPathOrMissingMessage()}
                 );
