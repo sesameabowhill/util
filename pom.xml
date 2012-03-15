@@ -16,7 +16,7 @@
     <modules>
         <module>jcityhash</module>
         <module>common</module>
-        <!--module>cdyne-ws-client</module-->
+        <module>cdyne-ws-client</module>
     </modules>
 
     <dependencies>
