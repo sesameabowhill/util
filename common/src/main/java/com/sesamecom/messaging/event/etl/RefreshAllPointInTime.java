@@ -11,6 +11,8 @@ public class RefreshAllPointInTime extends MarshaledEvent implements RefreshSupe
     private String username;
     private LocalDate recordDate;
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public RefreshAllPointInTime() {
     }
 
@@ -23,6 +25,8 @@ public class RefreshAllPointInTime extends MarshaledEvent implements RefreshSupe
         return username;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setUsername(String username) {
         this.username = username;
     }
@@ -31,6 +35,8 @@ public class RefreshAllPointInTime extends MarshaledEvent implements RefreshSupe
         return recordDate;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setRecordDate(LocalDate recordDate) {
         this.recordDate = recordDate;
     }

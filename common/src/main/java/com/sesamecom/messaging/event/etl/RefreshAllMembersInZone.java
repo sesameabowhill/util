@@ -13,6 +13,8 @@ import org.joda.time.DateTimeZone;
 public final class RefreshAllMembersInZone extends MarshaledEvent implements RefreshSupervisorCommand {
     private DateTimeZone timeZone;
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public RefreshAllMembersInZone() {
     }
 
@@ -26,6 +28,8 @@ public final class RefreshAllMembersInZone extends MarshaledEvent implements Ref
     }
 
     @JsonDeserialize(using=DateTimeZoneDeserializer.class)
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setTimeZone(DateTimeZone timeZone) {
         this.timeZone = timeZone;
     }

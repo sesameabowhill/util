@@ -1,14 +1,16 @@
 package com.sesamecom.messaging.event.feature;
 
 
-import com.sesamecom.messaging.event.MemberSettingStatusChanged;
+import com.sesamecom.messaging.event.AbstractMemberEvent;
 
 /**
  *
  */
-public class MemberFeatureStatusChanged extends MemberSettingStatusChanged {
+public abstract class MemberFeatureStatusChanged extends AbstractMemberEvent {
     private Boolean enabled;
 
+    @SuppressWarnings({"UnusedDeclaration", "deprecation"})
+    @Deprecated // required for json serialization
     public MemberFeatureStatusChanged() {
     }
 
@@ -21,7 +23,9 @@ public class MemberFeatureStatusChanged extends MemberSettingStatusChanged {
         return enabled;
     }
 
+    @Deprecated // required for json serialization
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
+
 }

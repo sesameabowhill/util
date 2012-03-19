@@ -12,6 +12,8 @@ public class RefreshRangedTable extends MarshaledEvent implements RefreshSupervi
     private LocalDate windowEnd;
     private String tableName;
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public RefreshRangedTable() {
     }
 
@@ -26,6 +28,8 @@ public class RefreshRangedTable extends MarshaledEvent implements RefreshSupervi
         return username;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setUsername(String username) {
         this.username = username;
     }
@@ -34,6 +38,8 @@ public class RefreshRangedTable extends MarshaledEvent implements RefreshSupervi
         return windowStart;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setWindowStart(LocalDate windowStart) {
         this.windowStart = windowStart;
     }
@@ -42,6 +48,8 @@ public class RefreshRangedTable extends MarshaledEvent implements RefreshSupervi
         return windowEnd;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setWindowEnd(LocalDate windowEnd) {
         this.windowEnd = windowEnd;
     }
@@ -50,6 +58,8 @@ public class RefreshRangedTable extends MarshaledEvent implements RefreshSupervi
         return tableName;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }

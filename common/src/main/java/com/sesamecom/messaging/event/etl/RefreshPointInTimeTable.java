@@ -11,6 +11,8 @@ public class RefreshPointInTimeTable extends MarshaledEvent implements RefreshSu
     private LocalDate recordDate;
     private String tableName;
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public RefreshPointInTimeTable() {
     }
 
@@ -24,6 +26,8 @@ public class RefreshPointInTimeTable extends MarshaledEvent implements RefreshSu
         return username;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setUsername(String username) {
         this.username = username;
     }
@@ -32,6 +36,8 @@ public class RefreshPointInTimeTable extends MarshaledEvent implements RefreshSu
         return recordDate;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setRecordDate(LocalDate recordDate) {
         this.recordDate = recordDate;
     }
@@ -40,6 +46,8 @@ public class RefreshPointInTimeTable extends MarshaledEvent implements RefreshSu
         return tableName;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }

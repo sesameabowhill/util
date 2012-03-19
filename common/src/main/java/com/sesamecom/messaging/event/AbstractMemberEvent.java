@@ -5,13 +5,14 @@ import java.io.Serializable;
 /**
  *
  */
-public abstract class MemberSettingStatusChanged extends MarshaledEvent implements Serializable {
+public abstract class AbstractMemberEvent extends MarshaledEvent implements Serializable {
     private Integer memberId;
 
-    protected MemberSettingStatusChanged() {
+    @Deprecated // required for json serialization
+    protected AbstractMemberEvent() {
     }
 
-    protected MemberSettingStatusChanged(Integer memberId) {
+    protected AbstractMemberEvent(Integer memberId) {
         this.memberId = memberId;
     }
 
@@ -19,6 +20,7 @@ public abstract class MemberSettingStatusChanged extends MarshaledEvent implemen
         return memberId;
     }
 
+    @Deprecated // required for json serialization
     public void setMemberId(int memberId) {
         this.memberId = memberId;
     }

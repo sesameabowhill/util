@@ -11,6 +11,8 @@ public final class RefreshAllRanged extends MarshaledEvent implements RefreshSup
     private LocalDate windowStart;
     private LocalDate windowEnd;
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public RefreshAllRanged() {
     }
 
@@ -24,6 +26,8 @@ public final class RefreshAllRanged extends MarshaledEvent implements RefreshSup
         return username;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setUsername(String username) {
         this.username = username;
     }
@@ -32,6 +36,8 @@ public final class RefreshAllRanged extends MarshaledEvent implements RefreshSup
         return windowStart;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setWindowStart(LocalDate windowStart) {
         this.windowStart = windowStart;
     }
@@ -40,6 +46,8 @@ public final class RefreshAllRanged extends MarshaledEvent implements RefreshSup
         return windowEnd;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    @Deprecated // required for json serialization
     public void setWindowEnd(LocalDate windowEnd) {
         this.windowEnd = windowEnd;
     }

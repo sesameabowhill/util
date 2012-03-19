@@ -4,6 +4,8 @@ package com.sesamecom.messaging.event.feature;
  *
  */
 final public class ReactivationFeatureStatusChanged extends MemberFeatureStatusChanged {
+    @SuppressWarnings({"UnusedDeclaration", "deprecation"})
+    @Deprecated // required for json serialization
     public ReactivationFeatureStatusChanged() {
     }
 
