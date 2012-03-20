@@ -370,18 +370,6 @@ public class EnvironmentConfig {
     }
 
     /**
-     * Get number of worker threads in Send service.
-     * @return number of workers
-     */
-    public static Integer getSendServiceConcurrencyCount() {
-        return getProperty("sendServiceConcurrencyCount", Integer.class);
-    }
-
-    public static Integer getSendServiceConcurrencyCount(int defaultCount) {
-        return getProperty("sendServiceConcurrencyCount", Integer.class, OPTIONAL, defaultCount, false);
-    }
-
-    /**
      * Get host name of SMTP server use for email sending.
      * @return host name
      */
