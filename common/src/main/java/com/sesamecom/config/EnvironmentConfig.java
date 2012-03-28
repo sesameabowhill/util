@@ -60,7 +60,7 @@ public class EnvironmentConfig {
 
     /**
      * Used to let the application know it is in production mode.  JIRA tickets created by MD will be created in
-     * their correct projects, not Test Project (TP).
+     * their correct projects, not Test Project (TP). ClowdWatch metric will try to get EC2 instance id.
      * <p/>
      * Property: mdProdMode
      */
@@ -68,15 +68,6 @@ public class EnvironmentConfig {
         return getProperty("mdProdMode", Boolean.class, OPTIONAL, defaultValue, false);
     }
 
-    /**
-     * Returns the theme to use for MD.
-     * <p/>
-     * Property: dashboardTheme
-     */
-    public static String getDashboardTheme(String defaultTheme) {
-        return getProperty("dashboardTheme", String.class, OPTIONAL, defaultTheme, false);
-    }
-    
     /**
      * Used to prevent Liquibase from running when SesamePersistService starts up.
      * <p/>

@@ -36,6 +36,7 @@ my  %options = (
 	'backup_folders' => 1,
 	'db_max_query_length' => 50_000,
 	'db_connection_string' => undef,
+	'no_obfuscation' => undef,
 
 	'cl_id' => undef,
 	'cl_db' => undef,
@@ -52,6 +53,7 @@ GetOptions(
 	'output-file=s' => \$options{'output_file'},
 	'only-table=s@' => \$options{'only_table'},
 	'skip-table=s@' => \$options{'skip_table'},
+	'no-obfuscation' => \$options{'no_obfuscation'},
 	'db-connection-string=s' => \$options{'db_connection_string'},
 );
 
@@ -78,7 +80,12 @@ if ($options{'cl_db'}) {
 		$options{'backup_folders'} = 0;
 	}
 
+	my $data_filter = ($options{'no_obfuscation'} ?
+		Obfuscation::Base->new(DataAccess->get_main_db_name()) :
+		Obfuscation::Filter->new(DataAccess->get_main_db_name())
+	);
 	{
+
 		my $linked_tables = $client->get_linked_tables();
 		if (defined $options{'only_table'}) {
 			my %filter = map {$_ => 1} @{ $options{'only_table'} };
@@ -133,12 +140,20 @@ if ($options{'cl_db'}) {
 					$logger->debug($count." record".($count==1?'':'s')." found in [$t->{table}]");
 					if ($count > 0) {
 						$logger->info("save: ".(exists $t->{'title'} ? $t->{'title'} : $t->{'table'}));
-						do_table_clear($t->{table}, $where);
+						do_table_clear($t->{'table'}, $where, $data_filter);
 					}
 				}
 
-				if (exists $t->{join}) {
-					save_join_table($dbi, $t->{join}, $t->{table}, $where, 1, \%skip_table);
+				if (exists $t->{'join'}) {
+					save_join_table(
+						$dbi,
+						$t->{'join'},
+						$t->{'table'},
+						$where,
+						1,
+						\%skip_table,
+						$data_filter
+					);
 				}
 			}
 			else {
@@ -170,10 +185,14 @@ if ($options{'cl_db'}) {
 	{
 		archive_folder($client, $options{'output_file'});
 	}
+	my $seed = $data_filter->get_seed();
+	if (defined $seed) {
+		$logger->info("data seed [$seed]");
+	}
 }
 else {
 	print <<USAGE;
-Usage: $0 [PARAMETERS] <client_db_name>
+Usage: $0 [PARAMETERS] <client_db_name></client_db_name>
 Parameters:
 	--client-db - clients database name
 	--client-id - clients id
@@ -181,12 +200,13 @@ Parameters:
 	--output-file - backup data will be put into this file
 	--only-table - save only specific tables
 	--skip-table - skip specific tables
+	--no-obfuscation
 USAGE
 	exit(1);
 }
 
 sub save_join_table {
-	my  ($dbi, $join_data, $table_name, $where, $level, $skip_table) = @_;
+	my  ($dbi, $join_data, $table_name, $where, $level, $skip_table, $data_filter) = @_;
 
 	my @existing_table_names;
 	for my $join_tn (keys %$join_data) {
@@ -248,9 +268,17 @@ sub save_join_table {
 				my $count = $dbi->selectrow_array("SELECT COUNT(*) FROM $join_tn WHERE $join_where");
 				if ($count > 0) {
 					$logger->info("[$level]: save joined table: $join_tn" . (@join_where>1?' '.$where_index.'/'.@join_where:''));
-					do_table_clear($join_tn, $join_where);
-					if (exists $join_params->{join}) {
-						save_join_table($dbi, $join_params->{join}, $join_tn, $join_where, $level+1, $skip_table);
+					do_table_clear($join_tn, $join_where, $data_filter);
+					if (exists $join_params->{'join'}) {
+						save_join_table(
+							$dbi,
+							$join_params->{'join'},
+							$join_tn,
+							$join_where,
+							$level+1,
+							$skip_table,
+							$data_filter,
+						);
 					}
 				}
 				$where_index++;
@@ -279,7 +307,7 @@ sub save_join_table {
 	my  @sql_commands;
 
 	sub do_table_clear {
-		my  ($table, $where) = @_;
+		my  ($table, $where, $data_filter) = @_;
 
 		my  $dbi = DataAccess->get_dbi();
 		_init_back_up_folder();
@@ -300,7 +328,10 @@ sub save_join_table {
 			$qr->{'NAME'},
 		);
 		while (my $r = $qr->fetchrow_hashref()) {
-			$table_backup_output->add_data($r);
+			$r = $data_filter->filter_row($table, $r);
+			if (defined $r) {
+				$table_backup_output->add_data($r);
+			}
 #			my  $sql = "INSERT INTO $table (".join(', ', map {"`$_`"} keys %$r).") VALUES (".join(', ', map {$dbi->quote($_)} values %$r).");";
 #			$back_up_db_file->print("$sql\n");
 		}
@@ -671,3 +702,200 @@ sub get_database_name {
 
 	return undef;
 }
+
+
+package Obfuscation::Base;
+
+sub new {
+	my ($class) = @_;
+
+	return bless {
+	}, $class;
+}
+
+sub filter_row {
+	my ($self, $table, $row) = @_;
+
+	return $row;
+}
+
+sub get_seed {}
+
+package Obfuscation::Filter;
+
+## base on http://wiki.sesamecommunications.com:8090/display/PD/Production+data+obfuscation
+
+use Digest::MD5 'md5_base64', 'md5_hex';
+use Sys::Hostname;
+
+use base 'Obfuscation::Base';
+
+sub new {
+	my ($class, $db_name) = @_;
+
+	my %update_columns;
+	## obfuscate
+	$update_columns{$db_name.'.'.'address_local'}{'street'} = undef;
+	$update_columns{$db_name.'.'.'address_local'}{'city'} = undef;
+	$update_columns{$db_name.'.'.'address_versioned'}{'street'} = undef;
+	$update_columns{$db_name.'.'.'address_versioned'}{'city'} = undef;
+	$update_columns{$db_name.'.'.'address_versioned'}{'pms_id'} = undef;
+	$update_columns{$db_name.'.'.'client_access'}{'user_passwd'} = undef;
+	$update_columns{$db_name.'.'.'client_access'}{'user_enc_passwd'} = undef;
+	$update_columns{$db_name.'.'.'email_local'}{'email'} = undef;
+	$update_columns{$db_name.'.'.'email_local'}{'relative_name'} = undef;
+	$update_columns{$db_name.'.'.'email_sent_mail_log'}{'sml_email'} = undef;
+	$update_columns{$db_name.'.'.'email_sent_mail_log'}{'sml_name'} = undef;
+	$update_columns{$db_name.'.'.'email_unsubscribe'}{'email'} = undef;
+	$update_columns{$db_name.'.'.'email_versioned'}{'email'} = undef;
+	$update_columns{$db_name.'.'.'email_versioned'}{'relative_name'} = undef;
+	$update_columns{$db_name.'.'.'email_versioned'}{'pms_id'} = undef;
+	$update_columns{$db_name.'.'.'hhf_applications'}{'fname'} = undef;
+	$update_columns{$db_name.'.'.'hhf_applications'}{'lname'} = undef;
+	$update_columns{$db_name.'.'.'invisalign_case_process_doctor'}{'password'} = undef;
+	$update_columns{$db_name.'.'.'invisalign_case_process_doctor'}{'adf_password'} = undef;
+	$update_columns{$db_name.'.'.'invisalign_case_process_patient'}{'fname'} = undef;
+	$update_columns{$db_name.'.'.'invisalign_case_process_patient'}{'lname'} = undef;
+	$update_columns{$db_name.'.'.'invisalign_case_process_patient'}{'adf_file'} = undef;
+	$update_columns{$db_name.'.'.'invisalign_patient'}{'fname'} = undef;
+	$update_columns{$db_name.'.'.'invisalign_patient'}{'lname'} = undef;
+	$update_columns{$db_name.'.'.'opse_payment_log'}{'FName'} = undef;
+	$update_columns{$db_name.'.'.'opse_payment_log'}{'LName'} = undef;
+	$update_columns{$db_name.'.'.'opse_payment_log'}{'EMail'} = undef;
+	$update_columns{$db_name.'.'.'opse_payment_log'}{'Comment'} = undef;
+	$update_columns{$db_name.'.'.'phone_local'}{'number'} = undef;
+	$update_columns{$db_name.'.'.'phone_versioned'}{'number'} = undef;
+	$update_columns{$db_name.'.'.'phone_versioned'}{'pms_id'} = undef;
+	$update_columns{$db_name.'.'.'referrer_local'}{'email'} = undef;
+	$update_columns{$db_name.'.'.'referrer_versioned'}{'email'} = undef;
+	$update_columns{$db_name.'.'.'si_doctor'}{'Password'} = undef;
+	$update_columns{$db_name.'.'.'si_patient'}{'FName'} = undef;
+	$update_columns{$db_name.'.'.'si_patient'}{'LName'} = undef;
+	$update_columns{$db_name.'.'.'sms_message_history'}{'phone'} = undef;
+	$update_columns{$db_name.'.'.'visitor_user_sensitive'}{'password'} = undef;
+	$update_columns{$db_name.'.'.'visitor_versioned'}{'first_name'} = undef;
+	$update_columns{$db_name.'.'.'visitor_versioned'}{'last_name'} = undef;
+	$update_columns{$db_name.'.'.'visitor_versioned'}{'pms_id'} = undef;
+	$update_columns{$db_name.'.'.'email_referral'}{'ref_lname'} = undef;
+	$update_columns{$db_name.'.'.'email_referral'}{'ref_fname'} = undef;
+	$update_columns{$db_name.'.'.'email_referral'}{'ref_email'} = undef;
+	$update_columns{$db_name.'.'.'email_referral_mail'}{'from_email'} = undef;
+	$update_columns{$db_name.'.'.'voice_reminder_settings'}{'transfer_phone'} = undef;
+	## override
+	$update_columns{$db_name.'.'.'email_reminder_settings'}{'is_enabled'} = '0';
+	$update_columns{$db_name.'.'.'email_sending_queue'}{'sent_date'} = '2010-09-08 07:06:05';
+	$update_columns{$db_name.'.'.'hhf_applications'}{'body'} = '<Groups/>';
+	$update_columns{$db_name.'.'.'holiday_settings'}{'hds_status'} = '0';
+	$update_columns{$db_name.'.'.'ppn_email_queue'}{'is_send'} = '1';
+	$update_columns{$db_name.'.'.'voice_reminder_settings'}{'is_enabled'} = '0';
+	$update_columns{$db_name.'.'.'client'}{'cl_status'} = '0';
+
+	my $data_seed = md5_base64(rand().time().hostname().'0scEru960WO8CiBcS82k');
+	return bless {
+		'seed' => $data_seed,
+		'password_seed' => md5_base64(rand().$data_seed),
+		'clear_table' => {
+			$db_name.'.'.'sms_queue' => 1,
+			$db_name.'.'.'token' => 1,
+			$db_name.'.'.'voice_queue' => 1,
+			$db_name.'.'.'voice_queue' => 1,
+		},
+		'settings_table' => {
+			$db_name.'.'.'client_setting' => {
+				'PKey' => {
+					'Reminder.PostApp->SurveyEmails' => 1,
+					'Client.Email->Optional' => 1,
+					'Client.Email->From' => 1,
+					'Voice.CallerId' => 1,
+					'Voice.RL.DoctorPhone' => 1,
+				},
+			},
+			$db_name.'.'.'hhf_settings' => {
+				'PKey' => {
+					'email' => 1,
+				},
+			},
+		},
+		'update_column' => \%update_columns,
+	}, $class;
+}
+
+sub filter_row {
+	my ($self, $table, $row) = @_;
+
+	if (exists $self->{'clear_table'}{$table}) {
+		return undef;
+	}
+	elsif (exists $self->{'settings_table'}{$table}) {
+		my $where_columns = $self->{'settings_table'}{$table};
+		my $hide_data = 0;
+		for my $where_column (keys %$where_columns) {
+			for my $where_value (keys %{ $where_columns->{$where_column} }) {
+				if (lc $row->{$where_column} eq lc $where_value) {
+					$hide_data = 1;
+				}
+			}
+		}
+		if ($hide_data) {
+			while (my ($column, $value) = each %$row) {
+				if (exists $where_columns->{$column}) {
+					## ignore if is number or used in where
+				}
+				else {
+					$row->{$column} = $self->_hide_number_value($column, $value);
+				}
+			}
+		}
+	}
+	elsif (exists $self->{'update_column'}{$table}) {
+		my $override = $self->{'update_column'}{$table};
+		while (my ($column, $override_value) = each %$override) {
+			if (exists $row->{$column}) {
+				if (defined $override_value) {
+					$row->{$column} = $override_value;
+				}
+				else {
+					$row->{$column} = $self->_hide_value($column, $row->{$column});
+				}
+			}
+		}
+	}
+	else {
+		## do nothing for all other tables
+	}
+	return $row;
+}
+
+sub _hide_number_value {
+	my ($self, $column, $value) = @_;
+
+	if (defined $value && $value =~ m{^\d+(?:\.\d+)?$}) { ## in fact we're skiping ids here
+		return $value;
+	}
+	else {
+		return $self->_hide_value($column, $value);
+	}
+}
+
+sub _hide_value {
+	my ($self, $column, $value) = @_;
+
+	return (defined $value && length $value ?
+		md5_hex(
+			$value .
+			($column =~ m{password|passwd}i ?
+				$self->{'password_seed'} :
+				$self->{'seed'}
+			)
+		) :
+		$value
+	);
+}
+
+sub get_seed {
+	my ($self) = @_;
+
+	return $self->{'seed'};
+}
+
+
