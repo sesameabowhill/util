@@ -11,9 +11,17 @@ if (defined $fn) {
 	my ($preview_url) = ($preview =~ m{src="([^"]+)"}i);
 	my $image = render_template($fn, {'size' => 'full'});
 	my ($image_url, $width, $height);
-	if ($image =~ m{SWFObject\("(.*)",\s*".*",\s*"(.*)",\s*"(.*)",}i) {
+	if ($image =~ m{AC_FL_RunContent\((.*?)\)}) {
+		my ($size) = ($1);
+		($width) = ($size =~ m{'width','?([^']+)'?}i);
+		($height) = ($size =~ m{'height','?([^']+)'?}i);
+		$image_url = get_embed_src($image);
+		$preview_url = get_embed_src($preview);
+	}
+	elsif ($image =~ m{SWFObject\("(.*)",\s*".*",\s*"(.*)",\s*"(.*)",}i) {
 		($image_url, $width, $height) = ($1, $2, $3);
-	} elsif ($image =~ m{OBJECT\s+classid}i) {
+	}
+	elsif ($image =~ m{OBJECT\s+classid}i) {
 		my ($embed) = ($image =~ m{<EMBED\s+(.*?)>}is);
 		($image_url) = ($embed =~ m{src="([^"]+)"}i);
 		($width) = ($embed =~ m{width="([^"]+)"}i);
@@ -27,6 +35,10 @@ if (defined $fn) {
 	if (!defined $width && $image_url =~ m{\.gif$}i) {
 		($width, $height) = read_gif_size($image_url);
 	}
+	if ($preview_url eq $image_url) {
+		$preview_url = "";
+	}
+
 	printf "%s,%s,%s,%s,%s\n", $fn, $image_url, $preview_url, $width, $height;
 }
 else {
@@ -49,4 +61,12 @@ sub read_gif_size {
 	my $img = Image::Magick->new();
 	$img->Read($ENV{SESAME_COMMON}.$fn);
 	return $img->Get('width', 'height');
+}
+
+sub get_embed_src {
+	my ($image) = @_;
+
+	my ($embed) = ($image =~ m{<EMBED\s+(.*?)>}is);
+	my ($image_url) = ($embed =~ m{src="([^"]+)"}i);
+	return $image_url;
 }
