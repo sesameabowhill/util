@@ -23,7 +23,7 @@ use PDMParser;
 
 	my $links = Links->new();
 	load_links_from_model($logger, $links, "Unified DB.pdm");
-	my $rules = get_schema_diff($logger, $schema_5, $schema_6, $required_tables, $links);
+	get_schema_diff($logger, $schema_5, $schema_6, $required_tables, $links);
 }
 
 sub get_schema_diff {
@@ -35,9 +35,12 @@ sub get_schema_diff {
     my $migration = Migration->new($schema_6, $required_tables);
     $required_tables = filter_and_expand_required_tables($logger, $required_tables, $migration, ['1', '2', '3']);
 
-    $links->rename_tables($migration);
-	$links->remove_link_not_from_tables([ map { $_->{'table'} } @$required_tables ], $migration);
-	verify_links($logger, $links, $schema_6);
+    $links->rename_tables($migration, $schema_6);
+    my %allowed_tables = map { $_->{'table'} => 1 } @$required_tables;
+	$links->remove_link_not_from_tables(\%allowed_tables);
+	$links->verify_broken_links($logger, \%allowed_tables, $migration);
+
+	verify_links($logger, $links, $schema_6_list, \%allowed_tables, $migration);
 
 	check_removed_tables($logger, $migration, $schema_5, $schema_6);
 	my $required = group_by_columns($required_tables, [ 'table' ]);
@@ -46,9 +49,10 @@ sub get_schema_diff {
 
 	$rules->apply_table_info($migration);
 	$rules->apply_simple_columns_info($migration);
+	$rules->apply_links($links);
 	$rules->apply_moved_tables($migration, $schema_5_list, $schema_6);
 	
-	$rules->save_json_to("_out.json");
+	$rules->save_json_to("_out.json", 1);
 	$rules->save_html_to("_out.html");
 
 
@@ -61,7 +65,11 @@ sub check_removed_tables {
 
 	my $stop = 0;
 	for my $table_5 (keys %$schema_5) {
-		unless ($migration->table_removed($table_5)) {
+		if ($migration->table_removed($table_5)) {
+			## skip removed tables
+		}  elsif ($migration->is_table_versioned($table_5)) {
+			## skip versioned tables
+		} else {
 			unless (exists $schema_6->{ $migration->table_name_after_renamed($table_5) }) {
 				$logger->printf("removed table [%s]", $table_5);
 				$stop ++;
@@ -162,21 +170,43 @@ sub get_sesame_6_schema {
 }
 
 sub verify_links {
-    my ($logger, $links, $schema_6) = @_;
+    my ($logger, $links, $schema_6, $allowed_tables, $migration) = @_;
 	
+	my %not_link = map { $_ => 1 } ( "pms_id", "link_id", "voice_queue_id" );
+	my %to_table = (
+		'patient_id' => "visitor",
+		'responsible_id' => "visitor",
+		'member_id' =>  "client",
+	);
+
+	my %primary_keys;
+	for my $column (@$schema_6) {
+		if ($column->{'COLUMN_KEY'} eq "PRI") {
+			push(@{ $primary_keys{$column->{'TABLE_NAME'}} }, $column->{'COLUMN_NAME'});
+		}
+	}
+	my %simple_primary_keys = map { $_ => { $primary_keys{$_}[0] => 1 } } grep { @{ $primary_keys{$_} } == 1 } keys %primary_keys;
+
 	my $stop = 0;
 	for my $column (@$schema_6) {
-		if ($column->{'COLUMN_NAME'} =~ m{^(.*)_id$} && ! ( $column->{'COLUMN_NAME'} ~~ ['pms_id', 'link_id'] ) ) {
-			my $to_table = $1;
-			unless (
-				$links->is_link_exists_from_column_to_table(
-					$column->{'TABLE_NAME'}, 
-					$column->{'COLUMN_NAME'},
-					$to_table,
-				)
+		if (exists $allowed_tables->{ $column->{'TABLE_NAME'} } && 
+			! exists $simple_primary_keys{ $column->{'TABLE_NAME'} }{ $column->{'COLUMN_NAME'} }
+		) {
+			if ($column->{'COLUMN_NAME'} =~ m{^(.*)_id$} && 
+				! exists $not_link{ $column->{'COLUMN_NAME'} } && 
+				! $migration->is_lookup($column->{'TABLE_NAME'}, $column->{'COLUMN_NAME'}) 
 			) {
-				$logger->printf("link for [".$column->{'TABLE_NAME'}.".".$column->{'COLUMN_NAME'}."] is not found");
-				$stop ++;
+				my $to_table = ( exists $to_table{$column->{'COLUMN_NAME'}} ? $to_table{$column->{'COLUMN_NAME'}} : $1 );
+				unless (
+					$links->is_link_exists_from_column_to_table(
+						$column->{'TABLE_NAME'}, 
+						$column->{'COLUMN_NAME'},
+						$to_table,
+					)
+				) {
+					$logger->printf("link for [".$column->{'TABLE_NAME'}.".".$column->{'COLUMN_NAME'}."] is not found");
+					$stop ++;
+				}
 			}
 		}
 	}
@@ -239,10 +269,11 @@ sub new {
 		}
 	}
 
+	tie my %tables, "Tie::IxHash";
 	my $self = bless {
 		'logger' => $logger,
 		'rules' => \%column_rules,
-		'tables' => {},
+		'tables' => \%tables,
 		'column_order' => {
 			'id' => -2,
 			'client_id' => -1,
@@ -253,21 +284,35 @@ sub new {
 
 sub apply_table_info {
     my ($self, $migration) = @_;
-	
+
+	$self->{'remap_only_tables'} = $migration->get_tables_with_remap_only_action();
+
+    my %remap_only_tables = map { $_ => 1 } @{ $self->{'remap_only_tables'} };
 	for my $table (keys %{ $self->{'rules'} }) {
+		if (exists $remap_only_tables{$table}) {
+			die "rules found for remap-only table [$table]";
+		}
 		$self->{'tables'}{$table} = {
-			"action" => $migration->get_table_action($table),
+			'action' => $migration->get_table_action($table),
 		};
 	}
 }
 
 sub flat_rules {
-    my ($self) = @_;
+    my ($self, $no_missing_rules) = @_;
 
     my $column_rules = $self->{'rules'};
 
     tie my %rules_by_table, "Tie::IxHash";
+
+	for my $table_6 (@{ $self->{'remap_only_tables'} }) {
+		$rules_by_table{$table_6} = {
+			'action' => 'remap-only',
+		};
+	}    
+
 	for my $table_6 (keys %$column_rules) {
+		my @missing_rules;
 		for my $column_6 (keys %{ $column_rules->{$table_6} }) {
 			my $rule = $column_rules->{$table_6}{$column_6};
 			if (defined $rule) {
@@ -282,7 +327,7 @@ sub flat_rules {
 						'table' => $table_6,
 						'column' => $column_6,
 						'comment' => $rule->as_string(),
-						'_ref' => ref $rule,
+						($no_missing_rules ? () : '_ref' => ref $rule),
 						%{ $rule->as_json() },
 					);
 					push(
@@ -290,6 +335,20 @@ sub flat_rules {
 						\%r
 					);
 				}
+			} else {
+				push(@missing_rules, $column_6);
+			}
+		}
+		if (!$no_missing_rules && @missing_rules) {
+			for my $column_6 (@missing_rules) {
+				tie my %r, "Tie::IxHash", (
+					'table' => $table_6,
+					'column' => $column_6,
+				);
+				push(
+					@{ $rules_by_table{$table_6}{'columns'} },
+					\%r
+				);
 			}
 		}
 	}
@@ -315,25 +374,39 @@ sub save_html_to {
     	"td, th {border-top: 1px solid #ccc; border-left: 1px dashed #ccc; padding-left: 0.5em; padding-right: 0.5em;}",
     	#".highlight { color: #49717F }",
     	".nohighlight { color: #999 }",
+    	".error { color: #f00; font-weight: bold; }",
     	"th {text-align: left; }",
     	"</style></head><body>");
     for my $table (keys %$rules) {
-    	push(@lines, "<h2>Table [$table]</h2>");
-    	push(@lines, "<p>Action: ".$rules->{$table}{'action'}."</p>");
-    	push(@lines, "<table><tr><th>column</th><th>from</th><th>description</th></tr>");
-    	for my $column ($self->_sort_column_names( $rules->{$table}{'columns'} ) ) {
-	    	push(@lines, "<tr><td>".$column->{'column'}."</td>");
-	    	push(
-    			@lines, 
-    			"<td>".( $column->{'from_table'} ? 
-    				_html_highlight($column->{'from_table'}, $column->{'from_table'} ne $column->{'table'}) . "." . 
-    				_html_highlight($column->{'from_column'}, $column->{'from_column'} ne $column->{'column'}) :
-    				""
-				)."</td>"
-			);
-    		push(@lines, "<td>"._html_highlight($column->{'comment'}, $column->{'_ref'} !~ m{(?:Copy|Move)Value}) ."</td></tr>");
-    	}
-    	push(@lines, "</table>");
+    	push(@lines, "<h2><a name=\"table.".$table."\"></a>Table [$table]</h2>");
+		push(@lines, "<p>Action: ".$rules->{$table}{'action'}."</p>");
+    	if (exists $rules->{$table}{'columns'}) {
+        	push(@lines, "<table><tr><th>column</th><th>from</th><th>action</th></tr>");
+	    	for my $column ($self->_sort_column_names( $rules->{$table}{'columns'} ) ) {
+		    	push(@lines, "<tr><td><a name=\"column.".$column->{'table'}.".".$column->{'column'}."\"></a>".$column->{'column'}."</td>");
+		    	push(
+	    			@lines, 
+	    			"<td>".( $column->{'from_table'} ? 
+	    				_html_highlight($column->{'from_table'}, $column->{'from_table'} ne $column->{'table'}) . "." . 
+	    				_html_highlight($column->{'from_column'}, $column->{'from_column'} ne $column->{'column'}) :
+	    				""
+					)."</td>"
+				);
+				if (exists $column->{'action'}) {
+					if ($column->{'action'} eq "foreign-key") {
+						push(@lines, "<td>value from [<a href=\"#table.".$column->{'lookup_table'}."\">".$column->{'lookup_table'}."</a>.".
+							"<a href=\"#column.".$column->{'lookup_table'}.".".$column->{'lookup_column'}."\">".$column->{'lookup_column'}."</a>]</td></tr>");
+					} else {
+						push(@lines, "<td>"._html_highlight($column->{'comment'}, $column->{'_ref'} !~ m{(?:Copy|Move)Value$}) ."</td></tr>");
+					}
+				} else {
+					push(@lines, "<td><span class=\"error\">missing</span></td></tr>");
+				}
+	    	}
+	    	push(@lines, "</table>");
+	    } else {
+	    	push(@lines, "<a name=\"column.".$table.".id\"></a>");
+	    }
     }
 
 	push(@lines, "</body></html>");
@@ -383,16 +456,40 @@ sub apply_simple_columns_info {
 
 		    if ($migration->is_column_from_pms($table_6, $column_6)) {
 		    	return Migration::Rule::FromPMS->new();
-		    } elsif ($migration->is_column_autoincrement($table_6, $column_6)) {
+		    } 
+		    if ($migration->is_column_autoincrement($table_6, $column_6)) {
 		    	return Migration::Rule::AutoIncrement->new();
-			} else {
+			}
+			{
 				my $hardcoded_lookup = $migration->get_hardcoded_lookup($table_6, $column_6);
 				if (defined $hardcoded_lookup) {
-					return Migration::Rule::HardCodedMap->new($hardcoded_lookup);
-				} else {
-					return undef;
+					return Migration::Rule::HardCodedLookup->new($hardcoded_lookup);
 				}
 			}
+			{
+				my $conditional_lookup = $migration->get_conditional_lookup($table_6, $column_6);
+				if (defined $conditional_lookup) {
+					return Migration::Rule::ConditionalLookup->new($conditional_lookup);
+				}
+			}
+
+			return undef;
+		}
+	);
+}
+
+sub apply_links {
+    my ($self, $links) = @_;
+	
+    $self->_for_each_undefinded_rule(
+		sub {
+		    my ($table_6, $column_6) = @_;
+
+		    my $link = $links->get_link_from($table_6, $column_6);
+		    if (defined $link) {
+		    	return Migration::Rule::ForeignKey->new($link->{'to_table'}, $link->{'to_column'});
+		    }
+			return undef;
 		}
 	);
 }
@@ -484,17 +581,21 @@ sub add_link {
     my ($self, $from_table, $to_table, $columns) = @_;
 
     if ($self->is_link_exists($from_table, $to_table, $columns)) {
-		die "link [$from_table] -> [$to_table] on [".$self->_columns_to_string($columns)."] is allready defined";
+		die "link [$from_table] -> [$to_table] on [".$self->_columns_to_string($columns)."] is already defined";
 	}
-    my $from_columns = join("|", sort keys %$columns);
-	$self->{'links'}{$from_table}{$to_table}{$from_columns} = $columns;
+	$self->{'links'}{$from_table}{$to_table}{ _columns_key($columns) } = $columns;
+}
+
+sub _columns_key {
+	my ($columns) = @_;
+
+	return join("|", sort keys %$columns);
 }
 
 sub is_link_exists {
     my ($self, $from_table, $to_table, $columns) = @_;
 
-	my $from_columns = join("|", sort keys %$columns);
-	return exists $self->{'links'}{$from_table}{$to_table}{$from_columns};
+	return exists $self->{'links'}{$from_table}{$to_table}{ _columns_key($columns) };
 }
 
 sub is_link_exists_from_column_to_table {
@@ -503,45 +604,91 @@ sub is_link_exists_from_column_to_table {
 	return exists $self->{'links'}{$from_table}{$to_table}{$from_column};
 }
 
-sub remove_link_not_from_tables {
-    my ($self, $tables, $migration) = @_;
+sub get_link_from {
+    my ($self, $from_table, $from_column) = @_;
 
-    my %allowed_tables = map { $_ => 1 } @$tables;
-	
-	my %deleted_tables;
+    if (exists $self->{'links'}{$from_table}) {
+    	while (my ($to_table, $links) = each %{ $self->{'links'}{$from_table} }) {
+    		for my $link_info (values %$links) {
+    			if (exists $link_info->{$from_column}) {
+    				return {
+    					'to_table' => $to_table,
+    					'to_column' => $link_info->{$from_column},
+    				};
+    			}
+    		}
+    	}
+	}
+	return undef;
+}
+
+sub remove_link_not_from_tables {
+    my ($self, $allowed_tables) = @_;
+
 	for my $from_table (keys %{ $self->{'links'} }) {
-		unless ($allowed_tables{$from_table}) {
-			$deleted_tables{$from_table} = 1;
+		unless ($allowed_tables->{$from_table}) {
 			delete $self->{'links'}{$from_table};
 		}
 	}
+}
+
+sub verify_broken_links {
+    my ($self, $logger, $allowed_tables, $migration) = @_;
+	
+	my @stop;
 	for my $from_table (keys %{ $self->{'links'} }) {
 		for my $to_table (keys %{ $self->{'links'}{$from_table} }) {
-			if (exists $deleted_tables{$to_table}) {
+			unless (exists $allowed_tables->{$to_table}) {
 				for my $from_column_str (keys %{ $self->{'links'}{$from_table}{$to_table} }) {
-					unless ($migration->get_hardcoded_lookup($from_table, $from_column_str)) {
-						die "table [".$to_table."] was removed, but link is in [".$from_table.".".$from_column_str."]";
+					if ($migration->is_lookup($from_table, $from_column_str)) {
+						## ignore lookups
+					} else {
+						push(@stop, sprintf("table [%s] was removed, but link is in [%s.%s]", $to_table, $from_table, $from_column_str));
 					}
 				}
 			}
 		}
 	}
+	for my $msg (sort @stop) {
+		$logger->printf($msg);
+	}
+	$logger->stop(scalar @stop, "broken links");
 }
 
 sub rename_tables {
-    my ($self, $migration) = @_;
+    my ($self, $migration, $schema_6) = @_;
 
     my %links;
 	for my $from_table (keys %{ $self->{'links'} }) {
 		my $new_from_tables = $migration->get_new_names($from_table);
 		for my $new_from_table (@$new_from_tables) {
-			for my $to_table (keys %{ $self->{'links'}{$from_table} }) {
-				my $new_to_table = $migration->table_name_after_renamed($to_table);
-				$links{$new_from_table}{$new_to_table} = $self->{'links'}{$from_table}{$to_table};
+			if (exists $schema_6->{$new_from_table}) {
+				for my $to_table (keys %{ $self->{'links'}{$from_table} }) {
+					my $new_link_info = $self->_clear_link_info(
+						$self->{'links'}{$from_table}{$to_table},
+						$schema_6->{$new_from_table},
+					);
+					if (keys %$new_link_info) {
+						$links{$new_from_table}{ $migration->table_name_after_renamed($to_table) } = $new_link_info;
+					}
+				}
 			}
 		}
 	}
 	$self->{'links'} = \%links;
+}
+
+sub _clear_link_info {
+    my ($self, $link_info, $allowed_columns) = @_;
+	
+	my %new_link_info;
+	for my $columns (values %$link_info) {
+		my %new_columns = map { $_ => $columns->{$_} } grep {exists $allowed_columns->{$_}} keys %$columns;
+		if (keys %new_columns) {
+			$new_link_info{ _columns_key(\%new_columns) } = \%new_columns;
+		}
+	}
+	return \%new_link_info;
 }
 
 sub _columns_to_string {
@@ -562,8 +709,7 @@ sub new {
 				'si_image_old', 'phone_sms_active_from_upload', 'phone_temp',
 				## pms data tables
 				'account', 'appointment_procedure', 'insurance_contract', 'ledger', 
-				'patient_referrer', 'patient_staff', 'staff', 
-				'treatment_plan', 
+				'patient_referrer', 'patient_staff', 'treatment_plan', 
 				## removed by Dan 
 				'upload_last', 
 			) 
@@ -573,13 +719,59 @@ sub new {
 			'email_sent_mail_log_archive' => 'email_sent_mail_log',
 			'voice_office_name_pronunciation' => 'office_user_sensitive',
 			'patient_pages_message' => 'patient_page_messages',
-			'office' => 'office_user_sensitive', ## TODO need to move fields
 			'referrer' => 'referrer_local',
 		},
 		'hardcoded_lookup' => {
 			'survey_answer' => {
 				'question_id' => 'survey-question-id',
 				'question_option_id' => 'survey-option-id',
+			},
+			'holiday_settings' => {
+				'hdc_id' => 'holiday-card-id',
+				'hd_id' => 'holiday-id',
+			},
+			'holiday_delivery_log' => {
+				'hdc_id' => 'holiday-card-id',
+				'hd_id' => 'holiday-id',
+			},
+			'holiday_settings_recipients_link' => {
+				'hr_id' => 'holiday-recipient-id',
+			},
+			'holiday_settings_recipients_link_log' => {
+				'hr_id' => 'holiday-recipient-id',
+			},
+			'client_feature' => {
+				'feature_id' => 'feature-id',
+			},
+			'client' => {
+				'client_edition_id' => 'client-edition-id',
+				'pms_software_id' => 'pms-software-id',
+			},
+			'ppn_letter_logo' => {
+				'logo_id' => 'ppn-logo-id',
+			},
+			'ppn_article_queue' => {
+				'art_id' => 'newsletter-common-article-id',
+			},
+			'email_reminder_settings' => {
+				'design_id' => 'email-design-id',
+			},
+			'email_sending_queue' => {
+				'design_id' => 'email-design-id',
+			},
+			'hits_count' => {
+				'hcount_sect_id' => 'hit-section-id',
+			},
+			'hits_log' => {
+				'hlog_sect_id' => 'hit-section-id',
+			},
+			'upload_postprocessing_task' => {
+				'postprocessing_action_id' => 'post-upload-action-id',
+			},
+		},
+		'conditional_lookup' => {
+			'ppn_article_letter' => {
+				'art_id' => 'newsletter-conditional-article-id',
 			},
 		},
 	}, $class;
@@ -592,22 +784,23 @@ sub new {
 sub _generate_actions {
     my ($self, $required_tables) = @_;
 	
-	my %know_actions = map {$_ => 1} ('delete-insert', 'insert', 'update', 'update-insert');
+	my %know_actions = map {$_ => 1} ("delete-insert", "insert", "update", "update-insert", "remap-only");
 	my %actions;
 	for my $table (@$required_tables) {
-		if ($table->{'action'} eq 'referrer') {
+		if ($table->{'action'} eq "referrer") {
 			## TODO
 			$actions{$table->{'table'}} = "???";
 			$actions{$table->{'table'}."_local"} = "???";
 		} elsif ($table->{'action'} eq 'user-sensitive') {
 			$actions{$table->{'table'}."_user_sensitive"} = "update";
 			$actions{$table->{'table'}."_local"} = "delete-insert";
+			$actions{$table->{'table'}} = "remap-only";
 		} elsif (exists $know_actions{$table->{'action'}}) {
 			$actions{ $self->table_name_after_renamed($table->{'table'}) } = $table->{'action'};
 		} elsif (!$table->{'action'}) {
 			## ignore empty actions
 		} else {
-			die "unknow action [".$table->{'action'}."]";
+			die "unknown action [".$table->{'action'}."]";
 		}
 	}
 	$self->{'actions'} = \%actions;
@@ -617,12 +810,12 @@ sub _generate_versioned_rules {
     my ($self, $schema_6, $required_tables) = @_;
 
     my %versioned;
-    for my $table (grep {$_->{'transform'} ~~ ['user-sensitive', 'user-sensitive-local', 'local-only']} @$required_tables) {
-		my @new_tables = grep { exists $schema_6->{$_} } map {$table->{'table'}.$_} ('_user_sensitive', '_local');
-		unless (@new_tables) {
-			die "no tables for ".$table->{'transform'}." transform for [".$table->{'table'}."]";
-		}
-		$versioned{ $table->{'table'} } = \@new_tables;
+    for my $table (@$required_tables) {
+    	if ($table->{'transform'} eq "user-sensitive") {
+    		$versioned{ $table->{'table'} } = [ $table->{'table'}, $table->{'table'}."_user_sensitive" ];
+    	} elsif ($table->{'transform'} eq "remap-only") {
+    		$versioned{ $table->{'table'} } = [ $table->{'table'} ];
+    	}
     }
     $self->{'versioned'} = \%versioned;
 }
@@ -666,7 +859,11 @@ sub table_removed {
 sub table_name_after_renamed {
     my ($self, $table_5) = @_;
 
-    return $self->get_new_names($table_5)->[0];
+    if (exists $self->{'renamed'}{$table_5}) {
+    	return $self->{'renamed'}{$table_5};
+	} else {
+		return $table_5;
+	}
 }
 
 sub get_new_names {
@@ -679,6 +876,12 @@ sub get_new_names {
     } else {
     	return [ $table_5 ];
     }
+}
+
+sub is_table_versioned {
+    my ($self, $table_5) = @_;
+
+    return exists $self->{'versioned'}{$table_5};
 }
 
 sub is_column_from_pms {
@@ -697,10 +900,28 @@ sub get_table_action {
 	}
 }
 
+sub get_tables_with_remap_only_action {
+    my ($self) = @_;
+
+    return [ grep {$self->{'actions'}{$_} eq "remap-only"} keys %{ $self->{'actions'} } ];
+}
+
+sub is_lookup {
+    my ($self, $table_6, $column_6) = @_;
+
+	return exists $self->{'hardcoded_lookup'}{$table_6}{$column_6} || $self->{'conditional_lookup'}{$table_6}{$column_6};
+}
+
 sub get_hardcoded_lookup {
     my ($self, $table_6, $column_6) = @_;
 	
 	return $self->{'hardcoded_lookup'}{$table_6}{$column_6};
+}
+
+sub get_conditional_lookup {
+    my ($self, $table_6, $column_6) = @_;
+	
+	return $self->{'conditional_lookup'}{$table_6}{$column_6};
 }
 
 package Migration::Rule;
@@ -725,17 +946,36 @@ sub as_json {
 	die "must override";
 }
 
-# sub get_table {
-#     my ($self) = @_;
-	
-# 	return $self->{'table'};
-# }
+package Migration::Rule::ForeignKey;
 
-# sub get_column {
-#     my ($self) = @_;
+use base qw(Migration::Rule);
+
+sub new {
+	my ($class, $table, $column) = @_;
 	
-# 	return $self->{'column'};
-# }
+	my $self = bless {
+		'table' => $table,
+		'column' => $column,
+	}, $class;
+	return $self;
+}
+
+sub as_string {
+    my ($self) = @_;
+	
+	return "link to [".$self->{'table'}.".".$self->{'column'}."]";
+}
+
+sub as_json {
+    my ($self) = @_;
+
+    tie my %r, "Tie::IxHash", (
+    	'action' => "foreign-key",
+    	'lookup_table' => $self->{'table'},
+    	'lookup_column' => $self->{'column'},
+    );
+	return \%r;
+}
 
 package Migration::Rule::CopyValue;
 
@@ -754,16 +994,16 @@ sub new {
 sub as_string {
     my ($self) = @_;
 	
-	return "value from [".$self->{'table'}.".".$self->{'column'}."]";
+	return "copy value from [".$self->{'table'}.".".$self->{'column'}."]";
 }
 
 sub as_json {
     my ($self) = @_;
 
     tie my %r, "Tie::IxHash", (
-    	"action" => "copy",
-    	"from_table" => $self->{'table'},
-    	"from_column" => $self->{'column'},
+    	'action' => "copy",
+    	'from_table' => $self->{'table'},
+    	'from_column' => $self->{'column'},
     );
 	return \%r;
 }
@@ -803,11 +1043,11 @@ sub as_json {
     my ($self) = @_;
 	
 	return {
-		"action" => "autoincrement",
+		'action' => "autoincrement",
 	};
 }
 
-package Migration::Rule::HardCodedMap;
+package Migration::Rule::HardCodedLookup;
 
 use base qw(Migration::Rule);
 
@@ -823,15 +1063,35 @@ sub new {
 sub as_string {
     my ($self) = @_;
 	
-	return "hard coded value from [".$self->{'map'}."] map";
+	return "hard-coded lookup from [".$self->{'map'}."] map";
 }
 
 sub as_json {
     my ($self) = @_;
 
     tie my %r, "Tie::IxHash", (
-    	"action" => "map-lookup",
-    	"map" => $self->{'map'},
+    	'action' => "hard-coded-lookup",
+    	'map' => $self->{'map'},
+    );
+	return \%r;
+}
+
+package Migration::Rule::ConditionalLookup;
+
+use base qw(Migration::Rule::HardCodedLookup);
+
+sub as_string {
+    my ($self) = @_;
+	
+	return "conditional lookup from [".$self->{'map'}."] map";
+}
+
+sub as_json {
+    my ($self) = @_;
+
+    tie my %r, "Tie::IxHash", (
+    	'action' => "conditional-lookup",
+    	'map' => $self->{'map'},
     );
 	return \%r;
 }
