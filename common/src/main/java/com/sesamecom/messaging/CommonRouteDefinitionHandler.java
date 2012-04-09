@@ -28,9 +28,9 @@ public class CommonRouteDefinitionHandler implements RouteDefinitionHandler {
      */
     public static RouteDefinitionHandler getHandlerByEndpoint(String endpointUri, Class<?> messageBodyType) {
         if (endpointUri.startsWith("aws-sqs:")) {
-            // if we're listening on an sqs endpoint, assume we're in production, and that the queue is being
-            // written to by SNS.  in this case SNS has its own JSON envelope we must unpack the actual message
-            // from.
+            // if we're listening on an sqs endpoint, the queue may be getting written to by SNS.  in this case SNS has
+            // its own JSON envelope we must unpack the actual message from.  SnsEnvelopeDataFormat will also gracefully
+            // handle raw JSON messages, only unpacking where it detects an SNS wrapped message.
             return new SnsRouteDefinitionHandler(messageBodyType);
         } else {
             // otherwise assume a raw JSON document with no envelope.

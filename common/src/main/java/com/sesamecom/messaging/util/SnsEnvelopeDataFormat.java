@@ -1,16 +1,18 @@
 package com.sesamecom.messaging.util;
 
+import com.google.common.io.CharStreams;
 import org.apache.camel.Exchange;
 import org.apache.camel.spi.DataFormat;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Map;
 
 /**
- * Similar to JacksonDataType, but only supports unmarshaling.  Operates on SNS envelopes, unpacking a nested JSON
- * message and mapping it as the type specified.
+ * Similar to JacksonDataType, but only supports unmarshaling.  Operates on JSON messages potentially wrapped in an SNS
+ * envelope, unpacking a nested JSON message and mapping it as the type specified where needed.
  */
 public class SnsEnvelopeDataFormat implements DataFormat {
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -30,9 +32,13 @@ public class SnsEnvelopeDataFormat implements DataFormat {
 
     @Override
     public Object unmarshal(Exchange exchange, InputStream stream) throws Exception {
-        Map envelope = objectMapper.readValue(stream, Map.class);
-        return objectMapper.readValue((String) envelope.get("Message"), messageBodyType);
+        String message = CharStreams.toString(new InputStreamReader(stream));
+        Map map = objectMapper.readValue(message, Map.class);
+
+        // looks like an SNS envelope to me!
+        if (map.containsKey("Type") && map.containsKey("MessageId") && map.containsKey("TopicArn") && map.containsKey("Message"))
+            message = map.get("Message").toString();
+
+        return objectMapper.readValue(message, messageBodyType);
     }
-
-
 }
