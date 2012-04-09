@@ -354,10 +354,38 @@ public class EnvironmentConfig {
      */
     public static String getSendSettingsChangeEndpoint() {
         return getProperty("sendSettingsChangeEndpoint", String.class);
-    }    
-    
+    }
+
     public static String getSendSettingsChangeEndpoint(String defaultEndpoint) {
         return getProperty("sendSettingsChangeEndpoint", String.class, OPTIONAL, defaultEndpoint, false);
+    }
+
+    /**
+     * Name of CloudWatch alarm that controls when janitor data cleanup will run.
+     */
+    public static String getJanitorCleanupAlarmName() {
+        return getProperty("janitorCleanupAlarmName", String.class);
+    }
+
+    /**
+     * Name of CloudWatch alarm that controls when janitor server-side diff will run.
+     */
+    public static String getJanitorDiffAlarmName() {
+        return getProperty("janitorDiffAlarmName", String.class);
+    }
+
+    /**
+     * Camel endpoint for the janitor service to read data cleanup tasks from.
+     */
+    public static String getJanitorCleanupTaskEndpoint(String defaultEndpoint) {
+        return getProperty("janitorCleanupTaskEndpoint", String.class, OPTIONAL, defaultEndpoint, false);
+    }
+
+    /**
+     * Camel endpoint to listen for reinitial events on / send reinitial events to.
+     */
+    public static String getReinitialEndpoint(String defaultEndpoint) {
+        return getProperty("reinitialEndpoint", String.class, OPTIONAL, defaultEndpoint, false);
     }
 
     /**

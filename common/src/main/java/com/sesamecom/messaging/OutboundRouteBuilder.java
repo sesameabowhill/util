@@ -14,22 +14,25 @@ import static com.sesamecom.messaging.OutboundEndpoint.*;
  */
 public class OutboundRouteBuilder extends RouteBuilder {
     private static final Logger log = LoggerFactory.getLogger(OutboundRouteBuilder.class);
+    private static final String disabled = Disabled.toCamelFormat();
 
     public void configure() throws Exception {
-        createJsonRoute(OlapCommand.toCamelFormat(), getAnalyticsOlapAdHocCommandEndpoint(Disabled.toCamelFormat()));
-        createJsonRoute(EtlCommand.toCamelFormat(), getAnalyticsEtlAdHocCommandEndpoint(Disabled.toCamelFormat()));
-        createJsonRoute(SendSettingsChange.toCamelFormat(), getSendSettingsChangeEndpoint(Disabled.toCamelFormat()));
-        createJsonRoute(IngestEvent.toCamelFormat(), getPmsUploadIngestEventEndpoint(Disabled.toCamelFormat()));
-        from(Disabled.toCamelFormat()).stop();
+        createJsonRoute(OlapCommand, getAnalyticsOlapAdHocCommandEndpoint(disabled));
+        createJsonRoute(EtlCommand, getAnalyticsEtlAdHocCommandEndpoint(disabled));
+        createJsonRoute(SendSettingsChange, getSendSettingsChangeEndpoint(disabled));
+        createJsonRoute(IngestEvent, getPmsUploadIngestEventEndpoint(disabled));
+        createJsonRoute(ReinitialEvent, getReinitialEndpoint(disabled));
+        createJsonRoute(JanitorCleanup, getJanitorCleanupTaskEndpoint(disabled));
+        from(disabled).stop();
     }
     
-    private void createJsonRoute(String internal, String outbound) {
+    private void createJsonRoute(OutboundEndpoint internal, String outbound) {
         log.info("outboundRoute->create internal: {}, outbound: {}",
-            internal,
+            internal.toCamelFormat(),
             outbound
         );
 
-        from(internal)
+        from(internal.toCamelFormat())
             .marshal().json(JsonLibrary.Jackson)
             .to(outbound);
     }

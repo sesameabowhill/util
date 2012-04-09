@@ -8,8 +8,10 @@ public enum OutboundEndpoint {
     EtlCommand("direct:etlAdHocCommandOutboundEndpoint"),
     SendSettingsChange("direct:sendSettingsChangeOutboundEndpoint"),
     IngestEvent("direct:ingestEventOutboundEndpoint"),
+    ReinitialEvent("direct:reinitialEndpoint"),
+    JanitorCleanup("direct:janitorCleanup"),
     Disabled("direct:disabled");
-    
+
     private String endpoint;
 
     private OutboundEndpoint(String endpoint) {
