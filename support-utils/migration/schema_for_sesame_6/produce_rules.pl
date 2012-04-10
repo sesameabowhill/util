@@ -23,6 +23,7 @@ use PDMParser;
 
 	my $links = Links->new();
 	load_links_from_model($logger, $links, "Unified DB.pdm");
+	load_hard_coded_links($links);
 	get_schema_diff($logger, $schema_5, $schema_6, $required_tables, $links);
 }
 
@@ -134,14 +135,18 @@ sub get_required_tables {
 sub filter_and_expand_required_tables {
     my ($logger, $tables, $migration, $levels) = @_;
 
-    my @tables_5 = grep { $_->{'priority'} ~~ @$levels } @$tables;
     tie my %tables_6, "Tie::IxHash";
-    for my $table (@tables_5) {
-    	for my $new_name (@{ $migration->get_new_names( $table->{'table'} ) }) {
-			$tables_6{$new_name} = {
-				%$table,
-				'table' => $new_name,
-			};
+    for my $table (@$tables) {
+    	if ($table->{'priority'} ~~ @$levels) {
+	    	for my $new_name (@{ $migration->get_new_names( $table->{'table'} ) }) {
+				$tables_6{$new_name} = {
+					%$table,
+					'table' => $new_name,
+				};
+	    	}
+    		#$logger->printf("include [%s] table", $table->{'table'});
+    	} else {
+    		#$logger->printf("table [%s] is ignored", $table->{'table'});
     	}
     }
     $logger->printf(
@@ -172,15 +177,18 @@ sub get_sesame_6_schema {
 sub verify_links {
     my ($logger, $links, $schema_6, $allowed_tables, $migration) = @_;
 	
-	my %not_link = map { $_ => 1 } ( "pms_id", "link_id", "voice_queue_id" );
+	my %not_link = map { $_ => 1 } (
+		"*.pms_id", "*.link_id", "*.voice_queue_id", "*.clog_mail_id", "*.rec_id", "*.sml_mail_id", 
+		"*.vip_patient_id", "invisalign_text.page_id", "si_image.is_id" );
 	my %to_table = (
 		'patient_id' => "visitor",
 		'responsible_id' => "visitor",
 		'member_id' =>  "client",
 	);
 
-	my %primary_keys;
+	my (%primary_keys, %tables);
 	for my $column (@$schema_6) {
+		$tables{$column->{'TABLE_NAME'}} = 1;
 		if ($column->{'COLUMN_KEY'} eq "PRI") {
 			push(@{ $primary_keys{$column->{'TABLE_NAME'}} }, $column->{'COLUMN_NAME'});
 		}
@@ -193,19 +201,31 @@ sub verify_links {
 			! exists $simple_primary_keys{ $column->{'TABLE_NAME'} }{ $column->{'COLUMN_NAME'} }
 		) {
 			if ($column->{'COLUMN_NAME'} =~ m{^(.*)_id$} && 
-				! exists $not_link{ $column->{'COLUMN_NAME'} } && 
+				! exists $not_link{ "*.".$column->{'COLUMN_NAME'} } && 
+				! exists $not_link{ $column->{'TABLE_NAME'}.".".$column->{'COLUMN_NAME'} } && 
 				! $migration->is_lookup($column->{'TABLE_NAME'}, $column->{'COLUMN_NAME'}) 
 			) {
 				my $to_table = ( exists $to_table{$column->{'COLUMN_NAME'}} ? $to_table{$column->{'COLUMN_NAME'}} : $1 );
-				unless (
-					$links->is_link_exists_from_column_to_table(
-						$column->{'TABLE_NAME'}, 
-						$column->{'COLUMN_NAME'},
-						$to_table,
-					)
-				) {
-					$logger->printf("link for [".$column->{'TABLE_NAME'}.".".$column->{'COLUMN_NAME'}."] is not found");
-					$stop ++;
+				if (exists $tables{$to_table}) {
+					unless (
+						$links->is_link_exists_between_tables(
+							$column->{'TABLE_NAME'}, 
+							$to_table,
+						)
+					) {
+						$logger->printf("link for [".$column->{'TABLE_NAME'}.".".$column->{'COLUMN_NAME'}."] is not found");
+						$stop ++;
+					}
+				} else {
+					unless (
+						$links->is_link_exists_from_column(
+							$column->{'TABLE_NAME'}, 
+							$column->{'COLUMN_NAME'},
+						)
+					) {
+						$logger->printf("link for [".$column->{'TABLE_NAME'}.".".$column->{'COLUMN_NAME'}."] is not found");
+						$stop ++;
+					}
 				}
 			}
 		}
@@ -246,6 +266,67 @@ sub load_links_from_model {
 			{
 				$tables->{ $reference->{'from'}{'table_id'} }{'columns'}{ $reference->{'from'}{'column_id'} }{'name'} =>
 				$tables->{ $reference->{'to'}{'table_id'} }{'columns'}{ $reference->{'to'}{'column_id'} }{'name'}
+			}
+		);
+	}
+	$links->delete_link_between_tables("appointment_reminder_schedule", "client");
+}
+
+sub load_hard_coded_links {
+    my ($links) = @_;
+
+	## client_id
+	for my $from_table (
+		"appointment_reminder_schedule", "email_contact_log", "email_sent_mail_log", "upload_settings", 
+		"address_local", "email_local", "office_address_local", "patient_page_messages", "phone_local"
+	) {
+		$links->add_link(
+			$from_table, 
+			"client", 
+			{
+				'client_id' => "id",
+			}
+		);
+	}
+
+	## visitor_id
+	for my $link (
+		"address_local.visitor_id", "email_local.visitor_id", "phone_local.visitor_id", 
+		"opse_payment_log.patient_id", "token.user_id"
+	) {
+		my ($from_table, $from_column) = split('\.', $link);
+		$links->add_link(
+			$from_table, 
+			"visitor", 
+			{
+				$from_column => "id",
+			}
+		);
+	}
+
+	## other
+	my %links = (
+		'email_referral.referral_mail_id' => 'email_referral_mail.id',
+		'invisalign_case_process_patient.invisalign_client_id' => 'invisalign_client.id',
+		'office_address_local.office_id' => 'office.id',
+		'orthomation.node_id' => 'orthomation_nodes.node_id',
+		'visitor_opinion.category_id' => 'review_category.id',
+		## user sensitive
+		'email_user_sensitive.email_id' => 'email.id',
+		'phone_user_sensitive.phone_id' => 'phone.id',
+		'procedure_user_sensitive.procedure_id' => 'procedure.id',
+		'recall_user_sensitive.recall_id' => 'recall.id',
+		'responsible_patient_user_sensitive.responsible_patient_id' => 'responsible_patient.id',
+		'visitor_user_sensitive.visitor_id' => 'visitor.id',
+	);
+	while (my ($from, $to) = each %links) { 
+		my ($from_table, $from_column) = split('\.', $from, 2);
+		my ($to_table, $to_column) = split('\.', $to, 2);
+		$links->add_link(
+			$from_table, 
+			$to_table, 
+			{
+				$from_column => $to_column,
 			}
 		);
 	}
@@ -308,6 +389,20 @@ sub flat_rules {
 	for my $table_6 (@{ $self->{'remap_only_tables'} }) {
 		$rules_by_table{$table_6} = {
 			'action' => 'remap-only',
+			'columns' => [
+				$self->_make_json_column_obj(
+					$table_6,
+					'id',
+					Migration::Rule::CopyValue->new($table_6, 'id'),
+					$no_missing_rules,
+				),
+				$self->_make_json_column_obj(
+					$table_6,
+					'pms_id',
+					Migration::Rule::CopyValue->new($table_6, 'pms_id'),
+					$no_missing_rules,
+				),
+			]
 		};
 	}    
 
@@ -323,17 +418,8 @@ sub flat_rules {
 							'columns' => [],
 						};
 					}
-					tie my %r, "Tie::IxHash", (
-						'table' => $table_6,
-						'column' => $column_6,
-						'comment' => $rule->as_string(),
-						($no_missing_rules ? () : '_ref' => ref $rule),
-						%{ $rule->as_json() },
-					);
-					push(
-						@{ $rules_by_table{$table_6}{'columns'} },
-						\%r
-					);
+					my $column = $self->_make_json_column_obj($table_6, $column_6, $rule, $no_missing_rules);
+					push(@{ $rules_by_table{$table_6}{'columns'} }, $column);
 				}
 			} else {
 				push(@missing_rules, $column_6);
@@ -353,6 +439,19 @@ sub flat_rules {
 		}
 	}
 	return \%rules_by_table;
+}
+
+sub _make_json_column_obj {
+    my ($self, $table_6, $column_6, $rule, $no_missing_rules) = @_;
+	
+	tie my %r, "Tie::IxHash", (
+		'table' => $table_6,
+		'column' => $column_6,
+		'comment' => $rule->as_string(),
+		($no_missing_rules ? () : ( '_ref' => ref $rule )),
+		%{ $rule->as_json() },
+	);
+	return \%r;
 }
 
 sub save_json_to {
@@ -460,6 +559,9 @@ sub apply_simple_columns_info {
 		    if ($migration->is_column_autoincrement($table_6, $column_6)) {
 		    	return Migration::Rule::AutoIncrement->new();
 			}
+			if ($migration->is_constant_value_exists($table_6, $column_6)) {
+				return Migration::Rule::ConstantValue->new($migration->get_constant_value($table_6, $column_6));
+			}
 			{
 				my $hardcoded_lookup = $migration->get_hardcoded_lookup($table_6, $column_6);
 				if (defined $hardcoded_lookup) {
@@ -499,21 +601,23 @@ sub apply_moved_tables {
 
     my $column_rules = $self->{'rules'};
 
+    my $stop = 0;
 	for my $column (@$schema_5_list) {
 		my $new_names = $migration->get_new_names($column->{'TABLE_NAME'});
 		for my $new_name (@$new_names) {
 			if (exists $column_rules->{$new_name}) {
-				if (exists $column_rules->{$new_name}{ $column->{'COLUMN_NAME'} } && 
-					! defined $column_rules->{$new_name}{ $column->{'COLUMN_NAME'} }
+				my $new_column = $migration->column_name_after_rename($column->{'TABLE_NAME'}, $column->{'COLUMN_NAME'});
+				if (exists $column_rules->{$new_name}{$new_column} && 
+					! defined $column_rules->{$new_name}{$new_column}
 				) {
-					if (can_copy_type($column, $schema_6->{$new_name}{ $column->{'COLUMN_NAME'} })) {
+					if ($self->can_copy_type(\$stop, $migration, $column, $schema_6->{$new_name}{$new_column})) {
 						if ($new_name eq $column->{'TABLE_NAME'}) {
-							$column_rules->{$new_name}{ $column->{'COLUMN_NAME'} } = Migration::Rule::MoveValue->new(
+							$column_rules->{$new_name}{$new_column} = Migration::Rule::MoveValue->new(
 								$column->{'TABLE_NAME'}, 
 								$column->{'COLUMN_NAME'}
 							);
 						} else {
-							$column_rules->{$new_name}{ $column->{'COLUMN_NAME'} } = Migration::Rule::CopyValue->new(
+							$column_rules->{$new_name}{$new_column} = Migration::Rule::CopyValue->new(
 								$column->{'TABLE_NAME'}, 
 								$column->{'COLUMN_NAME'}
 							);
@@ -523,14 +627,82 @@ sub apply_moved_tables {
 			}
 		}
 	}
+	$self->{'logger'}->stop($stop, "incompatible column types");
 }
 
 sub can_copy_type {
-    my ($from_column, $to_column) = @_;
+    my ($self, $stop_ref, $migration, $from_column, $to_column) = @_;
 
-    ## TODO
+    if (lc $from_column->{'IS_NULLABLE'} eq lc $to_column->{'IS_NULLABLE'}) {
+    	if ($migration->is_column_type_ignored($to_column->{'TABLE_NAME'}, $to_column->{'COLUMN_NAME'})) {
+    		return 1;
+		} else {
+	    	if ($self->_is_column_type_equal($from_column->{'COLUMN_TYPE'}, $to_column->{'COLUMN_TYPE'})) {
+				return 1;
+	    	} else {
+				$self->{'logger'}->printf(
+					"types didn't match [%s.%s: %s] => [%s.%s: %s]",
+					$from_column->{'TABLE_NAME'},
+					$from_column->{'COLUMN_NAME'},
+					$from_column->{'COLUMN_TYPE'},
+					$to_column->{'TABLE_NAME'},
+					$to_column->{'COLUMN_NAME'},
+					$to_column->{'COLUMN_TYPE'},
+				);
+				$$stop_ref ++;
+	    	}
+    	}
+	} else {
+		if (lc $to_column->{'IS_NULLABLE'} eq 'no' || ! $migration->is_nullable_ignored($to_column->{'TABLE_NAME'}, $to_column->{'COLUMN_NAME'})) {
+			$self->{'logger'}->printf(
+				"nullable didn't match [%s.%s: %s] => [%s.%s: %s]",
+				$from_column->{'TABLE_NAME'},
+				$from_column->{'COLUMN_NAME'},
+				(lc $from_column->{'IS_NULLABLE'} eq 'no' ? "NOT NULL" : "NULL"),
+				$to_column->{'TABLE_NAME'},
+				$to_column->{'COLUMN_NAME'},
+				(lc $to_column->{'IS_NULLABLE'} eq 'no' ? "NOT NULL" : "NULL"),
+			);
+			$$stop_ref ++;
+		} else {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+sub _is_column_type_equal {
+    my ($self, $from_type, $to_type) = @_;
 	
-	return 1;
+	my $from = $self->_prepare_type($from_type);
+	my $to = $self->_prepare_type($to_type);
+
+	if ($from eq $to) {
+		return 1;
+	} elsif ($from eq "text" && $to eq "mediumtext") {
+		return 1;
+	} elsif ($from eq "tinyint" && $to eq "int") {
+		return 1;
+	} elsif ($from =~ m{^enum} && $to =~ m{^enum}) {
+		my ($from_set) = ($from =~ m{^enum\((.*)\)$});
+		my ($to_set) = ($to =~ m{^enum\((.*)\)$});
+		my %to_enum = map {$_ => 1} split(',', $to_set);
+		for my $from_val (split(',', $from_set)) {
+			unless (exists $to_enum{$from_val}) {
+			 	return 0;
+			}
+		}
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+sub _prepare_type {
+    my ($self, $type) = @_;
+
+    $type =~ s{(?<=int)\(\d+\)}{}g;
+    return lc $type;
 }
 
 sub check_column_rules {
@@ -604,11 +776,31 @@ sub is_link_exists_from_column_to_table {
 	return exists $self->{'links'}{$from_table}{$to_table}{$from_column};
 }
 
+sub is_link_exists_from_column {
+    my ($self, $from_table, $from_column) = @_;
+	
+	if (exists $self->{'links'}{$from_table}) {
+		for my $link_info (values %{ $self->{'links'}{$from_table} }) {
+			if (exists $link_info->{$from_column}) {
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+sub is_link_exists_between_tables {
+    my ($self, $from_table, $to_table) = @_;
+	
+	return exists $self->{'links'}{$from_table}{$to_table};
+}
+
 sub get_link_from {
     my ($self, $from_table, $from_column) = @_;
 
     if (exists $self->{'links'}{$from_table}) {
-    	while (my ($to_table, $links) = each %{ $self->{'links'}{$from_table} }) {
+    	for my $to_table (keys %{ $self->{'links'}{$from_table} }) {
+    		my $links = $self->{'links'}{$from_table}{$to_table};
     		for my $link_info (values %$links) {
     			if (exists $link_info->{$from_column}) {
     				return {
@@ -678,6 +870,12 @@ sub rename_tables {
 	$self->{'links'} = \%links;
 }
 
+sub delete_link_between_tables {
+    my ($self, $from_table, $to_table) = @_;
+
+    delete $self->{'links'}{$from_table}{$to_table};
+}
+
 sub _clear_link_info {
     my ($self, $link_info, $allowed_columns) = @_;
 	
@@ -720,6 +918,21 @@ sub new {
 			'voice_office_name_pronunciation' => 'office_user_sensitive',
 			'patient_pages_message' => 'patient_page_messages',
 			'referrer' => 'referrer_local',
+			'address_visitor_fake' => 'address_local',
+			'address_office_fake' => 'office_address_local',
+			'email_local_fake' => 'email_local',
+			'phone_local_fake' => 'phone_local',
+			'referrer_local_fake' => 'referrer_local',
+		},
+		'renamed_columns' => {
+			'voice_office_name_pronunciation' => {
+				'guid' => 'voice_pronunciation_guid',
+				'office_name' => 'voice_pronunciation_name',
+			},
+			'patient_pages_message' => {
+				'do_not_show_after' => 'show_until',
+				'patient_page' => 'page_type',
+			},
 		},
 		'hardcoded_lookup' => {
 			'survey_answer' => {
@@ -768,10 +981,106 @@ sub new {
 			'upload_postprocessing_task' => {
 				'postprocessing_action_id' => 'post-upload-action-id',
 			},
+			'orthomation' => {
+				'node_id' => 'orthomation-node-id',
+			},
+			'visitor_opinion' => {
+				'category_id' => 'visitor-opinion-category-id',
+			},
+			'patient_page_messages' => {
+				'show_forever' => 'boolean-to-integer',
+			},
+			'referrer_local' => {
+				'type' => 'referrer-type',
+			},
+			'email_local' => {
+				'source' => 'email-source',
+			},
+			'phone_local' => {
+				'source' => 'phone-source',
+			},
+			'voice_message_history' => {
+				'sent_type' => 'voice-sent-type',
+			},
 		},
 		'conditional_lookup' => {
 			'ppn_article_letter' => {
 				'art_id' => 'newsletter-conditional-article-id',
+			},
+		},
+		'constant_value' => {
+			'appointment_user_sensitive' => {
+				'reactivation_sent' => 'false',
+			},
+			'hhf_applications' => {
+				'deleted' => '0',
+			},
+			'hhf_templates' => {
+				'name' => 'base',
+				'modify_date' => '2011-11-01 00:00:00',
+			},
+			'recall_user_sensitive' => {
+				'reactivation_sent' => 'false',
+			},
+		},
+		'ignore_nullable' => {
+			'email_sent_mail_log' => {
+				'subject' => 1,
+			},
+			'hhf_templates' => {
+				'body' => 1,
+			},
+			'patient_page_messages' => {
+				'message' => 1,
+				'show_until' => 1,
+			},
+			'office_user_sensitive' => {
+				'voice_pronunciation_name' => 1,
+			},
+			'phone_user_sensitive' => {
+				'sms_active' => 1,
+				'voice_active' => 1,
+			},
+			'responsible_patient_user_sensitive' => {
+				'hide_patient' => 1,
+			},
+		},
+		'ignore_type_change' => {
+			'appointment_confirmation_history' => {
+				'client_id' => 1,
+			},
+			'client' => {
+				'cl_start_date' => 1,
+			},
+			'email_sent_mail_log' => {
+				'sml_body' => 1,
+			},
+			'email_sent_mail_log_archive' => {
+				'sml_body' => 1,
+			},
+			'procedure_user_sensitive' => {
+				'client_id' => 1,
+			},
+			'si_theme' => {
+				'client_id' => 1,
+			},
+			'voice_left_messages' => {
+				'voice_queue_id' => 1,
+			},
+			'voice_qa_record' => {
+				'voice_queue_id' => 1,
+			},
+			'voice_transactions_log' => {
+				'voice_queue_id' => 1,
+			},
+			'voice_system_transaction_log' => {
+				'voice_queue_id' => 1,
+			},
+			'voice_message_history' => {
+				'voice_queue_id' => 1,
+			},
+			'office_address_local' => {
+				'client_id' => 1,
 			},
 		},
 	}, $class;
@@ -793,7 +1102,6 @@ sub _generate_actions {
 			$actions{$table->{'table'}."_local"} = "???";
 		} elsif ($table->{'action'} eq 'user-sensitive') {
 			$actions{$table->{'table'}."_user_sensitive"} = "update";
-			$actions{$table->{'table'}."_local"} = "delete-insert";
 			$actions{$table->{'table'}} = "remap-only";
 		} elsif (exists $know_actions{$table->{'action'}}) {
 			$actions{ $self->table_name_after_renamed($table->{'table'}) } = $table->{'action'};
@@ -866,6 +1174,16 @@ sub table_name_after_renamed {
 	}
 }
 
+sub column_name_after_rename {
+	my ($self, $table_5, $column_5) = @_;	
+
+    if (exists $self->{'renamed_columns'}{$table_5}{$column_5}) {
+    	return $self->{'renamed_columns'}{$table_5}{$column_5};
+	} else {
+		return $column_5;
+	}
+}
+
 sub get_new_names {
     my ($self, $table_5) = @_;
 	
@@ -923,6 +1241,31 @@ sub get_conditional_lookup {
 	
 	return $self->{'conditional_lookup'}{$table_6}{$column_6};
 }
+
+sub is_constant_value_exists {
+    my ($self, $table_6, $column_6) = @_;
+	
+	return exists $self->{'constant_value'}{$table_6}{$column_6};
+}
+
+sub get_constant_value {
+    my ($self, $table_6, $column_6) = @_;
+	
+	return $self->{'constant_value'}{$table_6}{$column_6};
+}
+
+sub is_nullable_ignored {
+    my ($self, $table_6, $column_6) = @_;
+	
+	return $self->{'ignore_nullable'}{$table_6}{$column_6};
+}
+
+sub is_column_type_ignored {
+    my ($self, $table_6, $column_6) = @_;
+	
+	return $self->{'ignore_type_change'}{$table_6}{$column_6};
+}
+
 
 package Migration::Rule;
 
@@ -1095,3 +1438,34 @@ sub as_json {
     );
 	return \%r;
 }
+
+package Migration::Rule::ConstantValue;
+
+use base qw(Migration::Rule);
+
+sub new {
+	my ($class, $value) = @_;
+	
+	my $self = bless {
+		'value' => $value,
+	}, $class;
+	return $self;
+}
+
+sub as_string {
+    my ($self) = @_;
+	
+	return "constant [".$self->{'value'}."]";
+}
+
+sub as_json {
+    my ($self) = @_;
+
+    tie my %r, "Tie::IxHash", (
+    	'action' => "constant",
+    	'value' => $self->{'value'},
+    );
+	return \%r;
+}
+
+1;
