@@ -23,7 +23,6 @@ use PDMParser;
 
 	my $links = Links->new();
 	load_links_from_model($logger, $links, "Unified DB.pdm");
-	load_hard_coded_links($links);
 	get_schema_diff($logger, $schema_5, $schema_6, $required_tables, $links);
 }
 
@@ -34,9 +33,11 @@ sub get_schema_diff {
 	my $schema_6 = group_by_columns($schema_6_list, [ 'TABLE_NAME', 'COLUMN_NAME' ]);
 
     my $migration = Migration->new($schema_6, $required_tables);
+	$migration->load_hard_coded_links($links);
     $required_tables = filter_and_expand_required_tables($logger, $required_tables, $migration, ['1', '2', '3']);
 
     $links->rename_tables($migration, $schema_6);
+    $migration->restore_remap_only_links($links);
     my %allowed_tables = map { $_->{'table'} => 1 } @$required_tables;
 	$links->remove_link_not_from_tables(\%allowed_tables);
 	$links->verify_broken_links($logger, \%allowed_tables, $migration);
@@ -48,13 +49,14 @@ sub get_schema_diff {
 
 	my $rules = MigrationRules->new($logger, $schema_6_list, $required);
 
-	$rules->apply_table_info($migration);
+	$rules->apply_table_info($migration, $links, $schema_6_list);
 	$rules->apply_simple_columns_info($migration);
 	$rules->apply_links($links);
 	$rules->apply_moved_tables($migration, $schema_5_list, $schema_6);
 	
 	$rules->save_json_to("_out.json", 1);
 	$rules->save_html_to("_out.html");
+	$rules->save_jira_to("_out.jira");
 
 
 	$rules->check_column_rules();
@@ -178,7 +180,7 @@ sub verify_links {
     my ($logger, $links, $schema_6, $allowed_tables, $migration) = @_;
 	
 	my %not_link = map { $_ => 1 } (
-		"*.pms_id", "*.link_id", "*.voice_queue_id", "*.clog_mail_id", "*.rec_id", "*.sml_mail_id", 
+		"*.pms_id", "*.link_id", "*.voice_queue_id", "*.clog_mail_id", "*.sml_mail_id", 
 		"*.vip_patient_id", "invisalign_text.page_id", "si_image.is_id" );
 	my %to_table = (
 		'patient_id' => "visitor",
@@ -266,70 +268,12 @@ sub load_links_from_model {
 			{
 				$tables->{ $reference->{'from'}{'table_id'} }{'columns'}{ $reference->{'from'}{'column_id'} }{'name'} =>
 				$tables->{ $reference->{'to'}{'table_id'} }{'columns'}{ $reference->{'to'}{'column_id'} }{'name'}
-			}
+			},
+			"from pdm",
 		);
 	}
-	$links->delete_link_between_tables("appointment_reminder_schedule", "client");
-}
-
-sub load_hard_coded_links {
-    my ($links) = @_;
-
-	## client_id
-	for my $from_table (
-		"appointment_reminder_schedule", "email_contact_log", "email_sent_mail_log", "upload_settings", 
-		"address_local", "email_local", "office_address_local", "patient_page_messages", "phone_local"
-	) {
-		$links->add_link(
-			$from_table, 
-			"client", 
-			{
-				'client_id' => "id",
-			}
-		);
-	}
-
-	## visitor_id
-	for my $link (
-		"address_local.visitor_id", "email_local.visitor_id", "phone_local.visitor_id", 
-		"opse_payment_log.patient_id", "token.user_id"
-	) {
-		my ($from_table, $from_column) = split('\.', $link);
-		$links->add_link(
-			$from_table, 
-			"visitor", 
-			{
-				$from_column => "id",
-			}
-		);
-	}
-
-	## other
-	my %links = (
-		'email_referral.referral_mail_id' => 'email_referral_mail.id',
-		'invisalign_case_process_patient.invisalign_client_id' => 'invisalign_client.id',
-		'office_address_local.office_id' => 'office.id',
-		'orthomation.node_id' => 'orthomation_nodes.node_id',
-		'visitor_opinion.category_id' => 'review_category.id',
-		## user sensitive
-		'email_user_sensitive.email_id' => 'email.id',
-		'phone_user_sensitive.phone_id' => 'phone.id',
-		'procedure_user_sensitive.procedure_id' => 'procedure.id',
-		'recall_user_sensitive.recall_id' => 'recall.id',
-		'responsible_patient_user_sensitive.responsible_patient_id' => 'responsible_patient.id',
-		'visitor_user_sensitive.visitor_id' => 'visitor.id',
-	);
-	while (my ($from, $to) = each %links) { 
-		my ($from_table, $from_column) = split('\.', $from, 2);
-		my ($to_table, $to_column) = split('\.', $to, 2);
-		$links->add_link(
-			$from_table, 
-			$to_table, 
-			{
-				$from_column => $to_column,
-			}
-		);
-	}
+	# $links->delete_link_between_tables("appointment_reminder_schedule", "client");
+	$links->delete_link_between_tables("email_referral", "referrer");
 }
 
 
@@ -364,19 +308,94 @@ sub new {
 }
 
 sub apply_table_info {
-    my ($self, $migration) = @_;
+    my ($self, $migration, $links, $schema_6) = @_;
 
 	$self->{'remap_only_tables'} = $migration->get_tables_with_remap_only_action();
 
-    my %remap_only_tables = map { $_ => 1 } @{ $self->{'remap_only_tables'} };
-	for my $table (keys %{ $self->{'rules'} }) {
-		if (exists $remap_only_tables{$table}) {
-			die "rules found for remap-only table [$table]";
+	{
+		my (%primary_keys);
+		for my $column (@$schema_6) {
+			if ($column->{'COLUMN_KEY'} eq "PRI") {
+				push(@{ $primary_keys{$column->{'TABLE_NAME'}} }, $column->{'COLUMN_NAME'});
+			}
 		}
-		$self->{'tables'}{$table} = {
-			'action' => $migration->get_table_action($table),
-		};
+
+	    my %remap_only_tables = map { $_ => 1 } @{ $self->{'remap_only_tables'} };
+	    my $stop = 0;
+		for my $table (keys %{ $self->{'rules'} }) {
+			if (exists $remap_only_tables{$table}) {
+				die "rules found for remap-only table [$table]";
+			}
+			my $table_action = $migration->get_table_action($table);
+			tie my %r, 'Tie::IxHash', (
+				'action' => $table_action,
+			);
+			if ($table_action =~ m{update}) {
+				if (exists $primary_keys{$table}) {
+					$r{'update_on'} = [ @{ $primary_keys{$table} } ],
+				} else {
+					$stop ++ ;
+					$self->{'logger'}->printf("no primary key in [%s]", $table);
+				}
+			}
+			$self->{'tables'}{$table} = \%r;
+		}
+		$self->{'logger'}->stop($stop, "missing primary key");
 	}
+
+	{
+		my $stop = 0;
+		for my $table (keys %{ $self->{'rules'} }) {
+			if ($table ne 'client') {
+				my $path = $self->find_path_to_client($table, $links);
+				if (defined $path) {
+					$self->{'tables'}{$table}{'path_to_client'} = $path;
+				} else {
+					#$stop ++;
+					$self->{'logger'}->printf("can't find link from [%s] to client", $table);
+				}
+			}
+		}
+		$self->{'logger'}->stop($stop, "tables without link to client");
+	}
+}
+
+sub find_path_to_client {
+    my ($self, $table, $links, $depth, $visited) = @_;
+
+    $depth //= 0;
+    $visited //= {
+    	$table => 1,
+    };
+	my @found_paths;
+	if ($links->is_link_exists_between_tables($table, "client")) {
+		push(
+			@found_paths,
+			[ $table.".".$links->get_link_column_between_tables($table, "client") ]
+		);
+	} else {
+		$links->for_each_link_from(
+			$table,
+			sub {
+				my ($to_table, $columns) = @_;
+
+				unless (exists $visited->{$to_table}) {
+				 	$visited->{$to_table} = 1;
+				 	my $path = $self->find_path_to_client($to_table, $links, $depth + 1, $visited);
+				 	if (defined $path) {
+				 		unshift(@$path, $table.".".((keys %$columns)[0]));
+					 	push(@found_paths, $path);
+				 	}
+				} 
+			}
+		);
+	}
+	## put shortest path on top
+	@found_paths = 
+		map {$_->[0]}
+		sort {$b->[1] <=> $a->[1]} 
+		map {[$_, scalar @$_]} @found_paths;
+	return $found_paths[0];
 }
 
 sub flat_rules {
@@ -402,7 +421,14 @@ sub flat_rules {
 					Migration::Rule::CopyValue->new($table_6, 'pms_id'),
 					$no_missing_rules,
 				),
-			]
+				$self->_make_json_column_obj(
+					$table_6,
+					'client_id',
+					Migration::Rule::ForeignKey->new('client', 'id')->set_source("link-remap-only"),
+					$no_missing_rules,
+				),
+			],
+			'path_to_client' => [ $table_6.".client_id" ],
 		};
 	}    
 
@@ -448,9 +474,15 @@ sub _make_json_column_obj {
 		'table' => $table_6,
 		'column' => $column_6,
 		'comment' => $rule->as_string(),
-		($no_missing_rules ? () : ( '_ref' => ref $rule )),
+		'_ref' => ref $rule,
+		($rule->get_source() ? ('_source' => $rule->get_source()) : ()),
 		%{ $rule->as_json() },
 	);
+	if ($no_missing_rules) {
+		for my $debug_key (grep {m{^_}} keys %r) {
+			delete $r{$debug_key};
+		}
+	}
 	return \%r;
 }
 
@@ -469,20 +501,33 @@ sub save_html_to {
     my @lines = (
     	"<html><head><style>",
     	"body {font-family: Verdana, Arial, Helvetica; }",
+    	"li {font-size: 11pt;}",
     	"table {border: 1px solid #ccc; border-collapse:collapse; font-size: 9pt;}",
     	"td, th {border-top: 1px solid #ccc; border-left: 1px dashed #ccc; padding-left: 0.5em; padding-right: 0.5em;}",
     	#".highlight { color: #49717F }",
     	".nohighlight { color: #999 }",
     	".error { color: #f00; font-weight: bold; }",
     	"th {text-align: left; }",
+    	".value {font-weight: bold;}",
     	"</style></head><body>");
     for my $table (keys %$rules) {
     	push(@lines, "<h2><a name=\"table.".$table."\"></a>Table [$table]</h2>");
-		push(@lines, "<p>Action: ".$rules->{$table}{'action'}."</p>");
+    	push(@lines, "<ul>");
+		push(@lines, "<li>Action: <span class=\"value\">".$rules->{$table}{'action'}."</span></li>");
+		my %update_columns;
+		if ($rules->{$table}{'update_on'}) {
+			%update_columns = map {$_ => 1} @{ $rules->{$table}{'update_on'} };
+			push(@lines, "<li>Update on: ".join(", ", map {"<span class=\"value\">$_</span>"} @{ $rules->{$table}{'update_on'} })."</li>");
+		}
+		if ($rules->{$table}{'path_to_client'}) {
+			push(@lines, "<li>Path to client: ".join(" &gt; ", map {"<span class=\"value\">$_</span>"} @{ $rules->{$table}{'path_to_client'} })."</li>");
+		}
+    	push(@lines, "</ul>");
     	if (exists $rules->{$table}{'columns'}) {
         	push(@lines, "<table><tr><th>column</th><th>from</th><th>action</th></tr>");
 	    	for my $column ($self->_sort_column_names( $rules->{$table}{'columns'} ) ) {
-		    	push(@lines, "<tr><td><a name=\"column.".$column->{'table'}.".".$column->{'column'}."\"></a>".$column->{'column'}."</td>");
+		    	push(@lines, "<tr><td><a name=\"column.".$column->{'table'}.".".$column->{'column'}."\"></a>".
+		    		_html_highlight($column->{'column'}, $update_columns{$column->{'column'}}, 'value')."</td>");
 		    	push(
 	    			@lines, 
 	    			"<td>".( $column->{'from_table'} ? 
@@ -494,7 +539,8 @@ sub save_html_to {
 				if (exists $column->{'action'}) {
 					if ($column->{'action'} eq "foreign-key") {
 						push(@lines, "<td>value from [<a href=\"#table.".$column->{'lookup_table'}."\">".$column->{'lookup_table'}."</a>.".
-							"<a href=\"#column.".$column->{'lookup_table'}.".".$column->{'lookup_column'}."\">".$column->{'lookup_column'}."</a>]</td></tr>");
+							"<a href=\"#column.".$column->{'lookup_table'}.".".$column->{'lookup_column'}."\">".$column->{'lookup_column'}.
+							"</a>]".($column->{'_source'}?" (".$column->{'_source'}.")":"")."</td></tr>");
 					} else {
 						push(@lines, "<td>"._html_highlight($column->{'comment'}, $column->{'_ref'} !~ m{(?:Copy|Move)Value$}) ."</td></tr>");
 					}
@@ -513,6 +559,57 @@ sub save_html_to {
 	write_file($fn, join("\n", @lines));
 }
 
+sub save_jira_to {
+    my ($self, $fn) = @_;
+	
+    $self->{'logger'}->printf("save rules as jira to [%s]", $fn);
+    my $rules = $self->flat_rules();
+    my @lines;
+    for my $table (keys %$rules) {
+    	push(@lines, "h2. Table \\[$table\\]");
+    	push(@lines, "");
+		push(@lines, "* Action: *".$rules->{$table}{'action'}."*");
+		my %update_columns;
+		if ($rules->{$table}{'update_on'}) {
+			%update_columns = map {$_ => 1} @{ $rules->{$table}{'update_on'} };
+			push(@lines, "* Update on: ".join(", ", map {"*$_*"} @{ $rules->{$table}{'update_on'} }));
+		}
+		if ($rules->{$table}{'path_to_client'}) {
+			push(@lines, "* Path to client: ".join(" &gt; ", map {"*$_*"} @{ $rules->{$table}{'path_to_client'} }));
+		}
+    	push(@lines, "");
+    	if (exists $rules->{$table}{'columns'}) {
+        	push(@lines, "|| column || from || action ||");
+	    	for my $column ($self->_sort_column_names( $rules->{$table}{'columns'} ) ) {
+	    		my @row;
+		    	push(@row, _jira_highlight($column->{'column'}, $update_columns{$column->{'column'}}));
+		    	push(
+	    			@row, 
+	    			( $column->{'from_table'} ? 
+	    				_jira_nohighlight($column->{'from_table'}, $column->{'from_table'} ne $column->{'table'}) . "." . 
+	    				_jira_nohighlight($column->{'from_column'}, $column->{'from_column'} ne $column->{'column'}) :
+	    				""
+					)
+				);
+				if (exists $column->{'action'}) {
+					if ($column->{'action'} eq "foreign-key") {
+						push(@row, "reference to \"".$column->{'lookup_table'}.".".$column->{'lookup_column'}."\"");
+					} else {
+						$column->{'comment'} =~ s{[\[\]]}{"}g;
+						push(@row, _jira_nohighlight($column->{'comment'}, $column->{'_ref'} !~ m{(?:Copy|Move)Value$}));
+					}
+				} else {
+					push(@row, "{color:red}missing{color}");
+				}
+				push(@lines, "| ".join(" | ", @row)." |");
+	    	}
+	    	push(@lines, "");
+	    }
+    }
+
+	write_file($fn, join("\n", @lines));
+}
+
 sub _sort_column_names {
     my ($self, $names) = @_;
 	
@@ -523,12 +620,34 @@ sub _sort_column_names {
 }
 
 sub _html_highlight {
+	my ($value, $condition, $class) = @_;
+
+	$class //= "highlight";
+
+	if ($condition) {
+		return "<span class=\"$class\">$value</span>";
+	} else {
+		return "<span class=\"no$class\">$value</span>";
+	}
+}
+
+sub _jira_nohighlight {
 	my ($value, $condition) = @_;
 
 	if ($condition) {
-		return "<span class=\"highlight\">$value</span>";
+		return $value;
 	} else {
-		return "<span class=\"nohighlight\">$value</span>";
+		return "{color:#999999}".$value."{color}";
+	}
+}
+
+sub _jira_highlight {
+	my ($value, $condition) = @_;
+
+	if ($condition) {
+		return "*$value*";
+	} else {
+		return $value;
 	}
 }
 
@@ -589,7 +708,7 @@ sub apply_links {
 
 		    my $link = $links->get_link_from($table_6, $column_6);
 		    if (defined $link) {
-		    	return Migration::Rule::ForeignKey->new($link->{'to_table'}, $link->{'to_column'});
+		    	return Migration::Rule::ForeignKey->new($link->{'to_table'}, $link->{'to_column'})->set_source($link->{'comment'});
 		    }
 			return undef;
 		}
@@ -745,17 +864,48 @@ sub new {
 	
 	my $self = bless {
 		'links' => {},
+		'comments' => {},
 	}, $class;
 	return $self;
 }
 
 sub add_link {
-    my ($self, $from_table, $to_table, $columns) = @_;
+    my ($self, $from_table, $to_table, $columns, $comment) = @_;
 
     if ($self->is_link_exists($from_table, $to_table, $columns)) {
 		die "link [$from_table] -> [$to_table] on [".$self->_columns_to_string($columns)."] is already defined";
 	}
 	$self->{'links'}{$from_table}{$to_table}{ _columns_key($columns) } = $columns;
+	$self->{'comments'}{$from_table}{$to_table}{ _columns_key($columns) } = $comment;
+}
+
+sub add_links {
+    my ($self, $links, $comment) = @_;
+	
+	while (my ($from, $to) = each %$links) { 
+		my ($from_table, $from_column) = split('\.', $from, 2);
+		my ($to_table, $to_column) = split('\.', $to, 2);
+		$self->add_link(
+			$from_table, 
+			$to_table, 
+			{
+				$from_column => $to_column,
+			},
+			$comment
+		);
+	}
+}
+
+sub for_each_link_from {
+    my ($self, $from_table, $callback) = @_;
+	
+	if (exists $self->{'links'}{$from_table}) {
+		for my $to_table (keys %{ $self->{'links'}{$from_table} }) {
+			for my $columns (values %{ $self->{'links'}{$from_table}{$to_table} }) {
+				$callback->($to_table, { %$columns });
+			}
+		}
+    }
 }
 
 sub _columns_key {
@@ -795,17 +945,29 @@ sub is_link_exists_between_tables {
 	return exists $self->{'links'}{$from_table}{$to_table};
 }
 
+sub get_link_column_between_tables {
+    my ($self, $from_table, $to_table) = @_;
+	
+	unless ($self->is_link_exists_between_tables($from_table, $to_table)) {
+		die "link from [$from_table] to [$to_table] doesn't exist";
+	}
+	my $link_info = $self->{'links'}{$from_table}{$to_table};
+	return (keys %{ (values %$link_info)[0] })[0];
+}
+
 sub get_link_from {
     my ($self, $from_table, $from_column) = @_;
 
     if (exists $self->{'links'}{$from_table}) {
     	for my $to_table (keys %{ $self->{'links'}{$from_table} }) {
     		my $links = $self->{'links'}{$from_table}{$to_table};
-    		for my $link_info (values %$links) {
+    		for my $link_key (keys %$links) {
+    			my $link_info = $links->{$link_key};
     			if (exists $link_info->{$from_column}) {
     				return {
     					'to_table' => $to_table,
     					'to_column' => $link_info->{$from_column},
+    					'comment' => $self->{'comments'}{$from_table}{$to_table}{$link_key}
     				};
     			}
     		}
@@ -861,7 +1023,12 @@ sub rename_tables {
 						$schema_6->{$new_from_table},
 					);
 					if (keys %$new_link_info) {
-						$links{$new_from_table}{ $migration->table_name_after_renamed($to_table) } = $new_link_info;
+						my $new_to_table = $migration->table_name_after_renamed($to_table);
+						$links{$new_from_table}{$new_to_table} = $new_link_info;
+						for my $link_key (keys %$new_link_info) {
+							$self->{'comments'}{$new_from_table}{$new_to_table}{$link_key} = "from ".$from_table.
+								" by rename (old ".$self->{'comments'}{$from_table}{$to_table}{$link_key}.")";
+						}
 					}
 				}
 			}
@@ -873,6 +1040,9 @@ sub rename_tables {
 sub delete_link_between_tables {
     my ($self, $from_table, $to_table) = @_;
 
+    unless (exists $self->{'links'}{$from_table}{$to_table}) {
+    	die "can't delete link [$from_table] -> [$to_table]: link doesn't exist";
+    }
     delete $self->{'links'}{$from_table}{$to_table};
 }
 
@@ -1266,6 +1436,85 @@ sub is_column_type_ignored {
 	return $self->{'ignore_type_change'}{$table_6}{$column_6};
 }
 
+sub load_hard_coded_links {
+    my ($self, $links) = @_;
+
+	## client_id
+	for my $from_table (
+		"appointment_reminder_schedule", "email_contact_log", "email_sent_mail_log", "upload_settings", 
+		"address_local", "email_local", "office_address_local", "patient_page_messages", "phone_local"
+	) {
+		$links->add_link(
+			$from_table, 
+			"client", 
+			{
+				'client_id' => "id",
+			},
+			"hard-coded",
+		);
+	}
+
+	## visitor_id
+	for my $link (
+		"address_local.visitor_id", "email_local.visitor_id", "phone_local.visitor_id", 
+		"opse_payment_log.patient_id", "token.user_id"
+	) {
+		my ($from_table, $from_column) = split('\.', $link);
+		$links->add_link(
+			$from_table, 
+			"visitor", 
+			{
+				$from_column => "id",
+			},
+			"hard-coded",
+		);
+	}
+
+	## other
+	$links->add_links(
+		{
+			'client_access.user_name' => 'client.cl_username',
+			'email_referral.referral_mail_id' => 'email_referral_mail.id',
+			'invisalign_case_process_patient.invisalign_client_id' => 'invisalign_client.id',
+			'office_address_local.office_id' => 'office.id',
+			'orthomation.node_id' => 'orthomation_nodes.node_id',
+			'visitor_opinion.category_id' => 'review_category.id',
+			'voice_left_messages.rec_id' => 'voice_recipient_list.RLId',
+			'voice_message_history.rec_id' => 'voice_recipient_list.RLId',
+			'srm_resource.container' => 'client.cl_username',
+			'email_referral.referrer_id' => 'visitor.id', ## type column is in fact 'visitor' for all records
+			## user sensitive
+			'email_user_sensitive.email_id' => 'email.id',
+			'phone_user_sensitive.phone_id' => 'phone.id',
+			'procedure_user_sensitive.procedure_id' => 'procedure.id',
+			'recall_user_sensitive.recall_id' => 'recall.id',
+			'responsible_patient_user_sensitive.responsible_patient_id' => 'responsible_patient.id',
+			'visitor_user_sensitive.visitor_id' => 'visitor.id',
+		},
+		"hard-coded",
+	);
+}
+
+sub restore_remap_only_links {
+    my ($self, $links) = @_;
+	
+	$links->add_links(
+		{
+			'address.client_id' => 'client.id',
+			'appointment.client_id' => 'client.id',
+			'email.client_id' => 'client.id',
+			'office.client_id' => 'client.id',
+			'phone.client_id' => 'client.id',
+			'procedure.client_id' => 'client.id',
+			'recall.client_id' => 'client.id',
+			'responsible_patient.client_id' => 'client.id',
+			'staff.client_id' => 'client.id',
+			'visitor.client_id' => 'client.id',
+		},
+		"remap-only",
+	);
+}
+
 
 package Migration::Rule;
 
@@ -1289,6 +1538,19 @@ sub as_json {
 	die "must override";
 }
 
+sub set_source {
+    my ($self, $source) = @_;
+	
+	$self->{'source'} = $source;
+	return $self;
+}
+
+sub get_source {
+    my ($self) = @_;
+	
+	return $self->{'source'};
+}
+
 package Migration::Rule::ForeignKey;
 
 use base qw(Migration::Rule);
@@ -1306,7 +1568,7 @@ sub new {
 sub as_string {
     my ($self) = @_;
 	
-	return "link to [".$self->{'table'}.".".$self->{'column'}."]";
+	return "link to [".$self->{'table'}.".".$self->{'column'}."]".($self->{'source'} ? " (".$self->{'source'}.")" : "");
 }
 
 sub as_json {
