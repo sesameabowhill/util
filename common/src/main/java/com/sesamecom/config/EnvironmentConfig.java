@@ -438,6 +438,14 @@ public class EnvironmentConfig {
     }
 
     /**
+     * Override for reactivation unit to help test sending.
+     * @return string value of reactivationScheduleUnitDebug property
+     */
+    public static Boolean getDebugUseDaysForReactivationSchedule() {
+        return getProperty("debugUseDaysForReactivationSchedule", Boolean.class, OPTIONAL, false, false);
+    }
+
+    /**
      * Provides raw, read-only access to all properties defined.  This can be useful when some properties are used to
      * configure a third party component that knows how to get them from a Properties object (like BoneCP).
      */
