@@ -55,6 +55,7 @@ sub get_schema_diff {
 	$rules->apply_simple_columns_info($migration);
 	$rules->apply_links($links);
 	$rules->apply_table_info($migration, $links, $schema_6_list);
+	$rules->apply_table_priority($migration, $required_tables);
 	$rules->apply_moved_tables($migration, $schema_5_list, $schema_6);
 	
 	$rules->save_json_to("_out.json", 1);
@@ -386,6 +387,35 @@ sub apply_table_info {
 	}
 }
 
+sub apply_table_priority {
+    my ($self, $migration, $required_tables) = @_;
+
+	for my $table (@$required_tables) {
+		my $new_names = $migration->get_new_names($table->{'table'});
+		for my $new_name (@$new_names) {
+			if (exists $self->{'tables'}{$new_name}) {
+				$self->{'tables'}{$new_name}{'priority'} = $table->{'priority'};
+				if ($table->{'priority'} == 3 && $table->{'transform'} eq 'past-week') {
+					my $date_column = $migration->get_date_column($new_name);
+					unless (defined $date_column) {
+						die "no data column for [$new_name]";
+					}
+					$self->{'tables'}{$new_name}{'priority_two_date_column'} = $date_column;
+				}
+			}
+		}
+	}
+
+	my $stop = 0;
+	for my $table (keys %{ $self->{'rules'} }) {
+		unless (exists $self->{'tables'}{$table}{'priority'}) {
+			$stop++;
+			$self->{'logger'}->printf("no priority for [%s]", $table);
+		}
+	}	
+	$self->{'logger'}->stop($stop, "tables without priority");
+}
+
 sub get_update_on_columns {
     my ($self, $schema_6, $migration) = @_;
 	
@@ -492,6 +522,7 @@ sub flat_rules {
 					'column' => 'client_id',
 				}
 			],
+			'priority' => 1,
 		);
 		$rules_by_table{$table_6} = \%r;
 	}    
@@ -587,6 +618,7 @@ sub save_html_to {
     	push(@lines, "<ul>");
 		push(@lines, "<li>To table: <span class=\"value\">".$rules->{$table}{'to_table'}."</span></li>");
 		push(@lines, "<li>Action: <span class=\"value\">".$rules->{$table}{'action'}."</span></li>");
+		push(@lines, "<li>Priority: <span class=\"value\">".$rules->{$table}{'priority'}."</span></li>");
 		my %update_columns;
 		if ($rules->{$table}{'update_on'}) {
 			%update_columns = map {$_ => 1} @{ $rules->{$table}{'update_on'} };
@@ -595,6 +627,10 @@ sub save_html_to {
 		if ($rules->{$table}{'path_to_client'}) {
 			$update_columns{ $rules->{$table}{'path_to_client'}->[0]{'column'} } = 1;
 			push(@lines, "<li>Path to client: ".join(" &gt; ", map {"<span class=\"value\">".$_->{'table'}.".".$_->{'column'}."</span>"} @{ $rules->{$table}{'path_to_client'} })."</li>");
+		}
+		if ($rules->{$table}{'priority_two_date_column'}) {
+			$update_columns{$rules->{$table}{'priority_two_date_column'}} = 1;
+			push(@lines, "<li>Date column for priority 2 extraction: <span class=\"value\">".$rules->{$table}{'priority_two_date_column'}."</span></li>");
 		}
     	push(@lines, "</ul>");
     	if (exists $rules->{$table}{'columns'}) {
@@ -644,6 +680,7 @@ sub save_jira_to {
     	push(@lines, "");
 		push(@lines, "* To table: *".$rules->{$table}{'to_table'}."*");
 		push(@lines, "* Action: *".$rules->{$table}{'action'}."*");
+		push(@lines, "* Priority: *".$rules->{$table}{'priority'}."*");
 		my %update_columns;
 		if ($rules->{$table}{'update_on'}) {
 			%update_columns = map {$_ => 1} @{ $rules->{$table}{'update_on'} };
@@ -652,6 +689,10 @@ sub save_jira_to {
 		if ($rules->{$table}{'path_to_client'}) {
 			$update_columns{ $rules->{$table}{'path_to_client'}->[0]{'column'} } = 1;
 			push(@lines, "* Path to client: ".join(" > ", map {"*".$_->{'table'}.".".$_->{'column'}."*"} @{ $rules->{$table}{'path_to_client'} }));
+		}
+		if ($rules->{$table}{'priority_two_date_column'}) {
+			$update_columns{$rules->{$table}{'priority_two_date_column'}} = 1;
+			push(@lines, "*Date column for priority 2 extraction: *".$rules->{$table}{'priority_two_date_column'}."*");
 		}
     	push(@lines, "");
     	if (exists $rules->{$table}{'columns'}) {
@@ -1411,7 +1452,26 @@ sub new {
 				'sent_date' => 1,
 				'create_datetime' => 1,
 			},
-		}
+		},
+		'date_column' => {
+			'email_contact_log' => 'clog_sdate',
+			'email_post_app_survey_log' => 'date',
+			'email_referral' => 'email_referral_mail.sending_date',
+			'email_referral_mail' => 'sending_date',
+			'email_sent_mail_log' => 'sml_date',
+			'hhf_applications' => 'filldate',
+			'opse_payment_log' => 'Time',
+			'sms_message_history' => 'time2send',
+			'sms_message_response' => 'ResponseReceiveDate',
+			'sms_queue' => 'time2send',
+			'token' => 'timestamp',
+			'voice_left_messages' => 'call_time',
+			'voice_message_history' => 'time2send',
+			'voice_queue' => 'time2send',
+			'voice_recipient_list' => 'voice_message_history.time2send',
+			'voice_system_transaction_log' => 'eventtime_utc',
+			'voice_transactions_log' => 'starttime_utc',
+		},
 	}, $class;
 	$self->_detect_renames_to_same_table();
 	$self->_generate_versioned_rules($schema_6, $required_tables);
@@ -1668,6 +1728,12 @@ sub is_column_type_ignored {
 	
     $table_6 = $self->get_table_name($table_6);
 	return $self->{'ignore_type_change'}{$table_6}{$column_6};
+}
+
+sub get_date_column {
+    my ($self, $table_6) = @_;
+	
+	return $self->{'date_column'}{$table_6};
 }
 
 sub load_hard_coded_links {
