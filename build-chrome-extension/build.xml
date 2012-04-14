@@ -1,0 +1,11 @@
+<project>
+	<target name="watch" description="automatically compile coffee files">
+		<exec executable="coffee" failonerror="true">
+			<arg value="--bare" />
+			<arg value="--output"/>
+			<arg value="target/"/>
+			<arg value="--watch"/>
+			<arg value="src/"/>
+		</exec>
+	</target>
+</project>

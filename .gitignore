@@ -5,6 +5,7 @@ _*
 *.ipr
 *.iws
 */target
+.DS_Store
 client-clone/backup_client_data.log
 client-clone/SesameDemo-Database.zip
 client-clone/demo_database.sql

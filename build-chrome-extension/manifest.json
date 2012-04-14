@@ -1,0 +1,12 @@
+{
+  "name": "Sesame Release Build",
+  "version": "0.0.0.0",
+  "background_page": "background.html",
+  "permissions": [
+  	"https://ci.sesamecom.com/*", "notifications"
+  ],
+  "browser_action": {
+    "default_icon": "images/icon.png",
+    "default_popup": "notification.html"
+  }
+}
