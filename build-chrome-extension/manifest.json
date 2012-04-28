@@ -3,10 +3,9 @@
   "version": "0.0.0.0",
   "background_page": "background.html",
   "permissions": [
-  	"https://ci.sesamecom.com/*", "notifications"
+  	"https://ci.sesamecom.com/*", "https://jenkins.sesamecom.com/*", "notifications"
   ],
   "browser_action": {
-    "default_icon": "images/icon.png",
-    "default_popup": "notification.html"
+    "default_icon": "images/icon.png"
   }
 }
