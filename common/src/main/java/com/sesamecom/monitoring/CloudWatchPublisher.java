@@ -9,6 +9,7 @@ import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.amazonaws.services.cloudwatch.model.StatisticSet;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.sesamecom.config.EnvironmentConfig;
 import org.joda.time.DateTime;
@@ -17,12 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.net.URLConnection;
+import java.util.Collection;
+import java.util.List;
 
 import static com.sesamecom.config.EnvironmentConfig.*;
 
@@ -58,32 +57,43 @@ public class CloudWatchPublisher implements OperationalStatisticPublisher {
     }
 
     @Override
-    public void publish(OperationalStatistic statistic) {
+    public void publish(String namespace, Collection<OperationalStatistic> statistics) {
         if (! backEndIsAvailable())
             return;
 
-        if (statistic.getSampleCount() > 0) {
-            StatisticSet statSet = new StatisticSet();
-            statSet.setMaximum(statistic.getMaximum());
-            statSet.setMinimum(statistic.getMinimum());
-            statSet.setSampleCount(statistic.getSampleCount());
-            statSet.setSum(statistic.getSum());
+        List<MetricDatum> datums = Lists.newArrayList();
+        for (OperationalStatistic statistic : statistics) {
+            if (statistic.getSampleCount() > 0) {
+                StatisticSet statSet = new StatisticSet();
+                statSet.setMaximum(statistic.getMaximum());
+                statSet.setMinimum(statistic.getMinimum());
+                statSet.setSampleCount(statistic.getSampleCount());
+                statSet.setSum(statistic.getSum());
 
-            MetricDatum datum = new MetricDatum();
-            datum.setMetricName(statistic.getMetric());
-            datum.setDimensions(dimensions);
-            datum.setTimestamp(DateTime.now(DateTimeZone.UTC).toDate());
-            datum.setUnit(statistic.getUnit().getValue());
-            datum.setStatisticValues(statSet);
+                MetricDatum datum = new MetricDatum();
+                datum.setMetricName(statistic.getMetric());
+                datum.setDimensions(dimensions);
+                datum.setTimestamp(DateTime.now(DateTimeZone.UTC).toDate());
+                datum.setUnit(statistic.getUnit().getValue());
+                datum.setStatisticValues(statSet);
 
+                datums.add(datum);
+            } else {
+                // It's good practice to not send zero values to AWS.
+            }
+        }
+        if (!datums.isEmpty()) {
             PutMetricDataRequest request = new PutMetricDataRequest();
-            request.setNamespace("Sesame/" + statistic.getComponent());
-            request.setMetricData(ImmutableList.of(datum));
+            request.setNamespace("Sesame/" + namespace);
+            request.setMetricData(datums);
 
             client.putMetricDataAsync(request); // fire and forget!  hope everything goes ok!
-        } else {
-            // It's a good practice to not send zero values to AWS.
         }
+    }
+
+    @Override
+    public void publish(String namespace, OperationalStatistic... statistics) {
+        publish(namespace, Lists.newArrayList(statistics));
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.sesamecom.monitoring;
 
+import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+
 /**
  * Represents descriptive statistics about a value sampled over some period.  For example, job completion time in
  * seconds, or queue size in count of queue items.  Simply collect samples continuously for some period (one minute is
@@ -7,7 +9,6 @@ package com.sesamecom.monitoring;
  * OperationalStatisticPublisher#publish(OperationalStatistic)}.
  */
 public class OperationalStatistic {
-    private String component;
     private String metric;
     private Unit unit;
     private double maximum;
@@ -39,8 +40,7 @@ public class OperationalStatistic {
         }
     }
 
-    public OperationalStatistic(String component, String metric, Unit unit, double maximum, double minimum, double sampleCount, double sum) {
-        this.component = component;
+    public OperationalStatistic(String metric, Unit unit, double maximum, double minimum, double sampleCount, double sum) {
         this.metric = metric;
         this.unit = unit;
         this.maximum = maximum;
@@ -49,8 +49,13 @@ public class OperationalStatistic {
         this.sum = sum;
     }
 
-    public String getComponent() {
-        return component;
+    public OperationalStatistic(String metric, Unit unit, DescriptiveStatistics statistics) {
+        this.metric = metric;
+        this.unit = unit;
+        this.maximum = statistics.getMax();
+        this.minimum = statistics.getMin();
+        this.sampleCount = statistics.getValues().length;
+        this.sum = statistics.getSum();
     }
 
     public String getMetric() {
