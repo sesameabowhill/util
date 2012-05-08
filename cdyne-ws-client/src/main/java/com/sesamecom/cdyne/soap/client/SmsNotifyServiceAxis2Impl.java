@@ -1,12 +1,9 @@
 package com.sesamecom.cdyne.soap.client;
 
 import com.cdyne.sms2.*;
-import com.cdyne.sms2.impl.SMSRequestImpl;
-import com.microsoft.schemas._2003._10.serialization.arrays.impl.ArrayOfstringImpl;
 import com.sesamecom.soap.generated.cdyne.SmsStub;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.ServiceClient;
-import org.datacontract.schemas._2004._07.smsws.SMSAdvancedRequestDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

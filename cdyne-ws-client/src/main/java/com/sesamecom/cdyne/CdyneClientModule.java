@@ -1,10 +1,8 @@
 package com.sesamecom.cdyne;
 
-import com.cdyne.sms2.SMSRequest;
-import com.cdyne.sms2.impl.SMSRequestImpl;
+import com.google.inject.AbstractModule;
 import com.sesamecom.cdyne.soap.client.PhoneNotifyService;
 import com.sesamecom.cdyne.soap.client.PhoneNotifyServiceAxis2Impl;
-import com.google.inject.AbstractModule;
 import com.sesamecom.cdyne.soap.client.SmsNotifyService;
 import com.sesamecom.cdyne.soap.client.SmsNotifyServiceAxis2Impl;
 

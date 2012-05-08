@@ -291,8 +291,8 @@ public class EnvironmentConfig {
     /**
      * Returns the SI Upload Visit Batch endpoint for messaging
      */
-    public static String getSIUploadVisitBatchCommandEndpoint() {
-        return getProperty("siUploadVisitBatchCommandEndpoint", String.class);
+    public static String getSIUploadVisitBatchCommandEndpoint(String defaultValue) {
+        return getProperty("siUploadVisitBatchCommandEndpoint", String.class, OPTIONAL, defaultValue, false);
     }
 
     /**
