@@ -30,7 +30,11 @@ public abstract class AbstractLiquibaseRunner {
     }
 
     public void update() {
-        Connection connection = null;
+        update(getContext());
+    }
+
+    public void update(String context) {
+        Connection connection;
         try {
             connection = getDataSource().getConnection();
         } catch (SQLException e) {
@@ -44,10 +48,11 @@ public abstract class AbstractLiquibaseRunner {
                 new JdbcConnection(connection)
             );
 
-            for (Map.Entry<String, Object> entry : getParameters().entrySet())
+            for (Map.Entry<String, Object> entry : getParameters().entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+            }
 
-            liquibase.update(getContext());
+            liquibase.update(context);
 
         } catch (LiquibaseException e) {
             throw new RuntimeException(e);
