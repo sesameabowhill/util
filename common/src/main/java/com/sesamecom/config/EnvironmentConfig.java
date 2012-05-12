@@ -291,22 +291,22 @@ public class EnvironmentConfig {
     /**
      * Returns the SI Upload Visit Batch endpoint for messaging
      */
-    public static String getSIUploadVisitBatchCommandEndpoint(String defaultValue) {
-        return getProperty("siUploadVisitBatchCommandEndpoint", String.class, OPTIONAL, defaultValue, false);
+    public static String getSIUploadBatchCommandEndpoint() {
+        return getProperty("siUploadBatchCommandEndpoint", String.class);
     }
 
     /**
-     * Returns the SI Upload Visit bucket where unpacked images are stored
+     * Returns the SI Upload image bucket where unpacked images are stored
      */
-    public static String getSIUploadClientImagesBucket(String defaultValue) {
-        return getProperty("siUploadClientImagesBucket", String.class, OPTIONAL, defaultValue, false);
+    public static String getSIUploadImageBucket() {
+        return getProperty("siUploadImageBucket", String.class);
     }
 
     /**
      * Returns the SI Upload Visit bucket where archives of images are uploaded
      */
-    public static String getSIUploadVisitArchiveBucket(String defaultValue) {
-        return getProperty("siUploadVisitArchiveBucket", String.class, OPTIONAL, defaultValue, false);
+    public static String getSIUploadBatchBucket() {
+        return getProperty("siUploadBatchBucket", String.class);
     }
 
     /**
@@ -314,13 +314,6 @@ public class EnvironmentConfig {
      */
     public static Integer getSIUploadBatchProcessorConcurrencyCount(Integer defaultValue) {
         return getProperty("siUploadBatchProcessorConcurrencyCount", Integer.class, OPTIONAL, defaultValue, false);
-    }
-
-    /**
-     * Returns the AWS S3 endpoint
-     */
-    public static String getS3Endpoint(String defaultValue) {
-        return getProperty("s3Endpoint", String.class, OPTIONAL, defaultValue, false);
     }
 
     /**
