@@ -13,12 +13,6 @@
       <developerConnection>scm:git:git@github.com:sesacom/util.git</developerConnection>
     </scm>
 
-    <modules>
-        <module>jcityhash</module>
-        <module>common</module>
-        <module>cdyne-ws-client</module>
-    </modules>
-
     <dependencies>
         <dependency>
             <groupId>ch.qos.logback</groupId>
