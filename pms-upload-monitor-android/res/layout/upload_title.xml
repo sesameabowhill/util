@@ -10,8 +10,9 @@
             android:gravity="center"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="5dp"
-            android:textSize="19sp"
-            android:id="@+id/text_upload_title" />
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:textSize="17sp"
+            android:id="@+id/text_upload_title"
+            />
 </LinearLayout>

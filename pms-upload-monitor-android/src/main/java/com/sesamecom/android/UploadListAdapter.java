@@ -112,15 +112,15 @@ public class UploadListAdapter extends BaseAdapter {
             case TYPE_IN_PROGRESS:
                 viewHolder.count.setText(Integer.toString(index));
                 viewHolder.priority.setText(UploadListView.priorityToString(info.getPriority()));
-                viewHolder.uploadDate.setText(UploadListView.diffBetweenDates(info.getUpdate(), now));
+                viewHolder.uploadDate.setText(UploadListView.diffBetweenDates(info.getStart(), now));
                 viewHolder.username.setText(info.getUsername());
                 viewHolder.message.setText(info.getMessage());
-                viewHolder.stepDate.setText(UploadListView.diffBetweenDates(info.getStart(), now));
+                viewHolder.stepDate.setText(UploadListView.diffBetweenDates(info.getUpdate(), now));
                 break;
             case TYPE_IN_QUEUE:
                 viewHolder.count.setText(Integer.toString(index - 1 - uploadListView.getInProgressSize()));
                 viewHolder.priority.setText(UploadListView.priorityToString(info.getPriority()));
-                viewHolder.uploadDate.setText(UploadListView.diffBetweenDates(info.getUpdate(), now));
+                viewHolder.uploadDate.setText(UploadListView.diffBetweenDates(info.getStart(), now));
                 viewHolder.username.setText(info.getUsername());
                 break;
             case TYPE_IN_TITLE:

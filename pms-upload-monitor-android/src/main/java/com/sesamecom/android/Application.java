@@ -3,8 +3,10 @@ package com.sesamecom.android;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.*;
 import android.widget.*;
 import com.sesamecom.android.model.UploadListView;
@@ -19,39 +21,95 @@ public class Application extends Activity implements SesameApiListener {
     public static final String UPLOAD_QUEUE_URL = "https://admin.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=upload_queue_6";
     private UploadListAdapter uploadListAdapter;
     private UploadListView uploadListView;
+    private Handler handler;
+    private Settings settings;
+    private Runnable refreshDataRunnable;
+    private Runnable redrawListRunnable;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
+        settings = Settings.getFromContextWrapper(this);
+
         setContentView(R.layout.main);
 
         ListView uploadList = (ListView) findViewById(R.id.upload_list_view);
         uploadListView = new UploadListView();
-        uploadListAdapter = new UploadListAdapter(uploadListView,
-                (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE));
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        uploadListAdapter = new UploadListAdapter(uploadListView, inflater);
         uploadList.setAdapter(uploadListAdapter);
+        uploadList.setKeepScreenOn(true);
 
-//        Button refreshButton = (Button) findViewById(R.id.button_refresh);
-//        refreshButton.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View view) {
-//                refreshUploadList();
-//            }
-//        });
+        initSchedulingTasks();
+
         refreshUploadList();
     }
 
+    private void initSchedulingTasks() {
+        handler = new Handler();
+
+        refreshDataRunnable = new Runnable() {
+            @Override
+            public void run() {
+                refreshUploadList();
+            }
+        };
+
+        redrawListRunnable = new Runnable() {
+            @Override
+            public void run() {
+                uploadListAdapter.notifyDataSetChanged();
+                scheduleListRedraw();
+            }
+        };
+
+        scheduleListRedraw();
+        scheduleDataRefresh();
+        settings.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+                handler.removeCallbacks(refreshDataRunnable);
+                handler.removeCallbacks(redrawListRunnable);
+                scheduleListRedraw();
+                scheduleDataRefresh();
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        handler.removeCallbacks(refreshDataRunnable);
+        handler.removeCallbacks(redrawListRunnable);
+        super.onDestroy();
+    }
+
+    private void scheduleDataRefresh() {
+        int refresh = settings.getServerRefresh();
+        if (refresh > 0) {
+            handler.postDelayed(refreshDataRunnable, refresh * 1000);
+        }
+    }
+
+    private void scheduleListRedraw() {
+        int refresh = settings.getTimeRefresh();
+        if (refresh > 0) {
+            handler.postDelayed(redrawListRunnable, refresh * 1000);
+        }
+    }
+
     private AsyncTask<String, Void, SesameApiResponse> refreshUploadList() {
-//        findViewById(R.id.button_refresh).setEnabled(false);
-        findViewById(R.id.progress_loading).setVisibility(View.VISIBLE);
-        Settings settings = Settings.getFromContextWrapper(this);
+        setProgressBarIndeterminateVisibility(true);
+        handler.removeCallbacks(refreshDataRunnable);
         return new RefreshUploadList(Application.this).execute(UPLOAD_QUEUE_URL,
                 settings.getUsername(), settings.getPassword());
     }
 
     @Override
     public void onSesameApiResponse(SesameApiResponse response) {
-//        findViewById(R.id.button_refresh).setEnabled(true);
-        findViewById(R.id.progress_loading).setVisibility(View.INVISIBLE);
+        setProgressBarIndeterminateVisibility(false);
+        scheduleDataRefresh();
         if (response instanceof UploadQueueResponse) {
             UploadQueueResponse uploadQueue = (UploadQueueResponse) response;
             uploadListView.update(uploadQueue.getUploads());

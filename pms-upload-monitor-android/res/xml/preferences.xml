@@ -13,6 +13,20 @@
                 android:dialogTitle="@string/pref_password_dialog_title"
                 android:inputType="textPassword"/>
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_category_refresh">
+        <ListPreference
+                android:key="preference_time_refresh"
+                android:title="@string/pref_time_refresh"
+                android:entries="@array/timeRefreshIntervals"
+                android:entryValues="@array/timeRefreshIntervalsTime"/>
+
+        <ListPreference
+                android:key="preference_server_refresh"
+                android:title="@string/pref_server_refresh"
+                android:entries="@array/serverRefreshIntervals"
+                android:entryValues="@array/serverRefreshIntervalsTime"/>
+
+    </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_about_category">
         <PreferenceScreen
                 android:key="preference_version"

@@ -13,12 +13,12 @@
                     android:id="@+id/item_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"/>
+                    />
             <TextView
                     android:text=". "
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"/>
+                    />
         </LinearLayout>
         <LinearLayout
                 android:layout_width="match_parent"
@@ -30,18 +30,18 @@
                     android:id="@+id/item_username"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"/>
+                    />
             <TextView
                     android:text=" - "
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"/>
+                    />
             <TextView
                     android:text="large file"
                     android:id="@+id/item_priority"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"/>
+                    />
         </LinearLayout>
         <TextView
                 android:layout_marginLeft="5dp"
@@ -51,7 +51,7 @@
                 android:id="@+id/item_upload_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="15sp"/>
+                />
     </TableRow>
 
 </TableLayout>

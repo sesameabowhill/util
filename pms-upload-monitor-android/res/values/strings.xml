@@ -13,4 +13,7 @@
     <string name="pref_about_category">About</string>
     <string name="pref_version_title">Version</string>
     <string name="pref_version_number">0.1</string>
+    <string name="pref_category_refresh">Refresh Settings</string>
+    <string name="pref_time_refresh">Screen refresh interval</string>
+    <string name="pref_server_refresh">Data refresh interval</string>
 </resources>

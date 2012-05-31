@@ -1,0 +1,26 @@
+<resources>
+    <string-array name="timeRefreshIntervals">
+        <item>Disabled</item>
+        <item>Every second</item>
+        <item>Every 5 seconds</item>
+        <item>Every minute</item>
+    </string-array>
+    <string-array name="timeRefreshIntervalsTime">
+        <item>0</item>
+        <item>1</item>
+        <item>5</item>
+        <item>60</item>
+    </string-array>
+    <string-array name="serverRefreshIntervals">
+        <item>Disabled</item>
+        <item>Every 5 seconds</item>
+        <item>Every minute</item>
+        <item>Every 5 minutes</item>
+    </string-array>
+    <string-array name="serverRefreshIntervalsTime">
+        <item>0</item>
+        <item>5</item>
+        <item>60</item>
+        <item>300</item>
+    </string-array>
+</resources>
