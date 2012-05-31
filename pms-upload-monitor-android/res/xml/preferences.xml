@@ -14,7 +14,7 @@
                 android:inputType="textPassword"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_about_category">
-        <EditTextPreference
+        <PreferenceScreen
                 android:key="preference_version"
                 android:title="@string/pref_version_title"
                 android:summary="@string/pref_version_number"

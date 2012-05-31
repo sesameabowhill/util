@@ -10,24 +10,20 @@ import static java.util.Collections.sort;
  * Created by Ivan
  */
 public class UploadListView {
-    final public static String USERNAME = "username";
-    final public static String PRIORITY = "priority";
-    final public static String COUNT = "count";
-    final public static String MESSAGE = "message";
-    final public static String IN_PROGRESS = "in_progress";
-    final public static String UPLOAD_STEP_DATE = "step_date";
-    final public static String UPLOAD_START_DATE = "start_date";
+//    final public static String USERNAME = "username";
+//    final public static String PRIORITY = "priority";
+//    final public static String COUNT = "count";
+//    final public static String MESSAGE = "message";
+//    final public static String IN_PROGRESS = "in_progress";
+//    final public static String UPLOAD_STEP_DATE = "step_date";
+//    final public static String UPLOAD_START_DATE = "start_date";
 
-    private LinkedList<Map<String, ?>> uploadView;
-    private int inProgress;
-    private int inQueue;
+    private List<MemberUploadInfo> uploadsInQueue;
+    private List<MemberUploadInfo> uploadsInProgress;
 
     public UploadListView() {
-        uploadView = new LinkedList<Map<String, ?>>();
-    }
-
-    public List<Map<String, ?>> getUploadView() {
-        return uploadView;
+        uploadsInProgress = new ArrayList<MemberUploadInfo>();
+        uploadsInQueue = new ArrayList<MemberUploadInfo>();
     }
 
     public void update(List<MemberUploadInfo> uploads) {
@@ -38,39 +34,41 @@ public class UploadListView {
 //        uploads.add(new MemberUploadInfo(4, "mcfill3", false, new Date(), new Date(), "Waiting", 2));
 //        uploads.add(new MemberUploadInfo(5, "appleortho", true, new Date(112, 4, 29, 1, 12), new Date(), "Rollback", 2));
 
-        inProgress = 0;
-        inQueue = 0;
-
         uploads = new ArrayList<MemberUploadInfo>(uploads);
         sort(uploads, byProcessOrder());
-
-        Date now = new Date();
-        uploadView.clear();
-        int count = 0;
+        uploadsInProgress.clear();
+        uploadsInQueue.clear();
         for (MemberUploadInfo upload: uploads) {
-            Map<String, Object> row = new HashMap<String, Object>();
-            row.put(USERNAME, upload.getUsername());
-            row.put(PRIORITY, priorityToString(upload.getPriority()));
-            row.put(UPLOAD_START_DATE, diffBetweenDates(upload.getStart(), now));
-            row.put(IN_PROGRESS, upload.isInProgress());
-            row.put(COUNT, ++count);
             if (upload.isInProgress()) {
-                row.put(UPLOAD_STEP_DATE, diffBetweenDates(upload.getUpdate(), now));
-                row.put(MESSAGE, upload.getMessage());
-                inProgress ++;
+                uploadsInProgress.add(upload);
             } else {
-                inQueue ++;
+                uploadsInQueue.add(upload);
             }
-            uploadView.add(row);
         }
+
+//            row.put(USERNAME, upload.getUsername());
+//            row.put(PRIORITY, priorityToString(upload.getPriority()));
+//            row.put(UPLOAD_START_DATE, diffBetweenDates(upload.getStart(), now));
+//            row.put(IN_PROGRESS, upload.isInProgress());
+//            row.put(COUNT, ++count);
+//            row.put(UPLOAD_STEP_DATE, diffBetweenDates(upload.getUpdate(), now));
+//            row.put(MESSAGE, upload.getMessage());
     }
 
-    public int getInProgress() {
-        return inProgress;
+    public int getInProgressSize() {
+        return uploadsInProgress.size();
     }
 
-    public int getInQueue() {
-        return inQueue;
+    public int getInQueueSize() {
+        return uploadsInQueue.size();
+    }
+
+    public MemberUploadInfo getInProgress(int index) {
+        return uploadsInProgress.get(index);
+    }
+
+    public MemberUploadInfo getInQueue(int index) {
+        return uploadsInQueue.get(index);
     }
 
     private Comparator<MemberUploadInfo> byProcessOrder() {
@@ -92,7 +90,7 @@ public class UploadListView {
         return first == 0 ? onEqual : first;
     }
 
-    private static String priorityToString(int priority) {
+    public static String priorityToString(int priority) {
         if (priority == 0) {
             return "large file";
         } else if (priority == 1) {
@@ -104,7 +102,7 @@ public class UploadListView {
         }
     }
 
-    private static String diffBetweenDates(Date start, Date end) {
+    public static String diffBetweenDates(Date start, Date end) {
         long seconds = (end.getTime() - start.getTime())/1000;
         return seconds >= 0 ? secondsToString(seconds) : "- " + secondsToString(- seconds);
     }
@@ -127,4 +125,25 @@ public class UploadListView {
             return seconds + "s";
         }
     }
+
+    public String getInProgressTitle() {
+        if (getInProgressSize() == 0) {
+            return "No uploads are in Progress";
+        } else if (getInProgressSize() == 1) {
+            return "1 upload is in Progress";
+        } else {
+            return getInProgressSize() + " uploads are in Progress";
+        }
+    }
+
+    public String getInQueueTitle() {
+        if (getInQueueSize() == 0) {
+            return "No uploads are in Queue";
+        } else if (getInQueueSize() == 1) {
+            return "1 upload is in Queue";
+        } else {
+            return getInQueueSize() + " uploads are in Queue";
+        }
+    }
+
 }
