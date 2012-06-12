@@ -1031,9 +1031,8 @@
          },
          {
             "column" : "clog_sdate",
-            "comment" : "convert value from [email_contact_log.clog_sdate] using [convert-timezone-to-utc]",
+            "comment" : "copy value from [email_contact_log.clog_sdate]",
             "action" : "copy",
-            "converter" : "convert-timezone-to-utc",
             "from_table" : "email_contact_log",
             "from_column" : "clog_sdate"
          }
@@ -1176,10 +1175,6 @@
       "path_to_client" : [
          {
             "table" : "email_referral",
-            "column" : "referrer_id"
-         },
-         {
-            "table" : "visitor",
             "column" : "client_id"
          }
       ],
@@ -1215,6 +1210,13 @@
             "from_column" : "ref_email"
          },
          {
+            "column" : "client_id",
+            "comment" : "link to [client.id] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "client",
+            "lookup_column" : "id"
+         },
+         {
             "column" : "referrer_id",
             "comment" : "link to [visitor.id] (hard-coded)",
             "action" : "foreign-key",
@@ -1238,6 +1240,12 @@
    "email_referral_mail" : {
       "to_table" : "email_referral_mail",
       "action" : "insert",
+      "path_to_client" : [
+         {
+            "table" : "email_referral_mail",
+            "column" : "client_id"
+         }
+      ],
       "priority" : "3",
       "priority_two_date_column" : "sending_date",
       "columns" : [
@@ -1254,6 +1262,13 @@
             "action" : "copy",
             "from_table" : "email_referral_mail",
             "from_column" : "from_email"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "link to [client.id] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "client",
+            "lookup_column" : "id"
          },
          {
             "column" : "id",
@@ -1524,9 +1539,8 @@
          },
          {
             "column" : "sml_date",
-            "comment" : "convert value from [email_sent_mail_log.sml_date] using [convert-timezone-to-utc]",
+            "comment" : "copy value from [email_sent_mail_log.sml_date]",
             "action" : "copy",
-            "converter" : "convert-timezone-to-utc",
             "from_table" : "email_sent_mail_log",
             "from_column" : "sml_date"
          },
@@ -3682,62 +3696,6 @@
          }
       ]
    },
-   "opse_settings" : {
-      "to_table" : "opse_settings",
-      "action" : "delete-insert",
-      "priority" : "2",
-      "columns" : [
-         {
-            "column" : "Type",
-            "comment" : "copy value from [opse_settings.Type]",
-            "action" : "copy",
-            "from_table" : "opse_settings",
-            "from_column" : "Type"
-         },
-         {
-            "column" : "RVal",
-            "comment" : "copy value from [opse_settings.RVal]",
-            "action" : "copy",
-            "from_table" : "opse_settings",
-            "from_column" : "RVal"
-         },
-         {
-            "column" : "IVal",
-            "comment" : "copy value from [opse_settings.IVal]",
-            "action" : "copy",
-            "from_table" : "opse_settings",
-            "from_column" : "IVal"
-         },
-         {
-            "column" : "DVal",
-            "comment" : "copy value from [opse_settings.DVal]",
-            "action" : "copy",
-            "from_table" : "opse_settings",
-            "from_column" : "DVal"
-         },
-         {
-            "column" : "SVal",
-            "comment" : "copy value from [opse_settings.SVal]",
-            "action" : "copy",
-            "from_table" : "opse_settings",
-            "from_column" : "SVal"
-         },
-         {
-            "column" : "TVal",
-            "comment" : "copy value from [opse_settings.TVal]",
-            "action" : "copy",
-            "from_table" : "opse_settings",
-            "from_column" : "TVal"
-         },
-         {
-            "column" : "PKey",
-            "comment" : "copy value from [opse_settings.PKey]",
-            "action" : "copy",
-            "from_table" : "opse_settings",
-            "from_column" : "PKey"
-         }
-      ]
-   },
    "orthomation" : {
       "to_table" : "orthomation",
       "action" : "delete-insert",
@@ -4113,10 +4071,6 @@
       "path_to_client" : [
          {
             "table" : "ppn_article_letter",
-            "column" : "art_id"
-         },
-         {
-            "table" : "ppn_article",
             "column" : "client_id"
          }
       ],
@@ -4142,6 +4096,13 @@
             "action" : "copy",
             "from_table" : "ppn_article_letter",
             "from_column" : "is_feature"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "link to [client.id] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "client",
+            "lookup_column" : "id"
          },
          {
             "column" : "id",
@@ -5133,6 +5094,13 @@
             "lookup_column" : "id"
          },
          {
+            "column" : "imageUrl",
+            "comment" : "copy value from [si_image.imageUrl]",
+            "action" : "copy",
+            "from_table" : "si_image",
+            "from_column" : "imageUrl"
+         },
+         {
             "column" : "TypeId",
             "comment" : "copy value from [si_image.TypeId]",
             "action" : "copy",
@@ -5799,9 +5767,8 @@
       "columns" : [
          {
             "column" : "SentTime",
-            "comment" : "convert value from [sms_message_history.SentTime] using [convert-timezone-to-utc]",
+            "comment" : "copy value from [sms_message_history.SentTime]",
             "action" : "copy",
-            "converter" : "convert-timezone-to-utc",
             "from_table" : "sms_message_history",
             "from_column" : "SentTime"
          },
@@ -5821,9 +5788,8 @@
          },
          {
             "column" : "time2send",
-            "comment" : "convert value from [sms_message_history.time2send] using [convert-timezone-to-utc]",
+            "comment" : "copy value from [sms_message_history.time2send]",
             "action" : "copy",
-            "converter" : "convert-timezone-to-utc",
             "from_table" : "sms_message_history",
             "from_column" : "time2send"
          },
@@ -5855,9 +5821,8 @@
          },
          {
             "column" : "registered",
-            "comment" : "convert value from [sms_message_history.registered] using [convert-timezone-to-utc]",
+            "comment" : "copy value from [sms_message_history.registered]",
             "action" : "copy",
-            "converter" : "convert-timezone-to-utc",
             "from_table" : "sms_message_history",
             "from_column" : "registered"
          },
@@ -5877,9 +5842,8 @@
          },
          {
             "column" : "processed",
-            "comment" : "convert value from [sms_message_history.processed] using [convert-timezone-to-utc]",
+            "comment" : "copy value from [sms_message_history.processed]",
             "action" : "copy",
-            "converter" : "convert-timezone-to-utc",
             "from_table" : "sms_message_history",
             "from_column" : "processed"
          },
@@ -5906,9 +5870,8 @@
          },
          {
             "column" : "appointment_datetime",
-            "comment" : "convert value from [sms_message_history.appointment_datetime] using [convert-timezone-to-utc]",
+            "comment" : "copy value from [sms_message_history.appointment_datetime]",
             "action" : "copy",
-            "converter" : "convert-timezone-to-utc",
             "from_table" : "sms_message_history",
             "from_column" : "appointment_datetime"
          },
@@ -6944,9 +6907,8 @@
          },
          {
             "column" : "event_datetime",
-            "comment" : "convert value from [voice_message_history.event_datetime] using [convert-timezone-to-utc]",
+            "comment" : "copy value from [voice_message_history.event_datetime]",
             "action" : "copy",
-            "converter" : "convert-timezone-to-utc",
             "from_table" : "voice_message_history",
             "from_column" : "event_datetime"
          },
@@ -6994,17 +6956,15 @@
          },
          {
             "column" : "sent_date",
-            "comment" : "convert value from [voice_message_history.sent_date] using [convert-timezone-to-utc]",
+            "comment" : "copy value from [voice_message_history.sent_date]",
             "action" : "copy",
-            "converter" : "convert-timezone-to-utc",
             "from_table" : "voice_message_history",
             "from_column" : "sent_date"
          },
          {
             "column" : "time2send",
-            "comment" : "convert value from [voice_message_history.time2send] using [convert-timezone-to-utc]",
+            "comment" : "copy value from [voice_message_history.time2send]",
             "action" : "copy",
-            "converter" : "convert-timezone-to-utc",
             "from_table" : "voice_message_history",
             "from_column" : "time2send"
          },
@@ -7463,6 +7423,13 @@
             "action" : "copy",
             "from_table" : "ppn_article_letter_common_fake",
             "from_column" : "is_feature"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "link to [client.id] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "client",
+            "lookup_column" : "id"
          },
          {
             "column" : "id",

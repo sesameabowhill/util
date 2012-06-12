@@ -25933,6 +25933,27 @@
       "EXTRA" : "",
       "PRIVILEGES" : "select,insert,update,references",
       "COLUMN_COMMENT" : ""
+   },   
+   {
+      "TABLE_CATALOG" : "def",
+      "TABLE_SCHEMA" : "sesame_5",
+      "TABLE_NAME" : "si_image",
+      "COLUMN_NAME" : "imageUrl",
+      "ORDINAL_POSITION" : "6",
+      "COLUMN_DEFAULT" : "",
+      "IS_NULLABLE" : "YES",
+      "DATA_TYPE" : "varchar",
+      "CHARACTER_MAXIMUM_LENGTH" : "255",
+      "CHARACTER_OCTET_LENGTH" : "255",
+      "NUMERIC_PRECISION" : "",
+      "NUMERIC_SCALE" : "",
+      "CHARACTER_SET_NAME" : "latin1",
+      "COLLATION_NAME" : "latin1_swedish_ci",
+      "COLUMN_TYPE" : "varchar(255)",
+      "COLUMN_KEY" : "MUL",
+      "EXTRA" : "",
+      "PRIVILEGES" : "select,insert,update,references",
+      "COLUMN_COMMENT" : ""
    },
    {
       "TABLE_CATALOG" : "def",

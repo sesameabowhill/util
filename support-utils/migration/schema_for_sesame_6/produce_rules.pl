@@ -846,13 +846,7 @@ sub apply_moved_tables {
 							$schema_6->{ $migration->get_table_name($new_name) }{$new_column}
 						)
 					) {
-						if ($migration->is_need_convert_datetime($new_name, $new_column)) {
-							$column_rules->{$new_name}{$new_column} = Migration::Rule::ConvertValue->new(
-								$column->{'TABLE_NAME'}, 
-								$column->{'COLUMN_NAME'},
-								"convert-timezone-to-utc",
-							);
-						} elsif ($new_name eq $column->{'TABLE_NAME'}) {
+						if ($new_name eq $column->{'TABLE_NAME'}) {
 							$column_rules->{$new_name}{$new_column} = Migration::Rule::MoveValue->new(
 								$column->{'TABLE_NAME'}, 
 								$column->{'COLUMN_NAME'}
@@ -1234,7 +1228,7 @@ sub new {
 	my $self = bless {
 		'removed' => {
 			map {$_ => 1} (
-				'si_image_old', 'phone_sms_active_from_upload', 'phone_temp',
+				'si_image_old', 'phone_sms_active_from_upload', 'phone_temp', 
 				## pms data tables
 				'account', 'appointment_procedure', 'insurance_contract', 'ledger', 
 				'patient_referrer', 'patient_staff', 'treatment_plan', 
@@ -1742,7 +1736,8 @@ sub load_hard_coded_links {
 	## client_id
 	for my $from_table (
 		"appointment_reminder_schedule", "email_contact_log", "email_sent_mail_log", "upload_settings", 
-		"address_local", "email_local", "office_address_local", "patient_page_messages", "phone_local", "referrer_local"
+		"address_local", "email_local", "office_address_local", "patient_page_messages", "phone_local", "referrer_local",
+		"email_referral_mail", "ppn_article_letter", "email_referral"
 	) {
 		$links->add_link(
 			$from_table, 
