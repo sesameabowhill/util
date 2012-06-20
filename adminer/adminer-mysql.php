@@ -5,11 +5,13 @@ function adminer_object() {
 
     include_once "./adminer-ConventionsForeignKeys.php";
     include_once "./adminer-foreign-system.php";
+    include_once "./adminer-versioned-tables.php";
     
     $plugins = array(
         // specify enabled plugins here
         new ConventionForeignKeys,
-        new AdminerForeignSystem
+        new AdminerForeignSystem,
+        new AdminerVersionedTables
     );
     
     /* It is possible to combine customization and plugins:
