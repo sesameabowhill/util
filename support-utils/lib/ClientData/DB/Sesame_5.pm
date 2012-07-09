@@ -1271,40 +1271,45 @@ sub _get_email_sent_mail_log_select {
 	return "SELECT l.id, l.visitor_id, sml_email AS Email, sml_name AS Name, sml_mail_type, sml_date AS DateTime, sml_mail_id, sml_body AS Body, sml_body_hash, contact_log_id FROM email_sent_mail_log l";
 }
 
-sub get_email_appointment_schedule {
-	my ($self) = @_;
+sub get_appointment_schedule_by_reminder_type {
+	my ($self, $reminder_type) = @_;
 
 	return $self->{'dbh'}->selectall_arrayref(
-		"SELECT id, appointment_week_day, send_offset FROM email_appointment_schedule WHERE client_id=?",
+		"SELECT id, weekday as appointment_week_day, send_offset, send_time, send_offset_unit FROM appointment_reminder_schedule WHERE client_id=? AND reminder_type=?",
 		{ 'Slice' => {} },
         $self->{'client_id'},
+        $reminder_type,
 	);
 }
 
-sub add_email_appointment_schedule {
-	my ($self, $appointment_week_day, $send_offset) = @_;
+sub add_appointment_schedule {
+	my ($self, $reminder_type, $appointment_week_day, $send_offset, $send_offset_unit, $send_time) = @_;
 
 	$self->_do_query(
-		"INSERT INTO email_appointment_schedule (client_id, appointment_week_day, send_offset) VALUES (%s, %s, %s)",
+		"INSERT INTO appointment_reminder_schedule (client_id, weekday, send_offset, send_offset_unit, send_time, reminder_type) VALUES (%s, %s, %s, %s, %s, %s)",
 		[
 			$self->{'client_id'},
 			$appointment_week_day,
 			$send_offset,
+			$send_offset_unit,
+			$send_time,
+			$reminder_type,
 		],
 	);
 }
 
-sub delete_email_appointment_schedule {
-	my ($self, $appointment_week_day, $send_offset, $schedule_id) = @_;
+sub delete_appointment_schedule {
+	my ($self, $reminder_type, $appointment_week_day, $send_offset, $schedule_id) = @_;
 
 	$self->_do_query(
-		"DELETE FROM email_appointment_schedule WHERE ".
-			"client_id=%s AND appointment_week_day=%s AND send_offset=%s".
+		"DELETE FROM appointment_reminder_schedule WHERE ".
+			"client_id=%s AND weekday=%s AND send_offset=%s AND reminder_type=%s".
 			(defined $schedule_id ? ' AND id=%s' :''),
 		[
 			$self->{'client_id'},
 			$appointment_week_day,
 			$send_offset,
+			$reminder_type,
 			(defined $schedule_id ?
 				( $schedule_id ):
 				()

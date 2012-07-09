@@ -12,9 +12,10 @@ use DataSource::DB;
 use DateUtils;
 use Logger;
 
-my ($weekday, $allow_today_appointments);
+my ($old_weekday, $new_weekday, $allow_today_appointments);
 GetOptions(
-	'resend-weekday=i'  => \$weekday,
+	'old-send-weekday=i' => \$old_weekday,
+	'new-send-weekday=i' => \$new_weekday,
 	'allow-today-appointments!'  => \$allow_today_appointments,
 );
 
@@ -25,22 +26,28 @@ if (@clients) {
 	my $start_time = time();
 	my $data_source = DataSource::DB->new();
 	@clients = @{ $data_source->expand_client_group( \@clients ) };
-	my ($today_weekday) = (localtime())[6];
-	$today_weekday = normalize_weekday($today_weekday-1); ## convert to our format
-	unless (defined $weekday) {
-		$weekday = normalize_weekday($today_weekday-1);
+	my $today_weekday = $new_weekday; 
+	unless (defined $today_weekday) {
+		($today_weekday) = (localtime())[6];
+		$today_weekday = normalize_weekday($today_weekday-1); ## convert to our format
 	}
-	unless (defined weekday_to_string($weekday)) {
-		die "[$weekday] weekday is not in [0..6] interval";
+	unless (defined $old_weekday) {
+		$old_weekday = normalize_weekday($today_weekday-1);
 	}
-	my $offset_shift = $today_weekday - $weekday;
+	unless (defined weekday_to_string($today_weekday)) {
+		die "[$new_weekday] new weekday is not in [0..6] interval";
+	}
+	unless (defined weekday_to_string($old_weekday)) {
+		die "[$old_weekday] old weekday is not in [0..6] interval";
+	}
+	my $offset_shift = $today_weekday - $old_weekday;
 	if ($offset_shift <= 0) {
 		$offset_shift += 7;
 	}
 
 	$logger->printf(
 		"move appointment sending time from [%s] to [%s] (offset %d)",
-		weekday_to_string($weekday),
+		weekday_to_string($old_weekday),
 		weekday_to_string($today_weekday),
 		$offset_shift,
 	);
@@ -50,7 +57,9 @@ if (@clients) {
 	}
 	for my $username (@clients) {
 		my $client_data = $data_source->get_client_data_by_db($username);
-		move_schedule($logger, $data_source, $client_data, $weekday, $offset_shift, $allow_today_appointments);
+		for my $reminder_type ('email','voice','sms') {
+			move_schedule($logger, $data_source, $client_data, $reminder_type, $old_weekday, $offset_shift, $allow_today_appointments);
+		}
 	}
 	my $fn = '_appointment_schedule_backup.'.DateUtils->get_current_date_filename().'.sql';
 	$logger->printf("write settings backup to [%s]", $fn);
@@ -62,41 +71,52 @@ if (@clients) {
 else {
 	print <<USAGE;
 Usage: $0 [..options...] <client_db1> ...
-Move appointments sent at weekday to be send today if posible
+Move appointments sent date to new weekday if possible
 Options:
-	--resend-weekday=0..6 (0 -> Monday, 6 -> Sunday) by default is today-1
-	--allow-today-appointments
+	--new-send-weekday=0..6 - by default is today
+	--old-send-weekday=0..6 - by default is today - 1
+	--allow-today-appointments - allow appointents for new date to be sent on same day
+Days of the week:
+	0 - Monday
+	1 - Tuesday
+	2 - Wednesday
+	3 - Thursday
+	4 - Friday
+	5 - Saturday
+	6 - Sunday
 USAGE
 	exit(1);
 }
 
 sub move_schedule {
-	my ($logger, $data_source, $client_data, $weekday, $offset_shift, $allow_today_appointments) = @_;
+	my ($logger, $data_source, $client_data, $reminder_type, $weekday, $offset_shift, $allow_today_appointments) = @_;
 
-	my $week_day_schedule = get_appointment_schedule_sent_at_weekday($client_data, $weekday);
+	my $week_day_schedule = get_appointment_schedule_sent_at_weekday($client_data, $reminder_type, $weekday);
 	if (@$week_day_schedule) {
 		for my $schedule (@$week_day_schedule) {
-			my $new_offset = $schedule->{'send_offset'} + $offset_shift;
+			my $new_offset = $schedule->{'send_offset'} - $offset_shift;
 			my $allowing_offset = (
 				$allow_today_appointments ?
-					$new_offset <= 0 :
-					$new_offset < 0
+					$new_offset >= 0 :
+					$new_offset > 0
 			);
 			if ($allowing_offset) {
 				$logger->printf(
-					"client [%s]: change [%s] appointment [%s] offset to [%s]",
+					"client [%s] - [%s]: change [%s] appointment [%s] offset to [%s]",
 					$client_data->get_username(),
-					weekday_to_string( $schedule->{'appointment_week_day'} ),
+					$reminder_type,
+					$schedule->{'appointment_week_day'},
 					$schedule->{'send_offset'},
 					$new_offset,
 				);
-				set_new_schedule($logger, $data_source, $client_data, $schedule->{'appointment_week_day'}, $new_offset);
+				set_new_schedule($logger, $data_source, $client_data, $reminder_type, $schedule, $new_offset);
 			}
 			else {
 				$logger->printf(
-					"client [%s]: too late to send [%s] appointment [%s] offset",
+					"client [%s] - [%s]: too late to send [%s] appointment [%s] offset",
 					$client_data->get_username(),
-					weekday_to_string( $schedule->{'appointment_week_day'} ),
+					$reminder_type,
+					$schedule->{'appointment_week_day'},
 					$schedule->{'send_offset'},
 				);
 				$logger->register_category('too late to change offset');
@@ -104,41 +124,53 @@ sub move_schedule {
 		}
 	}
 	else {
-		$logger->printf("client [%s]: no appointment found to be sent at [%s]", $client_data->get_username(), weekday_to_string($weekday));
+		$logger->printf("client [%s] - [%s]: no appointment found to be sent at [%s]", $client_data->get_username(), $reminder_type, weekday_to_string($weekday));
 	}
 }
 
 sub set_new_schedule {
-	my ($logger, $data_source, $client_data, $appointment_week_day, $send_offset) = @_;
+	my ($logger, $data_source, $client_data, $reminder_type, $new_schedule, $send_offset) = @_;
 
 	my %current_schedule;
-	my $schedule = $client_data->get_email_appointment_schedule();
+	my $schedule = $client_data->get_appointment_schedule_by_reminder_type($reminder_type);
 	for my $day (@$schedule) {
-		$current_schedule{ $day->{'appointment_week_day'} }{ $day->{'send_offset'} } = 1;
+		$current_schedule{ $day->{'appointment_week_day'} }{ $day->{'send_offset'} . $day->{'send_offset_unit'} } = 1;
 	}
-	if (exists $current_schedule{ $appointment_week_day }{ $send_offset }) {
+	if (exists $current_schedule{ $new_schedule->{'appointment_week_day'} }{ $send_offset . $new_schedule->{'send_offset_unit'} }) {
 		$logger->register_category('schedule already exists');
 	}
 	else {
 		$data_source->set_read_only(0);
-		my $schedule_id = $client_data->add_email_appointment_schedule($appointment_week_day, $send_offset);
+		my $schedule_id = $client_data->add_appointment_schedule(
+			$reminder_type, 
+			$new_schedule->{'appointment_week_day'}, 
+			$send_offset, 
+			$new_schedule->{'send_offset_unit'},
+			$new_schedule->{'send_time'},
+		);
 		if (defined $schedule_id) {
 			$data_source->set_read_only(1);
-			$client_data->delete_email_appointment_schedule($appointment_week_day, $send_offset, $schedule_id);
+			$client_data->delete_appointment_schedule($reminder_type, $new_schedule->{'appointment_week_day'}, $send_offset, $schedule_id);
 		}
 		$logger->register_category('add new offset');
 	}
 }
 
 sub get_appointment_schedule_sent_at_weekday {
-	my ($client_data, $weekday) = @_;
+	my ($client_data, $reminder_type, $weekday) = @_;
 
 	my @days;
-	my $current_schedule = $client_data->get_email_appointment_schedule();
+	my $current_schedule = $client_data->get_appointment_schedule_by_reminder_type($reminder_type);
 	for my $schedule (@$current_schedule) {
-		my $send_weekday = normalize_weekday( $schedule->{'appointment_week_day'} + $schedule->{'send_offset'} );
-		if ($weekday == $send_weekday) {
-			push(@days, $schedule);
+		if ($schedule->{'send_offset_unit'} eq 'hour') {
+			## skip hour schedule
+		} elsif ($schedule->{'send_offset_unit'} eq 'day') {
+			my $send_weekday = normalize_weekday( string_to_weekday($schedule->{'appointment_week_day'}) - $schedule->{'send_offset'} );
+			if ($weekday == $send_weekday) {
+				push(@days, $schedule);
+			}
+		} else {
+			die "unsupported offset unit [" . $schedule->{'send_offset_unit'} . "]";
 		}
 	}
 	return \@days;
@@ -152,6 +184,21 @@ sub normalize_weekday {
 		$weekday += 7;
 	}
 	return $weekday % 7;
+}
+
+sub string_to_weekday {
+	my ($string) = @_;
+
+	my %days = (
+		'monday' => 0,
+		'tuesday' => 1,
+		'wednesday' => 2,
+		'thursday' => 3,
+		'friday' => 4,
+		'saturday' => 5,
+		'sunday' => 6,
+	);
+	return $days{$string};
 }
 
 sub weekday_to_string {
