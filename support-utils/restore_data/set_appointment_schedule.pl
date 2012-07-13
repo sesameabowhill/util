@@ -162,6 +162,14 @@ sub get_appointment_schedule_sent_at_weekday {
 	my @days;
 	my $current_schedule = $client_data->get_appointment_schedule_by_reminder_type($reminder_type);
 	for my $schedule (@$current_schedule) {
+		if ($schedule->{'send_offset_unit'} eq 'week') {
+			$schedule->{'send_offset_unit'} = 'day';
+			$schedule->{'send_offset'} *= 7;
+		}
+		if ($schedule->{'send_offset_unit'} eq 'month') {
+			$schedule->{'send_offset_unit'} = 'day';
+			$schedule->{'send_offset'} *= 30;
+		}
 		if ($schedule->{'send_offset_unit'} eq 'hour') {
 			## skip hour schedule
 		} elsif ($schedule->{'send_offset_unit'} eq 'day') {
