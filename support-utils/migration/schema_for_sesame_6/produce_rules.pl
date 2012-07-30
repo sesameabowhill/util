@@ -57,6 +57,7 @@ sub get_schema_diff {
 	$rules->apply_table_info($migration, $links, $schema_6_list);
 	$rules->apply_table_priority($migration, $required_tables);
 	$rules->apply_moved_tables($migration, $schema_5_list, $schema_6);
+	$rules->make_multiple_tables_rules($migration, $schema_6);
 	
 	$rules->save_json_to("_out.json", 1);
 	$rules->save_html_to("_out.html");
@@ -416,6 +417,28 @@ sub apply_table_priority {
 	$self->{'logger'}->stop($stop, "tables without priority");
 }
 
+sub make_multiple_tables_rules {
+    my ($self, $migration, $schema_6) = @_;
+
+    my $stop = 0;
+    my $column_rules = $self->{'rules'};
+	
+	for my $table_6 (keys %$column_rules) {
+		my %from_tables;
+		for my $column_6 (keys %{ $column_rules->{$table_6} }) {
+			if (ref $column_rules->{$table_6}{$column_6} eq 'Migration::Rule::CopyValue') {
+				$from_tables{$column_rules->{$table_6}{$column_6}{'table'}} = 1;
+			}
+		}
+		if (keys %from_tables > 1) {
+			$self->{'logger'}->printf("%s rule uses multiple tables: %s", $table_6, join(', ', sort keys %from_tables));
+			$stop++;
+		}
+	}
+	##$self->{'logger'}->stop($stop, "tables with multiple source");
+}
+
+
 sub get_update_on_columns {
     my ($self, $schema_6, $migration) = @_;
 	
@@ -630,7 +653,7 @@ sub save_html_to {
 		}
 		if ($rules->{$table}{'priority_two_date_column'}) {
 			$update_columns{$rules->{$table}{'priority_two_date_column'}} = 1;
-			push(@lines, "<li>Date column for priority 2 extraction: <span class=\"value\">".$rules->{$table}{'priority_two_date_column'}."</span></li>");
+			push(@lines, "<li>Date column for priority 2 extraction: <span class=\"value\">".$rules->{$table}{'priority_two_date_column'}{'table'}.".".$rules->{$table}{'priority_two_date_column'}{'column'}."</span></li>");
 		}
     	push(@lines, "</ul>");
     	if (exists $rules->{$table}{'columns'}) {
@@ -692,7 +715,7 @@ sub save_jira_to {
 		}
 		if ($rules->{$table}{'priority_two_date_column'}) {
 			$update_columns{$rules->{$table}{'priority_two_date_column'}} = 1;
-			push(@lines, "*Date column for priority 2 extraction: *".$rules->{$table}{'priority_two_date_column'}."*");
+			push(@lines, "*Date column for priority 2 extraction: *".$rules->{$table}{'priority_two_date_column'}{'table'}.".".$rules->{$table}{'priority_two_date_column'}{'column'}."*");
 		}
     	push(@lines, "");
     	if (exists $rules->{$table}{'columns'}) {
@@ -792,6 +815,9 @@ sub apply_simple_columns_info {
 		    if ($migration->is_column_from_pms($table_6, $column_6)) {
 		    	return Migration::Rule::FromPMS->new();
 		    } 
+			if (defined $migration->get_column_eval($table_6, $column_6)) {
+				return Migration::Rule::Eval->new($migration->get_column_eval($table_6, $column_6));
+			}
 		    if ($migration->is_column_autoincrement($table_6, $column_6)) {
 		    	return Migration::Rule::AutoIncrement->new();
 			}
@@ -847,7 +873,7 @@ sub apply_moved_tables {
 						)
 					) {
 						if ($new_name eq $column->{'TABLE_NAME'}) {
-							$column_rules->{$new_name}{$new_column} = Migration::Rule::MoveValue->new(
+							$column_rules->{$new_name}{$new_column} = Migration::Rule::CopyValue->new(
 								$column->{'TABLE_NAME'}, 
 								$column->{'COLUMN_NAME'}
 							);
@@ -888,7 +914,7 @@ sub can_copy_type {
 	    	}
     	}
 	} else {
-		if (lc $to_column->{'IS_NULLABLE'} eq 'no' || ! $migration->is_nullable_ignored($to_column->{'TABLE_NAME'}, $to_column->{'COLUMN_NAME'})) {
+		if (lc $to_column->{'IS_NULLABLE'} eq 'no' && ! $migration->is_nullable_ignored($to_column->{'TABLE_NAME'}, $to_column->{'COLUMN_NAME'})) {
 			$self->{'logger'}->printf(
 				"nullable didn't match [%s.%s: %s] => [%s.%s: %s]",
 				$from_column->{'TABLE_NAME'},
@@ -915,6 +941,8 @@ sub _is_column_type_equal {
 	if ($from eq $to) {
 		return 1;
 	} elsif ($from eq "text" && $to eq "mediumtext") {
+		return 1;
+	} elsif ($from eq "text" && $to eq "longtext") {
 		return 1;
 	} elsif ($from eq "tinyint" && $to eq "int") {
 		return 1;
@@ -1221,7 +1249,7 @@ sub new {
 		'phone_local_fake' => 'phone_local',
 		'ppn_article_letter' => 'ppn_article_letter',
 		'ppn_article_letter_common_fake' => 'ppn_article_letter',
-		'referrer_local_fake' => 'referrer_local',
+		'referrer_local_fake' => 'si_doctor',
 		'voice_office_name_pronunciation' => 'office_user_sensitive',
 	);
 	
@@ -1306,9 +1334,6 @@ sub new {
 			'patient_page_messages' => {
 				'show_forever' => 'boolean-to-integer',
 			},
-			'referrer_local' => {
-				'type' => 'referrer-type',
-			},
 			'email_local' => {
 				'source' => 'email-source',
 			},
@@ -1317,6 +1342,9 @@ sub new {
 			},
 			'voice_message_history' => {
 				'sent_type' => 'voice-sent-type',
+			},
+			'si_standard_message' => {
+				'NotDeleted' => 'si-message-not-deleted',
 			},
 		},
 		'constant_value' => {
@@ -1355,14 +1383,19 @@ sub new {
 			'responsible_patient_user_sensitive' => {
 				'hide_patient' => 1,
 			},
+			'si_doctor' => {
+				'FName' => 1,
+				'LName' => 1,
+				'email' => 1,
+			},
 		},
 		'ignore_type_change' => {
 			'appointment_confirmation_history' => {
 				'client_id' => 1,
 			},
-			'client' => {
-				'cl_start_date' => 1,
-			},
+			# 'client' => {
+			# 	'cl_start_date' => 1,
+			# },
 			'email_sent_mail_log' => {
 				'sml_body' => 1,
 			},
@@ -1393,6 +1426,16 @@ sub new {
 			'office_address_local' => {
 				'client_id' => 1,
 			},
+			'si_standard_message' => {
+				'NotDeleted' => 1,
+			},
+			'si_doctor' => {
+				'AutoNotify' => 1,
+				'Deleted' => 1,
+				'Password' => 1,
+				'PrivacyAccepted' => 1,
+				'WelcomeSent' => 1,
+			},
 		},
 		'ignore_columns' => {
 			'client' => {
@@ -1406,6 +1449,16 @@ sub new {
 			'email_reminder_settings' => ['client_id', 'type'],
 		},
 		'path_to_client' => {
+			'ppn_article_letter' => [
+				{
+					'table' => 'ppn_article_letter',
+					'column' => 'let_id',
+				},
+				{
+					'table' => 'ppn_letter',
+					'column' => 'client_id',
+				},
+			],
 			'ppn_article_letter:2' => [
 				{
 					'table' => 'ppn_article_letter',
@@ -1465,6 +1518,20 @@ sub new {
 			'voice_recipient_list' => 'voice_message_history.time2send',
 			'voice_system_transaction_log' => 'eventtime_utc',
 			'voice_transactions_log' => 'starttime_utc',
+		},
+		'eval' => {
+			'office_user_sensitive' => {
+				'active' => 'office-active',
+			},
+			'si_image' => {
+				'imageUrl' => 'si-image-url',
+			},
+			'email_sent_mail_log' => {
+				'subject' => 'email-archive-subject',
+			},
+			'email_reminder_settings' => {
+				'type' => 'email-reminder-setting-type',
+			},
 		},
 	}, $class;
 	$self->_detect_renames_to_same_table();
@@ -1639,6 +1706,12 @@ sub is_need_convert_datetime {
 	return $self->{'need_convert_datetime'}{$table_6}{$column_6}
 }
 
+sub get_column_eval {
+    my ($self, $table_6, $column_6) = @_;
+	
+	return $self->{'eval'}{$table_6}{$column_6};
+}
+
 sub get_new_names {
     my ($self, $table_5) = @_;
 	
@@ -1727,7 +1800,15 @@ sub is_column_type_ignored {
 sub get_date_column {
     my ($self, $table_6) = @_;
 	
-	return $self->{'date_column'}{$table_6};
+	my $info = $self->{'date_column'}{$table_6};
+	my ($table, $column) = ($table_6, $info);
+	if ($info =~ m{\.}) {
+		($table, $column) = split(m{\.}, $info, 2);
+	}
+	return {
+		'table' => $table,
+		'column' => $column,
+	};
 }
 
 sub load_hard_coded_links {
@@ -1737,7 +1818,7 @@ sub load_hard_coded_links {
 	for my $from_table (
 		"appointment_reminder_schedule", "email_contact_log", "email_sent_mail_log", "upload_settings", 
 		"address_local", "email_local", "office_address_local", "patient_page_messages", "phone_local", "referrer_local",
-		"email_referral_mail", "ppn_article_letter", "email_referral"
+		"email_referral_mail", "ppn_article_letter", "email_referral", "voice_recipient_list", "referrer_email_log"
 	) {
 		$links->add_link(
 			$from_table, 
@@ -1776,7 +1857,7 @@ sub load_hard_coded_links {
 			'orthomation.node_id' => 'orthomation_nodes.node_id',
 			#'ppn_article_letter.art_id' => 'ppn_article.id',
 			'si_pms_referrer_link.pms_referrer_id' => 'referrer.id',
-			'si_pms_referrer_link.referrer_id' => 'referrer_local.id',
+			'si_pms_referrer_link.referrer_id' => 'si_doctor.id',
 			'srm_resource.container' => 'client.cl_username',
 			'visitor_opinion.category_id' => 'review_category.id',
 			'voice_left_messages.rec_id' => 'voice_recipient_list.RLId',
@@ -1912,10 +1993,6 @@ sub as_json {
 	return \%r;
 }
 
-package Migration::Rule::MoveValue;
-
-use base qw(Migration::Rule::CopyValue);
-
 package Migration::Rule::FromPMS;
 
 use base qw(Migration::Rule);
@@ -2005,6 +2082,35 @@ sub as_json {
     tie my %r, "Tie::IxHash", (
     	'action' => "constant",
     	'value' => $self->{'value'},
+    );
+	return \%r;
+}
+
+package Migration::Rule::Eval;
+
+use base qw(Migration::Rule);
+
+sub new {
+	my ($class, $eval) = @_;
+	
+	my $self = bless {
+		'eval' => $eval,
+	}, $class;
+	return $self;
+}
+
+sub as_string {
+    my ($self) = @_;
+	
+	return "eval [".$self->{'eval'}."]";
+}
+
+sub as_json {
+    my ($self) = @_;
+
+    tie my %r, "Tie::IxHash", (
+    	'action' => "eval",
+    	'eval' => $self->{'value'},
     );
 	return \%r;
 }

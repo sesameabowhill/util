@@ -27,7 +27,7 @@ class JenkinsStatusChecker
 		@last_state_change = null
 
 		@is_release = /^\+do-release$/
-		@base_url = "https://jenkins.sesamecom.com/view/Release%20Track/"
+		@base_url = "https://jenkins.sesamecom.com/view/Web%20Release/"
 		#@is_release = /-pp$/
 		#@base_url = "https://ci.sesamecom.com/jenkins/view/Legacy/"
 		@message_queue = []
