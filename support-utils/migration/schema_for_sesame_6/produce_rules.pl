@@ -53,10 +53,11 @@ sub get_schema_diff {
 	$rules->remove_ignored_columns($migration);
 	$rules->make_secondary_rules($migration);
 	$rules->apply_simple_columns_info($migration);
-	$rules->apply_links($links);
+	$rules->apply_links($links, $migration);
 	$rules->apply_table_info($migration, $links, $schema_6_list);
 	$rules->apply_table_priority($migration, $required_tables);
 	$rules->apply_moved_tables($migration, $schema_5_list, $schema_6);
+	$rules->apply_missing_eval($migration);
 	$rules->make_multiple_tables_rules($migration, $schema_6);
 	
 	$rules->save_json_to("_out.json", 1);
@@ -545,7 +546,7 @@ sub flat_rules {
 					'column' => 'client_id',
 				}
 			],
-			'priority' => 1,
+			'priority' => '1',
 		);
 		$rules_by_table{$table_6} = \%r;
 	}    
@@ -805,6 +806,23 @@ sub _for_each_undefinded_rule {
 	}
 }
 
+sub _for_each_rule {
+    my ($self, $sub) = @_;
+
+    my $column_rules = $self->{'rules'};
+	
+	for my $table_6 (keys %$column_rules) {
+		for my $column_6 (keys %{ $column_rules->{$table_6} }) {
+			unless (defined $column_rules->{$table_6}{$column_6}) {
+				my $new_rule = $sub->($table_6, $column_6, $column_rules->{$table_6}{$column_6});
+				if (defined $new_rule) {
+					$column_rules->{$table_6}{$column_6} = $new_rule;
+				}
+			}
+		}
+	}
+}
+
 sub apply_simple_columns_info {
     my ($self, $migration) = @_;
 	
@@ -815,36 +833,51 @@ sub apply_simple_columns_info {
 		    if ($migration->is_column_from_pms($table_6, $column_6)) {
 		    	return Migration::Rule::FromPMS->new();
 		    } 
-			if (defined $migration->get_column_eval($table_6, $column_6)) {
-				return Migration::Rule::Eval->new($migration->get_column_eval($table_6, $column_6));
-			}
+			# if (defined $migration->get_column_eval($table_6, $column_6)) {
+			# 	return Migration::Rule::Eval->new($migration->get_column_eval($table_6, $column_6));
+			# }
 		    if ($migration->is_column_autoincrement($table_6, $column_6)) {
 		    	return Migration::Rule::AutoIncrement->new();
 			}
 			if ($migration->is_constant_value_exists($table_6, $column_6)) {
 				return Migration::Rule::ConstantValue->new($migration->get_constant_value($table_6, $column_6));
 			}
-			{
-				my $hardcoded_lookup = $migration->get_hardcoded_lookup($table_6, $column_6);
-				if (defined $hardcoded_lookup) {
-					return Migration::Rule::HardCodedLookup->new($hardcoded_lookup);
-				}
-			}
+			# {
+			# 	my $hardcoded_lookup = $migration->get_hardcoded_lookup($table_6, $column_6);
+			# 	if (defined $hardcoded_lookup) {
+			# 		return Migration::Rule::HardCodedLookup->new($hardcoded_lookup);
+			# 	}
+			# }
 
 			return undef;
 		}
 	);
 }
 
+sub apply_missing_eval {
+    my ($self, $migration) = @_;
+	
+    $self->_for_each_undefinded_rule(
+		sub {
+		    my ($table_6, $column_6) = @_;
+
+			if (defined $migration->get_column_eval($table_6, $column_6)) {
+				return Migration::Rule::Eval->new($migration->get_column_eval($table_6, $column_6), undef, undef);
+			}
+			return undef;
+		}
+	);
+}
+
 sub apply_links {
-    my ($self, $links) = @_;
+    my ($self, $links, $migration) = @_;
 	
     $self->_for_each_undefinded_rule(
 		sub {
 		    my ($table_6, $column_6) = @_;
 
 		    my $link = $links->get_link_from($table_6, $column_6);
-		    if (defined $link) {
+		    if (defined $link && ! defined $migration->get_hardcoded_lookup($table_6, $column_6) && ! defined $migration->get_column_eval($table_6, $column_6)) {
 		    	return Migration::Rule::ForeignKey->new($link->{'to_table'}, $link->{'to_column'})->set_source($link->{'comment'});
 		    }
 			return undef;
@@ -866,7 +899,19 @@ sub apply_moved_tables {
 				if (exists $column_rules->{$new_name}{$new_column} && 
 					! defined $column_rules->{$new_name}{$new_column}
 				) {
-					if ($self->can_copy_type(
+					if (defined $migration->get_column_eval($new_name, $new_column)) {
+						$column_rules->{$new_name}{$new_column} = Migration::Rule::Eval->new(
+							$migration->get_column_eval($new_name, $new_column), 
+							$column->{'TABLE_NAME'},
+							$column->{'COLUMN_NAME'}
+						);
+					} elsif (defined $migration->get_hardcoded_lookup($new_name, $new_column)) {
+						$column_rules->{$new_name}{$new_column} = Migration::Rule::HardCodedLookup->new(
+							$migration->get_hardcoded_lookup($new_name, $new_column), 
+							$column->{'TABLE_NAME'},
+							$column->{'COLUMN_NAME'}
+						);
+					} elsif ($self->can_copy_type(
 							\$stop, 
 							$migration, $column, 
 							$schema_6->{ $migration->get_table_name($new_name) }{$new_column}
@@ -1250,6 +1295,7 @@ sub new {
 		'ppn_article_letter' => 'ppn_article_letter',
 		'ppn_article_letter_common_fake' => 'ppn_article_letter',
 		'referrer_local_fake' => 'si_doctor',
+		'si_pms_referrer_link' => 'referrer_user_sensitive',
 		'voice_office_name_pronunciation' => 'office_user_sensitive',
 	);
 	
@@ -1274,6 +1320,9 @@ sub new {
 				'do_not_show_after' => 'show_until',
 				'patient_page' => 'page_type',
 			},
+			# 'si_pms_referrer_link' => {
+			# 	'referrer_id' => 'si_doctor_id',
+			# },
 		},
 		'hardcoded_lookup' => {
 			'survey_answer' => {
@@ -1361,6 +1410,9 @@ sub new {
 			'recall_user_sensitive' => {
 				'reactivation_sent' => 'false',
 			},
+			'referrer_user_sensitive' => {
+				'deleted' => '0',
+			},
 		},
 		'ignore_nullable' => {
 			'email_sent_mail_log' => {
@@ -1441,6 +1493,9 @@ sub new {
 			'client' => {
 				'cl_start_date' => 1,
 				'cl_status' => 1,
+			},
+			'referrer_user_sensitive' => {
+				'password' => 1,
 			},
 		},
 		'update_on' => {
@@ -1532,6 +1587,9 @@ sub new {
 			'email_reminder_settings' => {
 				'type' => 'email-reminder-setting-type',
 			},
+			'client' => {
+				'id' => 'client-id',
+			},
 		},
 	}, $class;
 	$self->_detect_renames_to_same_table();
@@ -1581,11 +1639,7 @@ sub _generate_actions {
 	my %know_actions = map {$_ => 1} ("delete-insert", "insert", "update", "update-insert", "remap-only");
 	my %actions;
 	for my $table (@$required_tables) {
-		if ($table->{'action'} eq "referrer") {
-			## TODO
-			$actions{$table->{'table'}} = "???";
-			$actions{$table->{'table'}."_local"} = "???";
-		} elsif ($table->{'action'} eq 'user-sensitive') {
+		if ($table->{'action'} eq 'user-sensitive') {
 			$actions{$table->{'table'}."_user_sensitive"} = "update";
 			$actions{$table->{'table'}} = "remap-only";
 		} elsif (exists $know_actions{$table->{'action'}}) {
@@ -1627,6 +1681,8 @@ sub _generate_autoincrement {
     		}
     	}
     }
+    ## we are not inserting into client
+    delete $autoincrement{'client'}{'id'};
     $self->{'autoincrement'} = \%autoincrement;
 }
 
@@ -1818,7 +1874,8 @@ sub load_hard_coded_links {
 	for my $from_table (
 		"appointment_reminder_schedule", "email_contact_log", "email_sent_mail_log", "upload_settings", 
 		"address_local", "email_local", "office_address_local", "patient_page_messages", "phone_local", "referrer_local",
-		"email_referral_mail", "ppn_article_letter", "email_referral", "voice_recipient_list", "referrer_email_log"
+		"email_referral_mail", "ppn_article_letter", "email_referral", "voice_recipient_list", "referrer_email_log",
+		"referrer_user_sensitive"
 	) {
 		$links->add_link(
 			$from_table, 
@@ -1856,8 +1913,10 @@ sub load_hard_coded_links {
 			'office_address_local.office_id' => 'office.id',
 			'orthomation.node_id' => 'orthomation_nodes.node_id',
 			#'ppn_article_letter.art_id' => 'ppn_article.id',
-			'si_pms_referrer_link.pms_referrer_id' => 'referrer.id',
-			'si_pms_referrer_link.referrer_id' => 'si_doctor.id',
+			# 'si_pms_referrer_link.pms_referrer_id' => 'referrer.id',
+			# 'si_pms_referrer_link.referrer_id' => 'si_doctor.DocId',
+			'referrer_user_sensitive.si_doctor_id' => 'si_doctor.DocId',
+			'referrer_user_sensitive.referrer_id' => 'referrer.id',
 			'srm_resource.container' => 'client.cl_username',
 			'visitor_opinion.category_id' => 'review_category.id',
 			'voice_left_messages.rec_id' => 'voice_recipient_list.RLId',
@@ -2033,10 +2092,12 @@ package Migration::Rule::HardCodedLookup;
 use base qw(Migration::Rule);
 
 sub new {
-	my ($class, $map) = @_;
+	my ($class, $map, $table, $column) = @_;
 	
 	my $self = bless {
 		'map' => $map,
+		'table' => $table,
+		'column' => $column,
 	}, $class;
 	return $self;
 }
@@ -2044,7 +2105,7 @@ sub new {
 sub as_string {
     my ($self) = @_;
 	
-	return "hard-coded lookup from [".$self->{'map'}."] map";
+	return "hard-coded lookup: map [".$self->{'map'}."] value from [".$self->{'table'}.".".$self->{'column'}."] ";
 }
 
 sub as_json {
@@ -2053,6 +2114,8 @@ sub as_json {
     tie my %r, "Tie::IxHash", (
     	'action' => "hard-coded-lookup",
     	'map' => $self->{'map'},
+    	'from_table' => $self->{'table'},
+    	'from_column' => $self->{'column'},
     );
 	return \%r;
 }
@@ -2091,10 +2154,12 @@ package Migration::Rule::Eval;
 use base qw(Migration::Rule);
 
 sub new {
-	my ($class, $eval) = @_;
+	my ($class, $eval, $table, $column) = @_;
 	
 	my $self = bless {
 		'eval' => $eval,
+		'table' => $table,
+		'column' => $column,
 	}, $class;
 	return $self;
 }
@@ -2102,7 +2167,7 @@ sub new {
 sub as_string {
     my ($self) = @_;
 	
-	return "eval [".$self->{'eval'}."]";
+	return "eval [".$self->{'eval'}."]".(defined $self->{'table'} ? " value from [".$self->{'table'}.".".$self->{'column'}."]" : "");
 }
 
 sub as_json {
@@ -2110,40 +2175,12 @@ sub as_json {
 
     tie my %r, "Tie::IxHash", (
     	'action' => "eval",
-    	'eval' => $self->{'value'},
+    	'eval' => $self->{'eval'},
     );
+    if (defined $self->{'table'}) {
+    	$r{'from_table'} = $self->{'table'};
+    	$r{'from_column'} = $self->{'column'};
+    }
 	return \%r;
 }
 
-package Migration::Rule::ConvertValue;
-
-use base qw(Migration::Rule);
-
-sub new {
-	my ($class, $table, $column, $converter) = @_;
-	
-	my $self = bless {
-		'table' => $table,
-		'column' => $column,
-		'converter' => $converter,
-	}, $class;
-	return $self;
-}
-
-sub as_string {
-    my ($self) = @_;
-	
-	return "convert value from [".$self->{'table'}.".".$self->{'column'}."] using [".$self->{'converter'}."]";
-}
-
-sub as_json {
-    my ($self) = @_;
-
-    tie my %r, "Tie::IxHash", (
-    	'action' => "copy",
-    	'converter' => $self->{'converter'},
-    	'from_table' => $self->{'table'},
-    	'from_column' => $self->{'column'},
-    );
-	return \%r;
-}

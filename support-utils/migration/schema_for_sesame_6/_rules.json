@@ -31,7 +31,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : 1
+      "priority" : "1"
    },
    "appointment" : {
       "to_table" : "appointment",
@@ -65,7 +65,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : 1
+      "priority" : "1"
    },
    "procedure" : {
       "to_table" : "procedure",
@@ -99,7 +99,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : 1
+      "priority" : "1"
    },
    "address" : {
       "to_table" : "address",
@@ -133,7 +133,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : 1
+      "priority" : "1"
    },
    "referrer" : {
       "to_table" : "referrer",
@@ -167,7 +167,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : 1
+      "priority" : "1"
    },
    "phone" : {
       "to_table" : "phone",
@@ -201,7 +201,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : 1
+      "priority" : "1"
    },
    "office" : {
       "to_table" : "office",
@@ -235,7 +235,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : 1
+      "priority" : "1"
    },
    "recall" : {
       "to_table" : "recall",
@@ -269,7 +269,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : 1
+      "priority" : "1"
    },
    "responsible_patient" : {
       "to_table" : "responsible_patient",
@@ -303,7 +303,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : 1
+      "priority" : "1"
    },
    "staff" : {
       "to_table" : "staff",
@@ -337,7 +337,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : 1
+      "priority" : "1"
    },
    "visitor" : {
       "to_table" : "visitor",
@@ -371,7 +371,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : 1
+      "priority" : "1"
    },
    "address_local" : {
       "to_table" : "address_local",
@@ -704,9 +704,11 @@
          },
          {
             "column" : "client_edition_id",
-            "comment" : "hard-coded lookup from [client-edition-id] map",
+            "comment" : "hard-coded lookup: map [client-edition-id] value from [client.client_edition_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "client-edition-id"
+            "map" : "client-edition-id",
+            "from_table" : "client",
+            "from_column" : "client_edition_id"
          },
          {
             "column" : "pms_version",
@@ -731,14 +733,19 @@
          },
          {
             "column" : "pms_software_id",
-            "comment" : "hard-coded lookup from [pms-software-id] map",
+            "comment" : "hard-coded lookup: map [pms-software-id] value from [client.pms_software_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "pms-software-id"
+            "map" : "pms-software-id",
+            "from_table" : "client",
+            "from_column" : "pms_software_id"
          },
          {
             "column" : "id",
-            "comment" : "auto increment",
-            "action" : "autoincrement"
+            "comment" : "eval [client-id] value from [client.id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "client",
+            "from_column" : "id"
          }
       ]
    },
@@ -806,9 +813,11 @@
          },
          {
             "column" : "feature_id",
-            "comment" : "hard-coded lookup from [feature-id] map",
+            "comment" : "hard-coded lookup: map [feature-id] value from [client_feature.feature_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "feature-id"
+            "map" : "feature-id",
+            "from_table" : "client_feature",
+            "from_column" : "feature_id"
          },
          {
             "column" : "client_id",
@@ -1054,9 +1063,11 @@
       "columns" : [
          {
             "column" : "source",
-            "comment" : "hard-coded lookup from [email-source] map",
+            "comment" : "hard-coded lookup: map [email-source] value from [email_local_fake.source] ",
             "action" : "hard-coded-lookup",
-            "map" : "email-source"
+            "map" : "email-source",
+            "from_table" : "email_local_fake",
+            "from_column" : "source"
          },
          {
             "column" : "deleted_datetime",
@@ -1347,9 +1358,11 @@
          },
          {
             "column" : "design_id",
-            "comment" : "hard-coded lookup from [email-design-id] map",
+            "comment" : "hard-coded lookup: map [email-design-id] value from [email_reminder_settings.design_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "email-design-id"
+            "map" : "email-design-id",
+            "from_table" : "email_reminder_settings",
+            "from_column" : "design_id"
          },
          {
             "column" : "image_guid",
@@ -1365,9 +1378,11 @@
          },
          {
             "column" : "type",
-            "comment" : "eval [email-reminder-setting-type]",
+            "comment" : "eval [email-reminder-setting-type] value from [email_reminder_settings.type]",
             "action" : "eval",
-            "eval" : null
+            "eval" : "email-reminder-setting-type",
+            "from_table" : "email_reminder_settings",
+            "from_column" : "type"
          },
          {
             "column" : "image_title",
@@ -1461,9 +1476,11 @@
          },
          {
             "column" : "design_id",
-            "comment" : "hard-coded lookup from [email-design-id] map",
+            "comment" : "hard-coded lookup: map [email-design-id] value from [email_sending_queue.design_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "email-design-id"
+            "map" : "email-design-id",
+            "from_table" : "email_sending_queue",
+            "from_column" : "design_id"
          },
          {
             "column" : "image_guid",
@@ -1517,9 +1534,11 @@
          },
          {
             "column" : "subject",
-            "comment" : "eval [email-archive-subject]",
+            "comment" : "eval [email-archive-subject] value from [email_sent_mail_log.subject]",
             "action" : "eval",
-            "eval" : null
+            "eval" : "email-archive-subject",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "subject"
          },
          {
             "column" : "client_id",
@@ -2170,9 +2189,11 @@
          },
          {
             "column" : "hcount_sect_id",
-            "comment" : "hard-coded lookup from [hit-section-id] map",
+            "comment" : "hard-coded lookup: map [hit-section-id] value from [hits_count.hcount_sect_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "hit-section-id"
+            "map" : "hit-section-id",
+            "from_table" : "hits_count",
+            "from_column" : "hcount_sect_id"
          },
          {
             "column" : "client_id",
@@ -2201,9 +2222,11 @@
       "columns" : [
          {
             "column" : "hlog_sect_id",
-            "comment" : "hard-coded lookup from [hit-section-id] map",
+            "comment" : "hard-coded lookup: map [hit-section-id] value from [hits_log.hlog_sect_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "hit-section-id"
+            "map" : "hit-section-id",
+            "from_table" : "hits_log",
+            "from_column" : "hlog_sect_id"
          },
          {
             "column" : "visitor_id",
@@ -2267,15 +2290,19 @@
          },
          {
             "column" : "hd_id",
-            "comment" : "hard-coded lookup from [holiday-id] map",
+            "comment" : "hard-coded lookup: map [holiday-id] value from [holiday_delivery_log.hd_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "holiday-id"
+            "map" : "holiday-id",
+            "from_table" : "holiday_delivery_log",
+            "from_column" : "hd_id"
          },
          {
             "column" : "hdc_id",
-            "comment" : "hard-coded lookup from [holiday-card-id] map",
+            "comment" : "hard-coded lookup: map [holiday-card-id] value from [holiday_delivery_log.hdc_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "holiday-card-id"
+            "map" : "holiday-card-id",
+            "from_table" : "holiday_delivery_log",
+            "from_column" : "hdc_id"
          },
          {
             "column" : "hdl_date",
@@ -2332,9 +2359,11 @@
          },
          {
             "column" : "hd_id",
-            "comment" : "hard-coded lookup from [holiday-id] map",
+            "comment" : "hard-coded lookup: map [holiday-id] value from [holiday_settings.hd_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "holiday-id"
+            "map" : "holiday-id",
+            "from_table" : "holiday_settings",
+            "from_column" : "hd_id"
          },
          {
             "column" : "hds_subject",
@@ -2350,9 +2379,11 @@
          },
          {
             "column" : "hdc_id",
-            "comment" : "hard-coded lookup from [holiday-card-id] map",
+            "comment" : "hard-coded lookup: map [holiday-card-id] value from [holiday_settings.hdc_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "holiday-card-id"
+            "map" : "holiday-card-id",
+            "from_table" : "holiday_settings",
+            "from_column" : "hdc_id"
          },
          {
             "column" : "client_id",
@@ -2399,9 +2430,11 @@
          },
          {
             "column" : "hr_id",
-            "comment" : "hard-coded lookup from [holiday-recipient-id] map",
+            "comment" : "hard-coded lookup: map [holiday-recipient-id] value from [holiday_settings_recipients_link.hr_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "holiday-recipient-id"
+            "map" : "holiday-recipient-id",
+            "from_table" : "holiday_settings_recipients_link",
+            "from_column" : "hr_id"
          }
       ]
    },
@@ -2427,9 +2460,11 @@
          },
          {
             "column" : "hr_id",
-            "comment" : "hard-coded lookup from [holiday-recipient-id] map",
+            "comment" : "hard-coded lookup: map [holiday-recipient-id] value from [holiday_settings_recipients_link_log.hr_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "holiday-recipient-id"
+            "map" : "holiday-recipient-id",
+            "from_table" : "holiday_settings_recipients_link_log",
+            "from_column" : "hr_id"
          },
          {
             "column" : "hdl_id",
@@ -3527,7 +3562,7 @@
             "column" : "active",
             "comment" : "eval [office-active]",
             "action" : "eval",
-            "eval" : null
+            "eval" : "office-active"
          },
          {
             "column" : "client_id",
@@ -3730,9 +3765,11 @@
       "columns" : [
          {
             "column" : "node_id",
-            "comment" : "hard-coded lookup from [orthomation-node-id] map",
+            "comment" : "hard-coded lookup: map [orthomation-node-id] value from [orthomation.node_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "orthomation-node-id"
+            "map" : "orthomation-node-id",
+            "from_table" : "orthomation",
+            "from_column" : "node_id"
          },
          {
             "column" : "patient_id",
@@ -3761,9 +3798,11 @@
       "columns" : [
          {
             "column" : "show_forever",
-            "comment" : "hard-coded lookup from [boolean-to-integer] map",
+            "comment" : "hard-coded lookup: map [boolean-to-integer] value from [patient_pages_message.show_forever] ",
             "action" : "hard-coded-lookup",
-            "map" : "boolean-to-integer"
+            "map" : "boolean-to-integer",
+            "from_table" : "patient_pages_message",
+            "from_column" : "show_forever"
          },
          {
             "column" : "show_until",
@@ -3813,9 +3852,11 @@
       "columns" : [
          {
             "column" : "source",
-            "comment" : "hard-coded lookup from [phone-source] map",
+            "comment" : "hard-coded lookup: map [phone-source] value from [phone_local_fake.source] ",
             "action" : "hard-coded-lookup",
-            "map" : "phone-source"
+            "map" : "phone-source",
+            "from_table" : "phone_local_fake",
+            "from_column" : "source"
          },
          {
             "column" : "voice_active",
@@ -4163,9 +4204,11 @@
       "columns" : [
          {
             "column" : "art_id",
-            "comment" : "hard-coded lookup from [newsletter-common-article-id] map",
+            "comment" : "hard-coded lookup: map [newsletter-common-article-id] value from [ppn_article_queue.art_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "newsletter-common-article-id"
+            "map" : "newsletter-common-article-id",
+            "from_table" : "ppn_article_queue",
+            "from_column" : "art_id"
          },
          {
             "column" : "queue_id",
@@ -4370,9 +4413,11 @@
       "columns" : [
          {
             "column" : "logo_id",
-            "comment" : "hard-coded lookup from [ppn-logo-id] map",
+            "comment" : "hard-coded lookup: map [ppn-logo-id] value from [ppn_letter_logo.logo_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "ppn-logo-id"
+            "map" : "ppn-logo-id",
+            "from_table" : "ppn_letter_logo",
+            "from_column" : "logo_id"
          },
          {
             "column" : "let_id",
@@ -4636,6 +4681,49 @@
             "action" : "copy",
             "from_table" : "referrer_email_log",
             "from_column" : "datetime"
+         }
+      ]
+   },
+   "referrer_user_sensitive" : {
+      "to_table" : "referrer_user_sensitive",
+      "action" : "update",
+      "update_on" : [
+         "referrer_id"
+      ],
+      "path_to_client" : [
+         {
+            "table" : "referrer_user_sensitive",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : [
+         {
+            "column" : "si_doctor_id",
+            "comment" : "link to [si_doctor.DocId] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "si_doctor",
+            "lookup_column" : "DocId"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "link to [client.id] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "client",
+            "lookup_column" : "id"
+         },
+         {
+            "column" : "deleted",
+            "comment" : "constant [0]",
+            "action" : "constant",
+            "value" : "0"
+         },
+         {
+            "column" : "referrer_id",
+            "comment" : "link to [referrer.id] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "referrer",
+            "lookup_column" : "id"
          }
       ]
    },
@@ -5077,9 +5165,11 @@
          },
          {
             "column" : "imageUrl",
-            "comment" : "eval [si-image-url]",
+            "comment" : "eval [si-image-url] value from [si_image.imageUrl]",
             "action" : "eval",
-            "eval" : null
+            "eval" : "si-image-url",
+            "from_table" : "si_image",
+            "from_column" : "imageUrl"
          },
          {
             "column" : "TypeId",
@@ -5577,41 +5667,6 @@
          }
       ]
    },
-   "si_pms_referrer_link" : {
-      "to_table" : "si_pms_referrer_link",
-      "action" : "update",
-      "update_on" : [
-         "referrer_id",
-         "pms_referrer_id"
-      ],
-      "path_to_client" : [
-         {
-            "table" : "si_pms_referrer_link",
-            "column" : "referrer_id"
-         },
-         {
-            "table" : "si_doctor",
-            "column" : "client_id"
-         }
-      ],
-      "priority" : "2",
-      "columns" : [
-         {
-            "column" : "pms_referrer_id",
-            "comment" : "link to [referrer.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "referrer",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "referrer_id",
-            "comment" : "link to [si_doctor.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "si_doctor",
-            "lookup_column" : "id"
-         }
-      ]
-   },
    "si_standard_message" : {
       "to_table" : "si_standard_message",
       "action" : "delete-insert",
@@ -5637,9 +5692,11 @@
          },
          {
             "column" : "NotDeleted",
-            "comment" : "hard-coded lookup from [si-message-not-deleted] map",
+            "comment" : "hard-coded lookup: map [si-message-not-deleted] value from [si_standard_message.NotDeleted] ",
             "action" : "hard-coded-lookup",
-            "map" : "si-message-not-deleted"
+            "map" : "si-message-not-deleted",
+            "from_table" : "si_standard_message",
+            "from_column" : "NotDeleted"
          },
          {
             "column" : "ReqFields",
@@ -6121,9 +6178,11 @@
          },
          {
             "column" : "question_option_id",
-            "comment" : "hard-coded lookup from [survey-option-id] map",
+            "comment" : "hard-coded lookup: map [survey-option-id] value from [survey_answer.question_option_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "survey-option-id"
+            "map" : "survey-option-id",
+            "from_table" : "survey_answer",
+            "from_column" : "question_option_id"
          },
          {
             "column" : "datetime",
@@ -6148,9 +6207,11 @@
          },
          {
             "column" : "question_id",
-            "comment" : "hard-coded lookup from [survey-question-id] map",
+            "comment" : "hard-coded lookup: map [survey-question-id] value from [survey_answer.question_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "survey-question-id"
+            "map" : "survey-question-id",
+            "from_table" : "survey_answer",
+            "from_column" : "question_id"
          },
          {
             "column" : "type",
@@ -6243,9 +6304,11 @@
          },
          {
             "column" : "postprocessing_action_id",
-            "comment" : "hard-coded lookup from [post-upload-action-id] map",
+            "comment" : "hard-coded lookup: map [post-upload-action-id] value from [upload_postprocessing_task.postprocessing_action_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "post-upload-action-id"
+            "map" : "post-upload-action-id",
+            "from_table" : "upload_postprocessing_task",
+            "from_column" : "postprocessing_action_id"
          }
       ]
    },
@@ -6414,9 +6477,11 @@
          },
          {
             "column" : "category_id",
-            "comment" : "hard-coded lookup from [visitor-opinion-category-id] map",
+            "comment" : "hard-coded lookup: map [visitor-opinion-category-id] value from [visitor_opinion.category_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "visitor-opinion-category-id"
+            "map" : "visitor-opinion-category-id",
+            "from_table" : "visitor_opinion",
+            "from_column" : "category_id"
          },
          {
             "column" : "comment",
@@ -6883,9 +6948,11 @@
       "columns" : [
          {
             "column" : "sent_type",
-            "comment" : "hard-coded lookup from [voice-sent-type] map",
+            "comment" : "hard-coded lookup: map [voice-sent-type] value from [voice_message_history.sent_type] ",
             "action" : "hard-coded-lookup",
-            "map" : "voice-sent-type"
+            "map" : "voice-sent-type",
+            "from_table" : "voice_message_history",
+            "from_column" : "sent_type"
          },
          {
             "column" : "status_checking_dt",
@@ -7370,9 +7437,11 @@
          },
          {
             "column" : "design_id",
-            "comment" : "hard-coded lookup from [email-design-id] map",
+            "comment" : "hard-coded lookup: map [email-design-id] value from [email_reminder_settings_standard_fake.design_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "email-design-id"
+            "map" : "email-design-id",
+            "from_table" : "email_reminder_settings_standard_fake",
+            "from_column" : "design_id"
          },
          {
             "column" : "type",
@@ -7419,9 +7488,11 @@
       "columns" : [
          {
             "column" : "art_id",
-            "comment" : "hard-coded lookup from [newsletter-common-article-id] map",
+            "comment" : "hard-coded lookup: map [newsletter-common-article-id] value from [ppn_article_letter_common_fake.art_id] ",
             "action" : "hard-coded-lookup",
-            "map" : "newsletter-common-article-id"
+            "map" : "newsletter-common-article-id",
+            "from_table" : "ppn_article_letter_common_fake",
+            "from_column" : "art_id"
          },
          {
             "column" : "number",
