@@ -19,10 +19,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (link-remap-only)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          }
       ],
       "path_to_client" : [
@@ -53,10 +52,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (link-remap-only)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          }
       ],
       "path_to_client" : [
@@ -87,10 +85,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (link-remap-only)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          }
       ],
       "path_to_client" : [
@@ -121,10 +118,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (link-remap-only)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          }
       ],
       "path_to_client" : [
@@ -155,10 +151,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (link-remap-only)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          }
       ],
       "path_to_client" : [
@@ -189,10 +184,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (link-remap-only)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          }
       ],
       "path_to_client" : [
@@ -223,10 +217,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (link-remap-only)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          }
       ],
       "path_to_client" : [
@@ -257,10 +250,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (link-remap-only)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          }
       ],
       "path_to_client" : [
@@ -291,10 +283,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (link-remap-only)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          }
       ],
       "path_to_client" : [
@@ -325,10 +316,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (link-remap-only)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          }
       ],
       "path_to_client" : [
@@ -359,10 +349,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (link-remap-only)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          }
       ],
       "path_to_client" : [
@@ -400,10 +389,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [address_visitor_fake.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "address_visitor_fake",
+            "from_column" : "client_id"
          },
          {
             "column" : "state",
@@ -414,10 +404,12 @@
          },
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] (hard-coded)",
+            "comment" : "link to [visitor.id] from [address_visitor_fake.id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "address_visitor_fake",
+            "from_column" : "id"
          },
          {
             "column" : "city",
@@ -460,24 +452,29 @@
          },
          {
             "column" : "patient_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [appointment_confirmation_history.patient_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "appointment_confirmation_history",
+            "from_column" : "patient_id"
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [appointment_confirmation_history.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "appointment_confirmation_history",
+            "from_column" : "client_id"
          },
          {
             "column" : "appointment_id",
-            "comment" : "link to [appointment.id] (from pdm)",
+            "comment" : "link to [appointment.id] from [appointment_confirmation_history.appointment_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "appointment",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "appointment_confirmation_history",
+            "from_column" : "appointment_id"
          },
          {
             "column" : "datetime",
@@ -555,10 +552,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [appointment_reminder_schedule.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "appointment_reminder_schedule",
+            "from_column" : "client_id"
          },
          {
             "column" : "reminder_type",
@@ -625,17 +623,20 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [appointment.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "appointment",
+            "from_column" : "client_id"
          },
          {
             "column" : "appointment_id",
-            "comment" : "link to [appointment.id] (from pdm)",
+            "comment" : "link to [appointment.id] from [appointment_user_sensitive.appointment_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "appointment",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "appointment_user_sensitive",
+            "from_column" : "appointment_id"
          },
          {
             "column" : "need_to_send_courtesy",
@@ -786,10 +787,12 @@
          },
          {
             "column" : "user_name",
-            "comment" : "link to [client.cl_username] (hard-coded)",
+            "comment" : "link to [client.cl_username] from [client_access.user_name] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "client",
-            "lookup_column" : "cl_username"
+            "lookup_column" : "cl_username",
+            "from_table" : "client_access",
+            "from_column" : "user_name"
          }
       ]
    },
@@ -821,10 +824,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [client_feature.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "client_feature",
+            "from_column" : "client_id"
          },
          {
             "column" : "id",
@@ -853,10 +857,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [client_note.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "client_note",
+            "from_column" : "client_id"
          },
          {
             "column" : "note",
@@ -894,10 +899,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [client_properties.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "client_properties",
+            "from_column" : "client_id"
          }
       ]
    },
@@ -939,10 +945,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [client_setting.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "client_setting",
+            "from_column" : "client_id"
          },
          {
             "column" : "Type",
@@ -1003,10 +1010,12 @@
          },
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [email_contact_log.visitor_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "email_contact_log",
+            "from_column" : "visitor_id"
          },
          {
             "column" : "clog_code",
@@ -1017,10 +1026,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          },
          {
             "column" : "id",
@@ -1085,10 +1093,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [email_local_fake.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "email_local_fake",
+            "from_column" : "client_id"
          },
          {
             "column" : "deleted",
@@ -1106,10 +1115,12 @@
          },
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] (hard-coded)",
+            "comment" : "link to [visitor.id] from [email_local.visitor_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "email_local",
+            "from_column" : "visitor_id"
          },
          {
             "column" : "email",
@@ -1167,10 +1178,12 @@
          },
          {
             "column" : "patient_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [email_post_app_survey_log.patient_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "email_post_app_survey_log",
+            "from_column" : "patient_id"
          },
          {
             "column" : "id",
@@ -1227,17 +1240,18 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          },
          {
             "column" : "referrer_id",
-            "comment" : "link to [visitor.id] (hard-coded)",
+            "comment" : "link to [visitor.id] from [email_referral.referrer_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "email_referral",
+            "from_column" : "referrer_id"
          },
          {
             "column" : "id",
@@ -1246,10 +1260,12 @@
          },
          {
             "column" : "referral_mail_id",
-            "comment" : "link to [email_referral_mail.id] (hard-coded)",
+            "comment" : "link to [email_referral_mail.id] from [email_referral.referral_mail_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "email_referral_mail",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "email_referral",
+            "from_column" : "referral_mail_id"
          }
       ]
    },
@@ -1280,10 +1296,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          },
          {
             "column" : "id",
@@ -1337,10 +1352,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [email_reminder_settings.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "email_reminder_settings",
+            "from_column" : "client_id"
          },
          {
             "column" : "response_options",
@@ -1420,10 +1436,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [email_sending_queue.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "email_sending_queue",
+            "from_column" : "client_id"
          },
          {
             "column" : "response_options",
@@ -1542,17 +1559,18 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          },
          {
             "column" : "contact_log_id",
-            "comment" : "link to [email_contact_log.id] (from pdm)",
+            "comment" : "link to [email_contact_log.id] from [email_sent_mail_log.contact_log_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "email_contact_log",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "contact_log_id"
          },
          {
             "column" : "sml_mail_id",
@@ -1577,10 +1595,12 @@
          },
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [email_sent_mail_log.visitor_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "visitor_id"
          },
          {
             "column" : "sml_name",
@@ -1637,10 +1657,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [email_unsubscribe.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "email_unsubscribe",
+            "from_column" : "client_id"
          },
          {
             "column" : "type",
@@ -1681,10 +1702,12 @@
          },
          {
             "column" : "email_id",
-            "comment" : "link to [email.id] (hard-coded)",
+            "comment" : "link to [email.id] from [email.id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "email",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "email",
+            "from_column" : "id"
          },
          {
             "column" : "deleted_datetime",
@@ -1702,10 +1725,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from email by rename (old from pdm))",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [email.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "email",
+            "from_column" : "client_id"
          },
          {
             "column" : "deleted",
@@ -1747,10 +1771,12 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [email_welcome_forcing.client_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "email_welcome_forcing",
+            "from_column" : "client_id"
          },
          {
             "column" : "datetime",
@@ -1785,10 +1811,12 @@
       "columns" : [
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [flex_plan_info.visitor_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "flex_plan_info",
+            "from_column" : "visitor_id"
          },
          {
             "column" : "date",
@@ -1851,10 +1879,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [hhf_applications.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "hhf_applications",
+            "from_column" : "client_id"
          },
          {
             "column" : "deleted",
@@ -1917,10 +1946,11 @@
       "columns" : [
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [hhf_client_settings.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "hhf_client_settings",
+            "from_column" : "client_id"
          },
          {
             "column" : "guid",
@@ -1972,10 +2002,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [hhf_log.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "hhf_log",
+            "from_column" : "client_id"
          },
          {
             "column" : "send_date",
@@ -2039,10 +2070,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [hhf_settings.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "hhf_settings",
+            "from_column" : "client_id"
          },
          {
             "column" : "id",
@@ -2084,10 +2116,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [hhf_templates.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "hhf_templates",
+            "from_column" : "client_id"
          },
          {
             "column" : "id",
@@ -2122,10 +2155,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [hide_patient_change_history.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "hide_patient_change_history",
+            "from_column" : "client_id"
          },
          {
             "column" : "hide_patient_changed_to",
@@ -2136,10 +2170,12 @@
          },
          {
             "column" : "responsible_patient_id",
-            "comment" : "link to [responsible_patient.id] (from pdm)",
+            "comment" : "link to [responsible_patient.id] from [hide_patient_change_history.responsible_patient_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "responsible_patient",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "hide_patient_change_history",
+            "from_column" : "responsible_patient_id"
          },
          {
             "column" : "id",
@@ -2197,10 +2233,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [hits_count.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "hits_count",
+            "from_column" : "client_id"
          },
          {
             "column" : "hcount_id",
@@ -2230,10 +2267,12 @@
          },
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [hits_log.visitor_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "hits_log",
+            "from_column" : "visitor_id"
          },
          {
             "column" : "hlog_id",
@@ -2249,10 +2288,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [hits_log.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "hits_log",
+            "from_column" : "client_id"
          }
       ]
    },
@@ -2283,10 +2323,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [holiday_delivery_log.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "holiday_delivery_log",
+            "from_column" : "client_id"
          },
          {
             "column" : "hd_id",
@@ -2387,10 +2428,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [holiday_settings.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "holiday_settings",
+            "from_column" : "client_id"
          },
          {
             "column" : "hds_status",
@@ -2418,10 +2460,12 @@
       "columns" : [
          {
             "column" : "hds_id",
-            "comment" : "link to [holiday_settings.hds_id] (from pdm)",
+            "comment" : "link to [holiday_settings.hds_id] from [holiday_settings_recipients_link.hds_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "holiday_settings",
-            "lookup_column" : "hds_id"
+            "lookup_column" : "hds_id",
+            "from_table" : "holiday_settings_recipients_link",
+            "from_column" : "hds_id"
          },
          {
             "column" : "hsrl_id",
@@ -2468,10 +2512,12 @@
          },
          {
             "column" : "hdl_id",
-            "comment" : "link to [holiday_delivery_log.hdl_id] (from pdm)",
+            "comment" : "link to [holiday_delivery_log.hdl_id] from [holiday_settings_recipients_link_log.hdl_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "holiday_delivery_log",
-            "lookup_column" : "hdl_id"
+            "lookup_column" : "hdl_id",
+            "from_table" : "holiday_settings_recipients_link_log",
+            "from_column" : "hdl_id"
          }
       ]
    },
@@ -2506,10 +2552,12 @@
          },
          {
             "column" : "patient_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [insurance_plan_info.patient_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "insurance_plan_info",
+            "from_column" : "patient_id"
          },
          {
             "column" : "deleted",
@@ -2580,10 +2628,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [internal_sales_resource.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "internal_sales_resource",
+            "from_column" : "client_id"
          },
          {
             "column" : "zip_code",
@@ -2682,10 +2731,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [internal_sales_resource_quotes.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "internal_sales_resource_quotes",
+            "from_column" : "client_id"
          },
          {
             "column" : "category",
@@ -2730,10 +2780,11 @@
       "columns" : [
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [internal_salesforce_client_package.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "internal_salesforce_client_package",
+            "from_column" : "client_id"
          },
          {
             "column" : "discount",
@@ -2827,10 +2878,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [internal_spm_idea.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "internal_spm_idea",
+            "from_column" : "client_id"
          },
          {
             "column" : "v_drname",
@@ -2901,10 +2953,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [internal_statistics_pre_sesame.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "internal_statistics_pre_sesame",
+            "from_column" : "client_id"
          },
          {
             "column" : "pre_sesame_pms_active_patients",
@@ -2984,10 +3037,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [invisalign_case_process_doctor.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "invisalign_case_process_doctor",
+            "from_column" : "client_id"
          },
          {
             "column" : "last_process_date",
@@ -3026,10 +3080,12 @@
          },
          {
             "column" : "invisalign_client_id",
-            "comment" : "link to [invisalign_client.id] (from pdm)",
+            "comment" : "link to [invisalign_client.id] from [invisalign_case_process_doctor.invisalign_client_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "invisalign_client",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "invisalign_case_process_doctor",
+            "from_column" : "invisalign_client_id"
          },
          {
             "column" : "lname",
@@ -3081,10 +3137,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [invisalign_case_process_patient.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "invisalign_case_process_patient",
+            "from_column" : "client_id"
          },
          {
             "column" : "case_number",
@@ -3116,10 +3173,12 @@
          },
          {
             "column" : "invisalign_client_id",
-            "comment" : "link to [invisalign_client.id] (hard-coded)",
+            "comment" : "link to [invisalign_client.id] from [invisalign_case_process_patient.invisalign_client_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "invisalign_client",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "invisalign_case_process_patient",
+            "from_column" : "invisalign_client_id"
          },
          {
             "column" : "lname",
@@ -3178,10 +3237,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [invisalign_client.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "invisalign_client",
+            "from_column" : "client_id"
          },
          {
             "column" : "inv_pwd",
@@ -3231,10 +3291,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [invisalign_new_password_info.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "invisalign_new_password_info",
+            "from_column" : "client_id"
          },
          {
             "column" : "inv_pwd",
@@ -3288,10 +3349,12 @@
          },
          {
             "column" : "patient_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [invisalign_patient.patient_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "invisalign_patient",
+            "from_column" : "patient_id"
          },
          {
             "column" : "fname",
@@ -3337,10 +3400,12 @@
          },
          {
             "column" : "invisalign_client_id",
-            "comment" : "link to [invisalign_client.id] (from pdm)",
+            "comment" : "link to [invisalign_client.id] from [invisalign_patient.invisalign_client_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "invisalign_client",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "invisalign_patient",
+            "from_column" : "invisalign_client_id"
          },
          {
             "column" : "lname",
@@ -3401,10 +3466,12 @@
          },
          {
             "column" : "invisalign_client_id",
-            "comment" : "link to [invisalign_client.id] (from pdm)",
+            "comment" : "link to [invisalign_client.id] from [invisalign_refinement.invisalign_client_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "invisalign_client",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "invisalign_refinement",
+            "from_column" : "invisalign_client_id"
          },
          {
             "column" : "Id",
@@ -3454,10 +3521,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [invisalign_text.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "invisalign_text",
+            "from_column" : "client_id"
          },
          {
             "column" : "id",
@@ -3507,17 +3575,20 @@
          },
          {
             "column" : "office_id",
-            "comment" : "link to [office.id] (hard-coded)",
+            "comment" : "link to [office.id] from [office_address_local.office_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "office",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "office_address_local",
+            "from_column" : "office_id"
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [address_office_fake.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "address_office_fake",
+            "from_column" : "client_id"
          },
          {
             "column" : "id",
@@ -3553,10 +3624,12 @@
          },
          {
             "column" : "office_id",
-            "comment" : "link to [office.id] (from voice_office_name_pronunciation by rename (old from pdm))",
+            "comment" : "link to [office.id] from [voice_office_name_pronunciation.office_id] (from voice_office_name_pronunciation by rename (old from pdm))",
             "action" : "foreign-key",
             "lookup_table" : "office",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "voice_office_name_pronunciation",
+            "from_column" : "office_id"
          },
          {
             "column" : "active",
@@ -3566,10 +3639,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from voice_office_name_pronunciation by rename (old from pdm))",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [voice_office_name_pronunciation.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_office_name_pronunciation",
+            "from_column" : "client_id"
          },
          {
             "column" : "voice_pronunciation_name",
@@ -3614,10 +3688,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [opse_client_settings.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "opse_client_settings",
+            "from_column" : "client_id"
          },
          {
             "column" : "Comment",
@@ -3680,17 +3755,20 @@
          },
          {
             "column" : "patient_id",
-            "comment" : "link to [visitor.id] (hard-coded)",
+            "comment" : "link to [visitor.id] from [opse_payment_log.patient_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "opse_payment_log",
+            "from_column" : "patient_id"
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [opse_payment_log.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "opse_payment_log",
+            "from_column" : "client_id"
          },
          {
             "column" : "Comment",
@@ -3773,10 +3851,12 @@
          },
          {
             "column" : "patient_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [orthomation.patient_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "orthomation",
+            "from_column" : "patient_id"
          },
          {
             "column" : "id",
@@ -3820,10 +3900,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          },
          {
             "column" : "id",
@@ -3881,10 +3960,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [phone_local_fake.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "phone_local_fake",
+            "from_column" : "client_id"
          },
          {
             "column" : "deleted",
@@ -3902,10 +3982,12 @@
          },
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] (hard-coded)",
+            "comment" : "link to [visitor.id] from [phone_local_fake.visitor_id] (from phone_local_fake by rename (old hard-coded))",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "phone_local_fake",
+            "from_column" : "visitor_id"
          },
          {
             "column" : "deleted_source",
@@ -3993,10 +4075,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from phone by rename (old from pdm))",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [phone.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "phone",
+            "from_column" : "client_id"
          },
          {
             "column" : "deleted",
@@ -4007,10 +4090,12 @@
          },
          {
             "column" : "phone_id",
-            "comment" : "link to [phone.id] (hard-coded)",
+            "comment" : "link to [phone.id] from [phone.id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "phone",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "phone",
+            "from_column" : "id"
          },
          {
             "column" : "sms_active",
@@ -4041,10 +4126,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [ppn_article.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "ppn_article",
+            "from_column" : "client_id"
          },
          {
             "column" : "deleted",
@@ -4140,10 +4226,12 @@
       "columns" : [
          {
             "column" : "art_id",
-            "comment" : "link to [ppn_article.id] (from pdm)",
+            "comment" : "link to [ppn_article.id] from [ppn_article_letter.art_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "ppn_article",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "ppn_article_letter",
+            "from_column" : "art_id"
          },
          {
             "column" : "number",
@@ -4161,10 +4249,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          },
          {
             "column" : "id",
@@ -4180,10 +4267,12 @@
          },
          {
             "column" : "let_id",
-            "comment" : "link to [ppn_letter.id] (from pdm)",
+            "comment" : "link to [ppn_letter.id] from [ppn_article_letter.let_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "ppn_letter",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "ppn_article_letter",
+            "from_column" : "let_id"
          }
       ]
    },
@@ -4212,10 +4301,12 @@
          },
          {
             "column" : "queue_id",
-            "comment" : "link to [ppn_email_queue.id] (from pdm)",
+            "comment" : "link to [ppn_email_queue.id] from [ppn_article_queue.queue_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "ppn_email_queue",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "ppn_article_queue",
+            "from_column" : "queue_id"
          }
       ]
    },
@@ -4246,10 +4337,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [ppn_email_queue.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "ppn_email_queue",
+            "from_column" : "client_id"
          },
          {
             "column" : "is_send",
@@ -4336,10 +4428,12 @@
          },
          {
             "column" : "let_id",
-            "comment" : "link to [ppn_letter.id] (from pdm)",
+            "comment" : "link to [ppn_letter.id] from [ppn_href.let_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "ppn_letter",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "ppn_href",
+            "from_column" : "let_id"
          }
       ]
    },
@@ -4363,10 +4457,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [ppn_letter.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "ppn_letter",
+            "from_column" : "client_id"
          },
          {
             "column" : "deleted",
@@ -4421,10 +4516,12 @@
          },
          {
             "column" : "let_id",
-            "comment" : "link to [ppn_letter.id] (from pdm)",
+            "comment" : "link to [ppn_letter.id] from [ppn_letter_logo.let_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "ppn_letter",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "ppn_letter_logo",
+            "from_column" : "let_id"
          }
       ]
    },
@@ -4448,10 +4545,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [printable_ledger.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "printable_ledger",
+            "from_column" : "client_id"
          },
          {
             "column" : "phone",
@@ -4539,17 +4637,20 @@
       "columns" : [
          {
             "column" : "procedure_id",
-            "comment" : "link to [procedure.id] (hard-coded)",
+            "comment" : "link to [procedure.id] from [procedure.id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "procedure",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "procedure",
+            "from_column" : "id"
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from procedure by rename (old from pdm))",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [procedure.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "procedure",
+            "from_column" : "client_id"
          },
          {
             "column" : "state",
@@ -4596,10 +4697,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from recall by rename (old from pdm))",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [recall.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "recall",
+            "from_column" : "client_id"
          },
          {
             "column" : "description",
@@ -4610,10 +4712,12 @@
          },
          {
             "column" : "recall_id",
-            "comment" : "link to [recall.id] (hard-coded)",
+            "comment" : "link to [recall.id] from [recall.id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "recall",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "recall",
+            "from_column" : "id"
          }
       ]
    },
@@ -4658,17 +4762,18 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          },
          {
             "column" : "referrer_id",
-            "comment" : "link to [referrer.id] (from pdm)",
+            "comment" : "link to [referrer.id] from [referrer_email_log.referrer_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "referrer",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "referrer_email_log",
+            "from_column" : "referrer_id"
          },
          {
             "column" : "id",
@@ -4700,17 +4805,18 @@
       "columns" : [
          {
             "column" : "si_doctor_id",
-            "comment" : "link to [si_doctor.DocId] (hard-coded)",
+            "comment" : "link to [si_doctor.DocId] from [referrer_user_sensitive.si_doctor_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "si_doctor",
-            "lookup_column" : "DocId"
+            "lookup_column" : "DocId",
+            "from_table" : "referrer_user_sensitive",
+            "from_column" : "si_doctor_id"
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          },
          {
             "column" : "deleted",
@@ -4720,10 +4826,12 @@
          },
          {
             "column" : "referrer_id",
-            "comment" : "link to [referrer.id] (hard-coded)",
+            "comment" : "link to [referrer.id] from [referrer_user_sensitive.referrer_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "referrer",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "referrer_user_sensitive",
+            "from_column" : "referrer_id"
          }
       ]
    },
@@ -4778,17 +4886,20 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from responsible_patient by rename (old from pdm))",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [responsible_patient.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "responsible_patient",
+            "from_column" : "client_id"
          },
          {
             "column" : "responsible_patient_id",
-            "comment" : "link to [responsible_patient.id] (hard-coded)",
+            "comment" : "link to [responsible_patient.id] from [responsible_patient.id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "responsible_patient",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "responsible_patient",
+            "from_column" : "id"
          }
       ]
    },
@@ -4838,10 +4949,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [satellite.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "satellite",
+            "from_column" : "client_id"
          },
          {
             "column" : "comments",
@@ -4876,17 +4988,21 @@
          },
          {
             "column" : "DocId",
-            "comment" : "link to [si_doctor.DocId] (from pdm)",
+            "comment" : "link to [si_doctor.DocId] from [si_alerted_doctor_to_message.DocId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_doctor",
-            "lookup_column" : "DocId"
+            "lookup_column" : "DocId",
+            "from_table" : "si_alerted_doctor_to_message",
+            "from_column" : "DocId"
          },
          {
             "column" : "MsgId",
-            "comment" : "link to [si_message.MsgId] (from pdm)",
+            "comment" : "link to [si_message.MsgId] from [si_alerted_doctor_to_message.MsgId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_message",
-            "lookup_column" : "MsgId"
+            "lookup_column" : "MsgId",
+            "from_table" : "si_alerted_doctor_to_message",
+            "from_column" : "MsgId"
          }
       ]
    },
@@ -4917,10 +5033,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_default_timepoint_name.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_default_timepoint_name",
+            "from_column" : "client_id"
          }
       ]
    },
@@ -4965,10 +5082,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_doctor.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_doctor",
+            "from_column" : "client_id"
          },
          {
             "column" : "DocId",
@@ -5046,24 +5164,29 @@
       "columns" : [
          {
             "column" : "PatId",
-            "comment" : "link to [si_patient.PatId] (from pdm)",
+            "comment" : "link to [si_patient.PatId] from [si_doctor_access.PatId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_patient",
-            "lookup_column" : "PatId"
+            "lookup_column" : "PatId",
+            "from_table" : "si_doctor_access",
+            "from_column" : "PatId"
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_doctor_access.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_doctor_access",
+            "from_column" : "client_id"
          },
          {
             "column" : "DocId",
-            "comment" : "link to [si_doctor.DocId] (from pdm)",
+            "comment" : "link to [si_doctor.DocId] from [si_doctor_access.DocId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_doctor",
-            "lookup_column" : "DocId"
+            "lookup_column" : "DocId",
+            "from_table" : "si_doctor_access",
+            "from_column" : "DocId"
          }
       ]
    },
@@ -5098,17 +5221,21 @@
          },
          {
             "column" : "ThemeId",
-            "comment" : "link to [si_theme.ThemeId] (from pdm)",
+            "comment" : "link to [si_theme.ThemeId] from [si_doctor_theme.ThemeId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_theme",
-            "lookup_column" : "ThemeId"
+            "lookup_column" : "ThemeId",
+            "from_table" : "si_doctor_theme",
+            "from_column" : "ThemeId"
          },
          {
             "column" : "DocId",
-            "comment" : "link to [si_doctor.DocId] (from pdm)",
+            "comment" : "link to [si_doctor.DocId] from [si_doctor_theme.DocId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_doctor",
-            "lookup_column" : "DocId"
+            "lookup_column" : "DocId",
+            "from_table" : "si_doctor_theme",
+            "from_column" : "DocId"
          }
       ]
    },
@@ -5125,10 +5252,12 @@
       "columns" : [
          {
             "column" : "PatId",
-            "comment" : "link to [si_patient.PatId] (from pdm)",
+            "comment" : "link to [si_patient.PatId] from [si_image.PatId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_patient",
-            "lookup_column" : "PatId"
+            "lookup_column" : "PatId",
+            "from_table" : "si_image",
+            "from_column" : "PatId"
          },
          {
             "column" : "Position",
@@ -5158,10 +5287,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_image.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_image",
+            "from_column" : "client_id"
          },
          {
             "column" : "imageUrl",
@@ -5242,24 +5372,29 @@
       "columns" : [
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_image_to_message.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_image_to_message",
+            "from_column" : "client_id"
          },
          {
             "column" : "ImgId",
-            "comment" : "link to [si_image.ImageId] (from pdm)",
+            "comment" : "link to [si_image.ImageId] from [si_image_to_message.ImgId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_image",
-            "lookup_column" : "ImageId"
+            "lookup_column" : "ImageId",
+            "from_table" : "si_image_to_message",
+            "from_column" : "ImgId"
          },
          {
             "column" : "MsgId",
-            "comment" : "link to [si_message.MsgId] (from pdm)",
+            "comment" : "link to [si_message.MsgId] from [si_image_to_message.MsgId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_message",
-            "lookup_column" : "MsgId"
+            "lookup_column" : "MsgId",
+            "from_table" : "si_image_to_message",
+            "from_column" : "MsgId"
          }
       ]
    },
@@ -5304,10 +5439,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_image_type.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_image_type",
+            "from_column" : "client_id"
          },
          {
             "column" : "Date",
@@ -5387,24 +5523,29 @@
          },
          {
             "column" : "ThemeId",
-            "comment" : "link to [si_theme.ThemeId] (from pdm)",
+            "comment" : "link to [si_theme.ThemeId] from [si_message.ThemeId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_theme",
-            "lookup_column" : "ThemeId"
+            "lookup_column" : "ThemeId",
+            "from_table" : "si_message",
+            "from_column" : "ThemeId"
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_message.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_message",
+            "from_column" : "client_id"
          },
          {
             "column" : "DocId",
-            "comment" : "link to [si_doctor.DocId] (from pdm)",
+            "comment" : "link to [si_doctor.DocId] from [si_message.DocId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_doctor",
-            "lookup_column" : "DocId"
+            "lookup_column" : "DocId",
+            "from_table" : "si_message",
+            "from_column" : "DocId"
          },
          {
             "column" : "IsDraft",
@@ -5456,10 +5597,12 @@
          },
          {
             "column" : "MsgId",
-            "comment" : "link to [si_message.MsgId] (from pdm)",
+            "comment" : "link to [si_message.MsgId] from [si_message_attachment.MsgId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_message",
-            "lookup_column" : "MsgId"
+            "lookup_column" : "MsgId",
+            "from_table" : "si_message_attachment",
+            "from_column" : "MsgId"
          }
       ]
    },
@@ -5490,10 +5633,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_patient.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_patient",
+            "from_column" : "client_id"
          },
          {
             "column" : "LName",
@@ -5531,17 +5675,20 @@
       "columns" : [
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_patient_link.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_patient_link",
+            "from_column" : "client_id"
          },
          {
             "column" : "patient_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [si_patient_link.patient_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "si_patient_link",
+            "from_column" : "patient_id"
          },
          {
             "column" : "id",
@@ -5550,10 +5697,12 @@
          },
          {
             "column" : "si_patient_id",
-            "comment" : "link to [si_patient.PatId] (from pdm)",
+            "comment" : "link to [si_patient.PatId] from [si_patient_link.si_patient_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_patient",
-            "lookup_column" : "PatId"
+            "lookup_column" : "PatId",
+            "from_table" : "si_patient_link",
+            "from_column" : "si_patient_id"
          }
       ]
    },
@@ -5598,17 +5747,20 @@
          },
          {
             "column" : "PId",
-            "comment" : "link to [si_patient.PatId] (from pdm)",
+            "comment" : "link to [si_patient.PatId] from [si_patient_profile.PId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_patient",
-            "lookup_column" : "PatId"
+            "lookup_column" : "PatId",
+            "from_table" : "si_patient_profile",
+            "from_column" : "PId"
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_patient_profile.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_patient_profile",
+            "from_column" : "client_id"
          },
          {
             "column" : "PKey",
@@ -5639,10 +5791,12 @@
          },
          {
             "column" : "PatId",
-            "comment" : "link to [si_patient.PatId] (from pdm)",
+            "comment" : "link to [si_patient.PatId] from [si_patient_timepoint_link.PatId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_patient",
-            "lookup_column" : "PatId"
+            "lookup_column" : "PatId",
+            "from_table" : "si_patient_timepoint_link",
+            "from_column" : "PatId"
          },
          {
             "column" : "TpName",
@@ -5660,10 +5814,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_patient_timepoint_link.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_patient_timepoint_link",
+            "from_column" : "client_id"
          }
       ]
    },
@@ -5707,10 +5862,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_standard_message.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_standard_message",
+            "from_column" : "client_id"
          },
          {
             "column" : "OptFields",
@@ -5741,17 +5897,20 @@
       "columns" : [
          {
             "column" : "PatId",
-            "comment" : "link to [si_patient.PatId] (from pdm)",
+            "comment" : "link to [si_patient.PatId] from [si_theme.PatId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_patient",
-            "lookup_column" : "PatId"
+            "lookup_column" : "PatId",
+            "from_table" : "si_theme",
+            "from_column" : "PatId"
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [si_theme.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "si_theme",
+            "from_column" : "client_id"
          },
          {
             "column" : "ThemeId",
@@ -5760,10 +5919,12 @@
          },
          {
             "column" : "FirstMesId",
-            "comment" : "link to [si_message.MsgId] (from pdm)",
+            "comment" : "link to [si_message.MsgId] from [si_theme.FirstMesId] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "si_message",
-            "lookup_column" : "MsgId"
+            "lookup_column" : "MsgId",
+            "from_table" : "si_theme",
+            "from_column" : "FirstMesId"
          }
       ]
    },
@@ -5787,10 +5948,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [sms_client_settings.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "sms_client_settings",
+            "from_column" : "client_id"
          }
       ]
    },
@@ -5818,10 +5980,12 @@
          },
          {
             "column" : "patient_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [sms_message_history.patient_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "sms_message_history",
+            "from_column" : "patient_id"
          },
          {
             "column" : "message_limit",
@@ -5879,10 +6043,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [sms_message_history.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "sms_message_history",
+            "from_column" : "client_id"
          },
          {
             "column" : "processed",
@@ -5959,10 +6124,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [sms_message_response.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "sms_message_response",
+            "from_column" : "client_id"
          },
          {
             "column" : "ResponseReceiveDate",
@@ -6033,10 +6199,12 @@
          },
          {
             "column" : "container",
-            "comment" : "link to [client.cl_username] (hard-coded)",
+            "comment" : "link to [client.cl_username] from [srm_resource.container] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "client",
-            "lookup_column" : "cl_username"
+            "lookup_column" : "cl_username",
+            "from_table" : "srm_resource",
+            "from_column" : "container"
          },
          {
             "column" : "id",
@@ -6078,10 +6246,12 @@
          },
          {
             "column" : "office_id",
-            "comment" : "link to [office.id] (from pdm)",
+            "comment" : "link to [office.id] from [staff_schedule.office_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "office",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "staff_schedule",
+            "from_column" : "office_id"
          },
          {
             "column" : "day",
@@ -6130,10 +6300,12 @@
          },
          {
             "column" : "office_id",
-            "comment" : "link to [office.id] (from pdm)",
+            "comment" : "link to [office.id] from [staff_schedule_rules.office_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "office",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "staff_schedule_rules",
+            "from_column" : "office_id"
          },
          {
             "column" : "rule",
@@ -6171,10 +6343,11 @@
       "columns" : [
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [survey_answer.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "survey_answer",
+            "from_column" : "client_id"
          },
          {
             "column" : "question_option_id",
@@ -6193,10 +6366,12 @@
          },
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [survey_answer.visitor_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "survey_answer",
+            "from_column" : "visitor_id"
          },
          {
             "column" : "answer_text",
@@ -6265,10 +6440,12 @@
          },
          {
             "column" : "user_id",
-            "comment" : "link to [visitor.id] (hard-coded)",
+            "comment" : "link to [visitor.id] from [token.user_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "token",
+            "from_column" : "user_id"
          },
          {
             "column" : "token",
@@ -6292,10 +6469,11 @@
       "columns" : [
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [upload_postprocessing_task.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "upload_postprocessing_task",
+            "from_column" : "client_id"
          },
          {
             "column" : "id",
@@ -6348,10 +6526,12 @@
          },
          {
             "column" : "task_id",
-            "comment" : "link to [upload_postprocessing_task.id] (from pdm)",
+            "comment" : "link to [upload_postprocessing_task.id] from [upload_postprocessing_task_param.task_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "upload_postprocessing_task",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "upload_postprocessing_task_param",
+            "from_column" : "task_id"
          }
       ]
    },
@@ -6387,10 +6567,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [upload_settings.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "upload_settings",
+            "from_column" : "client_id"
          },
          {
             "column" : "comments",
@@ -6421,17 +6602,20 @@
          },
          {
             "column" : "office_id",
-            "comment" : "link to [office.id] (from pdm)",
+            "comment" : "link to [office.id] from [visitor_opinion.office_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "office",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "visitor_opinion",
+            "from_column" : "office_id"
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [visitor_opinion.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "visitor_opinion",
+            "from_column" : "client_id"
          },
          {
             "column" : "state",
@@ -6463,10 +6647,12 @@
          },
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [visitor_opinion.visitor_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "visitor_opinion",
+            "from_column" : "visitor_id"
          },
          {
             "column" : "featured",
@@ -6542,10 +6728,12 @@
          },
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [visitor_setting.visitor_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "visitor_setting",
+            "from_column" : "visitor_id"
          },
          {
             "column" : "Type",
@@ -6606,10 +6794,12 @@
          },
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [visitor_settings.visitor_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "visitor_settings",
+            "from_column" : "visitor_id"
          }
       ]
    },
@@ -6629,10 +6819,11 @@
       "columns" : [
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from visitor by rename (old from pdm))",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [visitor.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "visitor",
+            "from_column" : "client_id"
          },
          {
             "column" : "welcome_sent",
@@ -6643,10 +6834,12 @@
          },
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] (hard-coded)",
+            "comment" : "link to [visitor.id] from [visitor.id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "visitor",
+            "from_column" : "id"
          },
          {
             "column" : "phones_prioritize_source",
@@ -6709,17 +6902,21 @@
       "columns" : [
          {
             "column" : "procedure_id",
-            "comment" : "link to [procedure.id] (from pdm)",
+            "comment" : "link to [procedure.id] from [voice_appointment_reminder_procedure.procedure_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "procedure",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "voice_appointment_reminder_procedure",
+            "from_column" : "procedure_id"
          },
          {
             "column" : "voice_reminder_settings_id",
-            "comment" : "link to [voice_reminder_settings.id] (from pdm)",
+            "comment" : "link to [voice_reminder_settings.id] from [voice_appointment_reminder_procedure.voice_reminder_settings_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "voice_reminder_settings",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "voice_appointment_reminder_procedure",
+            "from_column" : "voice_reminder_settings_id"
          }
       ]
    },
@@ -6750,10 +6947,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [voice_autofills.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_autofills",
+            "from_column" : "client_id"
          },
          {
             "column" : "guid",
@@ -6777,10 +6975,11 @@
       "columns" : [
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [voice_client_settings.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_client_settings",
+            "from_column" : "client_id"
          },
          {
             "column" : "oncall_install_date",
@@ -6832,10 +7031,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [voice_end_message.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_end_message",
+            "from_column" : "client_id"
          },
          {
             "column" : "updated",
@@ -6889,10 +7089,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [voice_left_messages.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_left_messages",
+            "from_column" : "client_id"
          },
          {
             "column" : "phone",
@@ -6917,10 +7118,12 @@
          },
          {
             "column" : "rec_id",
-            "comment" : "link to [voice_recipient_list.RLId] (hard-coded)",
+            "comment" : "link to [voice_recipient_list.RLId] from [voice_left_messages.rec_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "voice_recipient_list",
-            "lookup_column" : "RLId"
+            "lookup_column" : "RLId",
+            "from_table" : "voice_left_messages",
+            "from_column" : "rec_id"
          },
          {
             "column" : "call_time",
@@ -6984,10 +7187,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [voice_message_history.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_message_history",
+            "from_column" : "client_id"
          },
          {
             "column" : "unique_key",
@@ -7033,10 +7237,12 @@
          },
          {
             "column" : "rec_id",
-            "comment" : "link to [voice_recipient_list.RLId] (hard-coded)",
+            "comment" : "link to [voice_recipient_list.RLId] from [voice_message_history.rec_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "voice_recipient_list",
-            "lookup_column" : "RLId"
+            "lookup_column" : "RLId",
+            "from_table" : "voice_message_history",
+            "from_column" : "rec_id"
          },
          {
             "column" : "id",
@@ -7065,10 +7271,11 @@
       "columns" : [
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [voice_no_call_list.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_no_call_list",
+            "from_column" : "client_id"
          },
          {
             "column" : "rec_phone",
@@ -7103,10 +7310,12 @@
          },
          {
             "column" : "patient_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [voice_patient_name_pronunciation.patient_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "voice_patient_name_pronunciation",
+            "from_column" : "patient_id"
          },
          {
             "column" : "pronunciation",
@@ -7151,10 +7360,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [voice_qa_record.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_qa_record",
+            "from_column" : "client_id"
          },
          {
             "column" : "id",
@@ -7180,17 +7390,18 @@
       "columns" : [
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          },
          {
             "column" : "patient_id",
-            "comment" : "link to [visitor.id] (from pdm)",
+            "comment" : "link to [visitor.id] from [voice_recipient_list.patient_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "voice_recipient_list",
+            "from_column" : "patient_id"
          },
          {
             "column" : "id",
@@ -7247,10 +7458,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [voice_reminder_settings.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_reminder_settings",
+            "from_column" : "client_id"
          },
          {
             "column" : "voice_menu",
@@ -7304,10 +7516,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [voice_system_transaction_log.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_system_transaction_log",
+            "from_column" : "client_id"
          },
          {
             "column" : "type",
@@ -7377,10 +7590,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [voice_transactions_log.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_transactions_log",
+            "from_column" : "client_id"
          },
          {
             "column" : "id",
@@ -7416,10 +7630,11 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id] value from [email_reminder_settings_standard_fake.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "email_reminder_settings_standard_fake",
+            "from_column" : "client_id"
          },
          {
             "column" : "response_options",
@@ -7510,10 +7725,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
          },
          {
             "column" : "id",
@@ -7522,10 +7736,12 @@
          },
          {
             "column" : "let_id",
-            "comment" : "link to [ppn_letter.id] (from pdm)",
+            "comment" : "link to [ppn_letter.id] from [ppn_article_letter.let_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "ppn_letter",
-            "lookup_column" : "id"
+            "lookup_column" : "id",
+            "from_table" : "ppn_article_letter",
+            "from_column" : "let_id"
          },
          {
             "column" : "is_doctor_article",

@@ -28,18 +28,18 @@ use PDMParser;
 }
 
 sub get_schema_diff {
-    my ($logger, $schema_5_list, $schema_6_list, $required_tables, $links) = @_;
+	my ($logger, $schema_5_list, $schema_6_list, $required_tables, $links) = @_;
 
 	my $schema_5 = group_by_columns($schema_5_list, [ 'TABLE_NAME', 'COLUMN_NAME' ]);
 	my $schema_6 = group_by_columns($schema_6_list, [ 'TABLE_NAME', 'COLUMN_NAME' ]);
 
-    my $migration = Migration->new($schema_6, $required_tables);
+	my $migration = Migration->new($schema_6, $required_tables);
 	$migration->load_hard_coded_links($links);
-    $required_tables = filter_and_expand_required_tables($logger, $required_tables, $migration, ['1', '2', '3']);
+	$required_tables = filter_and_expand_required_tables($logger, $required_tables, $migration, ['1', '2', '3']);
 
-    $links->rename_tables($migration, $schema_6);
-    $migration->restore_remap_only_links($links);
-    my %allowed_tables = map { $_->{'table'} => 1 } @$required_tables;
+	$links->rename_tables($migration, $schema_6);
+	$migration->restore_remap_only_links($links);
+	my %allowed_tables = map { $_->{'table'} => 1 } @$required_tables;
 	$links->remove_link_not_from_tables(\%allowed_tables);
 	$links->verify_broken_links($logger, \%allowed_tables, $migration);
 
@@ -56,8 +56,8 @@ sub get_schema_diff {
 	$rules->apply_links($links, $migration);
 	$rules->apply_table_info($migration, $links, $schema_6_list);
 	$rules->apply_table_priority($migration, $required_tables);
-	$rules->apply_moved_tables($migration, $schema_5_list, $schema_6);
-	$rules->apply_missing_eval($migration);
+	$rules->apply_moved_tables($migration, $schema_5_list, $schema_6, $links);
+	$rules->apply_missing_eval($migration, $links);
 	$rules->make_multiple_tables_rules($migration, $schema_6);
 	
 	$rules->save_json_to("_out.json", 1);
@@ -90,7 +90,7 @@ sub check_removed_tables {
 
 
 sub group_by_columns {
-    my ($rows, $columns) = @_;
+	my ($rows, $columns) = @_;
 	
 	tie my %r, 'Tie::IxHash';
 	for my $row (@$rows) {
@@ -100,70 +100,70 @@ sub group_by_columns {
 }
 
 sub _group_by_column {
-    my ($result, $row, $columns, $path) = @_;
+	my ($result, $row, $columns, $path) = @_;
 
-    if (@$columns == 1) {
+	if (@$columns == 1) {
 		my $column = $columns->[0];
 
-    	if (exists $result->{ $row->{$column} } ) {
-    		die "duplicated key [".join(".", @$path, $row->{$column})."]";
+		if (exists $result->{ $row->{$column} } ) {
+			die "duplicated key [".join(".", @$path, $row->{$column})."]";
 		} else {
 			$result->{ $row->{$column} } = { %$row };
 		}
 	} else {
 		my @left_columns = @$columns;
 		my $column = shift @left_columns;
-    	unless (exists $result->{ $row->{$column} }) {
-    		tie my %n, 'Tie::IxHash';
-    		$result->{ $row->{$column} } = \%n;
-    	}
+		unless (exists $result->{ $row->{$column} }) {
+			tie my %n, 'Tie::IxHash';
+			$result->{ $row->{$column} } = \%n;
+		}
 		_group_by_column(
 			$result->{ $row->{$column} }, 
 			$row, 
 			\@left_columns,
 			[ @$path, $row->{$column} ],
 		);
-    }
+	}
 }
 
 sub get_sesame_5_schema {
-    my ($logger, $fn) = @_;
+	my ($logger, $fn) = @_;
 	
-    $logger->printf("read sesame_5 schema from [%s]", $fn);
-    return from_json(read_file($fn));
+	$logger->printf("read sesame_5 schema from [%s]", $fn);
+	return from_json(read_file($fn));
 }
 
 sub get_required_tables {
-    my ($logger, $fn, $levels) = @_;
+	my ($logger, $fn, $levels) = @_;
 	
-    $logger->printf("read required tables from [%s]", $fn);
-    return from_json(read_file($fn));
+	$logger->printf("read required tables from [%s]", $fn);
+	return from_json(read_file($fn));
 }
 
 sub filter_and_expand_required_tables {
-    my ($logger, $tables, $migration, $levels) = @_;
+	my ($logger, $tables, $migration, $levels) = @_;
 
-    tie my %tables_6, "Tie::IxHash";
-    for my $table (@$tables) {
-    	if ($table->{'priority'} ~~ @$levels) {
-	    	for my $new_name (@{ $migration->get_new_names( $table->{'table'} ) }) {
+	tie my %tables_6, "Tie::IxHash";
+	for my $table (@$tables) {
+		if ($table->{'priority'} ~~ @$levels) {
+			for my $new_name (@{ $migration->get_new_names( $table->{'table'} ) }) {
 				$tables_6{$new_name} = {
 					%$table,
 					'table' => $new_name,
 				};
-	    	}
-    		#$logger->printf("include [%s] table", $table->{'table'});
-    	} else {
-    		#$logger->printf("table [%s] is ignored", $table->{'table'});
-    	}
-    }
-    $logger->printf(
-    	"[%d] required tables after filtering (priorit%s %s)", 
-    	scalar keys %tables_6,
-    	(@$levels == 1 ? "y" : "ies"),
-    	join(', ', @$levels)
+			}
+			#$logger->printf("include [%s] table", $table->{'table'});
+		} else {
+			#$logger->printf("table [%s] is ignored", $table->{'table'});
+		}
+	}
+	$logger->printf(
+		"[%d] required tables after filtering (priorit%s %s)", 
+		scalar keys %tables_6,
+		(@$levels == 1 ? "y" : "ies"),
+		join(', ', @$levels)
 	);
-    return [ values %tables_6 ];
+	return [ values %tables_6 ];
 }
 
 sub get_sesame_6_schema {
@@ -183,7 +183,7 @@ sub get_sesame_6_schema {
 }
 
 sub verify_links {
-    my ($logger, $links, $schema_6, $allowed_tables, $migration) = @_;
+	my ($logger, $links, $schema_6, $allowed_tables, $migration) = @_;
 	
 	my %not_link = map { $_ => 1 } (
 		"*.pms_id", "*.link_id", "*.voice_queue_id", "*.clog_mail_id", "*.sml_mail_id", 
@@ -242,7 +242,7 @@ sub verify_links {
 }
 
 sub load_links_from_model {
-    my ($logger, $links, $fn) = @_;
+	my ($logger, $links, $fn) = @_;
 
 	$logger->printf("read links from [%s]", $fn);
 	my $parser = PDMParser->new($fn);
@@ -316,7 +316,7 @@ sub new {
 }
 
 sub make_secondary_rules {
-    my ($self, $migration) = @_;
+	my ($self, $migration) = @_;
 
 	for my $table_6 (keys %{ $self->{'rules'} }) {
 		my $secondary_rules = $migration->get_secondary_rule_names($table_6);
@@ -327,7 +327,7 @@ sub make_secondary_rules {
 }
 
 sub remove_ignored_columns {
-    my ($self, $migration) = @_;
+	my ($self, $migration) = @_;
 	
 	for my $table_6 (keys %{ $self->{'rules'} }) {
 		for my $column_6 (keys %{ $self->{'rules'}{$table_6} }) {
@@ -339,14 +339,14 @@ sub remove_ignored_columns {
 }
 
 sub apply_table_info {
-    my ($self, $migration, $links, $schema_6) = @_;
+	my ($self, $migration, $links, $schema_6) = @_;
 
 	$self->{'remap_only_tables'} = $migration->get_tables_with_remap_only_action();
 
 	{
-	    my %remap_only_tables = map { $_ => 1 } @{ $self->{'remap_only_tables'} };
-	    my $stop = 0;
-	    my $update_on_columns = $self->get_update_on_columns($schema_6, $migration);
+		my %remap_only_tables = map { $_ => 1 } @{ $self->{'remap_only_tables'} };
+		my $stop = 0;
+		my $update_on_columns = $self->get_update_on_columns($schema_6, $migration);
 		for my $table (keys %{ $self->{'rules'} }) {
 			if (exists $remap_only_tables{$table}) {
 				die "rules found for remap-only table [$table]";
@@ -390,7 +390,7 @@ sub apply_table_info {
 }
 
 sub apply_table_priority {
-    my ($self, $migration, $required_tables) = @_;
+	my ($self, $migration, $required_tables) = @_;
 
 	for my $table (@$required_tables) {
 		my $new_names = $migration->get_new_names($table->{'table'});
@@ -419,10 +419,10 @@ sub apply_table_priority {
 }
 
 sub make_multiple_tables_rules {
-    my ($self, $migration, $schema_6) = @_;
+	my ($self, $migration, $schema_6) = @_;
 
-    my $stop = 0;
-    my $column_rules = $self->{'rules'};
+	my $stop = 0;
+	my $column_rules = $self->{'rules'};
 	
 	for my $table_6 (keys %$column_rules) {
 		my %from_tables;
@@ -441,7 +441,7 @@ sub make_multiple_tables_rules {
 
 
 sub get_update_on_columns {
-    my ($self, $schema_6, $migration) = @_;
+	my ($self, $schema_6, $migration) = @_;
 	
 	my (%primary_keys);
 	for my $column (@$schema_6) {
@@ -461,12 +461,12 @@ sub get_update_on_columns {
 }
 
 sub find_path_to_client {
-    my ($self, $table, $links, $depth, $visited) = @_;
+	my ($self, $table, $links, $depth, $visited) = @_;
 
-    $depth //= 0;
-    $visited //= {
-    	$table => 1,
-    };
+	$depth //= 0;
+	$visited //= {
+		$table => 1,
+	};
 	my @found_paths;
 	if ($links->is_link_exists_between_tables($table, "client")) {
 		push(
@@ -485,18 +485,18 @@ sub find_path_to_client {
 				my ($to_table, $columns) = @_;
 
 				unless (exists $visited->{$to_table}) {
-				 	$visited->{$to_table} = 1;
-				 	my $path = $self->find_path_to_client($to_table, $links, $depth + 1, $visited);
-				 	if (defined $path && 1 == keys %$columns) {
-				 		unshift(
-			 				@$path, 
-			 				{
-			 					'table' => $table,
-			 					'column' => ((keys %$columns)[0]),
-		 					}
-	 					);
-					 	push(@found_paths, $path);
-				 	}
+					$visited->{$to_table} = 1;
+					my $path = $self->find_path_to_client($to_table, $links, $depth + 1, $visited);
+					if (defined $path && 1 == keys %$columns) {
+						unshift(
+							@$path, 
+							{
+								'table' => $table,
+								'column' => ((keys %$columns)[0]),
+							}
+						);
+						push(@found_paths, $path);
+					}
 				} 
 			}
 		);
@@ -510,11 +510,11 @@ sub find_path_to_client {
 }
 
 sub flat_rules {
-    my ($self, $no_missing_rules) = @_;
+	my ($self, $no_missing_rules) = @_;
 
-    my $column_rules = $self->{'rules'};
+	my $column_rules = $self->{'rules'};
 
-    tie my %rules_by_table, "Tie::IxHash";
+	tie my %rules_by_table, "Tie::IxHash";
 
 	for my $table_6 (@{ $self->{'remap_only_tables'} }) {
 		tie my %r, 'Tie::IxHash', (
@@ -536,7 +536,7 @@ sub flat_rules {
 				$self->_make_json_column_obj(
 					$table_6,
 					'client_id',
-					Migration::Rule::ForeignKey->new('client', 'id')->set_source("link-remap-only"),
+					Migration::Rule::Eval->new('client-id', undef, undef),
 					$no_missing_rules,
 				),
 			],
@@ -589,14 +589,14 @@ sub flat_rules {
 }
 
 sub _get_table_name {
-    my ($table) = @_;
+	my ($table) = @_;
 	
 	$table =~ s{:.*$}{};
 	return $table;
 }
 
 sub _make_json_column_obj {
-    my ($self, $table_6, $column_6, $rule, $no_missing_rules) = @_;
+	my ($self, $table_6, $column_6, $rule, $no_missing_rules) = @_;
 	
 	tie my %r, "Tie::IxHash", (
 		'column' => $column_6,
@@ -614,32 +614,32 @@ sub _make_json_column_obj {
 }
 
 sub save_json_to {
-    my ($self, $fn, $no_missing_rules) = @_;
+	my ($self, $fn, $no_missing_rules) = @_;
 	
-    $self->{'logger'}->printf("save rules as json to [%s]", $fn);
+	$self->{'logger'}->printf("save rules as json to [%s]", $fn);
 	write_file($fn, to_json($self->flat_rules($no_missing_rules), { "pretty" => 1 }));
 }
 
 sub save_html_to {
-    my ($self, $fn) = @_;
+	my ($self, $fn) = @_;
 	
-    $self->{'logger'}->printf("save rules as html to [%s]", $fn);
-    my $rules = $self->flat_rules(1);
-    my @lines = (
-    	"<html><head><style>",
-    	"body {font-family: Verdana, Arial, Helvetica; }",
-    	"li {font-size: 11pt;}",
-    	"table {border: 1px solid #ccc; border-collapse:collapse; font-size: 9pt;}",
-    	"td, th {border-top: 1px solid #ccc; border-left: 1px dashed #ccc; padding-left: 0.5em; padding-right: 0.5em;}",
-    	#".highlight { color: #49717F }",
-    	".nohighlight { color: #999 }",
-    	".error { color: #f00; font-weight: bold; }",
-    	"th {text-align: left; }",
-    	".value {font-weight: bold;}",
-    	"</style></head><body>");
-    for my $table (keys %$rules) {
-    	push(@lines, "<h2><a name=\"table.".$table."\"></a>Table [$table]</h2>");
-    	push(@lines, "<ul>");
+	$self->{'logger'}->printf("save rules as html to [%s]", $fn);
+	my $rules = $self->flat_rules(1);
+	my @lines = (
+		"<html><head><style>",
+		"body {font-family: Verdana, Arial, Helvetica; }",
+		"li {font-size: 11pt;}",
+		"table {border: 1px solid #ccc; border-collapse:collapse; font-size: 9pt;}",
+		"td, th {border-top: 1px solid #ccc; border-left: 1px dashed #ccc; padding-left: 0.5em; padding-right: 0.5em;}",
+		#".highlight { color: #49717F }",
+		".nohighlight { color: #999 }",
+		".error { color: #f00; font-weight: bold; }",
+		"th {text-align: left; }",
+		".value {font-weight: bold;}",
+		"</style></head><body>");
+	for my $table (keys %$rules) {
+		push(@lines, "<h2><a name=\"table.".$table."\"></a>Table [$table]</h2>");
+		push(@lines, "<ul>");
 		push(@lines, "<li>To table: <span class=\"value\">".$rules->{$table}{'to_table'}."</span></li>");
 		push(@lines, "<li>Action: <span class=\"value\">".$rules->{$table}{'action'}."</span></li>");
 		push(@lines, "<li>Priority: <span class=\"value\">".$rules->{$table}{'priority'}."</span></li>");
@@ -656,37 +656,38 @@ sub save_html_to {
 			$update_columns{$rules->{$table}{'priority_two_date_column'}} = 1;
 			push(@lines, "<li>Date column for priority 2 extraction: <span class=\"value\">".$rules->{$table}{'priority_two_date_column'}{'table'}.".".$rules->{$table}{'priority_two_date_column'}{'column'}."</span></li>");
 		}
-    	push(@lines, "</ul>");
-    	if (exists $rules->{$table}{'columns'}) {
-        	push(@lines, "<table><tr><th>column</th><th>from</th><th>action</th></tr>");
-	    	for my $column ($self->_sort_column_names( $rules->{$table}{'columns'} ) ) {
-		    	push(@lines, "<tr><td><a name=\"column.".$rules->{$table}{'to_table'}.".".$column->{'column'}."\"></a>".
-		    		_html_highlight($column->{'column'}, $update_columns{$column->{'column'}}, 'value')."</td>");
-		    	push(
-	    			@lines, 
-	    			"<td>".( $column->{'from_table'} ? 
-	    				_html_highlight($column->{'from_table'}, $column->{'from_table'} ne $rules->{$table}{'to_table'}) . "." . 
-	    				_html_highlight($column->{'from_column'}, $column->{'from_column'} ne $column->{'column'}) :
-	    				""
+		push(@lines, "</ul>");
+		if (exists $rules->{$table}{'columns'}) {
+			push(@lines, "<table><tr><th>column</th><th>from</th><th>action</th></tr>");
+			for my $column ($self->_sort_column_names( $rules->{$table}{'columns'} ) ) {
+				push(@lines, "<tr><td><a name=\"column.".$rules->{$table}{'to_table'}.".".$column->{'column'}."\"></a>".
+					_html_highlight($column->{'column'}, $update_columns{$column->{'column'}}, 'value')."</td>");
+				push(
+					@lines, 
+					"<td>".( $column->{'from_table'} ? 
+						_html_highlight($column->{'from_table'}, $column->{'from_table'} ne $rules->{$table}{'to_table'}) . "." . 
+						_html_highlight($column->{'from_column'}, $column->{'from_column'} ne $column->{'column'}) :
+						""
 					)."</td>"
 				);
 				if (exists $column->{'action'}) {
 					if ($column->{'action'} eq "foreign-key") {
 						push(@lines, "<td>value from [<a href=\"#table.".$column->{'lookup_table'}."\">".$column->{'lookup_table'}."</a>.".
 							"<a href=\"#column.".$column->{'lookup_table'}.".".$column->{'lookup_column'}."\">".$column->{'lookup_column'}.
-							"</a>]".($column->{'_source'}?" (".$column->{'_source'}.")":"")."</td></tr>");
+							"</a>]".(defined $column->{'from_table'} ? " from [".$column->{'from_table'}.".".$column->{'from_column'}."]" : "").
+							($column->{'_source'}?" (".$column->{'_source'}.")":"")."</td></tr>");
 					} else {
 						push(@lines, "<td>"._html_highlight($column->{'comment'}, $column->{'_ref'} !~ m{(?:Copy|Move)Value$})."</td></tr>");
 					}
 				} else {
 					push(@lines, "<td><span class=\"error\">missing</span></td></tr>");
 				}
-	    	}
-	    	push(@lines, "</table>");
-	    } else {
-	    	push(@lines, "<a name=\"column.".$table.".id\"></a>");
-	    }
-    }
+			}
+			push(@lines, "</table>");
+		} else {
+			push(@lines, "<a name=\"column.".$table.".id\"></a>");
+		}
+	}
 
 	push(@lines, "</body></html>");
 
@@ -694,14 +695,14 @@ sub save_html_to {
 }
 
 sub save_jira_to {
-    my ($self, $fn) = @_;
+	my ($self, $fn) = @_;
 	
-    $self->{'logger'}->printf("save rules as jira to [%s]", $fn);
-    my $rules = $self->flat_rules(1);
-    my @lines;
-    for my $table (keys %$rules) {
-    	push(@lines, "h2. Table \\[$table\\]");
-    	push(@lines, "");
+	$self->{'logger'}->printf("save rules as jira to [%s]", $fn);
+	my $rules = $self->flat_rules(1);
+	my @lines;
+	for my $table (keys %$rules) {
+		push(@lines, "h2. Table \\[$table\\]");
+		push(@lines, "");
 		push(@lines, "* To table: *".$rules->{$table}{'to_table'}."*");
 		push(@lines, "* Action: *".$rules->{$table}{'action'}."*");
 		push(@lines, "* Priority: *".$rules->{$table}{'priority'}."*");
@@ -718,18 +719,18 @@ sub save_jira_to {
 			$update_columns{$rules->{$table}{'priority_two_date_column'}} = 1;
 			push(@lines, "*Date column for priority 2 extraction: *".$rules->{$table}{'priority_two_date_column'}{'table'}.".".$rules->{$table}{'priority_two_date_column'}{'column'}."*");
 		}
-    	push(@lines, "");
-    	if (exists $rules->{$table}{'columns'}) {
-        	push(@lines, "|| column || from || action ||");
-	    	for my $column ($self->_sort_column_names( $rules->{$table}{'columns'} ) ) {
-	    		my @row;
-		    	push(@row, _jira_highlight($column->{'column'}, $update_columns{$column->{'column'}}));
-		    	push(
-	    			@row, 
-	    			( $column->{'from_table'} ? 
-	    				_jira_nohighlight($column->{'from_table'}, $column->{'from_table'} ne $rules->{$table}{'to_table'}) . "." . 
-	    				_jira_nohighlight($column->{'from_column'}, $column->{'from_column'} ne $column->{'column'}) :
-	    				""
+		push(@lines, "");
+		if (exists $rules->{$table}{'columns'}) {
+			push(@lines, "|| column || from || action ||");
+			for my $column ($self->_sort_column_names( $rules->{$table}{'columns'} ) ) {
+				my @row;
+				push(@row, _jira_highlight($column->{'column'}, $update_columns{$column->{'column'}}));
+				push(
+					@row, 
+					( $column->{'from_table'} ? 
+						_jira_nohighlight($column->{'from_table'}, $column->{'from_table'} ne $rules->{$table}{'to_table'}) . "." . 
+						_jira_nohighlight($column->{'from_column'}, $column->{'from_column'} ne $column->{'column'}) :
+						""
 					)
 				);
 				if (exists $column->{'action'}) {
@@ -743,16 +744,16 @@ sub save_jira_to {
 					push(@row, "{color:red}missing{color}");
 				}
 				push(@lines, "| ".join(" | ", @row)." |");
-	    	}
-	    	push(@lines, "");
-	    }
-    }
+			}
+			push(@lines, "");
+		}
+	}
 
 	write_file($fn, join("\n", @lines));
 }
 
 sub _sort_column_names {
-    my ($self, $names) = @_;
+	my ($self, $names) = @_;
 	
 	return 
 		map {$_->[0]}
@@ -793,9 +794,9 @@ sub _jira_highlight {
 }
 
 sub _for_each_undefinded_rule {
-    my ($self, $sub) = @_;
+	my ($self, $sub) = @_;
 
-    my $column_rules = $self->{'rules'};
+	my $column_rules = $self->{'rules'};
 	
 	for my $table_6 (keys %$column_rules) {
 		for my $column_6 (keys %{ $column_rules->{$table_6} }) {
@@ -807,9 +808,9 @@ sub _for_each_undefinded_rule {
 }
 
 sub _for_each_rule {
-    my ($self, $sub) = @_;
+	my ($self, $sub) = @_;
 
-    my $column_rules = $self->{'rules'};
+	my $column_rules = $self->{'rules'};
 	
 	for my $table_6 (keys %$column_rules) {
 		for my $column_6 (keys %{ $column_rules->{$table_6} }) {
@@ -824,45 +825,36 @@ sub _for_each_rule {
 }
 
 sub apply_simple_columns_info {
-    my ($self, $migration) = @_;
+	my ($self, $migration) = @_;
 	
-    $self->_for_each_undefinded_rule(
+	$self->_for_each_undefinded_rule(
 		sub {
-		    my ($table_6, $column_6) = @_;
+			my ($table_6, $column_6) = @_;
 
-		    if ($migration->is_column_from_pms($table_6, $column_6)) {
-		    	return Migration::Rule::FromPMS->new();
-		    } 
-			# if (defined $migration->get_column_eval($table_6, $column_6)) {
-			# 	return Migration::Rule::Eval->new($migration->get_column_eval($table_6, $column_6));
-			# }
-		    if ($migration->is_column_autoincrement($table_6, $column_6)) {
-		    	return Migration::Rule::AutoIncrement->new();
+			if ($migration->is_column_from_pms($table_6, $column_6)) {
+				return Migration::Rule::FromPMS->new();
+			} 
+			if ($migration->is_column_autoincrement($table_6, $column_6)) {
+				return Migration::Rule::AutoIncrement->new();
 			}
 			if ($migration->is_constant_value_exists($table_6, $column_6)) {
 				return Migration::Rule::ConstantValue->new($migration->get_constant_value($table_6, $column_6));
 			}
-			# {
-			# 	my $hardcoded_lookup = $migration->get_hardcoded_lookup($table_6, $column_6);
-			# 	if (defined $hardcoded_lookup) {
-			# 		return Migration::Rule::HardCodedLookup->new($hardcoded_lookup);
-			# 	}
-			# }
-
 			return undef;
 		}
 	);
 }
 
 sub apply_missing_eval {
-    my ($self, $migration) = @_;
+	my ($self, $migration, $links) = @_;
 	
-    $self->_for_each_undefinded_rule(
+	$self->_for_each_undefinded_rule(
 		sub {
-		    my ($table_6, $column_6) = @_;
+			my ($table_6, $column_6) = @_;
 
-			if (defined $migration->get_column_eval($table_6, $column_6)) {
-				return Migration::Rule::Eval->new($migration->get_column_eval($table_6, $column_6), undef, undef);
+			my $eval = $migration->get_column_eval($table_6, $column_6, $links);
+			if (defined $eval) {
+				return Migration::Rule::Eval->new($eval, undef, undef);
 			}
 			return undef;
 		}
@@ -870,27 +862,33 @@ sub apply_missing_eval {
 }
 
 sub apply_links {
-    my ($self, $links, $migration) = @_;
+	my ($self, $links, $migration) = @_;
 	
-    $self->_for_each_undefinded_rule(
+	$self->_for_each_undefinded_rule(
 		sub {
-		    my ($table_6, $column_6) = @_;
+			my ($table_6, $column_6) = @_;
 
-		    my $link = $links->get_link_from($table_6, $column_6);
-		    if (defined $link && ! defined $migration->get_hardcoded_lookup($table_6, $column_6) && ! defined $migration->get_column_eval($table_6, $column_6)) {
-		    	return Migration::Rule::ForeignKey->new($link->{'to_table'}, $link->{'to_column'})->set_source($link->{'comment'});
-		    }
+			my $link = $links->get_link_from($table_6, $column_6);
+			if (defined $link && ! defined $migration->get_hardcoded_lookup($table_6, $column_6) && ! defined $migration->get_column_eval($table_6, $column_6, $links)) {
+				my $link_info = $link->{'link_info'} // {};
+				return Migration::Rule::ForeignKey->new(
+					$link->{'to_table'}, 
+					$link->{'to_column'}, 
+					$link_info->{'table'}, 
+					$link_info->{'column'}
+				)->set_source($link->{'comment'});
+			}
 			return undef;
 		}
 	);
 }
 
 sub apply_moved_tables {
-    my ($self, $migration, $schema_5_list, $schema_6) = @_;
+	my ($self, $migration, $schema_5_list, $schema_6, $links) = @_;
 
-    my $column_rules = $self->{'rules'};
+	my $column_rules = $self->{'rules'};
 
-    my $stop = 0;
+	my $stop = 0;
 	for my $column (@$schema_5_list) {
 		my $new_names = $migration->get_new_names($column->{'TABLE_NAME'});
 		for my $new_name (@$new_names) {
@@ -899,9 +897,9 @@ sub apply_moved_tables {
 				if (exists $column_rules->{$new_name}{$new_column} && 
 					! defined $column_rules->{$new_name}{$new_column}
 				) {
-					if (defined $migration->get_column_eval($new_name, $new_column)) {
+					if (defined $migration->get_column_eval($new_name, $new_column, $links)) {
 						$column_rules->{$new_name}{$new_column} = Migration::Rule::Eval->new(
-							$migration->get_column_eval($new_name, $new_column), 
+							$migration->get_column_eval($new_name, $new_column, $links), 
 							$column->{'TABLE_NAME'},
 							$column->{'COLUMN_NAME'}
 						);
@@ -937,15 +935,15 @@ sub apply_moved_tables {
 }
 
 sub can_copy_type {
-    my ($self, $stop_ref, $migration, $from_column, $to_column) = @_;
+	my ($self, $stop_ref, $migration, $from_column, $to_column) = @_;
 
-    if (lc $from_column->{'IS_NULLABLE'} eq lc $to_column->{'IS_NULLABLE'}) {
-    	if ($migration->is_column_type_ignored($to_column->{'TABLE_NAME'}, $to_column->{'COLUMN_NAME'})) {
-    		return 1;
+	if (lc $from_column->{'IS_NULLABLE'} eq lc $to_column->{'IS_NULLABLE'}) {
+		if ($migration->is_column_type_ignored($to_column->{'TABLE_NAME'}, $to_column->{'COLUMN_NAME'})) {
+			return 1;
 		} else {
-	    	if ($self->_is_column_type_equal($from_column->{'COLUMN_TYPE'}, $to_column->{'COLUMN_TYPE'})) {
+			if ($self->_is_column_type_equal($from_column->{'COLUMN_TYPE'}, $to_column->{'COLUMN_TYPE'})) {
 				return 1;
-	    	} else {
+			} else {
 				$self->{'logger'}->printf(
 					"types didn't match [%s.%s: %s] => [%s.%s: %s]",
 					$from_column->{'TABLE_NAME'},
@@ -956,8 +954,8 @@ sub can_copy_type {
 					$to_column->{'COLUMN_TYPE'},
 				);
 				$$stop_ref ++;
-	    	}
-    	}
+			}
+		}
 	} else {
 		if (lc $to_column->{'IS_NULLABLE'} eq 'no' && ! $migration->is_nullable_ignored($to_column->{'TABLE_NAME'}, $to_column->{'COLUMN_NAME'})) {
 			$self->{'logger'}->printf(
@@ -978,7 +976,7 @@ sub can_copy_type {
 }
 
 sub _is_column_type_equal {
-    my ($self, $from_type, $to_type) = @_;
+	my ($self, $from_type, $to_type) = @_;
 	
 	my $from = $self->_prepare_type($from_type);
 	my $to = $self->_prepare_type($to_type);
@@ -997,7 +995,7 @@ sub _is_column_type_equal {
 		my %to_enum = map {$_ => 1} split(',', $to_set);
 		for my $from_val (split(',', $from_set)) {
 			unless (exists $to_enum{$from_val}) {
-			 	return 0;
+				return 0;
 			}
 		}
 		return 1;
@@ -1007,10 +1005,10 @@ sub _is_column_type_equal {
 }
 
 sub _prepare_type {
-    my ($self, $type) = @_;
+	my ($self, $type) = @_;
 
-    $type =~ s{(?<=int)\(\d+\)}{}g;
-    return lc $type;
+	$type =~ s{(?<=int)\(\d+\)}{}g;
+	return lc $type;
 }
 
 sub check_column_rules {
@@ -1036,7 +1034,7 @@ package Logger::Migration;
 use base 'Logger';
 
 sub stop {
-    my ($self, $stop, $message_failed) = @_;
+	my ($self, $stop, $message_failed) = @_;
 	
 	if ($stop) {
 		$self->printf("STOP: %s (%d)", $message_failed, $stop);
@@ -1054,30 +1052,40 @@ sub new {
 	my $self = bless {
 		'links' => {},
 		'comments' => {},
+		'link_info' => {},
 	}, $class;
 	return $self;
 }
 
 sub _get_table_name {
-    my ($table) = @_;
+	my ($table) = @_;
 	
 	$table =~ s{:.*$}{};
 	return $table;
 }
 
 sub add_link {
-    my ($self, $from_table, $to_table, $columns, $comment) = @_;
+	my ($self, $from_table, $to_table, $columns, $comment, $link_info) = @_;
 
-    if ($self->is_link_exists($from_table, $to_table, $columns)) {
+	if ($self->is_link_exists($from_table, $to_table, $columns)) {
 		die "link [$from_table] -> [$to_table] on [".$self->_columns_to_string($columns)."] is already defined (".
 			$self->{'comments'}{$from_table}{$to_table}{ _columns_key($columns) }.")";
 	}
 	$self->{'links'}{$from_table}{$to_table}{ _columns_key($columns) } = $columns;
 	$self->{'comments'}{$from_table}{$to_table}{ _columns_key($columns) } = $comment;
+	unless (defined $link_info) {
+		if (keys(%$columns) == 1) {
+			$link_info = {
+				'table' => $from_table,
+				'column' => (keys(%$columns))[0],
+			};
+		}
+	}
+	$self->{'link_info'}{$from_table}{$to_table}{ _columns_key($columns) } = $link_info;
 }
 
 sub add_links {
-    my ($self, $links, $comment) = @_;
+	my ($self, $links, $comment) = @_;
 	
 	while (my ($from, $to) = each %$links) { 
 		my ($from_table, $from_column) = split('\.', $from, 2);
@@ -1094,7 +1102,7 @@ sub add_links {
 }
 
 sub for_each_link_from {
-    my ($self, $from_table, $callback) = @_;
+	my ($self, $from_table, $callback) = @_;
 	
 	if (exists $self->{'links'}{$from_table}) {
 		for my $to_table (keys %{ $self->{'links'}{$from_table} }) {
@@ -1102,7 +1110,7 @@ sub for_each_link_from {
 				$callback->($to_table, { %$columns });
 			}
 		}
-    }
+	}
 }
 
 sub _columns_key {
@@ -1112,25 +1120,25 @@ sub _columns_key {
 }
 
 sub is_link_exists {
-    my ($self, $from_table, $to_table, $columns) = @_;
+	my ($self, $from_table, $to_table, $columns) = @_;
 
-    $from_table = _get_table_name($from_table);
-    $to_table   = _get_table_name($to_table);
+	$from_table = _get_table_name($from_table);
+	$to_table   = _get_table_name($to_table);
 	return exists $self->{'links'}{$from_table}{$to_table}{ _columns_key($columns) };
 }
 
 sub is_link_exists_from_column_to_table {
-    my ($self, $from_table, $from_column, $to_table) = @_;
+	my ($self, $from_table, $from_column, $to_table) = @_;
 	
-    $from_table = _get_table_name($from_table);
-    $to_table   = _get_table_name($to_table);
+	$from_table = _get_table_name($from_table);
+	$to_table   = _get_table_name($to_table);
 	return exists $self->{'links'}{$from_table}{$to_table}{$from_column};
 }
 
 sub is_link_exists_from_column {
-    my ($self, $from_table, $from_column) = @_;
+	my ($self, $from_table, $from_column) = @_;
 	
-    $from_table = _get_table_name($from_table);
+	$from_table = _get_table_name($from_table);
 	if (exists $self->{'links'}{$from_table}) {
 		for my $link_info (values %{ $self->{'links'}{$from_table} }) {
 			if (exists $link_info->{$from_column}) {
@@ -1142,18 +1150,18 @@ sub is_link_exists_from_column {
 }
 
 sub is_link_exists_between_tables {
-    my ($self, $from_table, $to_table) = @_;
+	my ($self, $from_table, $to_table) = @_;
 	
-    $from_table = _get_table_name($from_table);
-    $to_table   = _get_table_name($to_table);
+	$from_table = _get_table_name($from_table);
+	$to_table   = _get_table_name($to_table);
 	return exists $self->{'links'}{$from_table}{$to_table};
 }
 
 sub get_link_column_between_tables {
-    my ($self, $from_table, $to_table) = @_;
+	my ($self, $from_table, $to_table) = @_;
 	
-    $from_table = _get_table_name($from_table);
-    $to_table   = _get_table_name($to_table);
+	$from_table = _get_table_name($from_table);
+	$to_table   = _get_table_name($to_table);
 	unless ($self->is_link_exists_between_tables($from_table, $to_table)) {
 		die "link from [$from_table] to [$to_table] doesn't exist";
 	}
@@ -1162,29 +1170,30 @@ sub get_link_column_between_tables {
 }
 
 sub get_link_from {
-    my ($self, $from_table, $from_column) = @_;
+	my ($self, $from_table, $from_column) = @_;
 
-    $from_table = _get_table_name($from_table);
-    if (exists $self->{'links'}{$from_table}) {
-    	for my $to_table (keys %{ $self->{'links'}{$from_table} }) {
-    		my $links = $self->{'links'}{$from_table}{$to_table};
-    		for my $link_key (keys %$links) {
-    			my $link_info = $links->{$link_key};
-    			if (exists $link_info->{$from_column}) {
-    				return {
-    					'to_table' => $to_table,
-    					'to_column' => $link_info->{$from_column},
-    					'comment' => $self->{'comments'}{$from_table}{$to_table}{$link_key}
-    				};
-    			}
-    		}
-    	}
+	$from_table = _get_table_name($from_table);
+	if (exists $self->{'links'}{$from_table}) {
+		for my $to_table (keys %{ $self->{'links'}{$from_table} }) {
+			my $links = $self->{'links'}{$from_table}{$to_table};
+			for my $link_key (keys %$links) {
+				my $link_info = $links->{$link_key};
+				if (exists $link_info->{$from_column}) {
+					return {
+						'to_table' => $to_table,
+						'to_column' => $link_info->{$from_column},
+						'comment' => $self->{'comments'}{$from_table}{$to_table}{$link_key},
+						'link_info' => $self->{'link_info'}{$from_table}{$to_table}{$link_key},
+					};
+				}
+			}
+		}
 	}
 	return undef;
 }
 
 sub remove_link_not_from_tables {
-    my ($self, $allowed_tables) = @_;
+	my ($self, $allowed_tables) = @_;
 
 	for my $from_table (keys %{ $self->{'links'} }) {
 		unless ($allowed_tables->{$from_table}) {
@@ -1194,7 +1203,7 @@ sub remove_link_not_from_tables {
 }
 
 sub verify_broken_links {
-    my ($self, $logger, $allowed_tables, $migration) = @_;
+	my ($self, $logger, $allowed_tables, $migration) = @_;
 	
 	my @stop;
 	for my $from_table (keys %{ $self->{'links'} }) {
@@ -1217,9 +1226,9 @@ sub verify_broken_links {
 }
 
 sub rename_tables {
-    my ($self, $migration, $schema_6) = @_;
+	my ($self, $migration, $schema_6) = @_;
 
-    my %links;
+	my %links;
 	for my $from_table (keys %{ $self->{'links'} }) {
 		my $new_from_tables = $migration->get_new_names($from_table);
 		for my $new_from_table (@$new_from_tables) {
@@ -1237,6 +1246,11 @@ sub rename_tables {
 								$self->{'comments'}{$new_from_table}{$new_to_table}{$link_key} = "from ".$from_table.
 									" by rename (old ".$self->{'comments'}{$from_table}{$to_table}{$link_key}.")";
 							}
+							unless (exists $self->{'link_info'}{$new_from_table}{$new_to_table}{$link_key}) {
+								my %link_info = %{ $self->{'link_info'}{$from_table}{$to_table}{$link_key} };
+								##$link_info{'table'} = $new_from_table;
+								$self->{'link_info'}{$new_from_table}{$new_to_table}{$link_key} = \%link_info;
+							}
 						}
 					}
 				}
@@ -1247,18 +1261,18 @@ sub rename_tables {
 }
 
 sub delete_link_between_tables {
-    my ($self, $from_table, $to_table) = @_;
+	my ($self, $from_table, $to_table) = @_;
 
-    $from_table = _get_table_name($from_table);
-    $to_table   = _get_table_name($to_table);
-    unless (exists $self->{'links'}{$from_table}{$to_table}) {
-    	die "can't delete link [$from_table] -> [$to_table]: link doesn't exist";
-    }
-    delete $self->{'links'}{$from_table}{$to_table};
+	$from_table = _get_table_name($from_table);
+	$to_table   = _get_table_name($to_table);
+	unless (exists $self->{'links'}{$from_table}{$to_table}) {
+		die "can't delete link [$from_table] -> [$to_table]: link doesn't exist";
+	}
+	delete $self->{'links'}{$from_table}{$to_table};
 }
 
 sub _clear_link_info {
-    my ($self, $link_info, $allowed_columns) = @_;
+	my ($self, $link_info, $allowed_columns) = @_;
 	
 	my %new_link_info;
 	for my $columns (values %$link_info) {
@@ -1271,7 +1285,7 @@ sub _clear_link_info {
 }
 
 sub _columns_to_string {
-    my ($self, $columns) = @_;
+	my ($self, $columns) = @_;
 	
 	return join(" AND ", map { $_."=".$columns->{$_} } sort keys %$columns);
 }
@@ -1280,9 +1294,9 @@ sub _columns_to_string {
 package Migration;
 
 sub new {
-    my ($class, $schema_6, $required_tables) = @_;
+	my ($class, $schema_6, $required_tables) = @_;
 
-    tie my %renamed, 'Tie::IxHash', (
+	tie my %renamed, 'Tie::IxHash', (
 		'address_office_fake' => 'office_address_local',
 		'address_visitor_fake' => 'address_local',
 		'appointment_extension' => 'appointment_versioned',
@@ -1600,9 +1614,9 @@ sub new {
 }
 
 sub _detect_renames_to_same_table {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my (%secondary_rules, %unique);
+	my (%secondary_rules, %unique);
 	while (my ($from, $to) = each %{ $self->{'renamed'} }) {
 		if (exists $unique{$to}) {
 			$unique{$to}++;
@@ -1617,24 +1631,24 @@ sub _detect_renames_to_same_table {
 }
 
 sub get_secondary_rule_names {
-    my ($self, $table_5) = @_;
+	my ($self, $table_5) = @_;
 	
 	return (exists $self->{'secondary_rules'}{$table_5} ? $self->{'secondary_rules'}{$table_5} : []);
 }
 
 sub get_table_name {
-    my ($self, $table) = @_;
+	my ($self, $table) = @_;
 
-    unless (defined $table) {
-    	die "table name can't be undef";
-    }
+	unless (defined $table) {
+		die "table name can't be undef";
+	}
 	
 	$table =~ s{:.*$}{};
 	return $table;
 }
 
 sub _generate_actions {
-    my ($self, $required_tables) = @_;
+	my ($self, $required_tables) = @_;
 	
 	my %know_actions = map {$_ => 1} ("delete-insert", "insert", "update", "update-insert", "remap-only");
 	my %actions;
@@ -1657,37 +1671,37 @@ sub _generate_actions {
 }
 
 sub _generate_versioned_rules {
-    my ($self, $schema_6, $required_tables) = @_;
+	my ($self, $schema_6, $required_tables) = @_;
 
-    my %versioned;
-    for my $table (@$required_tables) {
-    	if ($table->{'transform'} eq "user-sensitive") {
-    		$versioned{ $table->{'table'} } = [ $table->{'table'}, $table->{'table'}."_user_sensitive" ];
-    	} elsif ($table->{'transform'} eq "remap-only") {
-    		$versioned{ $table->{'table'} } = [ $table->{'table'} ];
-    	}
-    }
-    $self->{'versioned'} = \%versioned;
+	my %versioned;
+	for my $table (@$required_tables) {
+		if ($table->{'transform'} eq "user-sensitive") {
+			$versioned{ $table->{'table'} } = [ $table->{'table'}, $table->{'table'}."_user_sensitive" ];
+		} elsif ($table->{'transform'} eq "remap-only") {
+			$versioned{ $table->{'table'} } = [ $table->{'table'} ];
+		}
+	}
+	$self->{'versioned'} = \%versioned;
 }
 
 sub _generate_autoincrement {
-    my ($self, $schema_6) = @_;
+	my ($self, $schema_6) = @_;
 
-    my %autoincrement;
-    for my $table (keys %$schema_6) {
-    	for my $column (keys %{ $schema_6->{$table} }) {
-    		if ($schema_6->{$table}{$column}{'EXTRA'} =~ m{auto_increment}i) {
-    			$autoincrement{$table}{$column} = 1;
-    		}
-    	}
-    }
-    ## we are not inserting into client
-    delete $autoincrement{'client'}{'id'};
-    $self->{'autoincrement'} = \%autoincrement;
+	my %autoincrement;
+	for my $table (keys %$schema_6) {
+		for my $column (keys %{ $schema_6->{$table} }) {
+			if ($schema_6->{$table}{$column}{'EXTRA'} =~ m{auto_increment}i) {
+				$autoincrement{$table}{$column} = 1;
+			}
+		}
+	}
+	## we are not inserting into client
+	delete $autoincrement{'client'}{'id'};
+	$self->{'autoincrement'} = \%autoincrement;
 }
 
 sub _get_versioned_name_base {
-    my ($self, $name) = @_;
+	my ($self, $name) = @_;
 	
 	if ($name =~ m{^(.*)_versioned$}) {
 		return $1;
@@ -1697,49 +1711,49 @@ sub _get_versioned_name_base {
 }
 
 sub is_column_autoincrement {
-    my ($self, $table_6, $column_6) = @_;
+	my ($self, $table_6, $column_6) = @_;
 
-    $table_6 = $self->get_table_name($table_6);
+	$table_6 = $self->get_table_name($table_6);
 	return $self->{'autoincrement'}{$table_6}{$column_6};
 }
 
 sub is_column_ignored {
-    my ($self, $table_6, $column_6) = @_;
+	my ($self, $table_6, $column_6) = @_;
 	
-    $table_6 = $self->get_table_name($table_6);
+	$table_6 = $self->get_table_name($table_6);
 	return $self->{'ignore_columns'}{$table_6}{$column_6};
 }
 
 sub get_update_on_columns {
-    my ($self, $table_6) = @_;
+	my ($self, $table_6) = @_;
 	
-    $table_6 = $self->get_table_name($table_6);
+	$table_6 = $self->get_table_name($table_6);
 	return (exists $self->{'update_on'}{$table_6} ? [ @{ $self->{'update_on'}{$table_6} } ] : undef);
 }
 
 sub get_path_to_client {
-    my ($self, $table_6) = @_;
+	my ($self, $table_6) = @_;
 
-    return $self->{'path_to_client'}{$table_6};
+	return $self->{'path_to_client'}{$table_6};
 }
 
 sub table_removed {
-    my ($self, $table_5) = @_;
+	my ($self, $table_5) = @_;
 
-    return exists $self->{'removed'}{$table_5};
+	return exists $self->{'removed'}{$table_5};
 }
 
 sub table_name_after_renamed {
-    my ($self, $table_5) = @_;
+	my ($self, $table_5) = @_;
 
-    return $self->get_table_name($self->table_to_name_after_renamed($table_5));
+	return $self->get_table_name($self->table_to_name_after_renamed($table_5));
 }
 
 sub table_to_name_after_renamed {
-    my ($self, $table_5) = @_;
+	my ($self, $table_5) = @_;
 
-    if (exists $self->{'renamed'}{$table_5}) {
-    	return $self->{'renamed'}{$table_5};
+	if (exists $self->{'renamed'}{$table_5}) {
+		return $self->{'renamed'}{$table_5};
 	} else {
 		return $table_5;
 	}
@@ -1748,53 +1762,58 @@ sub table_to_name_after_renamed {
 sub column_name_after_rename {
 	my ($self, $table_5, $column_5) = @_;	
 
-    if (exists $self->{'renamed_columns'}{$table_5}{$column_5}) {
-    	return $self->{'renamed_columns'}{$table_5}{$column_5};
+	if (exists $self->{'renamed_columns'}{$table_5}{$column_5}) {
+		return $self->{'renamed_columns'}{$table_5}{$column_5};
 	} else {
 		return $column_5;
 	}
 }
 
 sub is_need_convert_datetime {
-    my ($self, $table_6, $column_6) = @_;
+	my ($self, $table_6, $column_6) = @_;
 	
-    $table_6 = $self->get_table_name($table_6);
+	$table_6 = $self->get_table_name($table_6);
 	return $self->{'need_convert_datetime'}{$table_6}{$column_6}
 }
 
 sub get_column_eval {
-    my ($self, $table_6, $column_6) = @_;
+	my ($self, $table_6, $column_6, $links) = @_;
 	
-	return $self->{'eval'}{$table_6}{$column_6};
+	my $link = $links->get_link_from($table_6, $column_6);
+	if (defined $link && $link->{'to_table'} eq 'client' && $link->{'to_column'} eq 'id') {
+		return $self->{'eval'}{$link->{'to_table'}}{$link->{'to_column'}}
+	} else {
+		return $self->{'eval'}{$table_6}{$column_6};
+	}
 }
 
 sub get_new_names {
-    my ($self, $table_5) = @_;
+	my ($self, $table_5) = @_;
 	
-    if (exists $self->{'renamed'}{$table_5}) {
-    	return [ $self->{'renamed'}{$table_5} ];
-    } elsif (exists $self->{'versioned'}{$table_5}) {
-    	return [ @{ $self->{'versioned'}{$table_5} } ];
-    } else {
-    	return [ $table_5 ];
-    }
+	if (exists $self->{'renamed'}{$table_5}) {
+		return [ $self->{'renamed'}{$table_5} ];
+	} elsif (exists $self->{'versioned'}{$table_5}) {
+		return [ @{ $self->{'versioned'}{$table_5} } ];
+	} else {
+		return [ $table_5 ];
+	}
 }
 
 sub is_table_versioned {
-    my ($self, $table_5) = @_;
+	my ($self, $table_5) = @_;
 
-    return exists $self->{'versioned'}{$table_5};
+	return exists $self->{'versioned'}{$table_5};
 }
 
 sub is_column_from_pms {
-    my ($self, $table_6, $column_6) = @_;
+	my ($self, $table_6, $column_6) = @_;
 	
-    $table_6 = $self->get_table_name($table_6);
-    return defined $self->_get_versioned_name_base($table_6);
+	$table_6 = $self->get_table_name($table_6);
+	return defined $self->_get_versioned_name_base($table_6);
 }
 
 sub get_table_action {
-    my ($self, $table_6) = @_;
+	my ($self, $table_6) = @_;
 	
 	if (exists $self->{'actions'}{$table_6}) {
 		return $self->{'actions'}{$table_6};
@@ -1804,57 +1823,57 @@ sub get_table_action {
 }
 
 sub get_tables_with_remap_only_action {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    return [ grep {$self->{'actions'}{$_} eq "remap-only"} keys %{ $self->{'actions'} } ];
+	return [ grep {$self->{'actions'}{$_} eq "remap-only"} keys %{ $self->{'actions'} } ];
 }
 
 sub is_lookup {
-    my ($self, $table_6, $column_6) = @_;
+	my ($self, $table_6, $column_6) = @_;
 
-    $table_6 = $self->get_table_name($table_6);
+	$table_6 = $self->get_table_name($table_6);
 	return exists $self->{'hardcoded_lookup'}{$table_6}{$column_6} || $self->{'conditional_lookup'}{$table_6}{$column_6};
 }
 
 sub get_hardcoded_lookup {
-    my ($self, $table_6, $column_6) = @_;
+	my ($self, $table_6, $column_6) = @_;
 	
 	unless (exists $self->{'hardcoded_lookup'}{$table_6}{$column_6}) {
-	    $table_6 = $self->get_table_name($table_6);
+		$table_6 = $self->get_table_name($table_6);
 	}
 	return $self->{'hardcoded_lookup'}{$table_6}{$column_6};
 }
 
 sub is_constant_value_exists {
-    my ($self, $table_6, $column_6) = @_;
+	my ($self, $table_6, $column_6) = @_;
 	
-    $table_6 = $self->get_table_name($table_6);
+	$table_6 = $self->get_table_name($table_6);
 	return exists $self->{'constant_value'}{$table_6}{$column_6};
 }
 
 sub get_constant_value {
-    my ($self, $table_6, $column_6) = @_;
+	my ($self, $table_6, $column_6) = @_;
 	
-    $table_6 = $self->get_table_name($table_6);
+	$table_6 = $self->get_table_name($table_6);
 	return $self->{'constant_value'}{$table_6}{$column_6};
 }
 
 sub is_nullable_ignored {
-    my ($self, $table_6, $column_6) = @_;
+	my ($self, $table_6, $column_6) = @_;
 	
-    $table_6 = $self->get_table_name($table_6);
+	$table_6 = $self->get_table_name($table_6);
 	return $self->{'ignore_nullable'}{$table_6}{$column_6};
 }
 
 sub is_column_type_ignored {
-    my ($self, $table_6, $column_6) = @_;
+	my ($self, $table_6, $column_6) = @_;
 	
-    $table_6 = $self->get_table_name($table_6);
+	$table_6 = $self->get_table_name($table_6);
 	return $self->{'ignore_type_change'}{$table_6}{$column_6};
 }
 
 sub get_date_column {
-    my ($self, $table_6) = @_;
+	my ($self, $table_6) = @_;
 	
 	my $info = $self->{'date_column'}{$table_6};
 	my ($table, $column) = ($table_6, $info);
@@ -1868,7 +1887,7 @@ sub get_date_column {
 }
 
 sub load_hard_coded_links {
-    my ($self, $links) = @_;
+	my ($self, $links) = @_;
 
 	## client_id
 	for my $from_table (
@@ -1889,7 +1908,7 @@ sub load_hard_coded_links {
 
 	## visitor_id
 	for my $link (
-		"address_local.visitor_id", "email_local.visitor_id", "phone_local.visitor_id", 
+		"email_local.visitor_id", "phone_local_fake.visitor_id", 
 		"opse_payment_log.patient_id", "token.user_id"
 	) {
 		my ($from_table, $from_column) = split('\.', $link);
@@ -1902,6 +1921,19 @@ sub load_hard_coded_links {
 			"hard-coded",
 		);
 	}
+
+	$links->add_link(
+		"address_local", 
+		"visitor", 
+		{
+			"visitor_id" => "id",
+		},
+		"hard-coded",
+		{
+			'table' => 'address_visitor_fake',
+			'column' => 'id',
+		}
+	);
 
 	## other
 	$links->add_links(
@@ -1921,21 +1953,37 @@ sub load_hard_coded_links {
 			'visitor_opinion.category_id' => 'review_category.id',
 			'voice_left_messages.rec_id' => 'voice_recipient_list.RLId',
 			'voice_message_history.rec_id' => 'voice_recipient_list.RLId',
-
-			## user sensitive
-			'email_user_sensitive.email_id' => 'email.id',
-			'phone_user_sensitive.phone_id' => 'phone.id',
-			'procedure_user_sensitive.procedure_id' => 'procedure.id',
-			'recall_user_sensitive.recall_id' => 'recall.id',
-			'responsible_patient_user_sensitive.responsible_patient_id' => 'responsible_patient.id',
-			'visitor_user_sensitive.visitor_id' => 'visitor.id',
 		},
 		"hard-coded",
 	);
+	## user sensitive
+	my %user_sensitive_links = (
+		'email_user_sensitive.email_id' => 'email',
+		'phone_user_sensitive.phone_id' => 'phone',
+		'procedure_user_sensitive.procedure_id' => 'procedure',
+		'recall_user_sensitive.recall_id' => 'recall',
+		'responsible_patient_user_sensitive.responsible_patient_id' => 'responsible_patient',
+		'visitor_user_sensitive.visitor_id' => 'visitor',
+	);
+	for my $link (keys %user_sensitive_links) {
+		my ($from_table, $from_column) = split('\.', $link);
+		$links->add_link(
+			$from_table, 
+			$user_sensitive_links{$link}, 
+			{
+				$from_column => "id",
+			},
+			"hard-coded",
+			{
+				'table' => $user_sensitive_links{$link},
+				'column' => 'id',
+			}
+		);
+	}
 }
 
 sub restore_remap_only_links {
-    my ($self, $links) = @_;
+	my ($self, $links) = @_;
 	
 	$links->add_links(
 		{
@@ -1966,26 +2014,26 @@ sub new {
 }
 
 sub as_string {
-    my ($self) = @_;
+	my ($self) = @_;
 	
 	die "must override";
 }
 
 sub as_json {
-    my ($self) = @_;
+	my ($self) = @_;
 	
 	die "must override";
 }
 
 sub set_source {
-    my ($self, $source) = @_;
+	my ($self, $source) = @_;
 	
 	$self->{'source'} = $source;
 	return $self;
 }
 
 sub get_source {
-    my ($self) = @_;
+	my ($self) = @_;
 	
 	return $self->{'source'};
 }
@@ -1995,29 +2043,37 @@ package Migration::Rule::ForeignKey;
 use base qw(Migration::Rule);
 
 sub new {
-	my ($class, $table, $column) = @_;
+	my ($class, $table, $column, $from_table, $from_column) = @_;
 	
 	my $self = bless {
 		'table' => $table,
 		'column' => $column,
+		'from_table' => $from_table,
+		'from_column' => $from_column,
 	}, $class;
 	return $self;
 }
 
 sub as_string {
-    my ($self) = @_;
+	my ($self) = @_;
 	
-	return "link to [".$self->{'table'}.".".$self->{'column'}."]".($self->{'source'} ? " (".$self->{'source'}.")" : "");
+	return "link to [".$self->{'table'}.".".$self->{'column'}."]".
+		(defined $self->{'from_table'} ? " from [".$self->{'from_table'}.".".$self->{'from_column'}."]" : "").
+		($self->{'source'} ? " (".$self->{'source'}.")" : "");
 }
 
 sub as_json {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    tie my %r, "Tie::IxHash", (
-    	'action' => "foreign-key",
-    	'lookup_table' => $self->{'table'},
-    	'lookup_column' => $self->{'column'},
-    );
+	tie my %r, "Tie::IxHash", (
+		'action' => "foreign-key",
+		'lookup_table' => $self->{'table'},
+		'lookup_column' => $self->{'column'},
+	);
+	if (defined $self->{'from_table'}) {
+		$r{'from_table'} = $self->{'from_table'};
+		$r{'from_column'} = $self->{'from_column'};
+	}
 	return \%r;
 }
 
@@ -2036,19 +2092,19 @@ sub new {
 }
 
 sub as_string {
-    my ($self) = @_;
+	my ($self) = @_;
 	
 	return "copy value from [".$self->{'table'}.".".$self->{'column'}."]";
 }
 
 sub as_json {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    tie my %r, "Tie::IxHash", (
-    	'action' => "copy",
-    	'from_table' => $self->{'table'},
-    	'from_column' => $self->{'column'},
-    );
+	tie my %r, "Tie::IxHash", (
+		'action' => "copy",
+		'from_table' => $self->{'table'},
+		'from_column' => $self->{'column'},
+	);
 	return \%r;
 }
 
@@ -2057,13 +2113,13 @@ package Migration::Rule::FromPMS;
 use base qw(Migration::Rule);
 
 sub as_string {
-    my ($self) = @_;
+	my ($self) = @_;
 	
 	return "value from PMS";
 }
 
 sub as_json {
-    my ($self) = @_;
+	my ($self) = @_;
 	
 	return undef;
 }
@@ -2074,13 +2130,13 @@ package Migration::Rule::AutoIncrement;
 use base qw(Migration::Rule);
 
 sub as_string {
-    my ($self) = @_;
+	my ($self) = @_;
 	
 	return "auto increment";
 }
 
 sub as_json {
-    my ($self) = @_;
+	my ($self) = @_;
 	
 	return {
 		'action' => "autoincrement",
@@ -2103,20 +2159,20 @@ sub new {
 }
 
 sub as_string {
-    my ($self) = @_;
+	my ($self) = @_;
 	
 	return "hard-coded lookup: map [".$self->{'map'}."] value from [".$self->{'table'}.".".$self->{'column'}."] ";
 }
 
 sub as_json {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    tie my %r, "Tie::IxHash", (
-    	'action' => "hard-coded-lookup",
-    	'map' => $self->{'map'},
-    	'from_table' => $self->{'table'},
-    	'from_column' => $self->{'column'},
-    );
+	tie my %r, "Tie::IxHash", (
+		'action' => "hard-coded-lookup",
+		'map' => $self->{'map'},
+		'from_table' => $self->{'table'},
+		'from_column' => $self->{'column'},
+	);
 	return \%r;
 }
 
@@ -2134,18 +2190,18 @@ sub new {
 }
 
 sub as_string {
-    my ($self) = @_;
+	my ($self) = @_;
 	
 	return "constant [".$self->{'value'}."]";
 }
 
 sub as_json {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    tie my %r, "Tie::IxHash", (
-    	'action' => "constant",
-    	'value' => $self->{'value'},
-    );
+	tie my %r, "Tie::IxHash", (
+		'action' => "constant",
+		'value' => $self->{'value'},
+	);
 	return \%r;
 }
 
@@ -2165,22 +2221,22 @@ sub new {
 }
 
 sub as_string {
-    my ($self) = @_;
+	my ($self) = @_;
 	
 	return "eval [".$self->{'eval'}."]".(defined $self->{'table'} ? " value from [".$self->{'table'}.".".$self->{'column'}."]" : "");
 }
 
 sub as_json {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    tie my %r, "Tie::IxHash", (
-    	'action' => "eval",
-    	'eval' => $self->{'eval'},
-    );
-    if (defined $self->{'table'}) {
-    	$r{'from_table'} = $self->{'table'};
-    	$r{'from_column'} = $self->{'column'};
-    }
+	tie my %r, "Tie::IxHash", (
+		'action' => "eval",
+		'eval' => $self->{'eval'},
+	);
+	if (defined $self->{'table'}) {
+		$r{'from_table'} = $self->{'table'};
+		$r{'from_column'} = $self->{'column'};
+	}
 	return \%r;
 }
 
