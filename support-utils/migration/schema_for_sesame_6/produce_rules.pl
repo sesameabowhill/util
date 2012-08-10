@@ -859,6 +859,12 @@ sub apply_missing_eval {
 			return undef;
 		}
 	);
+
+	## hard-coded evals
+	$self->{'rules'}{'office_user_sensitive:2'}{'active'} = Migration::Rule::Eval->new('office-active', undef, undef);
+	delete $self->{'rules'}{'office_user_sensitive'}{'active'};
+	$self->{'tables'}{'office_user_sensitive:2'} = { %{ $self->{'tables'}{'office_user_sensitive'} } };
+	$self->{'tables'}{'office_user_sensitive:2'}{'action'} = 'update';
 }
 
 sub apply_links {
@@ -1589,9 +1595,9 @@ sub new {
 			'voice_transactions_log' => 'starttime_utc',
 		},
 		'eval' => {
-			'office_user_sensitive' => {
-				'active' => 'office-active',
-			},
+			# 'office_user_sensitive' => {
+			# 	'active' => 'office-active',
+			# },
 			'si_image' => {
 				'imageUrl' => 'si-image-url',
 			},

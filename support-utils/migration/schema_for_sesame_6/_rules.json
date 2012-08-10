@@ -3632,12 +3632,6 @@
             "from_column" : "office_id"
          },
          {
-            "column" : "active",
-            "comment" : "eval [office-active]",
-            "action" : "eval",
-            "eval" : "office-active"
-         },
-         {
             "column" : "client_id",
             "comment" : "eval [client-id] value from [voice_office_name_pronunciation.client_id]",
             "action" : "eval",
@@ -7749,6 +7743,25 @@
             "action" : "copy",
             "from_table" : "ppn_article_letter_common_fake",
             "from_column" : "is_doctor_article"
+         }
+      ]
+   },
+   "office_user_sensitive:2" : {
+      "to_table" : "office_user_sensitive",
+      "priority" : "2",
+      "path_to_client" : [
+         {
+            "table" : "office_user_sensitive",
+            "column" : "client_id"
+         }
+      ],
+      "action" : "update",
+      "columns" : [
+         {
+            "column" : "active",
+            "comment" : "eval [office-active]",
+            "action" : "eval",
+            "eval" : "office-active"
          }
       ]
    }
