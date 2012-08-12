@@ -864,7 +864,10 @@ sub apply_missing_eval {
 	$self->{'rules'}{'office_user_sensitive:2'}{'active'} = Migration::Rule::Eval->new('office-active', undef, undef);
 	delete $self->{'rules'}{'office_user_sensitive'}{'active'};
 	$self->{'tables'}{'office_user_sensitive:2'} = { %{ $self->{'tables'}{'office_user_sensitive'} } };
-	$self->{'tables'}{'office_user_sensitive:2'}{'action'} = 'update';
+	$self->{'tables'}{'office_user_sensitive:2'}{'action'} = 'update-office-active';
+
+	$self->{'rules'}{'referrer_user_sensitive'}{'si_doctor_id'} = Migration::Rule::Eval->new('si-doctor-id', 'si_pms_referrer_link', 'pms_referrer_id');
+
 }
 
 sub apply_links {
@@ -1315,7 +1318,8 @@ sub new {
 		'ppn_article_letter' => 'ppn_article_letter',
 		'ppn_article_letter_common_fake' => 'ppn_article_letter',
 		'referrer_local_fake' => 'si_doctor',
-		'si_pms_referrer_link' => 'referrer_user_sensitive',
+		#'referrer' => 'referrer_user_sensitive',
+		#'si_pms_referrer_link' => 'referrer_user_sensitive',
 		'voice_office_name_pronunciation' => 'office_user_sensitive',
 	);
 	
@@ -1610,6 +1614,9 @@ sub new {
 			'client' => {
 				'id' => 'client-id',
 			},
+			'referrer_user_sensitive' => {
+				'si_doctor_id' => 'si-doctor-id',
+			},
 		},
 	}, $class;
 	$self->_detect_renames_to_same_table();
@@ -1651,6 +1658,12 @@ sub get_table_name {
 	
 	$table =~ s{:.*$}{};
 	return $table;
+}
+
+sub ignore_table_6 {
+	my ($self, $table_6) = @_;
+
+	return $table_6 eq 'si_pms_referrer_link';
 }
 
 sub _generate_actions {
@@ -1952,9 +1965,9 @@ sub load_hard_coded_links {
 			'orthomation.node_id' => 'orthomation_nodes.node_id',
 			#'ppn_article_letter.art_id' => 'ppn_article.id',
 			# 'si_pms_referrer_link.pms_referrer_id' => 'referrer.id',
-			# 'si_pms_referrer_link.referrer_id' => 'si_doctor.DocId',
+			# 'si_pms_referrer_link.referrer_id' => 'referrer.id',
 			'referrer_user_sensitive.si_doctor_id' => 'si_doctor.DocId',
-			'referrer_user_sensitive.referrer_id' => 'referrer.id',
+			#'referrer_user_sensitive.referrer_id' => 'referrer.id',
 			'srm_resource.container' => 'client.cl_username',
 			'visitor_opinion.category_id' => 'review_category.id',
 			'voice_left_messages.rec_id' => 'voice_recipient_list.RLId',
@@ -1970,6 +1983,7 @@ sub load_hard_coded_links {
 		'recall_user_sensitive.recall_id' => 'recall',
 		'responsible_patient_user_sensitive.responsible_patient_id' => 'responsible_patient',
 		'visitor_user_sensitive.visitor_id' => 'visitor',
+		'referrer_user_sensitive.referrer_id' => 'referrer',
 	);
 	for my $link (keys %user_sensitive_links) {
 		my ($from_table, $from_column) = split('\.', $link);

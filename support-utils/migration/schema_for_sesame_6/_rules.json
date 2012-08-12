@@ -4799,18 +4799,19 @@
       "columns" : [
          {
             "column" : "si_doctor_id",
-            "comment" : "link to [si_doctor.DocId] from [referrer_user_sensitive.si_doctor_id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "si_doctor",
-            "lookup_column" : "DocId",
-            "from_table" : "referrer_user_sensitive",
-            "from_column" : "si_doctor_id"
+            "comment" : "eval [si-doctor-id] value from [si_pms_referrer_link.pms_referrer_id]",
+            "action" : "eval",
+            "eval" : "si-doctor-id",
+            "from_table" : "si_pms_referrer_link",
+            "from_column" : "pms_referrer_id"
          },
          {
             "column" : "client_id",
-            "comment" : "eval [client-id]",
+            "comment" : "eval [client-id] value from [referrer.client_id]",
             "action" : "eval",
-            "eval" : "client-id"
+            "eval" : "client-id",
+            "from_table" : "referrer",
+            "from_column" : "client_id"
          },
          {
             "column" : "deleted",
@@ -4820,12 +4821,12 @@
          },
          {
             "column" : "referrer_id",
-            "comment" : "link to [referrer.id] from [referrer_user_sensitive.referrer_id] (hard-coded)",
+            "comment" : "link to [referrer.id] from [referrer.id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "referrer",
             "lookup_column" : "id",
-            "from_table" : "referrer_user_sensitive",
-            "from_column" : "referrer_id"
+            "from_table" : "referrer",
+            "from_column" : "id"
          }
       ]
    },
@@ -7755,7 +7756,7 @@
             "column" : "client_id"
          }
       ],
-      "action" : "update",
+      "action" : "update-office-active",
       "columns" : [
          {
             "column" : "active",
