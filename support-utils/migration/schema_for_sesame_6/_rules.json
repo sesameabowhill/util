@@ -727,8 +727,8 @@
          },
          {
             "column" : "cl_username",
-            "comment" : "copy value from [client.cl_username]",
-            "action" : "copy",
+            "comment" : "copy-and-save value from [client.cl_username]",
+            "action" : "copy-and-save",
             "from_table" : "client",
             "from_column" : "cl_username"
          },
@@ -1115,11 +1115,11 @@
          },
          {
             "column" : "visitor_id",
-            "comment" : "link to [visitor.id] from [email_local.visitor_id] (hard-coded)",
+            "comment" : "link to [visitor.id] from [email_local_fake.visitor_id] (from email_local_fake by rename (old hard-coded))",
             "action" : "foreign-key",
             "lookup_table" : "visitor",
             "lookup_column" : "id",
-            "from_table" : "email_local",
+            "from_table" : "email_local_fake",
             "from_column" : "visitor_id"
          },
          {
@@ -3575,12 +3575,12 @@
          },
          {
             "column" : "office_id",
-            "comment" : "link to [office.id] from [office_address_local.office_id] (hard-coded)",
+            "comment" : "link to [office.id] from [address_office_fake.id] (from address_office_fake by rename (old hard-coded))",
             "action" : "foreign-key",
             "lookup_table" : "office",
             "lookup_column" : "id",
-            "from_table" : "office_address_local",
-            "from_column" : "office_id"
+            "from_table" : "address_office_fake",
+            "from_column" : "id"
          },
          {
             "column" : "client_id",
@@ -5621,8 +5621,8 @@
          },
          {
             "column" : "PatId",
-            "comment" : "copy value from [si_patient.PatId]",
-            "action" : "copy",
+            "comment" : "copy-and-save value from [si_patient.PatId]",
+            "action" : "copy-and-save",
             "from_table" : "si_patient",
             "from_column" : "PatId"
          },
@@ -5914,12 +5914,9 @@
          },
          {
             "column" : "FirstMesId",
-            "comment" : "link to [si_message.MsgId] from [si_theme.FirstMesId] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "si_message",
-            "lookup_column" : "MsgId",
-            "from_table" : "si_theme",
-            "from_column" : "FirstMesId"
+            "comment" : "constant [0]",
+            "action" : "constant",
+            "value" : "0"
          }
       ]
    },
@@ -6162,13 +6159,11 @@
    },
    "srm_resource" : {
       "to_table" : "srm_resource",
-      "action" : "delete-insert",
-      "path_to_client" : [
-         {
-            "table" : "srm_resource",
-            "column" : "container"
-         }
+      "action" : "update-insert",
+      "update_on" : [
+         "id"
       ],
+      "path_to_client" : [],
       "priority" : "2",
       "columns" : [
          {
@@ -7405,8 +7400,8 @@
          },
          {
             "column" : "RLId",
-            "comment" : "copy value from [voice_recipient_list.RLId]",
-            "action" : "copy",
+            "comment" : "copy-and-save value from [voice_recipient_list.RLId]",
+            "action" : "copy-and-save",
             "from_table" : "voice_recipient_list",
             "from_column" : "RLId"
          }

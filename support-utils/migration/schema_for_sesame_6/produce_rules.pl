@@ -57,6 +57,7 @@ sub get_schema_diff {
 	$rules->apply_table_info($migration, $links, $schema_6_list);
 	$rules->apply_table_priority($migration, $required_tables);
 	$rules->apply_moved_tables($migration, $schema_5_list, $schema_6, $links);
+	$rules->update_copy_columns_for_link();
 	$rules->apply_missing_eval($migration, $links);
 	$rules->make_multiple_tables_rules($migration, $schema_6);
 	
@@ -281,6 +282,7 @@ sub load_links_from_model {
 	# $links->delete_link_between_tables("appointment_reminder_schedule", "client");
 	$links->delete_link_between_tables("email_referral", "referrer");
 	$links->delete_link_between_tables("si_pms_referrer_link", "referrer");
+	$links->delete_link_between_tables("si_theme", "si_message");
 	$links->delete_link_between_tables("ppn_article_letter", "ppn_common_article");
 }
 
@@ -648,7 +650,7 @@ sub save_html_to {
 			%update_columns = map {$_ => 1} @{ $rules->{$table}{'update_on'} };
 			push(@lines, "<li>Update on: ".join(", ", map {"<span class=\"value\">$_</span>"} @{ $rules->{$table}{'update_on'} })."</li>");
 		}
-		if ($rules->{$table}{'path_to_client'}) {
+		if ($rules->{$table}{'path_to_client'} && @{ $rules->{$table}{'path_to_client'} }) {
 			$update_columns{ $rules->{$table}{'path_to_client'}->[0]{'column'} } = 1;
 			push(@lines, "<li>Path to client: ".join(" &gt; ", map {"<span class=\"value\">".$_->{'table'}.".".$_->{'column'}."</span>"} @{ $rules->{$table}{'path_to_client'} })."</li>");
 		}
@@ -711,7 +713,7 @@ sub save_jira_to {
 			%update_columns = map {$_ => 1} @{ $rules->{$table}{'update_on'} };
 			push(@lines, "* Update on: ".join(", ", map {"*$_*"} @{ $rules->{$table}{'update_on'} }));
 		}
-		if ($rules->{$table}{'path_to_client'}) {
+		if ($rules->{$table}{'path_to_client'} && @{ $rules->{$table}{'path_to_client'} }) {
 			$update_columns{ $rules->{$table}{'path_to_client'}->[0]{'column'} } = 1;
 			push(@lines, "* Path to client: ".join(" > ", map {"*".$_->{'table'}.".".$_->{'column'}."*"} @{ $rules->{$table}{'path_to_client'} }));
 		}
@@ -814,11 +816,9 @@ sub _for_each_rule {
 	
 	for my $table_6 (keys %$column_rules) {
 		for my $column_6 (keys %{ $column_rules->{$table_6} }) {
-			unless (defined $column_rules->{$table_6}{$column_6}) {
-				my $new_rule = $sub->($table_6, $column_6, $column_rules->{$table_6}{$column_6});
-				if (defined $new_rule) {
-					$column_rules->{$table_6}{$column_6} = $new_rule;
-				}
+			my $new_rule = $sub->($table_6, $column_6, $column_rules->{$table_6}{$column_6});
+			if (defined $new_rule) {
+				$column_rules->{$table_6}{$column_6} = $new_rule;
 			}
 		}
 	}
@@ -839,6 +839,36 @@ sub apply_simple_columns_info {
 			}
 			if ($migration->is_constant_value_exists($table_6, $column_6)) {
 				return Migration::Rule::ConstantValue->new($migration->get_constant_value($table_6, $column_6));
+			}
+			return undef;
+		}
+	);
+}
+
+sub update_copy_columns_for_link {
+	my ($self) = @_;
+
+	my %lookups;
+	$self->_for_each_rule(
+		sub {
+		    my ($table_6, $column_6, $rule) = @_;
+			
+		    if (ref $rule eq 'Migration::Rule::ForeignKey') {
+		    	$lookups{ $rule->{'table'} }{ $rule->{'column'} } = 1;
+		    }
+			return undef;
+		}
+	);
+
+	$self->_for_each_rule(
+		sub {
+		    my ($table_6, $column_6, $rule) = @_;
+			
+			if ($lookups{$table_6}{$column_6}) {
+				if (ref $rule eq 'Migration::Rule::CopyValue') {
+					$rule->set_copy_and_save();
+					$self->{'logger'}->printf("%s.%s <- %s", $table_6, $column_6, $rule->as_string());
+				}
 			}
 			return undef;
 		}
@@ -1437,6 +1467,9 @@ sub new {
 			'referrer_user_sensitive' => {
 				'deleted' => '0',
 			},
+			'si_theme' => {
+				'FirstMesId' => '0', ## need to be fixed by second rule
+			},
 		},
 		'ignore_nullable' => {
 			'email_sent_mail_log' => {
@@ -1526,6 +1559,7 @@ sub new {
 			'client' => ['cl_username'],
 			'client_setting' => ['client_id', 'PKey'],
 			'email_reminder_settings' => ['client_id', 'type'],
+			'srm_resource' => ['id'],
 		},
 		'path_to_client' => {
 			'ppn_article_letter' => [
@@ -1547,7 +1581,8 @@ sub new {
 					'table' => 'ppn_letter',
 					'column' => 'client_id',
 				},
-			]
+			],
+			'srm_resource' => [],
 		},
 		'need_convert_datetime' => {
 			'email_contact_log' => {
@@ -1927,7 +1962,7 @@ sub load_hard_coded_links {
 
 	## visitor_id
 	for my $link (
-		"email_local.visitor_id", "phone_local_fake.visitor_id", 
+		"email_local_fake.visitor_id", "phone_local_fake.visitor_id", 
 		"opse_payment_log.patient_id", "token.user_id"
 	) {
 		my ($from_table, $from_column) = split('\.', $link);
@@ -1954,6 +1989,19 @@ sub load_hard_coded_links {
 		}
 	);
 
+	$links->add_link(
+		"address_office_fake", 
+		"office", 
+		{
+			"office_id" => "id",
+		},
+		"hard-coded",
+		{
+			'table' => 'address_office_fake',
+			'column' => 'id',
+		}
+	);
+
 	## other
 	$links->add_links(
 		{
@@ -1961,7 +2009,7 @@ sub load_hard_coded_links {
 			'email_referral.referral_mail_id' => 'email_referral_mail.id',
 			'email_referral.referrer_id' => 'visitor.id', ## type column is in fact 'visitor' for all records
 			'invisalign_case_process_patient.invisalign_client_id' => 'invisalign_client.id',
-			'office_address_local.office_id' => 'office.id',
+			#'address_office_fake.office_id' => 'office.id',
 			'orthomation.node_id' => 'orthomation_nodes.node_id',
 			#'ppn_article_letter.art_id' => 'ppn_article.id',
 			# 'si_pms_referrer_link.pms_referrer_id' => 'referrer.id',
@@ -2107,6 +2155,7 @@ sub new {
 	my $self = bless {
 		'table' => $table,
 		'column' => $column,
+		'action' => 'copy',
 	}, $class;
 	return $self;
 }
@@ -2114,18 +2163,24 @@ sub new {
 sub as_string {
 	my ($self) = @_;
 	
-	return "copy value from [".$self->{'table'}.".".$self->{'column'}."]";
+	return $self->{'action'}." value from [".$self->{'table'}.".".$self->{'column'}."]";
 }
 
 sub as_json {
 	my ($self) = @_;
 
 	tie my %r, "Tie::IxHash", (
-		'action' => "copy",
+		'action' => $self->{'action'},
 		'from_table' => $self->{'table'},
 		'from_column' => $self->{'column'},
 	);
 	return \%r;
+}
+
+sub set_copy_and_save {
+    my ($self) = @_;
+	
+	$self->{'action'} = 'copy-and-save';
 }
 
 package Migration::Rule::FromPMS;
