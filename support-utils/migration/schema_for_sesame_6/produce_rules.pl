@@ -188,7 +188,8 @@ sub verify_links {
 	
 	my %not_link = map { $_ => 1 } (
 		"*.pms_id", "*.link_id", "*.voice_queue_id", "*.clog_mail_id", "*.sml_mail_id", 
-		"*.vip_patient_id", "invisalign_text.page_id", "si_image.is_id" );
+		"*.vip_patient_id", "invisalign_text.page_id", "si_image.is_id", "sms_message_history.client_id", 
+		"sms_message_response.client_id" );
 	my %to_table = (
 		'patient_id' => "visitor",
 		'responsible_id' => "visitor",
@@ -284,6 +285,8 @@ sub load_links_from_model {
 	$links->delete_link_between_tables("si_pms_referrer_link", "referrer");
 	$links->delete_link_between_tables("si_theme", "si_message");
 	$links->delete_link_between_tables("ppn_article_letter", "ppn_common_article");
+	$links->delete_link_between_tables("sms_message_history", "client");
+	$links->delete_link_between_tables("sms_message_response", "client");
 }
 
 
@@ -656,7 +659,8 @@ sub save_html_to {
 		}
 		if ($rules->{$table}{'priority_two_date_column'}) {
 			$update_columns{$rules->{$table}{'priority_two_date_column'}} = 1;
-			push(@lines, "<li>Date column for priority 2 extraction: <span class=\"value\">".$rules->{$table}{'priority_two_date_column'}{'table'}.".".$rules->{$table}{'priority_two_date_column'}{'column'}."</span></li>");
+			push(@lines, "<li>Date column for priority 2 extraction: <span class=\"value\">".$rules->{$table}{'priority_two_date_column'}{'legacy_table'}
+				.".".$rules->{$table}{'priority_two_date_column'}{'legacy_column'}."</span></li>");
 		}
 		push(@lines, "</ul>");
 		if (exists $rules->{$table}{'columns'}) {
@@ -719,7 +723,7 @@ sub save_jira_to {
 		}
 		if ($rules->{$table}{'priority_two_date_column'}) {
 			$update_columns{$rules->{$table}{'priority_two_date_column'}} = 1;
-			push(@lines, "*Date column for priority 2 extraction: *".$rules->{$table}{'priority_two_date_column'}{'table'}.".".$rules->{$table}{'priority_two_date_column'}{'column'}."*");
+			push(@lines, "*Date column for priority 2 extraction: *".$rules->{$table}{'priority_two_date_column'}{'legacy_table'}.".".$rules->{$table}{'priority_two_date_column'}{'legacy_column'}."*");
 		}
 		push(@lines, "");
 		if (exists $rules->{$table}{'columns'}) {
@@ -884,13 +888,15 @@ sub apply_missing_eval {
 
 			my $eval = $migration->get_column_eval($table_6, $column_6, $links);
 			if (defined $eval) {
-				return Migration::Rule::Eval->new($eval, undef, undef);
+				return Migration::Rule::Eval->new($eval->{'eval'}, undef, undef);
 			}
 			return undef;
 		}
 	);
 
 	## hard-coded evals
+
+	## eval for active office id
 	$self->{'rules'}{'office_user_sensitive:2'}{'active'} = Migration::Rule::Eval->new('office-active', undef, undef);
 	delete $self->{'rules'}{'office_user_sensitive'}{'active'};
 	$self->{'tables'}{'office_user_sensitive:2'} = { %{ $self->{'tables'}{'office_user_sensitive'} } };
@@ -898,6 +904,15 @@ sub apply_missing_eval {
 
 	$self->{'rules'}{'referrer_user_sensitive'}{'si_doctor_id'} = Migration::Rule::Eval->new('si-doctor-id', 'si_pms_referrer_link', 'pms_referrer_id');
 
+	## eval for voice end message id
+	$self->{'rules'}{'client_setting:2'}{'IVal'} = Migration::Rule::Eval->new('voice-end-message-id', undef, undef);
+	$self->{'tables'}{'client_setting:2'} = { %{ $self->{'tables'}{'client_setting'} } };
+	$self->{'tables'}{'client_setting:2'}{'action'} = 'update-voice-end-message-id';
+
+	## eval for first si theme message id
+	$self->{'rules'}{'si_theme:2'}{'FirstMesId'} = Migration::Rule::Eval->new('first-theme-message-id', undef, undef);
+	$self->{'tables'}{'si_theme:2'} = { %{ $self->{'tables'}{'si_theme'} } };
+	$self->{'tables'}{'si_theme:2'}{'action'} = 'update-first-theme-message-id';
 }
 
 sub apply_links {
@@ -937,10 +952,16 @@ sub apply_moved_tables {
 					! defined $column_rules->{$new_name}{$new_column}
 				) {
 					if (defined $migration->get_column_eval($new_name, $new_column, $links)) {
+						my $column_eval = $migration->get_column_eval($new_name, $new_column, $links);
 						$column_rules->{$new_name}{$new_column} = Migration::Rule::Eval->new(
-							$migration->get_column_eval($new_name, $new_column, $links), 
-							$column->{'TABLE_NAME'},
-							$column->{'COLUMN_NAME'}
+							$column_eval->{'eval'}, 
+							($column_eval->{'unknown_column'} ? (
+								undef,
+								undef,
+							) : (							
+								$column->{'TABLE_NAME'},
+								$column->{'COLUMN_NAME'},
+							) )
 						);
 					} elsif (defined $migration->get_hardcoded_lookup($new_name, $new_column)) {
 						$column_rules->{$new_name}{$new_column} = Migration::Rule::HardCodedLookup->new(
@@ -1583,6 +1604,26 @@ sub new {
 				},
 			],
 			'srm_resource' => [],
+			'sms_message_history' => [
+				{
+					'table' => 'sms_message_history',
+					'column' => 'client_id',
+				},
+				{
+					'table' => 'sms_client_settings',
+					'column' => 'client_id',
+				}
+			],
+			'sms_message_response' => [
+				{
+					'table' => 'sms_message_response',
+					'column' => 'client_id',
+				},
+				{
+					'table' => 'sms_client_settings',
+					'column' => 'client_id',
+				}
+			],
 		},
 		'need_convert_datetime' => {
 			'email_contact_log' => {
@@ -1638,19 +1679,35 @@ sub new {
 			# 	'active' => 'office-active',
 			# },
 			'si_image' => {
-				'imageUrl' => 'si-image-url',
+				'imageUrl' => {
+					'eval' => 'si-image-url',
+				},
 			},
 			'email_sent_mail_log' => {
-				'subject' => 'email-archive-subject',
+				'subject' => {
+					'eval' => 'email-archive-subject',
+					'unknown_column' => 1,
+				},
 			},
 			'email_reminder_settings' => {
-				'type' => 'email-reminder-setting-type',
+				'type' => {
+					'eval' => 'email-reminder-setting-type',
+				},
 			},
 			'client' => {
-				'id' => 'client-id',
+				'id' => {
+					'eval' => 'client-id',
+				},
 			},
 			'referrer_user_sensitive' => {
-				'si_doctor_id' => 'si-doctor-id',
+				'si_doctor_id' => {
+					'eval' => 'si-doctor-id',
+				},
+			},
+			'opse_payment_log' => {
+				'patient_id' => {
+					'eval' => 'patient-id-for-opse',
+				},
 			},
 		},
 	}, $class;
@@ -1935,8 +1992,8 @@ sub get_date_column {
 		($table, $column) = split(m{\.}, $info, 2);
 	}
 	return {
-		'table' => $table,
-		'column' => $column,
+		'legacy_table' => $table,
+		'legacy_column' => $column,
 	};
 }
 
@@ -1999,6 +2056,32 @@ sub load_hard_coded_links {
 		{
 			'table' => 'address_office_fake',
 			'column' => 'id',
+		}
+	);
+
+	$links->add_link(
+		"sms_message_history", 
+		"sms_client_settings", 
+		{
+			"client_id" => "Id",
+		},
+		"hard-coded",
+		{
+			'table' => 'sms_message_history',
+			'column' => 'client_id',
+		}
+	);
+
+	$links->add_link(
+		"sms_message_response", 
+		"sms_client_settings", 
+		{
+			"client_id" => "Id",
+		},
+		"hard-coded",
+		{
+			'table' => 'sms_message_response',
+			'column' => 'client_id',
 		}
 	);
 

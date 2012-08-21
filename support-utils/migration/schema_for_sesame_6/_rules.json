@@ -997,8 +997,8 @@
       ],
       "priority" : "3",
       "priority_two_date_column" : {
-         "table" : "email_contact_log",
-         "column" : "clog_sdate"
+         "legacy_column" : "clog_sdate",
+         "legacy_table" : "email_contact_log"
       },
       "columns" : [
          {
@@ -1165,8 +1165,8 @@
       ],
       "priority" : "3",
       "priority_two_date_column" : {
-         "table" : "email_post_app_survey_log",
-         "column" : "date"
+         "legacy_column" : "date",
+         "legacy_table" : "email_post_app_survey_log"
       },
       "columns" : [
          {
@@ -1538,8 +1538,8 @@
       ],
       "priority" : "3",
       "priority_two_date_column" : {
-         "table" : "email_sent_mail_log",
-         "column" : "sml_date"
+         "legacy_column" : "sml_date",
+         "legacy_table" : "email_sent_mail_log"
       },
       "columns" : [
          {
@@ -1551,11 +1551,9 @@
          },
          {
             "column" : "subject",
-            "comment" : "eval [email-archive-subject] value from [email_sent_mail_log.subject]",
+            "comment" : "eval [email-archive-subject]",
             "action" : "eval",
-            "eval" : "email-archive-subject",
-            "from_table" : "email_sent_mail_log",
-            "from_column" : "subject"
+            "eval" : "email-archive-subject"
          },
          {
             "column" : "client_id",
@@ -1859,8 +1857,8 @@
       ],
       "priority" : "3",
       "priority_two_date_column" : {
-         "table" : "hhf_applications",
-         "column" : "filldate"
+         "legacy_column" : "filldate",
+         "legacy_table" : "hhf_applications"
       },
       "columns" : [
          {
@@ -3606,7 +3604,10 @@
    },
    "office_user_sensitive" : {
       "to_table" : "office_user_sensitive",
-      "action" : "delete-insert",
+      "action" : "update",
+      "update_on" : [
+         "office_id"
+      ],
       "path_to_client" : [
          {
             "table" : "office_user_sensitive",
@@ -3722,8 +3723,8 @@
       ],
       "priority" : "3",
       "priority_two_date_column" : {
-         "table" : "opse_payment_log",
-         "column" : "Time"
+         "legacy_column" : "Time",
+         "legacy_table" : "opse_payment_log"
       },
       "columns" : [
          {
@@ -3749,12 +3750,9 @@
          },
          {
             "column" : "patient_id",
-            "comment" : "link to [visitor.id] from [opse_payment_log.patient_id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor",
-            "lookup_column" : "id",
-            "from_table" : "opse_payment_log",
-            "from_column" : "patient_id"
+            "comment" : "eval [patient-id-for-opse]",
+            "action" : "eval",
+            "eval" : "patient-id-for-opse"
          },
          {
             "column" : "client_id",
@@ -5933,8 +5931,8 @@
       "columns" : [
          {
             "column" : "Id",
-            "comment" : "copy value from [sms_client_settings.Id]",
-            "action" : "copy",
+            "comment" : "copy-and-save value from [sms_client_settings.Id]",
+            "action" : "copy-and-save",
             "from_table" : "sms_client_settings",
             "from_column" : "Id"
          },
@@ -5955,12 +5953,16 @@
          {
             "table" : "sms_message_history",
             "column" : "client_id"
+         },
+         {
+            "table" : "sms_client_settings",
+            "column" : "client_id"
          }
       ],
       "priority" : "3",
       "priority_two_date_column" : {
-         "table" : "sms_message_history",
-         "column" : "time2send"
+         "legacy_column" : "time2send",
+         "legacy_table" : "sms_message_history"
       },
       "columns" : [
          {
@@ -6035,9 +6037,10 @@
          },
          {
             "column" : "client_id",
-            "comment" : "eval [client-id] value from [sms_message_history.client_id]",
-            "action" : "eval",
-            "eval" : "client-id",
+            "comment" : "link to [sms_client_settings.Id] from [sms_message_history.client_id] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "sms_client_settings",
+            "lookup_column" : "Id",
             "from_table" : "sms_message_history",
             "from_column" : "client_id"
          },
@@ -6092,12 +6095,16 @@
          {
             "table" : "sms_message_response",
             "column" : "client_id"
+         },
+         {
+            "table" : "sms_client_settings",
+            "column" : "client_id"
          }
       ],
       "priority" : "3",
       "priority_two_date_column" : {
-         "table" : "sms_message_response",
-         "column" : "ResponseReceiveDate"
+         "legacy_column" : "ResponseReceiveDate",
+         "legacy_table" : "sms_message_response"
       },
       "columns" : [
          {
@@ -6116,9 +6123,10 @@
          },
          {
             "column" : "client_id",
-            "comment" : "eval [client-id] value from [sms_message_response.client_id]",
-            "action" : "eval",
-            "eval" : "client-id",
+            "comment" : "link to [sms_client_settings.Id] from [sms_message_response.client_id] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "sms_client_settings",
+            "lookup_column" : "Id",
             "from_table" : "sms_message_response",
             "from_column" : "client_id"
          },
@@ -7059,8 +7067,8 @@
       ],
       "priority" : "3",
       "priority_two_date_column" : {
-         "table" : "voice_left_messages",
-         "column" : "call_time"
+         "legacy_column" : "call_time",
+         "legacy_table" : "voice_left_messages"
       },
       "columns" : [
          {
@@ -7135,8 +7143,8 @@
       ],
       "priority" : "3",
       "priority_two_date_column" : {
-         "table" : "voice_message_history",
-         "column" : "time2send"
+         "legacy_column" : "time2send",
+         "legacy_table" : "voice_message_history"
       },
       "columns" : [
          {
@@ -7374,8 +7382,8 @@
       ],
       "priority" : "3",
       "priority_two_date_column" : {
-         "table" : "voice_message_history",
-         "column" : "time2send"
+         "legacy_column" : "time2send",
+         "legacy_table" : "voice_message_history"
       },
       "columns" : [
          {
@@ -7493,8 +7501,8 @@
       ],
       "priority" : "3",
       "priority_two_date_column" : {
-         "table" : "voice_system_transaction_log",
-         "column" : "eventtime_utc"
+         "legacy_column" : "eventtime_utc",
+         "legacy_table" : "voice_system_transaction_log"
       },
       "columns" : [
          {
@@ -7546,8 +7554,8 @@
       ],
       "priority" : "3",
       "priority_two_date_column" : {
-         "table" : "voice_transactions_log",
-         "column" : "starttime_utc"
+         "legacy_column" : "starttime_utc",
+         "legacy_table" : "voice_transactions_log"
       },
       "columns" : [
          {
@@ -7745,6 +7753,9 @@
    "office_user_sensitive:2" : {
       "to_table" : "office_user_sensitive",
       "priority" : "2",
+      "update_on" : [
+         "office_id"
+      ],
       "path_to_client" : [
          {
             "table" : "office_user_sensitive",
@@ -7758,6 +7769,48 @@
             "comment" : "eval [office-active]",
             "action" : "eval",
             "eval" : "office-active"
+         }
+      ]
+   },
+   "client_setting:2" : {
+      "to_table" : "client_setting",
+      "priority" : "2",
+      "update_on" : [
+         "client_id",
+         "PKey"
+      ],
+      "path_to_client" : [
+         {
+            "table" : "client_setting",
+            "column" : "client_id"
+         }
+      ],
+      "action" : "update-voice-end-message-id",
+      "columns" : [
+         {
+            "column" : "IVal",
+            "comment" : "eval [voice-end-message-id]",
+            "action" : "eval",
+            "eval" : "voice-end-message-id"
+         }
+      ]
+   },
+   "si_theme:2" : {
+      "to_table" : "si_theme",
+      "priority" : "2",
+      "path_to_client" : [
+         {
+            "table" : "si_theme",
+            "column" : "client_id"
+         }
+      ],
+      "action" : "update-first-theme-message-id",
+      "columns" : [
+         {
+            "column" : "FirstMesId",
+            "comment" : "eval [first-theme-message-id]",
+            "action" : "eval",
+            "eval" : "first-theme-message-id"
          }
       ]
    }
