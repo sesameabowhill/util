@@ -1051,8 +1051,9 @@
          },
          {
             "column" : "clog_sdate",
-            "comment" : "copy value from [email_contact_log.clog_sdate]",
-            "action" : "copy",
+            "comment" : "eval [convert-time-zone-from-server] value from [email_contact_log.clog_sdate]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
             "from_table" : "email_contact_log",
             "from_column" : "clog_sdate"
          }
@@ -1579,8 +1580,9 @@
          },
          {
             "column" : "sml_date",
-            "comment" : "copy value from [email_sent_mail_log.sml_date]",
-            "action" : "copy",
+            "comment" : "eval [convert-time-zone-from-server] value from [email_sent_mail_log.sml_date]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
             "from_table" : "email_sent_mail_log",
             "from_column" : "sml_date"
          },
@@ -6023,8 +6025,9 @@
          },
          {
             "column" : "registered",
-            "comment" : "copy value from [sms_message_history.registered]",
-            "action" : "copy",
+            "comment" : "eval [convert-time-zone-from-server] value from [sms_message_history.registered]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
             "from_table" : "sms_message_history",
             "from_column" : "registered"
          },
@@ -6074,8 +6077,9 @@
          },
          {
             "column" : "appointment_datetime",
-            "comment" : "copy value from [sms_message_history.appointment_datetime]",
-            "action" : "copy",
+            "comment" : "eval [convert-time-zone-from-server] value from [sms_message_history.appointment_datetime]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
             "from_table" : "sms_message_history",
             "from_column" : "appointment_datetime"
          },
@@ -7171,8 +7175,9 @@
          },
          {
             "column" : "event_datetime",
-            "comment" : "copy value from [voice_message_history.event_datetime]",
-            "action" : "copy",
+            "comment" : "eval [convert-time-zone-from-server] value from [voice_message_history.event_datetime]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
             "from_table" : "voice_message_history",
             "from_column" : "event_datetime"
          },
@@ -7221,15 +7226,17 @@
          },
          {
             "column" : "sent_date",
-            "comment" : "copy value from [voice_message_history.sent_date]",
-            "action" : "copy",
+            "comment" : "eval [convert-time-zone-from-server] value from [voice_message_history.sent_date]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
             "from_table" : "voice_message_history",
             "from_column" : "sent_date"
          },
          {
             "column" : "time2send",
-            "comment" : "copy value from [voice_message_history.time2send]",
-            "action" : "copy",
+            "comment" : "eval [convert-time-zone-from-server] value from [voice_message_history.time2send]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
             "from_table" : "voice_message_history",
             "from_column" : "time2send"
          },

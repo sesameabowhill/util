@@ -58,6 +58,7 @@ sub get_schema_diff {
 	$rules->apply_table_priority($migration, $required_tables);
 	$rules->apply_moved_tables($migration, $schema_5_list, $schema_6, $links);
 	$rules->update_copy_columns_for_link();
+	$rules->update_copy_columns_for_eval($migration);
 	$rules->apply_missing_eval($migration, $links);
 	$rules->make_multiple_tables_rules($migration, $schema_6);
 	
@@ -879,6 +880,32 @@ sub update_copy_columns_for_link {
 	);
 }
 
+sub update_copy_columns_for_eval {
+    my ($self, $migration) = @_;
+
+    my $stop = 0;
+	$self->_for_each_rule(
+		sub {
+		    my ($table_6, $column_6, $rule) = @_;
+			
+			if ($migration->get_need_convert_datetime($table_6, $column_6)) {
+				if (ref $rule eq 'Migration::Rule::CopyValue') {
+					return Migration::Rule::Eval->new(
+						'convert-time-zone-from-'.$migration->get_need_convert_datetime($table_6, $column_6), 
+						$rule->{'table'},
+						$rule->{'column'}
+					);
+				} else {
+					$self->{'logger'}->printf("%s.%s:can't apply datetime convertion to [%s] ", $table_6, $column_6, ref($rule));
+					$stop ++;
+				}
+			}
+			return undef;
+		}
+	);
+	$self->{'logger'}->stop($stop, "columns with unexpected rules for time zone convertion");
+}
+
 sub apply_missing_eval {
 	my ($self, $migration, $links) = @_;
 	
@@ -1627,32 +1654,32 @@ sub new {
 		},
 		'need_convert_datetime' => {
 			'email_contact_log' => {
-				'clog_sdate' => 1,
+				'clog_sdate' => 'server',
 			},
 			'email_sent_mail_log' => {
-				'sml_date' => 1,
+				'sml_date' => 'server',
 			},
 			'sms_message_history' => {
-				'registered' => 1,
-				'time2send' => 1,
-				'processed' => 1,
-				'SentTime' => 1,
-				'appointment_datetime' => 1,
+				'registered' => 'server',
+				# 'time2send' => 'utc',
+				# 'processed' => 'utc',
+				# 'SentTime' => 'utc',
+				'appointment_datetime' => 'server',
 			},
 			'sms_queue' => {
-				'registered' => 1,
-				'time2send' => 1,
-				'appointment_datetime' => 1,
+				'registered' => 'server',
+				# 'time2send' => 'utc',
+				'appointment_datetime' => 'server',
 			},
 			'voice_message_history' => {
-				'time2send' => 1,
-				'sent_date' => 1,
-				'event_datetime' => 1,
+				'time2send' => 'server',
+				'sent_date' => 'server',
+				'event_datetime' => 'server',
 			},
 			'voice_queue' => {
-				'time2send' => 1,
-				'sent_date' => 1,
-				'create_datetime' => 1,
+				'time2send' => 'server',
+				'sent_date' => 'server',
+				'create_datetime' => 'server',
 			},
 		},
 		'date_column' => {
@@ -1880,11 +1907,11 @@ sub column_name_after_rename {
 	}
 }
 
-sub is_need_convert_datetime {
+sub get_need_convert_datetime {
 	my ($self, $table_6, $column_6) = @_;
 	
 	$table_6 = $self->get_table_name($table_6);
-	return $self->{'need_convert_datetime'}{$table_6}{$column_6}
+	return $self->{'need_convert_datetime'}{$table_6}{$column_6};
 }
 
 sub get_column_eval {
