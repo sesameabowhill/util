@@ -224,7 +224,7 @@ sub verify_links {
 							$to_table,
 						)
 					) {
-						$logger->printf("link for [".$column->{'TABLE_NAME'}.".".$column->{'COLUMN_NAME'}."] is not found");
+						$logger->printf("link for [".$column->{'TABLE_NAME'}.".".$column->{'COLUMN_NAME'}."] is not found (expecting link to $to_table)");
 						$stop ++;
 					}
 				} else {
@@ -281,13 +281,13 @@ sub load_links_from_model {
 			"from pdm",
 		);
 	}
-	# $links->delete_link_between_tables("appointment_reminder_schedule", "client");
 	$links->delete_link_between_tables("email_referral", "referrer");
 	$links->delete_link_between_tables("si_pms_referrer_link", "referrer");
 	$links->delete_link_between_tables("si_theme", "si_message");
 	$links->delete_link_between_tables("ppn_article_letter", "ppn_common_article");
 	$links->delete_link_between_tables("sms_message_history", "client");
 	$links->delete_link_between_tables("sms_message_response", "client");
+	$links->delete_link_between_tables("referrer_email_log", "referrer");
 }
 
 
@@ -936,10 +936,16 @@ sub apply_missing_eval {
 	$self->{'tables'}{'client_setting:2'} = { %{ $self->{'tables'}{'client_setting'} } };
 	$self->{'tables'}{'client_setting:2'}{'action'} = 'update-voice-end-message-id';
 
+	## eval for si auto notify
+	$self->{'rules'}{'client_setting:3'}{'IVal'} = Migration::Rule::Eval->new('si-auto-notify', undef, undef);
+	$self->{'tables'}{'client_setting:3'} = { %{ $self->{'tables'}{'client_setting'} } };
+	$self->{'tables'}{'client_setting:3'}{'action'} = 'update-si-auto-notify';
+
 	## eval for first si theme message id
 	$self->{'rules'}{'si_theme:2'}{'FirstMesId'} = Migration::Rule::Eval->new('first-theme-message-id', undef, undef);
 	$self->{'tables'}{'si_theme:2'} = { %{ $self->{'tables'}{'si_theme'} } };
 	$self->{'tables'}{'si_theme:2'}{'action'} = 'update-first-theme-message-id';
+
 }
 
 sub apply_links {
@@ -1356,6 +1362,8 @@ sub delete_link_between_tables {
 		die "can't delete link [$from_table] -> [$to_table]: link doesn't exist";
 	}
 	delete $self->{'links'}{$from_table}{$to_table};
+	delete $self->{'comments'}{$from_table}{$to_table};
+	delete $self->{'link_info'}{$from_table}{$to_table};
 }
 
 sub _clear_link_info {
@@ -1395,12 +1403,12 @@ sub new {
 		'phone_local_fake' => 'phone_local',
 		'ppn_article_letter' => 'ppn_article_letter',
 		'ppn_article_letter_common_fake' => 'ppn_article_letter',
+		'referrer_email_log_fake' => 'referrer_email_log',
 		'referrer_local_fake' => 'si_doctor',
-		#'referrer' => 'referrer_user_sensitive',
-		#'si_pms_referrer_link' => 'referrer_user_sensitive',
+		'si_doctor_email_log_fake' => 'si_doctor_email_log',
 		'voice_office_name_pronunciation' => 'office_user_sensitive',
 	);
-	
+
 	my $self = bless {
 		'removed' => {
 			map {$_ => 1} (
@@ -1422,9 +1430,6 @@ sub new {
 				'do_not_show_after' => 'show_until',
 				'patient_page' => 'page_type',
 			},
-			# 'si_pms_referrer_link' => {
-			# 	'referrer_id' => 'si_doctor_id',
-			# },
 		},
 		'hardcoded_lookup' => {
 			'survey_answer' => {
@@ -1608,6 +1613,7 @@ sub new {
 			'client_setting' => ['client_id', 'PKey'],
 			'email_reminder_settings' => ['client_id', 'type'],
 			'srm_resource' => ['id'],
+			'upload_settings' => ['client_id', 'name'],
 		},
 		'path_to_client' => {
 			'ppn_article_letter' => [
@@ -1708,6 +1714,7 @@ sub new {
 			'si_image' => {
 				'imageUrl' => {
 					'eval' => 'si-image-url',
+					'unknown_column' => 1,
 				},
 			},
 			'email_sent_mail_log' => {
@@ -1715,6 +1722,9 @@ sub new {
 					'eval' => 'email-archive-subject',
 					'unknown_column' => 1,
 				},
+				'sml_body' => {
+					'eval' => 'email-archive-body',
+				}
 			},
 			'email_reminder_settings' => {
 				'type' => {
@@ -2032,7 +2042,7 @@ sub load_hard_coded_links {
 		"appointment_reminder_schedule", "email_contact_log", "email_sent_mail_log", "upload_settings", 
 		"address_local", "email_local", "office_address_local", "patient_page_messages", "phone_local", "referrer_local",
 		"email_referral_mail", "ppn_article_letter", "email_referral", "voice_recipient_list", "referrer_email_log",
-		"referrer_user_sensitive"
+		"referrer_user_sensitive", "si_doctor_email_log"
 	) {
 		$links->add_link(
 			$from_table, 
@@ -2109,6 +2119,32 @@ sub load_hard_coded_links {
 		{
 			'table' => 'sms_message_response',
 			'column' => 'client_id',
+		}
+	);
+
+	$links->add_link(
+		"si_doctor_email_log_fake", 
+		"si_doctor", 
+		{
+			"si_doctor_id" => "DocId",
+		},
+		"hard-coded",
+		{
+			'table' => 'si_doctor_email_log_fake',
+			'column' => 'si_doctor_id',
+		}
+	);
+
+	$links->add_link(
+		"referrer_email_log_fake", 
+		"referrer", 
+		{
+			"referrer_id" => "id",
+		},
+		"hard-coded",
+		{
+			'table' => 'referrer_email_log_fake',
+			'column' => 'referrer_id',
 		}
 	);
 
