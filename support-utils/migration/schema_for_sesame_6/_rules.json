@@ -4631,30 +4631,30 @@
       "columns" : [
          {
             "column" : "body",
-            "comment" : "copy value from [referrer_email_log_fake.body]",
+            "comment" : "copy value from [referrer_email_log.body]",
             "action" : "copy",
-            "from_table" : "referrer_email_log_fake",
+            "from_table" : "referrer_email_log",
             "from_column" : "body"
          },
          {
             "column" : "attach_path",
-            "comment" : "copy value from [referrer_email_log_fake.attach_path]",
+            "comment" : "copy value from [referrer_email_log.attach_path]",
             "action" : "copy",
-            "from_table" : "referrer_email_log_fake",
+            "from_table" : "referrer_email_log",
             "from_column" : "attach_path"
          },
          {
             "column" : "attach_name",
-            "comment" : "copy value from [referrer_email_log_fake.attach_name]",
+            "comment" : "copy value from [referrer_email_log.attach_name]",
             "action" : "copy",
-            "from_table" : "referrer_email_log_fake",
+            "from_table" : "referrer_email_log",
             "from_column" : "attach_name"
          },
          {
             "column" : "subject",
-            "comment" : "copy value from [referrer_email_log_fake.subject]",
+            "comment" : "copy value from [referrer_email_log.subject]",
             "action" : "copy",
-            "from_table" : "referrer_email_log_fake",
+            "from_table" : "referrer_email_log",
             "from_column" : "subject"
          },
          {
@@ -4665,11 +4665,11 @@
          },
          {
             "column" : "referrer_id",
-            "comment" : "link to [referrer.id] from [referrer_email_log_fake.referrer_id] (from referrer_email_log_fake by rename (old hard-coded))",
+            "comment" : "link to [referrer.id] from [referrer_email_log.referrer_id] (from pdm)",
             "action" : "foreign-key",
             "lookup_table" : "referrer",
             "lookup_column" : "id",
-            "from_table" : "referrer_email_log_fake",
+            "from_table" : "referrer_email_log",
             "from_column" : "referrer_id"
          },
          {
@@ -4679,9 +4679,9 @@
          },
          {
             "column" : "datetime",
-            "comment" : "copy value from [referrer_email_log_fake.datetime]",
+            "comment" : "copy value from [referrer_email_log.datetime]",
             "action" : "copy",
-            "from_table" : "referrer_email_log_fake",
+            "from_table" : "referrer_email_log",
             "from_column" : "datetime"
          }
       ]

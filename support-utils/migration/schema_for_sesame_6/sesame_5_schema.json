@@ -38373,7 +38373,7 @@
    {
       "TABLE_CATALOG" : "def",
       "TABLE_SCHEMA" : "sesame_5",
-      "TABLE_NAME" : "referrer_email_log_fake",
+      "TABLE_NAME" : "referrer_email_log",
       "COLUMN_NAME" : "id",
       "ORDINAL_POSITION" : "1",
       "COLUMN_DEFAULT" : "",
@@ -38394,7 +38394,7 @@
    {
       "TABLE_CATALOG" : "def",
       "TABLE_SCHEMA" : "sesame_5",
-      "TABLE_NAME" : "referrer_email_log_fake",
+      "TABLE_NAME" : "referrer_email_log",
       "COLUMN_NAME" : "referrer_id",
       "ORDINAL_POSITION" : "2",
       "COLUMN_DEFAULT" : "",
@@ -38415,7 +38415,7 @@
    {
       "TABLE_CATALOG" : "def",
       "TABLE_SCHEMA" : "sesame_5",
-      "TABLE_NAME" : "referrer_email_log_fake",
+      "TABLE_NAME" : "referrer_email_log",
       "COLUMN_NAME" : "datetime",
       "ORDINAL_POSITION" : "3",
       "COLUMN_DEFAULT" : "",
@@ -38436,7 +38436,7 @@
    {
       "TABLE_CATALOG" : "def",
       "TABLE_SCHEMA" : "sesame_5",
-      "TABLE_NAME" : "referrer_email_log_fake",
+      "TABLE_NAME" : "referrer_email_log",
       "COLUMN_NAME" : "subject",
       "ORDINAL_POSITION" : "4",
       "COLUMN_DEFAULT" : "",
@@ -38457,7 +38457,7 @@
    {
       "TABLE_CATALOG" : "def",
       "TABLE_SCHEMA" : "sesame_5",
-      "TABLE_NAME" : "referrer_email_log_fake",
+      "TABLE_NAME" : "referrer_email_log",
       "COLUMN_NAME" : "body",
       "ORDINAL_POSITION" : "5",
       "COLUMN_DEFAULT" : "",
@@ -38478,7 +38478,7 @@
    {
       "TABLE_CATALOG" : "def",
       "TABLE_SCHEMA" : "sesame_5",
-      "TABLE_NAME" : "referrer_email_log_fake",
+      "TABLE_NAME" : "referrer_email_log",
       "COLUMN_NAME" : "attach_path",
       "ORDINAL_POSITION" : "6",
       "COLUMN_DEFAULT" : "",
@@ -38499,7 +38499,7 @@
    {
       "TABLE_CATALOG" : "def",
       "TABLE_SCHEMA" : "sesame_5",
-      "TABLE_NAME" : "referrer_email_log_fake",
+      "TABLE_NAME" : "referrer_email_log",
       "COLUMN_NAME" : "attach_name",
       "ORDINAL_POSITION" : "7",
       "COLUMN_DEFAULT" : "",

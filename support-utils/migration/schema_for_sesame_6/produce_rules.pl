@@ -287,7 +287,7 @@ sub load_links_from_model {
 	$links->delete_link_between_tables("ppn_article_letter", "ppn_common_article");
 	$links->delete_link_between_tables("sms_message_history", "client");
 	$links->delete_link_between_tables("sms_message_response", "client");
-	$links->delete_link_between_tables("referrer_email_log", "referrer");
+	#$links->delete_link_between_tables("referrer_email_log", "referrer");
 }
 
 
@@ -1403,7 +1403,6 @@ sub new {
 		'phone_local_fake' => 'phone_local',
 		'ppn_article_letter' => 'ppn_article_letter',
 		'ppn_article_letter_common_fake' => 'ppn_article_letter',
-		'referrer_email_log_fake' => 'referrer_email_log',
 		'referrer_local_fake' => 'si_doctor',
 		'si_doctor_email_log_fake' => 'si_doctor_email_log',
 		'voice_office_name_pronunciation' => 'office_user_sensitive',
@@ -1801,6 +1800,7 @@ sub _generate_actions {
 	my %know_actions = map {$_ => 1} ("delete-insert", "insert", "update", "update-insert", "remap-only");
 	my %actions;
 	for my $table (@$required_tables) {
+		$table->{'action'} //= '';
 		if ($table->{'action'} eq 'user-sensitive') {
 			$actions{$table->{'table'}."_user_sensitive"} = "update";
 			$actions{$table->{'table'}} = "remap-only";
@@ -1823,6 +1823,7 @@ sub _generate_versioned_rules {
 
 	my %versioned;
 	for my $table (@$required_tables) {
+		$table->{'transform'} //= '';
 		if ($table->{'transform'} eq "user-sensitive") {
 			$versioned{ $table->{'table'} } = [ $table->{'table'}, $table->{'table'}."_user_sensitive" ];
 		} elsif ($table->{'transform'} eq "remap-only") {
@@ -2135,18 +2136,18 @@ sub load_hard_coded_links {
 		}
 	);
 
-	$links->add_link(
-		"referrer_email_log_fake", 
-		"referrer", 
-		{
-			"referrer_id" => "id",
-		},
-		"hard-coded",
-		{
-			'table' => 'referrer_email_log_fake',
-			'column' => 'referrer_id',
-		}
-	);
+	# $links->add_link(
+	# 	"referrer_email_log_fake", 
+	# 	"referrer", 
+	# 	{
+	# 		"referrer_id" => "id",
+	# 	},
+	# 	"hard-coded",
+	# 	{
+	# 		'table' => 'referrer_email_log_fake',
+	# 		'column' => 'referrer_id',
+	# 	}
+	# );
 
 	## other
 	$links->add_links(
