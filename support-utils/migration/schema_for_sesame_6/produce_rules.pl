@@ -741,7 +741,9 @@ sub save_jira_to {
 					)
 				);
 				if (exists $column->{'action'}) {
-					if ($column->{'action'} eq "foreign-key") {
+					if ($column->{'action'} eq "copy" && $rules->{$table}{'action'} eq 'remap-only') {
+						push(@row, $rules->{$table}{'action'});
+					} elsif ($column->{'action'} eq "foreign-key") {
 						push(@row, "reference to \"".$column->{'lookup_table'}.".".$column->{'lookup_column'}."\"");
 					} else {
 						$column->{'comment'} =~ s{[\[\]]}{"}g;
@@ -929,7 +931,8 @@ sub apply_missing_eval {
 	$self->{'tables'}{'office_user_sensitive:2'} = { %{ $self->{'tables'}{'office_user_sensitive'} } };
 	$self->{'tables'}{'office_user_sensitive:2'}{'action'} = 'update-office-active';
 
-	$self->{'rules'}{'referrer_user_sensitive'}{'si_doctor_id'} = Migration::Rule::Eval->new('si-doctor-id', 'si_pms_referrer_link', 'pms_referrer_id');
+	$self->{'rules'}{'referrer_user_sensitive'}{'si_doctor_id'} = Migration::Rule::Eval->new('si-doctor-id', 'si_pms_referrer_link', 'referrer_id');
+	$self->{'rules'}{'si_doctor_email_log'}{'si_doctor_id'} = Migration::Rule::Eval->new('si-doctor-referrer-id', 'si_doctor_email_log_fake', 'referrer_id');
 
 	## eval for voice end message id
 	$self->{'rules'}{'client_setting:2'}{'IVal'} = Migration::Rule::Eval->new('voice-end-message-id', undef, undef);
@@ -1431,10 +1434,6 @@ sub new {
 			},
 		},
 		'hardcoded_lookup' => {
-			'survey_answer' => {
-				'question_id' => 'survey-question-id',
-				'question_option_id' => 'survey-option-id',
-			},
 			'holiday_settings' => {
 				'hdc_id' => 'holiday-card-id',
 				'hd_id' => 'holiday-id',
@@ -1500,6 +1499,9 @@ sub new {
 			},
 			'si_standard_message' => {
 				'NotDeleted' => 'si-message-not-deleted',
+			},
+			'survey_question' => {
+				'client_edition_id' => 'client-edition-id-or-zero',
 			},
 		},
 		'constant_value' => {
@@ -1613,6 +1615,7 @@ sub new {
 			'email_reminder_settings' => ['client_id', 'type'],
 			'srm_resource' => ['id'],
 			'upload_settings' => ['client_id', 'name'],
+			'sms_client_settings' => ['client_id'],
 		},
 		'path_to_client' => {
 			'ppn_article_letter' => [
@@ -1743,6 +1746,14 @@ sub new {
 			'opse_payment_log' => {
 				'patient_id' => {
 					'eval' => 'patient-id-for-opse',
+				},
+			},
+			'survey_answer' => {
+				'question_id' => {
+					'eval' => 'survey-question-id',
+				},
+				'question_option_id' => {
+					'eval' => 'survey-option-id',
 				},
 			},
 		},
@@ -2156,13 +2167,8 @@ sub load_hard_coded_links {
 			'email_referral.referral_mail_id' => 'email_referral_mail.id',
 			'email_referral.referrer_id' => 'visitor.id', ## type column is in fact 'visitor' for all records
 			'invisalign_case_process_patient.invisalign_client_id' => 'invisalign_client.id',
-			#'address_office_fake.office_id' => 'office.id',
 			'orthomation.node_id' => 'orthomation_nodes.node_id',
-			#'ppn_article_letter.art_id' => 'ppn_article.id',
-			# 'si_pms_referrer_link.pms_referrer_id' => 'referrer.id',
-			# 'si_pms_referrer_link.referrer_id' => 'referrer.id',
 			'referrer_user_sensitive.si_doctor_id' => 'si_doctor.DocId',
-			#'referrer_user_sensitive.referrer_id' => 'referrer.id',
 			'srm_resource.container' => 'client.cl_username',
 			'visitor_opinion.category_id' => 'review_category.id',
 			'voice_left_messages.rec_id' => 'voice_recipient_list.RLId',

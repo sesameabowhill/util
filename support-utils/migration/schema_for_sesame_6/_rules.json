@@ -4702,11 +4702,11 @@
       "columns" : [
          {
             "column" : "si_doctor_id",
-            "comment" : "eval [si-doctor-id] value from [si_pms_referrer_link.pms_referrer_id]",
+            "comment" : "eval [si-doctor-id] value from [si_pms_referrer_link.referrer_id]",
             "action" : "eval",
             "eval" : "si-doctor-id",
             "from_table" : "si_pms_referrer_link",
-            "from_column" : "pms_referrer_id"
+            "from_column" : "referrer_id"
          },
          {
             "column" : "client_id",
@@ -5020,13 +5020,6 @@
             "from_column" : "email"
          },
          {
-            "column" : "AutoNotify",
-            "comment" : "copy value from [si_doctor.AutoNotify]",
-            "action" : "copy",
-            "from_table" : "si_doctor",
-            "from_column" : "AutoNotify"
-         },
-         {
             "column" : "Password",
             "comment" : "copy value from [si_doctor.Password]",
             "action" : "copy",
@@ -5090,14 +5083,14 @@
    },
    "si_doctor_email_log" : {
       "to_table" : "si_doctor_email_log",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "si_doctor_email_log",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
+      "priority" : "2",
       "columns" : [
          {
             "column" : "body",
@@ -5108,12 +5101,11 @@
          },
          {
             "column" : "si_doctor_id",
-            "comment" : "link to [si_doctor.DocId] from [si_doctor_email_log_fake.si_doctor_id] (from si_doctor_email_log_fake by rename (old hard-coded))",
-            "action" : "foreign-key",
-            "lookup_table" : "si_doctor",
-            "lookup_column" : "DocId",
+            "comment" : "eval [si-doctor-referrer-id] value from [si_doctor_email_log_fake.referrer_id]",
+            "action" : "eval",
+            "eval" : "si-doctor-referrer-id",
             "from_table" : "si_doctor_email_log_fake",
-            "from_column" : "si_doctor_id"
+            "from_column" : "referrer_id"
          },
          {
             "column" : "attach_path",
@@ -5207,14 +5199,14 @@
    },
    "si_image" : {
       "to_table" : "si_image",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "si_image",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
+      "priority" : "2",
       "columns" : [
          {
             "column" : "PatId",
@@ -5325,14 +5317,14 @@
    },
    "si_image_to_message" : {
       "to_table" : "si_image_to_message",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "si_image_to_message",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
+      "priority" : "2",
       "columns" : [
          {
             "column" : "client_id",
@@ -5364,14 +5356,14 @@
    },
    "si_image_type" : {
       "to_table" : "si_image_type",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "si_image_type",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
+      "priority" : "2",
       "columns" : [
          {
             "column" : "Position",
@@ -5737,14 +5729,14 @@
    },
    "si_patient_timepoint_link" : {
       "to_table" : "si_patient_timepoint_link",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "si_patient_timepoint_link",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
+      "priority" : "2",
       "columns" : [
          {
             "column" : "TpNum",
@@ -5891,7 +5883,10 @@
    },
    "sms_client_settings" : {
       "to_table" : "sms_client_settings",
-      "action" : "delete-insert",
+      "action" : "update-insert",
+      "update_on" : [
+         "client_id"
+      ],
       "path_to_client" : [
          {
             "table" : "sms_client_settings",
@@ -6322,9 +6317,9 @@
          },
          {
             "column" : "question_option_id",
-            "comment" : "hard-coded lookup: map [survey-option-id] value from [survey_answer.question_option_id] ",
-            "action" : "hard-coded-lookup",
-            "map" : "survey-option-id",
+            "comment" : "eval [survey-option-id] value from [survey_answer.question_option_id]",
+            "action" : "eval",
+            "eval" : "survey-option-id",
             "from_table" : "survey_answer",
             "from_column" : "question_option_id"
          },
@@ -6353,9 +6348,9 @@
          },
          {
             "column" : "question_id",
-            "comment" : "hard-coded lookup: map [survey-question-id] value from [survey_answer.question_id] ",
-            "action" : "hard-coded-lookup",
-            "map" : "survey-question-id",
+            "comment" : "eval [survey-question-id] value from [survey_answer.question_id]",
+            "action" : "eval",
+            "eval" : "survey-question-id",
             "from_table" : "survey_answer",
             "from_column" : "question_id"
          },
@@ -6364,6 +6359,113 @@
             "comment" : "copy value from [survey_answer.type]",
             "action" : "copy",
             "from_table" : "survey_answer",
+            "from_column" : "type"
+         },
+         {
+            "column" : "id",
+            "comment" : "auto increment",
+            "action" : "autoincrement"
+         }
+      ]
+   },
+   "survey_question" : {
+      "to_table" : "survey_question",
+      "action" : "delete-insert",
+      "path_to_client" : [
+         {
+            "table" : "survey_question",
+            "column" : "member_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : [
+         {
+            "column" : "order_number",
+            "comment" : "copy value from [survey_question.order_number]",
+            "action" : "copy",
+            "from_table" : "survey_question",
+            "from_column" : "order_number"
+         },
+         {
+            "column" : "survey_type",
+            "comment" : "copy value from [survey_question.survey_type]",
+            "action" : "copy",
+            "from_table" : "survey_question",
+            "from_column" : "survey_type"
+         },
+         {
+            "column" : "question_text",
+            "comment" : "copy value from [survey_question.question_text]",
+            "action" : "copy",
+            "from_table" : "survey_question",
+            "from_column" : "question_text"
+         },
+         {
+            "column" : "client_edition_id",
+            "comment" : "hard-coded lookup: map [client-edition-id-or-zero] value from [survey_question.client_edition_id] ",
+            "action" : "hard-coded-lookup",
+            "map" : "client-edition-id-or-zero",
+            "from_table" : "survey_question",
+            "from_column" : "client_edition_id"
+         },
+         {
+            "column" : "member_id",
+            "comment" : "eval [client-id] value from [survey_question.member_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "survey_question",
+            "from_column" : "member_id"
+         },
+         {
+            "column" : "id",
+            "comment" : "auto increment",
+            "action" : "autoincrement"
+         }
+      ]
+   },
+   "survey_question_option" : {
+      "to_table" : "survey_question_option",
+      "action" : "delete-insert",
+      "path_to_client" : [
+         {
+            "table" : "survey_question_option",
+            "column" : "question_id"
+         },
+         {
+            "table" : "survey_question",
+            "column" : "member_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : [
+         {
+            "column" : "order_number",
+            "comment" : "copy value from [survey_question_option.order_number]",
+            "action" : "copy",
+            "from_table" : "survey_question_option",
+            "from_column" : "order_number"
+         },
+         {
+            "column" : "option_text",
+            "comment" : "copy value from [survey_question_option.option_text]",
+            "action" : "copy",
+            "from_table" : "survey_question_option",
+            "from_column" : "option_text"
+         },
+         {
+            "column" : "question_id",
+            "comment" : "link to [survey_question.id] from [survey_question_option.question_id] (from pdm)",
+            "action" : "foreign-key",
+            "lookup_table" : "survey_question",
+            "lookup_column" : "id",
+            "from_table" : "survey_question_option",
+            "from_column" : "question_id"
+         },
+         {
+            "column" : "type",
+            "comment" : "copy value from [survey_question_option.type]",
+            "action" : "copy",
+            "from_table" : "survey_question_option",
             "from_column" : "type"
          },
          {

@@ -1,11 +1,15 @@
 <?php
 function adminer_object() {
     // required to run any plugin
-    include_once "./adminer-plugin.php";
+    include_once "./adminer-plugin.inc.php";
 
-    include_once "./adminer-ConventionsForeignKeys.php";
-    include_once "./adminer-foreign-system.php";
-    include_once "./adminer-versioned-tables.php";
+    include_once "./adminer-ConventionsForeignKeys.inc.php";
+    include_once "./adminer-foreign-system.inc.php";
+    include_once "./adminer-versioned-tables.inc.php";
+    include_once "./adminer-login-databases.inc.php";
+    if (file_exists("./databases.inc.php")) {
+        include_once "./databases.inc.php";
+    }
     
     $plugins = array(
         // specify enabled plugins here
@@ -13,16 +17,13 @@ function adminer_object() {
         new AdminerForeignSystem,
         new AdminerVersionedTables
     );
-    
-    /* It is possible to combine customization and plugins:
-    class AdminerCustomization extends AdminerPlugin {
+    if (isset($databases)) {
+        array_push($plugins, new AdminerLoginDatabases($databases));
     }
-    return new AdminerCustomization($plugins);
-    */
-    
+
     return new AdminerPlugin($plugins);
 }
 
 // include original Adminer or Adminer Editor
-include "./adminer-core.php";
+include "./adminer-core.inc.php";
 ?>
