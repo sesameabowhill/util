@@ -6,7 +6,7 @@
 * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
 * @license http://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2 (one or other)
 */
-class AdminerLoginDatabases extends Adminer {
+class AdminerLoginDatabases {
 	/** @access protected */
 	var $databases;
 	
@@ -38,13 +38,6 @@ class AdminerLoginDatabases extends Adminer {
 		return $this->titles;
 	}
 
-	function navigation($missing) {
-		// workaround duplicated title when database is not selected
-		if (array_key_exists(DB, $this->databases)) {
-			parent::navigation($missing);
-		}
-	}
-	
 	function loginForm() {
 		?>
 <table cellspacing="0">

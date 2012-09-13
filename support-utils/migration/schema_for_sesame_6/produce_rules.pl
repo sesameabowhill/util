@@ -931,6 +931,11 @@ sub apply_missing_eval {
 	$self->{'tables'}{'office_user_sensitive:2'} = { %{ $self->{'tables'}{'office_user_sensitive'} } };
 	$self->{'tables'}{'office_user_sensitive:2'}{'action'} = 'update-office-active';
 
+	$self->{'rules'}{'office_user_sensitive:3'}{'name_local'} = Migration::Rule::Eval->new('office-local-name', undef, undef);
+	delete $self->{'rules'}{'office_user_sensitive'}{'name_local'};
+	$self->{'tables'}{'office_user_sensitive:3'} = { %{ $self->{'tables'}{'office_user_sensitive'} } };
+	$self->{'tables'}{'office_user_sensitive:3'}{'action'} = 'update-office-local-name';
+
 	$self->{'rules'}{'referrer_user_sensitive'}{'si_doctor_id'} = Migration::Rule::Eval->new('si-doctor-id', 'si_pms_referrer_link', 'referrer_id');
 	$self->{'rules'}{'si_doctor_email_log'}{'si_doctor_id'} = Migration::Rule::Eval->new('si-doctor-referrer-id', 'si_doctor_email_log_fake', 'referrer_id');
 

@@ -15,7 +15,7 @@ class AdminerVersionedTables {
 			'phone' => 1,
 			'procedure' => 1,
 			'recall' => 1,
-			'referrer' => 0,
+			'referrer' => 1,
 			'responsible_patient' => 1,
 			'staff' => 0,
 			'treatment_plan' => 0,

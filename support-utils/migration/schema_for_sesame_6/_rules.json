@@ -7807,6 +7807,28 @@
          }
       ]
    },
+   "office_user_sensitive:3" : {
+      "to_table" : "office_user_sensitive",
+      "priority" : "2",
+      "update_on" : [
+         "office_id"
+      ],
+      "path_to_client" : [
+         {
+            "table" : "office_user_sensitive",
+            "column" : "client_id"
+         }
+      ],
+      "action" : "update-office-local-name",
+      "columns" : [
+         {
+            "column" : "name_local",
+            "comment" : "eval [office-local-name]",
+            "action" : "eval",
+            "eval" : "office-local-name"
+         }
+      ]
+   },
    "client_setting:2" : {
       "to_table" : "client_setting",
       "priority" : "2",

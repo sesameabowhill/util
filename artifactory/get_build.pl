@@ -55,7 +55,7 @@ if (defined $version) {
 	}
 } else {
 	print <<USAGE;
-Usage: $0 <mndule> <version> [options...]
+Usage: $0 <module> <version> [options...]
 Version can look like: "1.2.75" or "master".
   Use "release" version to get result of release snapshot.
 Options:
