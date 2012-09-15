@@ -7638,7 +7638,10 @@
    },
    "email_reminder_settings:2" : {
       "to_table" : "email_reminder_settings",
-      "action" : "delete-insert",
+      "action" : "delete-insert-where",
+      "where" : {
+         "type" : "standard"
+      },
       "path_to_client" : [
          {
             "table" : "email_reminder_settings",
@@ -7721,7 +7724,10 @@
    },
    "ppn_article_letter:2" : {
       "to_table" : "ppn_article_letter",
-      "action" : "delete-insert",
+      "action" : "delete-insert-where",
+      "where" : {
+         "is_doctor_article" : "0"
+      },
       "path_to_client" : [
          {
             "table" : "ppn_article_letter",
@@ -7769,11 +7775,11 @@
          },
          {
             "column" : "let_id",
-            "comment" : "link to [ppn_letter.id] from [ppn_article_letter.let_id] (from pdm)",
+            "comment" : "link to [ppn_letter.id] from [ppn_article_letter_common_fake.let_id] (special hard-code)",
             "action" : "foreign-key",
             "lookup_table" : "ppn_letter",
             "lookup_column" : "id",
-            "from_table" : "ppn_article_letter",
+            "from_table" : "ppn_article_letter_common_fake",
             "from_column" : "let_id"
          },
          {

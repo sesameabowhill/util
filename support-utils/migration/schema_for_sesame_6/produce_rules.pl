@@ -369,6 +369,14 @@ sub apply_table_info {
 					$self->{'logger'}->printf("can't update [%s]: no keys to use", $table);
 				}
 			}
+			if ($table_action eq 'delete-insert-where') {
+				if ($migration->get_where_columns($table)) {
+					$r{'where'} = $migration->get_where_columns($table),
+				} else {
+					$stop ++ ;
+					$self->{'logger'}->printf("can't delete-where [%s]: without where", $table);
+				}
+			}
 			$self->{'tables'}{$table} = \%r;
 		}
 		$self->{'logger'}->stop($stop, "missing columns to update on");
@@ -653,6 +661,9 @@ sub save_html_to {
 		if ($rules->{$table}{'update_on'}) {
 			%update_columns = map {$_ => 1} @{ $rules->{$table}{'update_on'} };
 			push(@lines, "<li>Update on: ".join(", ", map {"<span class=\"value\">$_</span>"} @{ $rules->{$table}{'update_on'} })."</li>");
+		}
+		if ($rules->{$table}{'where'}) {
+			push(@lines, "<li>Delete where: ".join(" AND ", map {"<span class=\"value\">$_ = ".$rules->{$table}{'where'}{$_}."</span>"} keys %{ $rules->{$table}{'where'} })."</li>");
 		}
 		if ($rules->{$table}{'path_to_client'} && @{ $rules->{$table}{'path_to_client'} }) {
 			$update_columns{ $rules->{$table}{'path_to_client'}->[0]{'column'} } = 1;
@@ -953,6 +964,9 @@ sub apply_missing_eval {
 	$self->{'rules'}{'si_theme:2'}{'FirstMesId'} = Migration::Rule::Eval->new('first-theme-message-id', undef, undef);
 	$self->{'tables'}{'si_theme:2'} = { %{ $self->{'tables'}{'si_theme'} } };
 	$self->{'tables'}{'si_theme:2'}{'action'} = 'update-first-theme-message-id';
+
+	## fix ppn_article_letter:2 link
+	$self->{'rules'}{'ppn_article_letter:2'}{'let_id'} = Migration::Rule::ForeignKey->new('ppn_letter', 'id', 'ppn_article_letter_common_fake', 'let_id')->set_source("special hard-code");
 
 }
 
@@ -1762,6 +1776,14 @@ sub new {
 				},
 			},
 		},
+		'delete_where' => {
+			'email_reminder_settings:2' => {
+				'type' => 'standard',
+			},
+			'ppn_article_letter:2' => {
+				'is_doctor_article' => '0',
+			},
+		},
 	}, $class;
 	$self->_detect_renames_to_same_table();
 	$self->_generate_versioned_rules($schema_6, $required_tables);
@@ -1813,7 +1835,7 @@ sub ignore_table_6 {
 sub _generate_actions {
 	my ($self, $required_tables) = @_;
 	
-	my %know_actions = map {$_ => 1} ("delete-insert", "insert", "update", "update-insert", "remap-only");
+	my %know_actions = map {$_ => 1} ("delete-insert", "insert", "update", "update-insert", "remap-only", "delete-insert-where");
 	my %actions;
 	for my $table (@$required_tables) {
 		$table->{'action'} //= '';
@@ -1939,6 +1961,12 @@ sub get_need_convert_datetime {
 	
 	$table_6 = $self->get_table_name($table_6);
 	return $self->{'need_convert_datetime'}{$table_6}{$column_6};
+}
+
+sub get_where_columns {
+    my ($self, $tables_6) = @_;
+	
+	return $self->{'delete_where'}{$tables_6};
 }
 
 sub get_column_eval {
@@ -2151,19 +2179,6 @@ sub load_hard_coded_links {
 			'column' => 'si_doctor_id',
 		}
 	);
-
-	# $links->add_link(
-	# 	"referrer_email_log_fake", 
-	# 	"referrer", 
-	# 	{
-	# 		"referrer_id" => "id",
-	# 	},
-	# 	"hard-coded",
-	# 	{
-	# 		'table' => 'referrer_email_log_fake',
-	# 		'column' => 'referrer_id',
-	# 	}
-	# );
 
 	## other
 	$links->add_links(

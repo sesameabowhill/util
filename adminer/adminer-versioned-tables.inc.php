@@ -9,7 +9,7 @@ class AdminerVersionedTables {
 			'email' => 1,
 			'insurance_contract' => 0,
 			'ledger' => 0,
-			'office' => 0,
+			'office' => 1,
 			'patient_referrer' => 0,
 			'patient_staff' => 0,
 			'phone' => 1,
