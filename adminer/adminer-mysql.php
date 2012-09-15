@@ -7,6 +7,7 @@ function adminer_object() {
     include_once "./adminer-foreign-system.inc.php";
     include_once "./adminer-versioned-tables.inc.php";
     include_once "./adminer-login-databases.inc.php";
+    include_once "./adminer-sticky-client-id.inc.php";
     if (file_exists("./databases.inc.php")) {
         include_once "./databases.inc.php";
     }
@@ -15,7 +16,8 @@ function adminer_object() {
         // specify enabled plugins here
         new ConventionForeignKeys,
         new AdminerForeignSystem,
-        new AdminerVersionedTables
+        new AdminerVersionedTables,
+        new AdminerStickyClientId
     );
     if (isset($databases)) {
         array_push($plugins, new AdminerLoginDatabases($databases));
