@@ -38,6 +38,14 @@ class AdminerLoginDatabases {
 		return $this->titles;
 	}
 
+	function name() {
+		if ($this->databases[DB]["wikipage"]) {
+			return '<a href="'.$this->databases[DB]["wikipage"].'">'.$this->databases[DB]["title"].'</a>';
+		} else {
+			return $this->databases[DB]["title"];
+		}
+	}
+
 	function loginForm() {
 		?>
 <table cellspacing="0">

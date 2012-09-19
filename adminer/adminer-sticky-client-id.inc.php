@@ -85,6 +85,11 @@ class AdminerStickyClientId {
 			if ($client_id != null) {
 				echo '<fieldset><legend><a href="#fieldset-client-id" onclick="return !toggle(\'fieldset-client-id\');">Client</a></legend>';
 				echo '<div id="fieldset-client-id"><div>';
+				echo '<input style="float: left; margin-right: 0.5em; margin-left: 0px" type="checkbox" id="remember-client-id" ';
+				echo 'onchange="document.getElementById(\'client-id-action\').value = (this.checked?\'add\':\'remove\')"';
+				echo ($client_id_condition == null ? "" : " checked");
+				echo '><input type="hidden" name="client-id-action" id="client-id-action" value="0">';
+
 				echo '<label for="remember-client-id" title="';
 				echo ($client_id_condition == null ? "Check to add condition" : "Uncheck to remove condition");
 				echo '">';
@@ -95,10 +100,7 @@ class AdminerStickyClientId {
 					echo "".$username."<br>id: ".$client_id;
 				}
 				echo '</label> ';
-				echo '<input style="float: left; margin-right: 0.5em; margin-left: 0px" type="checkbox" id="remember-client-id" ';
-				echo 'onchange="document.getElementById(\'client-id-action\').value = (this.checked?\'add\':\'remove\')"';
-				echo ($client_id_condition == null ? "" : " checked");
-				echo '><input type="hidden" name="client-id-action" id="client-id-action" value="0"></div></div></fieldset>';
+				echo '</div></div></fieldset>';
 			}
 		}
 	}
