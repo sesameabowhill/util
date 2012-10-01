@@ -98,8 +98,12 @@ namespace WindowsFormsApplication1
             columns.Add(new TableColumn("Responsibles", "LastName", "ID", MAX_NAME_LENGTH));
             columns.Add(new TableColumn("TreatmentPlans", "PatientID", "ID"));
 
+            progressBar.Maximum = 0;
+            progressBar.Maximum = columns.Count;
+            progressBar.Value = 0;
             foreach (TableColumn tableColumn in columns)
             {
+                progressBar.PerformStep();
                 obfuscateTableColumn(tableColumn, saltEdit.Text, connection);
             }
 
@@ -120,20 +124,23 @@ namespace WindowsFormsApplication1
             {
                 while (objectReader.Read())
                 {
-                    string id = objectReader.GetString(0);
-                    string value = objectReader.GetString(1);
-
-                    OleDbCommand updateCommand = new OleDbCommand("UPDATE [" + tableColumn.table + "] SET [" +
-                         tableColumn.column + "] = ? WHERE [" + tableColumn.idColumn + "] = ?", connection);
-                    string newValue = obfuscateString(value, salt);
-                    if (tableColumn.maxLength > 0)
+                    if (!objectReader.IsDBNull(0) && !objectReader.IsDBNull(1))
                     {
-                        newValue = newValue.Substring(0, tableColumn.maxLength);
+                        string id = objectReader.GetString(0);
+                        string value = objectReader.GetString(1);
+
+                        OleDbCommand updateCommand = new OleDbCommand("UPDATE [" + tableColumn.table + "] SET [" +
+                             tableColumn.column + "] = ? WHERE [" + tableColumn.idColumn + "] = ?", connection);
+                        string newValue = obfuscateString(value, salt);
+                        if (tableColumn.maxLength > 0 && newValue.Length > tableColumn.maxLength)
+                        {
+                            newValue = newValue.Substring(0, tableColumn.maxLength);
+                        }
+                        updateCommand.Parameters.AddWithValue(tableColumn.column, newValue);
+                        updateCommand.Parameters.AddWithValue(tableColumn.idColumn, id);
+                        updateCommand.ExecuteNonQuery();
+                        count++;
                     }
-                    updateCommand.Parameters.AddWithValue(tableColumn.column, newValue);
-                    updateCommand.Parameters.AddWithValue(tableColumn.idColumn, id);
-                    updateCommand.ExecuteNonQuery();
-                    count++;
                 }
                 objectReader.Close();
             }

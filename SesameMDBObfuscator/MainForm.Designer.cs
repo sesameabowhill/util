@@ -39,6 +39,7 @@
             this.encodeTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.encodeButton = new System.Windows.Forms.Button();
+            this.progressBar = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
             // saltEdit
@@ -106,19 +107,18 @@
             this.logTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.logTextBox.Location = new System.Drawing.Point(12, 97);
+            this.logTextBox.Location = new System.Drawing.Point(12, 126);
             this.logTextBox.Multiline = true;
             this.logTextBox.Name = "logTextBox";
             this.logTextBox.ReadOnly = true;
             this.logTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.logTextBox.Size = new System.Drawing.Size(459, 207);
+            this.logTextBox.Size = new System.Drawing.Size(459, 231);
             this.logTextBox.TabIndex = 6;
             this.logTextBox.TabStop = false;
             // 
             // mdbFileOpenDialog
             // 
             this.mdbFileOpenDialog.DefaultExt = "mdb";
-            this.mdbFileOpenDialog.FileName = "mdbFile";
             this.mdbFileOpenDialog.Filter = "MDB files|*.mdb";
             // 
             // encodeTextBox
@@ -152,12 +152,23 @@
             this.encodeButton.UseVisualStyleBackColor = true;
             this.encodeButton.Click += new System.EventHandler(this.encodeButton_Click);
             // 
+            // progressBar
+            // 
+            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar.Location = new System.Drawing.Point(12, 97);
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(458, 23);
+            this.progressBar.Step = 1;
+            this.progressBar.TabIndex = 10;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(485, 316);
+            this.ClientSize = new System.Drawing.Size(485, 369);
+            this.Controls.Add(this.progressBar);
             this.Controls.Add(this.encodeButton);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.encodeTextBox);
@@ -189,6 +200,7 @@
         private System.Windows.Forms.TextBox encodeTextBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button encodeButton;
+        private System.Windows.Forms.ProgressBar progressBar;
     }
 }
 
