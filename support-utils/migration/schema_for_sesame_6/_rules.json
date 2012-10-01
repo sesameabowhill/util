@@ -352,6 +352,13 @@
             "comment" : "eval [client-id]",
             "action" : "eval",
             "eval" : "client-id"
+         },
+         {
+            "column" : "type",
+            "comment" : "copy value from [visitor.type]",
+            "action" : "copy",
+            "from_table" : "visitor",
+            "from_column" : "type"
          }
       ],
       "path_to_client" : [
@@ -798,7 +805,11 @@
    },
    "client_feature" : {
       "to_table" : "client_feature",
-      "action" : "delete-insert",
+      "action" : "update-insert",
+      "update_on" : [
+         "client_id",
+         "feature_id"
+      ],
       "path_to_client" : [
          {
             "table" : "client_feature",
@@ -4707,6 +4718,12 @@
             "eval" : "si-doctor-id",
             "from_table" : "si_pms_referrer_link",
             "from_column" : "referrer_id"
+         },
+         {
+            "column" : "WelcomeSent",
+            "comment" : "eval [referrer-welcome-sent]",
+            "action" : "eval",
+            "eval" : "referrer-welcome-sent"
          },
          {
             "column" : "client_id",

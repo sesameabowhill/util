@@ -562,6 +562,17 @@ sub flat_rules {
 			],
 			'priority' => '1',
 		);
+		if ($table_6 eq 'visitor') {
+			push(
+				@{ $r{'columns'} },
+				$self->_make_json_column_obj(
+					$table_6,
+					'type',
+					Migration::Rule::CopyValue->new($table_6, 'type'),
+					$no_missing_rules,
+				),
+			);
+		}
 		$rules_by_table{$table_6} = \%r;
 	}    
 
@@ -1635,6 +1646,7 @@ sub new {
 			'srm_resource' => ['id'],
 			'upload_settings' => ['client_id', 'name'],
 			'sms_client_settings' => ['client_id'],
+			'client_feature' => ['client_id', 'feature_id'],
 		},
 		'path_to_client' => {
 			'ppn_article_letter' => [
@@ -1760,6 +1772,9 @@ sub new {
 			'referrer_user_sensitive' => {
 				'si_doctor_id' => {
 					'eval' => 'si-doctor-id',
+				},
+				'WelcomeSent' => {
+					'eval' => 'referrer-welcome-sent',
 				},
 			},
 			'opse_payment_log' => {

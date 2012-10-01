@@ -40,9 +40,9 @@ class AdminerLoginDatabases {
 
 	function name() {
 		if ($this->databases[DB]["wikipage"]) {
-			return '<a href="'.$this->databases[DB]["wikipage"].'">'.$this->databases[DB]["title"].'</a>';
+			return '<a href="'.$this->databases[DB]["wikipage"].'">Wiki page</a>';
 		} else {
-			return $this->databases[DB]["title"];
+			return "Adminer";
 		}
 	}
 
