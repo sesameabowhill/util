@@ -52,6 +52,7 @@ namespace WindowsFormsApplication1
         private void mdbFileNameEdit_TextChanged(object sender, EventArgs e)
         {
             obfuscateButton.Enabled = File.Exists(mdbFileNameEdit.Text);
+            obfuscateContactsButton.Enabled = File.Exists(mdbFileNameEdit.Text);
         }
 
         private void obfuscateButton_Click(object sender, EventArgs e)
@@ -209,6 +210,80 @@ namespace WindowsFormsApplication1
         private void encodeTextBox_TextChanged(object sender, EventArgs e)
         {
             encodeButton.Enabled = ! string.IsNullOrEmpty(encodeTextBox.Text);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + mdbFileNameEdit.Text +
+                ";Jet OLEDB:Database Password=password";
+
+            OleDbConnection connection = new OleDbConnection(connectionString);
+            connection.Open();
+
+            log("open [" + mdbFileNameEdit.Text + "], salt [" + saltEdit.Text + "]");
+
+            {
+                OleDbCommand command = new OleDbCommand("SELECT [ID], [EMail] FROM [EMails]", connection);
+
+                OleDbDataReader objectReader = command.ExecuteReader();
+
+                int count = 0;
+                if (objectReader != null)
+                {
+                    while (objectReader.Read())
+                    {
+                        if (!objectReader.IsDBNull(0) && !objectReader.IsDBNull(1))
+                        {
+                            string id = objectReader.GetString(0);
+                            string value = objectReader.GetString(1);
+
+                            OleDbCommand updateCommand = new OleDbCommand("UPDATE [EMails] SET [EMail] = ? WHERE [ID] = ?", connection);
+                            string newValue = value + ".email";
+                            updateCommand.Parameters.AddWithValue("EMail", newValue);
+                            updateCommand.Parameters.AddWithValue("ID", id);
+                            updateCommand.ExecuteNonQuery();
+                            count++;
+                        }
+                    }
+                    objectReader.Close();
+                }
+                log("[" + count + "] record" + (count == 1 ? "" : "s") + " encoded in [EMail]");
+            }
+            {
+                OleDbCommand command = new OleDbCommand("SELECT [ID], [PhoneNumber] FROM [Phones]", connection);
+
+                OleDbDataReader objectReader = command.ExecuteReader();
+
+                int count = 0;
+                if (objectReader != null)
+                {
+                    while (objectReader.Read())
+                    {
+                        if (!objectReader.IsDBNull(0) && !objectReader.IsDBNull(1))
+                        {
+                            string id = objectReader.GetString(0);
+                            string value = objectReader.GetString(1);
+
+                            OleDbCommand updateCommand = new OleDbCommand("UPDATE [Phones] SET [PhoneNumber] = ? WHERE [ID] = ?", connection);
+                            if (value.Length > 6)
+                            {
+                                string newValue = "555" + value.Substring(3, 4) + "000";
+                                updateCommand.Parameters.AddWithValue("PhoneNumber", newValue);
+                                updateCommand.Parameters.AddWithValue("ID", id);
+                                updateCommand.ExecuteNonQuery();
+                                count++;
+                            }
+                        }
+                    }
+                    objectReader.Close();
+                }
+                log("[" + count + "] record" + (count == 1 ? "" : "s") + " encoded in [Phones]");
+            }
+
+            
+            connection.Close();
+            log("close [" + mdbFileNameEdit.Text + "]");
+
         }
 
     }

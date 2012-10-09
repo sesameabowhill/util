@@ -531,20 +531,24 @@ sub flat_rules {
 	tie my %rules_by_table, "Tie::IxHash";
 
 	for my $table_6 (@{ $self->{'remap_only_tables'} }) {
+		my ($column_to_save, $column_to_match) = ('id', 'pms_id');
+		# if ($table_6 eq 'email' || $table_6 eq 'phone') {
+		# 	($column_to_save, $column_to_match) = ('id', 'link_id');
+		# }
 		tie my %r, 'Tie::IxHash', (
 			'to_table' => _get_table_name($table_6),
 			'action' => 'remap-only',
 			'columns' => [
 				$self->_make_json_column_obj(
 					$table_6,
-					'id',
-					Migration::Rule::CopyValue->new($table_6, 'id'),
+					$column_to_save,
+					Migration::Rule::CopyValue->new($table_6, $column_to_save),
 					$no_missing_rules,
 				),
 				$self->_make_json_column_obj(
 					$table_6,
-					'pms_id',
-					Migration::Rule::CopyValue->new($table_6, 'pms_id'),
+					$column_to_match,
+					Migration::Rule::CopyValue->new($table_6, $column_to_match),
 					$no_missing_rules,
 				),
 				$self->_make_json_column_obj(
@@ -1447,7 +1451,7 @@ sub new {
 				'si_image_old', 'phone_sms_active_from_upload', 'phone_temp', 
 				## pms data tables
 				'account', 'appointment_procedure', 'insurance_contract', 'ledger', 
-				'patient_referrer', 'patient_staff', 'treatment_plan', 
+				'patient_referrer', 'patient_staff', 'treatment_plan', 'si_pms_referrer_link',
 				## removed by Dan 
 				'upload_last', 
 			) 
@@ -2195,6 +2199,30 @@ sub load_hard_coded_links {
 		}
 	);
 
+	$links->add_link(
+		'email_user_sensitive', 
+		'email', 
+		{
+			'email_id' => "id",
+		},
+		"hard-coded",
+		{
+			'table' => 'email',
+			'column' => 'pms_id',
+		}
+	);
+	$links->add_link(
+		'phone_user_sensitive', 
+		'phone', 
+		{
+			'phone_id' => "id",
+		},
+		"hard-coded",
+		{
+			'table' => 'phone',
+			'column' => 'pms_id',
+		}
+	);
 	## other
 	$links->add_links(
 		{
@@ -2213,8 +2241,8 @@ sub load_hard_coded_links {
 	);
 	## user sensitive
 	my %user_sensitive_links = (
-		'email_user_sensitive.email_id' => 'email',
-		'phone_user_sensitive.phone_id' => 'phone',
+		# 'email_user_sensitive.email_id' => 'email',
+		# 'phone_user_sensitive.phone_id' => 'phone',
 		'procedure_user_sensitive.procedure_id' => 'procedure',
 		'recall_user_sensitive.recall_id' => 'recall',
 		'responsible_patient_user_sensitive.responsible_patient_id' => 'responsible_patient',

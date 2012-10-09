@@ -1714,12 +1714,12 @@
          },
          {
             "column" : "email_id",
-            "comment" : "link to [email.id] from [email.id] (hard-coded)",
+            "comment" : "link to [email.id] from [email.pms_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "email",
             "lookup_column" : "id",
             "from_table" : "email",
-            "from_column" : "id"
+            "from_column" : "pms_id"
          },
          {
             "column" : "deleted_datetime",
@@ -3998,12 +3998,12 @@
          },
          {
             "column" : "phone_id",
-            "comment" : "link to [phone.id] from [phone.id] (hard-coded)",
+            "comment" : "link to [phone.id] from [phone.pms_id] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "phone",
             "lookup_column" : "id",
             "from_table" : "phone",
-            "from_column" : "id"
+            "from_column" : "pms_id"
          },
          {
             "column" : "sms_active",

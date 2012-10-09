@@ -40,6 +40,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.encodeButton = new System.Windows.Forms.Button();
             this.progressBar = new System.Windows.Forms.ProgressBar();
+            this.obfuscateContactsButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // saltEdit
@@ -48,7 +49,7 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.saltEdit.Location = new System.Drawing.Point(82, 40);
             this.saltEdit.Name = "saltEdit";
-            this.saltEdit.Size = new System.Drawing.Size(292, 22);
+            this.saltEdit.Size = new System.Drawing.Size(195, 22);
             this.saltEdit.TabIndex = 3;
             // 
             // label1
@@ -162,12 +163,25 @@
             this.progressBar.Step = 1;
             this.progressBar.TabIndex = 10;
             // 
+            // obfuscateContactsButton
+            // 
+            this.obfuscateContactsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.obfuscateContactsButton.Enabled = false;
+            this.obfuscateContactsButton.Location = new System.Drawing.Point(283, 40);
+            this.obfuscateContactsButton.Name = "obfuscateContactsButton";
+            this.obfuscateContactsButton.Size = new System.Drawing.Size(91, 23);
+            this.obfuscateContactsButton.TabIndex = 11;
+            this.obfuscateContactsButton.Text = "Contact Info";
+            this.obfuscateContactsButton.UseVisualStyleBackColor = true;
+            this.obfuscateContactsButton.Click += new System.EventHandler(this.button2_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(485, 369);
+            this.Controls.Add(this.obfuscateContactsButton);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.encodeButton);
             this.Controls.Add(this.label3);
@@ -201,6 +215,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button encodeButton;
         private System.Windows.Forms.ProgressBar progressBar;
+        private System.Windows.Forms.Button obfuscateContactsButton;
     }
 }
 
