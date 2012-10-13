@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Data.OleDb;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace WindowsFormsApplication1
 {
@@ -238,7 +239,7 @@ namespace WindowsFormsApplication1
                             string value = objectReader.GetString(1);
 
                             OleDbCommand updateCommand = new OleDbCommand("UPDATE [EMails] SET [EMail] = ? WHERE [ID] = ?", connection);
-                            string newValue = value + ".email";
+                            string newValue = value.TrimEnd() + ".email";
                             updateCommand.Parameters.AddWithValue("EMail", newValue);
                             updateCommand.Parameters.AddWithValue("ID", id);
                             updateCommand.ExecuteNonQuery();
@@ -267,7 +268,7 @@ namespace WindowsFormsApplication1
                             OleDbCommand updateCommand = new OleDbCommand("UPDATE [Phones] SET [PhoneNumber] = ? WHERE [ID] = ?", connection);
                             if (value.Length > 6)
                             {
-                                string newValue = "555" + value.Substring(3, 4) + "000";
+                                string newValue = obfuscatePhone(value);
                                 updateCommand.Parameters.AddWithValue("PhoneNumber", newValue);
                                 updateCommand.Parameters.AddWithValue("ID", id);
                                 updateCommand.ExecuteNonQuery();
@@ -286,6 +287,29 @@ namespace WindowsFormsApplication1
 
         }
 
+        private string obfuscatePhone(string phone)
+        {
+            Match match = Regex.Match(phone, "^([\\d\\s().-]+)(.*)$");
+            if (match.Success)
+            {
+                string number = match.Groups[1].Value;
+                string comment = match.Groups[2].Value;
+                Match leftPartOfCommentMatch = Regex.Match(number, "([^\\d]*)$");
+                if (leftPartOfCommentMatch.Success)
+                {
+                    comment = leftPartOfCommentMatch.Groups[1].Value + comment;
+                }
+                number = Regex.Replace(number, "[^\\d]", ""); // remove all non-digits
+                number = Regex.Replace(number, "^\\d{3}(\\d+)\\d$", m => "555" + m.Groups[1].Value + "0"); // replace first 3 and last 1 digit
+                return number + comment;
+            }
+            else
+            {
+                return phone;
+            }
+        }
     }
+
+
 
 }

@@ -47,15 +47,15 @@
             // 
             this.saltEdit.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.saltEdit.Location = new System.Drawing.Point(82, 40);
+            this.saltEdit.Location = new System.Drawing.Point(82, 70);
             this.saltEdit.Name = "saltEdit";
-            this.saltEdit.Size = new System.Drawing.Size(195, 22);
+            this.saltEdit.Size = new System.Drawing.Size(245, 22);
             this.saltEdit.TabIndex = 3;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(44, 43);
+            this.label1.Location = new System.Drawing.Point(44, 73);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(32, 17);
             this.label1.TabIndex = 1;
@@ -95,11 +95,11 @@
             // 
             this.obfuscateButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.obfuscateButton.Enabled = false;
-            this.obfuscateButton.Location = new System.Drawing.Point(380, 40);
+            this.obfuscateButton.Location = new System.Drawing.Point(333, 70);
             this.obfuscateButton.Name = "obfuscateButton";
-            this.obfuscateButton.Size = new System.Drawing.Size(91, 23);
+            this.obfuscateButton.Size = new System.Drawing.Size(138, 23);
             this.obfuscateButton.TabIndex = 4;
-            this.obfuscateButton.Text = "Obfuscate";
+            this.obfuscateButton.Text = "Obfuscate All Data";
             this.obfuscateButton.UseVisualStyleBackColor = true;
             this.obfuscateButton.Click += new System.EventHandler(this.obfuscateButton_Click);
             // 
@@ -108,12 +108,12 @@
             this.logTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.logTextBox.Location = new System.Drawing.Point(12, 126);
+            this.logTextBox.Location = new System.Drawing.Point(12, 156);
             this.logTextBox.Multiline = true;
             this.logTextBox.Name = "logTextBox";
             this.logTextBox.ReadOnly = true;
             this.logTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.logTextBox.Size = new System.Drawing.Size(459, 231);
+            this.logTextBox.Size = new System.Drawing.Size(459, 201);
             this.logTextBox.TabIndex = 6;
             this.logTextBox.TabStop = false;
             // 
@@ -126,7 +126,7 @@
             // 
             this.encodeTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.encodeTextBox.Location = new System.Drawing.Point(82, 68);
+            this.encodeTextBox.Location = new System.Drawing.Point(82, 98);
             this.encodeTextBox.Name = "encodeTextBox";
             this.encodeTextBox.Size = new System.Drawing.Size(292, 22);
             this.encodeTextBox.TabIndex = 7;
@@ -135,7 +135,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(31, 71);
+            this.label3.Location = new System.Drawing.Point(31, 101);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(45, 17);
             this.label3.TabIndex = 8;
@@ -145,7 +145,7 @@
             // 
             this.encodeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.encodeButton.Enabled = false;
-            this.encodeButton.Location = new System.Drawing.Point(380, 68);
+            this.encodeButton.Location = new System.Drawing.Point(380, 98);
             this.encodeButton.Name = "encodeButton";
             this.encodeButton.Size = new System.Drawing.Size(91, 23);
             this.encodeButton.TabIndex = 9;
@@ -157,7 +157,7 @@
             // 
             this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar.Location = new System.Drawing.Point(12, 97);
+            this.progressBar.Location = new System.Drawing.Point(12, 127);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(458, 23);
             this.progressBar.Step = 1;
@@ -167,11 +167,11 @@
             // 
             this.obfuscateContactsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.obfuscateContactsButton.Enabled = false;
-            this.obfuscateContactsButton.Location = new System.Drawing.Point(283, 40);
+            this.obfuscateContactsButton.Location = new System.Drawing.Point(272, 41);
             this.obfuscateContactsButton.Name = "obfuscateContactsButton";
-            this.obfuscateContactsButton.Size = new System.Drawing.Size(91, 23);
+            this.obfuscateContactsButton.Size = new System.Drawing.Size(199, 23);
             this.obfuscateContactsButton.TabIndex = 11;
-            this.obfuscateContactsButton.Text = "Contact Info";
+            this.obfuscateContactsButton.Text = "Obfuscate Contact Info only";
             this.obfuscateContactsButton.UseVisualStyleBackColor = true;
             this.obfuscateContactsButton.Click += new System.EventHandler(this.button2_Click);
             // 

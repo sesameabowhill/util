@@ -60,6 +60,7 @@ sub get_schema_diff {
 	$rules->update_copy_columns_for_link();
 	$rules->update_copy_columns_for_eval($migration);
 	$rules->apply_missing_eval($migration, $links);
+	$rules->make_date_column_rules($migration);
 	$rules->make_multiple_tables_rules($migration, $schema_6);
 	
 	$rules->save_json_to("_out.json", 1);
@@ -416,7 +417,7 @@ sub apply_table_priority {
 					unless (defined $date_column) {
 						die "no data column for [$new_name]";
 					}
-					$self->{'tables'}{$new_name}{'priority_two_date_column'} = $date_column;
+					$self->{'tables'}{$new_name}{'date_filter_column'} = $date_column;
 				}
 			}
 		}
@@ -453,6 +454,24 @@ sub make_multiple_tables_rules {
 	##$self->{'logger'}->stop($stop, "tables with multiple source");
 }
 
+sub make_date_column_rules {
+    my ($self, $migration) = @_;
+
+	my $column_rules = $self->{'rules'};
+	for my $table_6 (keys %$column_rules) {
+		if ($self->{'tables'}{$table_6}{'date_filter_column'}) {
+			if (exists $self->{'tables'}{$table_6.":2"}) {
+				die "not unique date filter column rule id for [$table_6]";
+			}
+			tie my %new_tables, 'Tie::IxHash', %{ $self->{'tables'}{$table_6} };
+			$self->{'tables'}{$table_6.":2"} = \%new_tables;
+			tie my %new_rules, 'Tie::IxHash', %{ $self->{'rules'}{$table_6} };
+			$self->{'rules'}{$table_6.":2"} = \%new_rules;
+			$self->{'tables'}{$table_6}{'action'} = 'delete-insert';
+			$self->{'tables'}{$table_6}{'priority'} = '2';
+		}
+	}
+}
 
 sub get_update_on_columns {
 	my ($self, $schema_6, $migration) = @_;
@@ -684,10 +703,10 @@ sub save_html_to {
 			$update_columns{ $rules->{$table}{'path_to_client'}->[0]{'column'} } = 1;
 			push(@lines, "<li>Path to client: ".join(" &gt; ", map {"<span class=\"value\">".$_->{'table'}.".".$_->{'column'}."</span>"} @{ $rules->{$table}{'path_to_client'} })."</li>");
 		}
-		if ($rules->{$table}{'priority_two_date_column'}) {
-			$update_columns{$rules->{$table}{'priority_two_date_column'}} = 1;
-			push(@lines, "<li>Date column for priority 2 extraction: <span class=\"value\">".$rules->{$table}{'priority_two_date_column'}{'legacy_table'}
-				.".".$rules->{$table}{'priority_two_date_column'}{'legacy_column'}."</span></li>");
+		if ($rules->{$table}{'date_filter_column'}) {
+			$update_columns{$rules->{$table}{'date_filter_column'}} = 1;
+			push(@lines, "<li>Date column for priority 2 extraction: <span class=\"value\">".$rules->{$table}{'date_filter_column'}{'legacy_table'}
+				.".".$rules->{$table}{'date_filter_column'}{'legacy_column'}."</span></li>");
 		}
 		push(@lines, "</ul>");
 		if (exists $rules->{$table}{'columns'}) {
@@ -748,9 +767,9 @@ sub save_jira_to {
 			$update_columns{ $rules->{$table}{'path_to_client'}->[0]{'column'} } = 1;
 			push(@lines, "* Path to client: ".join(" > ", map {"*".$_->{'table'}.".".$_->{'column'}."*"} @{ $rules->{$table}{'path_to_client'} }));
 		}
-		if ($rules->{$table}{'priority_two_date_column'}) {
-			$update_columns{$rules->{$table}{'priority_two_date_column'}} = 1;
-			push(@lines, "*Date column for priority 2 extraction: *".$rules->{$table}{'priority_two_date_column'}{'legacy_table'}.".".$rules->{$table}{'priority_two_date_column'}{'legacy_column'}."*");
+		if ($rules->{$table}{'date_filter_column'}) {
+			$update_columns{$rules->{$table}{'date_filter_column'}} = 1;
+			push(@lines, "*Date column for priority 2 extraction: *".$rules->{$table}{'date_filter_column'}{'legacy_table'}.".".$rules->{$table}{'date_filter_column'}{'legacy_column'}."*");
 		}
 		push(@lines, "");
 		if (exists $rules->{$table}{'columns'}) {
@@ -906,6 +925,12 @@ sub update_copy_columns_for_link {
 			return undef;
 		}
 	);
+	unless (exists $self->{'rules'}{"voice_left_messages"}{"call_id"}) {
+		die "can't set copy-and-save to missing [voice_left_messages.call_id]";
+	}
+	$self->{'rules'}{"voice_left_messages"}{"call_id"}->set_copy_and_save();
+	$self->{'rules'}{"voice_system_transaction_log"}{"voice_queue_id"}->set_copy_and_save();
+
 }
 
 sub update_copy_columns_for_eval {
@@ -974,6 +999,11 @@ sub apply_missing_eval {
 	$self->{'rules'}{'client_setting:3'}{'IVal'} = Migration::Rule::Eval->new('si-auto-notify', undef, undef);
 	$self->{'tables'}{'client_setting:3'} = { %{ $self->{'tables'}{'client_setting'} } };
 	$self->{'tables'}{'client_setting:3'}{'action'} = 'update-si-auto-notify';
+
+	## eval for si auto notify
+	$self->{'rules'}{'client_setting:4'}{'IVal'} = Migration::Rule::Eval->new('voice-client-id', undef, undef);
+	$self->{'tables'}{'client_setting:4'} = { %{ $self->{'tables'}{'client_setting'} } };
+	$self->{'tables'}{'client_setting:4'}{'action'} = 'update-voice-client-id';
 
 	## eval for first si theme message id
 	$self->{'rules'}{'si_theme:2'}{'FirstMesId'} = Migration::Rule::Eval->new('first-theme-message-id', undef, undef);
@@ -1830,7 +1860,7 @@ sub _detect_renames_to_same_table {
 
 sub get_secondary_rule_names {
 	my ($self, $table_5) = @_;
-	
+
 	return (exists $self->{'secondary_rules'}{$table_5} ? $self->{'secondary_rules'}{$table_5} : []);
 }
 

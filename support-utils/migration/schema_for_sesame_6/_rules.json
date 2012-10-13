@@ -441,14 +441,14 @@
    },
    "appointment_confirmation_history" : {
       "to_table" : "appointment_confirmation_history",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "appointment_confirmation_history",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
+      "priority" : "2",
       "columns" : [
          {
             "column" : "patient_first_name",
@@ -857,7 +857,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
+      "priority" : "2",
       "columns" : [
          {
             "column" : "source",
@@ -892,7 +892,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
+      "priority" : "2",
       "columns" : [
          {
             "column" : "value",
@@ -999,15 +999,15 @@
    },
    "email_contact_log" : {
       "to_table" : "email_contact_log",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "email_contact_log",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
-      "priority_two_date_column" : {
+      "priority" : "2",
+      "date_filter_column" : {
          "legacy_column" : "clog_sdate",
          "legacy_table" : "email_contact_log"
       },
@@ -1164,7 +1164,7 @@
    },
    "email_post_app_survey_log" : {
       "to_table" : "email_post_app_survey_log",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "email_post_app_survey_log",
@@ -1175,8 +1175,8 @@
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
-      "priority_two_date_column" : {
+      "priority" : "2",
+      "date_filter_column" : {
          "legacy_column" : "date",
          "legacy_table" : "email_post_app_survey_log"
       },
@@ -1541,15 +1541,15 @@
    },
    "email_sent_mail_log" : {
       "to_table" : "email_sent_mail_log",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "email_sent_mail_log",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
-      "priority_two_date_column" : {
+      "priority" : "2",
+      "date_filter_column" : {
          "legacy_column" : "sml_date",
          "legacy_table" : "email_sent_mail_log"
       },
@@ -1862,18 +1862,14 @@
    },
    "hhf_applications" : {
       "to_table" : "hhf_applications",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "hhf_applications",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
-      "priority_two_date_column" : {
-         "legacy_column" : "filldate",
-         "legacy_table" : "hhf_applications"
-      },
+      "priority" : "2",
       "columns" : [
          {
             "column" : "birthdate",
@@ -3630,18 +3626,14 @@
    },
    "opse_payment_log" : {
       "to_table" : "opse_payment_log",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "opse_payment_log",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
-      "priority_two_date_column" : {
-         "legacy_column" : "Time",
-         "legacy_table" : "opse_payment_log"
-      },
+      "priority" : "2",
       "columns" : [
          {
             "column" : "PaymentType",
@@ -5931,7 +5923,7 @@
    },
    "sms_message_history" : {
       "to_table" : "sms_message_history",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "sms_message_history",
@@ -5942,8 +5934,8 @@
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
-      "priority_two_date_column" : {
+      "priority" : "2",
+      "date_filter_column" : {
          "legacy_column" : "time2send",
          "legacy_table" : "sms_message_history"
       },
@@ -6075,7 +6067,7 @@
    },
    "sms_message_response" : {
       "to_table" : "sms_message_response",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "sms_message_response",
@@ -6086,8 +6078,8 @@
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
-      "priority_two_date_column" : {
+      "priority" : "2",
+      "date_filter_column" : {
          "legacy_column" : "ResponseReceiveDate",
          "legacy_table" : "sms_message_response"
       },
@@ -7154,15 +7146,15 @@
    },
    "voice_left_messages" : {
       "to_table" : "voice_left_messages",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "voice_left_messages",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
-      "priority_two_date_column" : {
+      "priority" : "2",
+      "date_filter_column" : {
          "legacy_column" : "call_time",
          "legacy_table" : "voice_left_messages"
       },
@@ -7198,8 +7190,8 @@
          },
          {
             "column" : "call_id",
-            "comment" : "copy value from [voice_left_messages.call_id]",
-            "action" : "copy",
+            "comment" : "copy-and-save value from [voice_left_messages.call_id]",
+            "action" : "copy-and-save",
             "from_table" : "voice_left_messages",
             "from_column" : "call_id"
          },
@@ -7230,15 +7222,15 @@
    },
    "voice_message_history" : {
       "to_table" : "voice_message_history",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "voice_message_history",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
-      "priority_two_date_column" : {
+      "priority" : "2",
+      "date_filter_column" : {
          "legacy_column" : "time2send",
          "legacy_table" : "voice_message_history"
       },
@@ -7425,15 +7417,15 @@
    },
    "voice_recipient_list" : {
       "to_table" : "voice_recipient_list",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "voice_recipient_list",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
-      "priority_two_date_column" : {
+      "priority" : "2",
+      "date_filter_column" : {
          "legacy_column" : "time2send",
          "legacy_table" : "voice_message_history"
       },
@@ -7544,23 +7536,23 @@
    },
    "voice_system_transaction_log" : {
       "to_table" : "voice_system_transaction_log",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "voice_system_transaction_log",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
-      "priority_two_date_column" : {
+      "priority" : "2",
+      "date_filter_column" : {
          "legacy_column" : "eventtime_utc",
          "legacy_table" : "voice_system_transaction_log"
       },
       "columns" : [
          {
             "column" : "voice_queue_id",
-            "comment" : "copy value from [voice_system_transaction_log.voice_queue_id]",
-            "action" : "copy",
+            "comment" : "copy-and-save value from [voice_system_transaction_log.voice_queue_id]",
+            "action" : "copy-and-save",
             "from_table" : "voice_system_transaction_log",
             "from_column" : "voice_queue_id"
          },
@@ -7597,15 +7589,15 @@
    },
    "voice_transactions_log" : {
       "to_table" : "voice_transactions_log",
-      "action" : "insert",
+      "action" : "delete-insert",
       "path_to_client" : [
          {
             "table" : "voice_transactions_log",
             "column" : "client_id"
          }
       ],
-      "priority" : "3",
-      "priority_two_date_column" : {
+      "priority" : "2",
+      "date_filter_column" : {
          "legacy_column" : "starttime_utc",
          "legacy_table" : "voice_transactions_log"
       },
@@ -7898,6 +7890,29 @@
          }
       ]
    },
+   "client_setting:4" : {
+      "to_table" : "client_setting",
+      "priority" : "2",
+      "update_on" : [
+         "client_id",
+         "PKey"
+      ],
+      "path_to_client" : [
+         {
+            "table" : "client_setting",
+            "column" : "client_id"
+         }
+      ],
+      "action" : "update-voice-client-id",
+      "columns" : [
+         {
+            "column" : "IVal",
+            "comment" : "eval [voice-client-id]",
+            "action" : "eval",
+            "eval" : "voice-client-id"
+         }
+      ]
+   },
    "si_theme:2" : {
       "to_table" : "si_theme",
       "priority" : "2",
@@ -7914,6 +7929,817 @@
             "comment" : "eval [first-theme-message-id]",
             "action" : "eval",
             "eval" : "first-theme-message-id"
+         }
+      ]
+   },
+   "email_contact_log:2" : {
+      "to_table" : "email_contact_log",
+      "action" : "insert",
+      "path_to_client" : [
+         {
+            "table" : "email_contact_log",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "date_filter_column" : {
+         "legacy_column" : "clog_sdate",
+         "legacy_table" : "email_contact_log"
+      },
+      "columns" : [
+         {
+            "column" : "clog_mail_id",
+            "comment" : "copy value from [email_contact_log.clog_mail_id]",
+            "action" : "copy",
+            "from_table" : "email_contact_log",
+            "from_column" : "clog_mail_id"
+         },
+         {
+            "column" : "visitor_id",
+            "comment" : "link to [visitor.id] from [email_contact_log.visitor_id] (from pdm)",
+            "action" : "foreign-key",
+            "lookup_table" : "visitor",
+            "lookup_column" : "id",
+            "from_table" : "email_contact_log",
+            "from_column" : "visitor_id"
+         },
+         {
+            "column" : "clog_code",
+            "comment" : "copy value from [email_contact_log.clog_code]",
+            "action" : "copy",
+            "from_table" : "email_contact_log",
+            "from_column" : "clog_code"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
+         },
+         {
+            "column" : "id",
+            "comment" : "auto increment",
+            "action" : "autoincrement"
+         },
+         {
+            "column" : "clog_mail_type",
+            "comment" : "copy value from [email_contact_log.clog_mail_type]",
+            "action" : "copy",
+            "from_table" : "email_contact_log",
+            "from_column" : "clog_mail_type"
+         },
+         {
+            "column" : "clog_tdate",
+            "comment" : "copy value from [email_contact_log.clog_tdate]",
+            "action" : "copy",
+            "from_table" : "email_contact_log",
+            "from_column" : "clog_tdate"
+         },
+         {
+            "column" : "clog_sdate",
+            "comment" : "eval [convert-time-zone-from-server] value from [email_contact_log.clog_sdate]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
+            "from_table" : "email_contact_log",
+            "from_column" : "clog_sdate"
+         }
+      ]
+   },
+   "email_post_app_survey_log:2" : {
+      "to_table" : "email_post_app_survey_log",
+      "action" : "insert",
+      "path_to_client" : [
+         {
+            "table" : "email_post_app_survey_log",
+            "column" : "patient_id"
+         },
+         {
+            "table" : "visitor",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "date_filter_column" : {
+         "legacy_column" : "date",
+         "legacy_table" : "email_post_app_survey_log"
+      },
+      "columns" : [
+         {
+            "column" : "date",
+            "comment" : "copy value from [email_post_app_survey_log.date]",
+            "action" : "copy",
+            "from_table" : "email_post_app_survey_log",
+            "from_column" : "date"
+         },
+         {
+            "column" : "patient_id",
+            "comment" : "link to [visitor.id] from [email_post_app_survey_log.patient_id] (from pdm)",
+            "action" : "foreign-key",
+            "lookup_table" : "visitor",
+            "lookup_column" : "id",
+            "from_table" : "email_post_app_survey_log",
+            "from_column" : "patient_id"
+         },
+         {
+            "column" : "id",
+            "comment" : "auto increment",
+            "action" : "autoincrement"
+         },
+         {
+            "column" : "descr",
+            "comment" : "copy value from [email_post_app_survey_log.descr]",
+            "action" : "copy",
+            "from_table" : "email_post_app_survey_log",
+            "from_column" : "descr"
+         }
+      ]
+   },
+   "email_sent_mail_log:2" : {
+      "to_table" : "email_sent_mail_log",
+      "action" : "insert",
+      "path_to_client" : [
+         {
+            "table" : "email_sent_mail_log",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "date_filter_column" : {
+         "legacy_column" : "sml_date",
+         "legacy_table" : "email_sent_mail_log"
+      },
+      "columns" : [
+         {
+            "column" : "sml_email",
+            "comment" : "copy value from [email_sent_mail_log.sml_email]",
+            "action" : "copy",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "sml_email"
+         },
+         {
+            "column" : "subject",
+            "comment" : "eval [email-archive-subject]",
+            "action" : "eval",
+            "eval" : "email-archive-subject"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
+         },
+         {
+            "column" : "contact_log_id",
+            "comment" : "link to [email_contact_log.id] from [email_sent_mail_log.contact_log_id] (from pdm)",
+            "action" : "foreign-key",
+            "lookup_table" : "email_contact_log",
+            "lookup_column" : "id",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "contact_log_id"
+         },
+         {
+            "column" : "sml_mail_id",
+            "comment" : "copy value from [email_sent_mail_log.sml_mail_id]",
+            "action" : "copy",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "sml_mail_id"
+         },
+         {
+            "column" : "sml_date",
+            "comment" : "eval [convert-time-zone-from-server] value from [email_sent_mail_log.sml_date]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "sml_date"
+         },
+         {
+            "column" : "sml_body",
+            "comment" : "eval [email-archive-body] value from [email_sent_mail_log.sml_body]",
+            "action" : "eval",
+            "eval" : "email-archive-body",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "sml_body"
+         },
+         {
+            "column" : "visitor_id",
+            "comment" : "link to [visitor.id] from [email_sent_mail_log.visitor_id] (from pdm)",
+            "action" : "foreign-key",
+            "lookup_table" : "visitor",
+            "lookup_column" : "id",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "visitor_id"
+         },
+         {
+            "column" : "sml_name",
+            "comment" : "copy value from [email_sent_mail_log.sml_name]",
+            "action" : "copy",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "sml_name"
+         },
+         {
+            "column" : "sml_body_hash",
+            "comment" : "copy value from [email_sent_mail_log.sml_body_hash]",
+            "action" : "copy",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "sml_body_hash"
+         },
+         {
+            "column" : "sml_mail_type",
+            "comment" : "copy value from [email_sent_mail_log.sml_mail_type]",
+            "action" : "copy",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "sml_mail_type"
+         },
+         {
+            "column" : "sml_belongsto",
+            "comment" : "copy value from [email_sent_mail_log.sml_belongsto]",
+            "action" : "copy",
+            "from_table" : "email_sent_mail_log",
+            "from_column" : "sml_belongsto"
+         },
+         {
+            "column" : "id",
+            "comment" : "auto increment",
+            "action" : "autoincrement"
+         }
+      ]
+   },
+   "sms_message_history:2" : {
+      "to_table" : "sms_message_history",
+      "action" : "insert",
+      "path_to_client" : [
+         {
+            "table" : "sms_message_history",
+            "column" : "client_id"
+         },
+         {
+            "table" : "sms_client_settings",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "date_filter_column" : {
+         "legacy_column" : "time2send",
+         "legacy_table" : "sms_message_history"
+      },
+      "columns" : [
+         {
+            "column" : "SentTime",
+            "comment" : "copy value from [sms_message_history.SentTime]",
+            "action" : "copy",
+            "from_table" : "sms_message_history",
+            "from_column" : "SentTime"
+         },
+         {
+            "column" : "patient_id",
+            "comment" : "link to [visitor.id] from [sms_message_history.patient_id] (from pdm)",
+            "action" : "foreign-key",
+            "lookup_table" : "visitor",
+            "lookup_column" : "id",
+            "from_table" : "sms_message_history",
+            "from_column" : "patient_id"
+         },
+         {
+            "column" : "message_limit",
+            "comment" : "copy value from [sms_message_history.message_limit]",
+            "action" : "copy",
+            "from_table" : "sms_message_history",
+            "from_column" : "message_limit"
+         },
+         {
+            "column" : "time2send",
+            "comment" : "copy value from [sms_message_history.time2send]",
+            "action" : "copy",
+            "from_table" : "sms_message_history",
+            "from_column" : "time2send"
+         },
+         {
+            "column" : "text",
+            "comment" : "copy value from [sms_message_history.text]",
+            "action" : "copy",
+            "from_table" : "sms_message_history",
+            "from_column" : "text"
+         },
+         {
+            "column" : "id",
+            "comment" : "auto increment",
+            "action" : "autoincrement"
+         },
+         {
+            "column" : "FromPhoneNumber",
+            "comment" : "copy value from [sms_message_history.FromPhoneNumber]",
+            "action" : "copy",
+            "from_table" : "sms_message_history",
+            "from_column" : "FromPhoneNumber"
+         },
+         {
+            "column" : "SMSError",
+            "comment" : "copy value from [sms_message_history.SMSError]",
+            "action" : "copy",
+            "from_table" : "sms_message_history",
+            "from_column" : "SMSError"
+         },
+         {
+            "column" : "registered",
+            "comment" : "eval [convert-time-zone-from-server] value from [sms_message_history.registered]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
+            "from_table" : "sms_message_history",
+            "from_column" : "registered"
+         },
+         {
+            "column" : "message_type",
+            "comment" : "copy value from [sms_message_history.message_type]",
+            "action" : "copy",
+            "from_table" : "sms_message_history",
+            "from_column" : "message_type"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "link to [sms_client_settings.Id] from [sms_message_history.client_id] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "sms_client_settings",
+            "lookup_column" : "Id",
+            "from_table" : "sms_message_history",
+            "from_column" : "client_id"
+         },
+         {
+            "column" : "processed",
+            "comment" : "copy value from [sms_message_history.processed]",
+            "action" : "copy",
+            "from_table" : "sms_message_history",
+            "from_column" : "processed"
+         },
+         {
+            "column" : "ToPhoneNumber",
+            "comment" : "copy value from [sms_message_history.ToPhoneNumber]",
+            "action" : "copy",
+            "from_table" : "sms_message_history",
+            "from_column" : "ToPhoneNumber"
+         },
+         {
+            "column" : "phone",
+            "comment" : "copy value from [sms_message_history.phone]",
+            "action" : "copy",
+            "from_table" : "sms_message_history",
+            "from_column" : "phone"
+         },
+         {
+            "column" : "MessageID",
+            "comment" : "copy value from [sms_message_history.MessageID]",
+            "action" : "copy",
+            "from_table" : "sms_message_history",
+            "from_column" : "MessageID"
+         },
+         {
+            "column" : "appointment_datetime",
+            "comment" : "eval [convert-time-zone-from-server] value from [sms_message_history.appointment_datetime]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
+            "from_table" : "sms_message_history",
+            "from_column" : "appointment_datetime"
+         },
+         {
+            "column" : "type",
+            "comment" : "copy value from [sms_message_history.type]",
+            "action" : "copy",
+            "from_table" : "sms_message_history",
+            "from_column" : "type"
+         }
+      ]
+   },
+   "sms_message_response:2" : {
+      "to_table" : "sms_message_response",
+      "action" : "insert",
+      "path_to_client" : [
+         {
+            "table" : "sms_message_response",
+            "column" : "client_id"
+         },
+         {
+            "table" : "sms_client_settings",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "date_filter_column" : {
+         "legacy_column" : "ResponseReceiveDate",
+         "legacy_table" : "sms_message_response"
+      },
+      "columns" : [
+         {
+            "column" : "MatchedMessageID",
+            "comment" : "copy value from [sms_message_response.MatchedMessageID]",
+            "action" : "copy",
+            "from_table" : "sms_message_response",
+            "from_column" : "MatchedMessageID"
+         },
+         {
+            "column" : "ToPhoneNumber",
+            "comment" : "copy value from [sms_message_response.ToPhoneNumber]",
+            "action" : "copy",
+            "from_table" : "sms_message_response",
+            "from_column" : "ToPhoneNumber"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "link to [sms_client_settings.Id] from [sms_message_response.client_id] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "sms_client_settings",
+            "lookup_column" : "Id",
+            "from_table" : "sms_message_response",
+            "from_column" : "client_id"
+         },
+         {
+            "column" : "ResponseReceiveDate",
+            "comment" : "copy value from [sms_message_response.ResponseReceiveDate]",
+            "action" : "copy",
+            "from_table" : "sms_message_response",
+            "from_column" : "ResponseReceiveDate"
+         },
+         {
+            "column" : "MessageID",
+            "comment" : "copy value from [sms_message_response.MessageID]",
+            "action" : "copy",
+            "from_table" : "sms_message_response",
+            "from_column" : "MessageID"
+         },
+         {
+            "column" : "Message",
+            "comment" : "copy value from [sms_message_response.Message]",
+            "action" : "copy",
+            "from_table" : "sms_message_response",
+            "from_column" : "Message"
+         },
+         {
+            "column" : "id",
+            "comment" : "auto increment",
+            "action" : "autoincrement"
+         },
+         {
+            "column" : "FromPhoneNumber",
+            "comment" : "copy value from [sms_message_response.FromPhoneNumber]",
+            "action" : "copy",
+            "from_table" : "sms_message_response",
+            "from_column" : "FromPhoneNumber"
+         }
+      ]
+   },
+   "voice_left_messages:2" : {
+      "to_table" : "voice_left_messages",
+      "action" : "insert",
+      "path_to_client" : [
+         {
+            "table" : "voice_left_messages",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "date_filter_column" : {
+         "legacy_column" : "call_time",
+         "legacy_table" : "voice_left_messages"
+      },
+      "columns" : [
+         {
+            "column" : "voice_queue_id",
+            "comment" : "copy value from [voice_left_messages.voice_queue_id]",
+            "action" : "copy",
+            "from_table" : "voice_left_messages",
+            "from_column" : "voice_queue_id"
+         },
+         {
+            "column" : "status",
+            "comment" : "copy value from [voice_left_messages.status]",
+            "action" : "copy",
+            "from_table" : "voice_left_messages",
+            "from_column" : "status"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "eval [client-id] value from [voice_left_messages.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_left_messages",
+            "from_column" : "client_id"
+         },
+         {
+            "column" : "phone",
+            "comment" : "copy value from [voice_left_messages.phone]",
+            "action" : "copy",
+            "from_table" : "voice_left_messages",
+            "from_column" : "phone"
+         },
+         {
+            "column" : "call_id",
+            "comment" : "copy-and-save value from [voice_left_messages.call_id]",
+            "action" : "copy-and-save",
+            "from_table" : "voice_left_messages",
+            "from_column" : "call_id"
+         },
+         {
+            "column" : "filename",
+            "comment" : "copy value from [voice_left_messages.filename]",
+            "action" : "copy",
+            "from_table" : "voice_left_messages",
+            "from_column" : "filename"
+         },
+         {
+            "column" : "rec_id",
+            "comment" : "link to [voice_recipient_list.RLId] from [voice_left_messages.rec_id] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "voice_recipient_list",
+            "lookup_column" : "RLId",
+            "from_table" : "voice_left_messages",
+            "from_column" : "rec_id"
+         },
+         {
+            "column" : "call_time",
+            "comment" : "copy value from [voice_left_messages.call_time]",
+            "action" : "copy",
+            "from_table" : "voice_left_messages",
+            "from_column" : "call_time"
+         }
+      ]
+   },
+   "voice_message_history:2" : {
+      "to_table" : "voice_message_history",
+      "action" : "insert",
+      "path_to_client" : [
+         {
+            "table" : "voice_message_history",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "date_filter_column" : {
+         "legacy_column" : "time2send",
+         "legacy_table" : "voice_message_history"
+      },
+      "columns" : [
+         {
+            "column" : "sent_type",
+            "comment" : "hard-coded lookup: map [voice-sent-type] value from [voice_message_history.sent_type] ",
+            "action" : "hard-coded-lookup",
+            "map" : "voice-sent-type",
+            "from_table" : "voice_message_history",
+            "from_column" : "sent_type"
+         },
+         {
+            "column" : "status_checking_dt",
+            "comment" : "copy value from [voice_message_history.status_checking_dt]",
+            "action" : "copy",
+            "from_table" : "voice_message_history",
+            "from_column" : "status_checking_dt"
+         },
+         {
+            "column" : "voice_queue_id",
+            "comment" : "copy value from [voice_message_history.voice_queue_id]",
+            "action" : "copy",
+            "from_table" : "voice_message_history",
+            "from_column" : "voice_queue_id"
+         },
+         {
+            "column" : "event_datetime",
+            "comment" : "eval [convert-time-zone-from-server] value from [voice_message_history.event_datetime]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
+            "from_table" : "voice_message_history",
+            "from_column" : "event_datetime"
+         },
+         {
+            "column" : "message_type",
+            "comment" : "copy value from [voice_message_history.message_type]",
+            "action" : "copy",
+            "from_table" : "voice_message_history",
+            "from_column" : "message_type"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "eval [client-id] value from [voice_message_history.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_message_history",
+            "from_column" : "client_id"
+         },
+         {
+            "column" : "unique_key",
+            "comment" : "copy value from [voice_message_history.unique_key]",
+            "action" : "copy",
+            "from_table" : "voice_message_history",
+            "from_column" : "unique_key"
+         },
+         {
+            "column" : "response_code",
+            "comment" : "copy value from [voice_message_history.response_code]",
+            "action" : "copy",
+            "from_table" : "voice_message_history",
+            "from_column" : "response_code"
+         },
+         {
+            "column" : "rec_phone",
+            "comment" : "copy value from [voice_message_history.rec_phone]",
+            "action" : "copy",
+            "from_table" : "voice_message_history",
+            "from_column" : "rec_phone"
+         },
+         {
+            "column" : "machine_answer",
+            "comment" : "copy value from [voice_message_history.machine_answer]",
+            "action" : "copy",
+            "from_table" : "voice_message_history",
+            "from_column" : "machine_answer"
+         },
+         {
+            "column" : "sent_date",
+            "comment" : "eval [convert-time-zone-from-server] value from [voice_message_history.sent_date]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
+            "from_table" : "voice_message_history",
+            "from_column" : "sent_date"
+         },
+         {
+            "column" : "time2send",
+            "comment" : "eval [convert-time-zone-from-server] value from [voice_message_history.time2send]",
+            "action" : "eval",
+            "eval" : "convert-time-zone-from-server",
+            "from_table" : "voice_message_history",
+            "from_column" : "time2send"
+         },
+         {
+            "column" : "rec_id",
+            "comment" : "link to [voice_recipient_list.RLId] from [voice_message_history.rec_id] (hard-coded)",
+            "action" : "foreign-key",
+            "lookup_table" : "voice_recipient_list",
+            "lookup_column" : "RLId",
+            "from_table" : "voice_message_history",
+            "from_column" : "rec_id"
+         },
+         {
+            "column" : "id",
+            "comment" : "auto increment",
+            "action" : "autoincrement"
+         },
+         {
+            "column" : "menu_code",
+            "comment" : "copy value from [voice_message_history.menu_code]",
+            "action" : "copy",
+            "from_table" : "voice_message_history",
+            "from_column" : "menu_code"
+         }
+      ]
+   },
+   "voice_recipient_list:2" : {
+      "to_table" : "voice_recipient_list",
+      "action" : "insert",
+      "path_to_client" : [
+         {
+            "table" : "voice_recipient_list",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "date_filter_column" : {
+         "legacy_column" : "time2send",
+         "legacy_table" : "voice_message_history"
+      },
+      "columns" : [
+         {
+            "column" : "client_id",
+            "comment" : "eval [client-id]",
+            "action" : "eval",
+            "eval" : "client-id"
+         },
+         {
+            "column" : "patient_id",
+            "comment" : "link to [visitor.id] from [voice_recipient_list.patient_id] (from pdm)",
+            "action" : "foreign-key",
+            "lookup_table" : "visitor",
+            "lookup_column" : "id",
+            "from_table" : "voice_recipient_list",
+            "from_column" : "patient_id"
+         },
+         {
+            "column" : "id",
+            "comment" : "auto increment",
+            "action" : "autoincrement"
+         },
+         {
+            "column" : "RLId",
+            "comment" : "copy-and-save value from [voice_recipient_list.RLId]",
+            "action" : "copy-and-save",
+            "from_table" : "voice_recipient_list",
+            "from_column" : "RLId"
+         }
+      ]
+   },
+   "voice_system_transaction_log:2" : {
+      "to_table" : "voice_system_transaction_log",
+      "action" : "insert",
+      "path_to_client" : [
+         {
+            "table" : "voice_system_transaction_log",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "date_filter_column" : {
+         "legacy_column" : "eventtime_utc",
+         "legacy_table" : "voice_system_transaction_log"
+      },
+      "columns" : [
+         {
+            "column" : "voice_queue_id",
+            "comment" : "copy-and-save value from [voice_system_transaction_log.voice_queue_id]",
+            "action" : "copy-and-save",
+            "from_table" : "voice_system_transaction_log",
+            "from_column" : "voice_queue_id"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "eval [client-id] value from [voice_system_transaction_log.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_system_transaction_log",
+            "from_column" : "client_id"
+         },
+         {
+            "column" : "type",
+            "comment" : "copy value from [voice_system_transaction_log.type]",
+            "action" : "copy",
+            "from_table" : "voice_system_transaction_log",
+            "from_column" : "type"
+         },
+         {
+            "column" : "eventtime_utc",
+            "comment" : "copy value from [voice_system_transaction_log.eventtime_utc]",
+            "action" : "copy",
+            "from_table" : "voice_system_transaction_log",
+            "from_column" : "eventtime_utc"
+         },
+         {
+            "column" : "phone",
+            "comment" : "copy value from [voice_system_transaction_log.phone]",
+            "action" : "copy",
+            "from_table" : "voice_system_transaction_log",
+            "from_column" : "phone"
+         }
+      ]
+   },
+   "voice_transactions_log:2" : {
+      "to_table" : "voice_transactions_log",
+      "action" : "insert",
+      "path_to_client" : [
+         {
+            "table" : "voice_transactions_log",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "date_filter_column" : {
+         "legacy_column" : "starttime_utc",
+         "legacy_table" : "voice_transactions_log"
+      },
+      "columns" : [
+         {
+            "column" : "endtime_utc",
+            "comment" : "copy value from [voice_transactions_log.endtime_utc]",
+            "action" : "copy",
+            "from_table" : "voice_transactions_log",
+            "from_column" : "endtime_utc"
+         },
+         {
+            "column" : "starttime_utc",
+            "comment" : "copy value from [voice_transactions_log.starttime_utc]",
+            "action" : "copy",
+            "from_table" : "voice_transactions_log",
+            "from_column" : "starttime_utc"
+         },
+         {
+            "column" : "voice_queue_id",
+            "comment" : "copy value from [voice_transactions_log.voice_queue_id]",
+            "action" : "copy",
+            "from_table" : "voice_transactions_log",
+            "from_column" : "voice_queue_id"
+         },
+         {
+            "column" : "transfer",
+            "comment" : "copy value from [voice_transactions_log.transfer]",
+            "action" : "copy",
+            "from_table" : "voice_transactions_log",
+            "from_column" : "transfer"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "eval [client-id] value from [voice_transactions_log.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "voice_transactions_log",
+            "from_column" : "client_id"
+         },
+         {
+            "column" : "id",
+            "comment" : "auto increment",
+            "action" : "autoincrement"
          }
       ]
    }
