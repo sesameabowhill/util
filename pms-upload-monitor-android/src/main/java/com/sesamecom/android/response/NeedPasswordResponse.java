@@ -1,4 +1,4 @@
-package com.sesamecom.android.sesameresponse;
+package com.sesamecom.android.response;
 
 /**
  * Created by Ivan

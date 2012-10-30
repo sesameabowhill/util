@@ -1,7 +1,8 @@
-package com.sesamecom.android;
+package com.sesamecom.android.helper;
 
 import android.content.ContextWrapper;
 import android.content.SharedPreferences;
+import com.sesamecom.android.Preferences;
 
 public class Settings {
     private static final String PREFERENCES_NAME = "defaults";
