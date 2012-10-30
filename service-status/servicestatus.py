@@ -2,10 +2,32 @@
 
 import subprocess
 import threading
+import Queue
+
+class Record:
+	def __init__(self, line, fn):
+		self.line = line
+		self.file = fn
+
+class QueueProcessor(threading.Thread):
+	def __init__(self, queue, exit_after):
+		threading.Thread.__init__(self)
+		self.queue = queue
+		self.exit_after = exit_after
+	def run(self):
+		while True:
+			record = self.queue.get()
+			if record == None:
+				self.exit_after -= 1
+				if self.exit_after == 0:
+					break
+			else:
+				print "==>>[%s]<<==" % record.line
+				self.queue.task_done()
 
 class LineReader:
-	def __init__(self, file):
-		self.pipe = subprocess.Popen(["cat", file], stdout=subprocess.PIPE)
+	def __init__(self, fn):
+		self.pipe = subprocess.Popen(["cat", fn], stdout=subprocess.PIPE)
 	def lines(self):
 		for element in self.pipe.communicate():
 			if element != None:
@@ -14,27 +36,28 @@ class LineReader:
 					yield line
 
 class ReaderThread(threading.Thread):
-	def __init__(self, file):
+	def __init__(self, fn, queue):
 		threading.Thread.__init__(self)
-		self.reader = LineReader(file)
+		self.reader = LineReader(fn)
+		self.queue = queue
+		self.file = fn
 	def run(self):
 		for line in self.reader.lines():
-			print "==>>[%s]<<==" % line
+			self.queue.put(Record(line, self.file))
+			#print "==>>[%s]<<==" % line
+		self.queue.put(None)
 
 
 class ServerStatus:
 	def start(self):
-		t1 = ReaderThread("a.txt")
-		t2 = ReaderThread("b.txt")
-		t3 = ReaderThread("c.txt")
-		t4 = ReaderThread("d.txt")
-		t5 = ReaderThread("e.txt")
-		t1.start()
-		t2.start()
-		t3.start()
-		t4.start()
-		t5.start()
-		#fn = "/mnt/hgfs/Share/logs2/analytics.log"
+		files = ("a.txt", "b.txt", "c.txt", "d.txt", "e.txt")
+		queue = Queue.Queue();
+		processor = QueueProcessor(queue, len(files))
+		processor.start()
+		threads = [ ReaderThread(fn, queue) for fn in files ]
+		for thread in threads:
+			thread.start()
+ 		#fn = "/mnt/hgfs/Share/logs2/analytics.log"
 		# fn = "/mnt/hgfs/Share/logs2/uploadws.vpc-prd-ups-01.log"
 		# reader = LineReader(fn)
 		# for line in reader.lines():
