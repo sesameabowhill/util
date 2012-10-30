@@ -6,10 +6,6 @@ import com.sesamecom.android.Preferences;
 
 public class Settings {
     private static final String PREFERENCES_NAME = "defaults";
-    private static final String PREFERENCE_USERNAME = "preference_username";
-    private static final String PREFERENCE_PASSWORD = "preference_password";
-    private static final String PREFERENCE_TIME_REFRESH = "preference_time_refresh";
-    private static final String PREFERENCE_SERVER_REFRESH = "preference_server_refresh";
 
     private SharedPreferences sharedPreferences;
 
@@ -26,35 +22,38 @@ public class Settings {
     }
 
     public String getUsername() {
-        return sharedPreferences.getString(PREFERENCE_USERNAME, "");
+        return sharedPreferences.getString(Key.Username.getPrefName(), "");
     }
 
     public String getPassword() {
-        return sharedPreferences.getString(PREFERENCE_PASSWORD, "");
+        return sharedPreferences.getString(Key.Password.getPrefName(), "");
     }
 
-    public int getTimeRefresh() {
-        return toIntWithDefault(sharedPreferences.getString(PREFERENCE_TIME_REFRESH, ""), 5);
+    public int getRedrawInterval() {
+        return getIntervalValue(Key.RedrawInterval);
     }
 
-    public int getServerRefresh() {
-        return toIntWithDefault(sharedPreferences.getString(PREFERENCE_SERVER_REFRESH, ""), 60);
+    public int getUploadListReloadInterval() {
+        return getIntervalValue(Key.UploadListReloadInterval);
+    }
+
+    public int getIntervalValue(Key key) {
+        int defaultValue;
+        switch (key) {
+            case RedrawInterval:
+                defaultValue = 5;
+                break;
+            case UploadListReloadInterval:
+                defaultValue = 60;
+                break;
+            default:
+                throw new RuntimeException("key [" + key + "] is not interval");
+        }
+        return toIntWithDefault(sharedPreferences.getString(key.getPrefName(), ""), defaultValue);
     }
 
     public static String getPreferencesName() {
         return PREFERENCES_NAME;
-    }
-
-    public static String getPrefNameUsername() {
-        return PREFERENCE_USERNAME;
-    }
-
-    public static String getPrefNameTimeRefresh() {
-        return PREFERENCE_TIME_REFRESH;
-    }
-
-    public static String getPrefNameServerRefresh() {
-        return PREFERENCE_SERVER_REFRESH;
     }
 
     private static int toIntWithDefault(String string, int defaultValue) {
@@ -62,6 +61,23 @@ public class Settings {
             return Integer.parseInt(string);
         } catch (NumberFormatException e) {
             return defaultValue;
+        }
+    }
+
+    public enum Key {
+        Username("preference_username"),
+        Password("preference_password"),
+        RedrawInterval("preference_time_refresh"),
+        UploadListReloadInterval("preference_server_refresh");
+
+        private String prefName;
+
+        private Key(String prefName) {
+            this.prefName = prefName;
+        }
+
+        public String getPrefName() {
+            return prefName;
         }
     }
 

@@ -1,6 +1,6 @@
 package com.sesamecom.android;
 
-import com.sesamecom.android.sesameresponse.SesameApiResponse;
+import com.sesamecom.android.response.SesameApiResponse;
 
 /**
  * Created by Ivan

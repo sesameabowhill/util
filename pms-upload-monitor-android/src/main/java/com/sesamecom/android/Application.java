@@ -9,11 +9,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.*;
 import android.widget.*;
+import com.sesamecom.android.helper.Settings;
+import com.sesamecom.android.helper.TaskRunner;
 import com.sesamecom.android.model.UploadListView;
-import com.sesamecom.android.sesameresponse.ErrorResponse;
-import com.sesamecom.android.sesameresponse.NeedPasswordResponse;
-import com.sesamecom.android.sesameresponse.SesameApiResponse;
-import com.sesamecom.android.sesameresponse.UploadQueueResponse;
+import com.sesamecom.android.response.ErrorResponse;
+import com.sesamecom.android.response.NeedPasswordResponse;
+import com.sesamecom.android.response.SesameApiResponse;
+import com.sesamecom.android.response.UploadQueueResponse;
 
 
 public class Application extends Activity implements SesameApiListener {
@@ -21,10 +23,13 @@ public class Application extends Activity implements SesameApiListener {
     public static final String UPLOAD_QUEUE_URL = "https://admin.sesamecommunications.com/support-tools/sesame/clients-count.cgi?action=upload_queue_6";
     private UploadListAdapter uploadListAdapter;
     private UploadListView uploadListView;
-    private Handler handler;
     private Settings settings;
-    private Runnable refreshDataRunnable;
-    private Runnable redrawListRunnable;
+    private TaskRunner redrawTask;
+    private TaskRunner uploadListReloadTask;
+
+    public Application() {
+        uploadListView = new UploadListView();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,7 +41,6 @@ public class Application extends Activity implements SesameApiListener {
         setContentView(R.layout.main);
 
         ListView uploadList = (ListView) findViewById(R.id.upload_list_view);
-        uploadListView = new UploadListView();
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         uploadListAdapter = new UploadListAdapter(uploadListView, inflater);
         uploadList.setAdapter(uploadListAdapter);
@@ -48,60 +52,44 @@ public class Application extends Activity implements SesameApiListener {
     }
 
     private void initSchedulingTasks() {
-        handler = new Handler();
+        Handler handler = new Handler();
 
-        refreshDataRunnable = new Runnable() {
+        redrawTask = new TaskRunner(handler, settings, new Runnable() {
+            @Override
+            public void run() {
+                uploadListAdapter.notifyDataSetChanged();
+            }
+        }, Settings.Key.RedrawInterval);
+
+        uploadListReloadTask = new TaskRunner(handler, settings, new Runnable() {
             @Override
             public void run() {
                 refreshUploadList();
             }
-        };
+        }, Settings.Key.UploadListReloadInterval);
 
-        redrawListRunnable = new Runnable() {
-            @Override
-            public void run() {
-                uploadListAdapter.notifyDataSetChanged();
-                scheduleListRedraw();
-            }
-        };
+        redrawTask.scheduleNextRun();
+        uploadListReloadTask.scheduleNextRun();
 
-        scheduleListRedraw();
-        scheduleDataRefresh();
         settings.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-                handler.removeCallbacks(refreshDataRunnable);
-                handler.removeCallbacks(redrawListRunnable);
-                scheduleListRedraw();
-                scheduleDataRefresh();
+                redrawTask.scheduleNextRun();
+                uploadListReloadTask.scheduleNextRun();
             }
         });
     }
 
     @Override
     protected void onDestroy() {
-        handler.removeCallbacks(refreshDataRunnable);
-        handler.removeCallbacks(redrawListRunnable);
+        redrawTask.stop();
+        uploadListReloadTask.stop();
         super.onDestroy();
-    }
-
-    private void scheduleDataRefresh() {
-        int refresh = settings.getServerRefresh();
-        if (refresh > 0) {
-            handler.postDelayed(refreshDataRunnable, refresh * 1000);
-        }
-    }
-
-    private void scheduleListRedraw() {
-        int refresh = settings.getTimeRefresh();
-        if (refresh > 0) {
-            handler.postDelayed(redrawListRunnable, refresh * 1000);
-        }
     }
 
     private AsyncTask<String, Void, SesameApiResponse> refreshUploadList() {
         setProgressBarIndeterminateVisibility(true);
-        handler.removeCallbacks(refreshDataRunnable);
+        uploadListReloadTask.stop();
         return new RefreshUploadList(Application.this).execute(UPLOAD_QUEUE_URL,
                 settings.getUsername(), settings.getPassword());
     }
@@ -109,7 +97,7 @@ public class Application extends Activity implements SesameApiListener {
     @Override
     public void onSesameApiResponse(SesameApiResponse response) {
         setProgressBarIndeterminateVisibility(false);
-        scheduleDataRefresh();
+        uploadListReloadTask.scheduleNextRun();
         if (response instanceof UploadQueueResponse) {
             UploadQueueResponse uploadQueue = (UploadQueueResponse) response;
             uploadListView.update(uploadQueue.getUploads());

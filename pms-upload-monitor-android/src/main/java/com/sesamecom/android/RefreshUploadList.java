@@ -10,21 +10,18 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.stream.JsonReader;
 import com.sesamecom.android.model.MemberUploadInfo;
-import com.sesamecom.android.sesameresponse.ErrorResponse;
-import com.sesamecom.android.sesameresponse.NeedPasswordResponse;
-import com.sesamecom.android.sesameresponse.SesameApiResponse;
-import com.sesamecom.android.sesameresponse.UploadQueueResponse;
+import com.sesamecom.android.response.ErrorResponse;
+import com.sesamecom.android.response.NeedPasswordResponse;
+import com.sesamecom.android.response.SesameApiResponse;
+import com.sesamecom.android.response.UploadQueueResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -3,6 +3,7 @@ package com.sesamecom.android;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import com.sesamecom.android.helper.Settings;
 
 /**
  * Created by Ivan
@@ -15,7 +16,7 @@ public class Preferences extends PreferenceActivity {
         getPreferenceManager().setSharedPreferencesName(Settings.getPreferencesName());
         addPreferencesFromResource(R.xml.preferences);
 
-        Preference preferenceUsername = getPreferenceManager().findPreference(Settings.getPrefNameUsername());
+        Preference preferenceUsername = getPreferenceManager().findPreference(Settings.Key.Username.getPrefName());
         preferenceUsername.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newUsername) {
@@ -24,7 +25,7 @@ public class Preferences extends PreferenceActivity {
             }
         });
 
-        Preference preferenceTimeRefresh = getPreferenceManager().findPreference(Settings.getPrefNameTimeRefresh());
+        Preference preferenceTimeRefresh = getPreferenceManager().findPreference(Settings.Key.RedrawInterval.getPrefName());
         preferenceTimeRefresh.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newTimeRefresh) {
@@ -33,7 +34,7 @@ public class Preferences extends PreferenceActivity {
             }
         });
 
-        Preference preferenceServerRefresh = getPreferenceManager().findPreference(Settings.getPrefNameServerRefresh());
+        Preference preferenceServerRefresh = getPreferenceManager().findPreference(Settings.Key.UploadListReloadInterval.getPrefName());
         preferenceServerRefresh.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newServerRefresh) {
@@ -44,8 +45,8 @@ public class Preferences extends PreferenceActivity {
 
         Settings settings = Settings.getFromContextWrapper(this);
         preferenceUsername.setSummary(settings.getUsername());
-        preferenceTimeRefresh.setSummary(intervalToString(settings.getTimeRefresh()));
-        preferenceServerRefresh.setSummary(intervalToString(settings.getServerRefresh()));
+        preferenceTimeRefresh.setSummary(intervalToString(settings.getRedrawInterval()));
+        preferenceServerRefresh.setSummary(intervalToString(settings.getUploadListReloadInterval()));
     }
 
     private static String intervalToString(String seconds) {

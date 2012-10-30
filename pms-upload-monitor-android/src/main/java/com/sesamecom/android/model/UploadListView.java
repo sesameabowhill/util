@@ -10,13 +10,6 @@ import static java.util.Collections.sort;
  * Created by Ivan
  */
 public class UploadListView {
-//    final public static String USERNAME = "username";
-//    final public static String PRIORITY = "priority";
-//    final public static String COUNT = "count";
-//    final public static String MESSAGE = "message";
-//    final public static String IN_PROGRESS = "in_progress";
-//    final public static String UPLOAD_STEP_DATE = "step_date";
-//    final public static String UPLOAD_START_DATE = "start_date";
 
     private List<MemberUploadInfo> uploadsInQueue;
     private List<MemberUploadInfo> uploadsInProgress;
@@ -45,14 +38,6 @@ public class UploadListView {
                 uploadsInQueue.add(upload);
             }
         }
-
-//            row.put(USERNAME, upload.getUsername());
-//            row.put(PRIORITY, priorityToString(upload.getPriority()));
-//            row.put(UPLOAD_START_DATE, diffBetweenDates(upload.getStart(), now));
-//            row.put(IN_PROGRESS, upload.isInProgress());
-//            row.put(COUNT, ++count);
-//            row.put(UPLOAD_STEP_DATE, diffBetweenDates(upload.getUpdate(), now));
-//            row.put(MESSAGE, upload.getMessage());
     }
 
     public int getInProgressSize() {
