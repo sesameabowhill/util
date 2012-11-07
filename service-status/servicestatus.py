@@ -70,30 +70,79 @@ class LogRecordProcessor:
 	def finish(self):
 		pass
 
-class GatherMetaData(LogRecordProcessor):
+class FindPropertiesProcessor(LogRecordProcessor):
 	def __init__(self, file_name):
 		self.file_name = file_name
-		self.version = None
 		self.properties = {}
 	def process(self, record):
 		if record.status == LogRecord.NONE:
-			matched_version = GatherMetaData.VERSION_RE.search(record.line)
-			if matched_version:
-				matched_number = GatherMetaData.VERSION_NAME_RE.search(matched_version.group('version'))
-				if matched_number:
-					self.version = (matched_number.group('name'), matched_number.group('version'))
+			matched_property = FindPropertiesProcessor.PROPERTY_RE.search(record.line)
+			if matched_property:
+				name = matched_property.group('name').rstrip(',')
+				source = matched_property.group('source')
+				if source != None:
+					source = source.rstrip(',')
+				if source == 'FILE':
+					source = matched_property.group('config').rstrip(',')
+				if matched_property.group('value') == None:
+					value = matched_property.group('default').rstrip(',')
+					source = 'DEFAULT'
 				else:
-					self.version = (matched_version.group('version'), None);
+					value = matched_property.group('value').rstrip(',')
+				self.properties[name] = (value, source)
+
 		elif record.status == LogRecord.WRAPPER_STARTED:
-			self.version = None
 			self.properties = {}
 	def finish(self):
-		print "%s: %s - [%s] (waiting from %s)" % (self.file_name, self.last.date, self.control.status, self.control.date)
-	VERSION_RE = re.compile('ArtifactInfoReporter\b.*\bapplicationName:\s+(?P<version>\S+)')
-	VERSION_NAME_RE = re.compile('^(?P<name>.*)-(?P<number>\d+\.\d+\.\d+|\w+-\d+\.\d+-\d+),?$')
+		for name in sorted(iter(self.properties)):
+			print "%s: property %s = %s (from %s)" % (self.file_name, name, self.properties[name][0], self.properties[name][1])
+
+	PROPERTY_RE = re.compile('EnvironmentConfig\\b.*\\b(?:resolved|defaultValueUsed)\s+' +
+		'name:\s+(?P<name>\S+)\s+' +
+		'(?:value:\s+(?P<value>\S+)\s+source:\s+(?P<source>\S+)|defaultValue:\s+(?P<default>\S+))\s+' +
+		'configFilePath:\s+(?P<config>\S+)')
+
+class FindVersionProcessor(LogRecordProcessor):
+	def __init__(self, file_name):
+		self.file_name = file_name
+		self.version = None
+		self.version_source = None
+	def process(self, record):
+		if record.status == LogRecord.NONE:
+			version = None
+			matched_version = FindVersionProcessor.VERSION_RE.search(record.line)
+			if matched_version:
+				version = matched_version.group('version').rstrip(',')
+				self.version_source = FindVersionProcessor.SOURCE_ARTIFACT
+			elif self.version_source in (None, FindVersionProcessor.SOURCE_JETTY):
+				matched_jetty_version = FindVersionProcessor.VERSION_JETTY_RE.search(record.line)
+				if matched_jetty_version:
+					version = matched_jetty_version.group('version')
+					self.version_source = FindVersionProcessor.SOURCE_JETTY
+			if version != None:
+				matched_number = FindVersionProcessor.VERSION_NAME_RE.search(version)
+				if matched_number:
+					self.version = (matched_number.group('number'), matched_number.group('name'))
+				else:
+					self.version = (version, None);
+		elif record.status == LogRecord.WRAPPER_STARTED:
+			self.version = None
+			self.version_source = None
+	def finish(self):
+		if self.version != None:
+			if self.version[1] == None:
+				print "%s: version - %s" % (self.file_name, self.version[0])
+			else:
+				print "%s: version - %s (service %s)" % (self.file_name, self.version[0], self.version[1])
+
+	SOURCE_JETTY = "jetty"
+	SOURCE_ARTIFACT = "artifact"
+	VERSION_RE = re.compile('ArtifactInfoReporter\\b.*\\bapplicationName:\s+(?P<version>\S+)')
+	VERSION_NAME_RE = re.compile('^(?P<name>.*?)-(?P<number>\d+\.\d+\.\d+|(?:f-)?\w+-\d+\.\d+-\d+)$')
+	VERSION_JETTY_RE = re.compile('WebInfConfiguration\\b.*\\bfile:[^!]+/(?P<version>\S+)-jetty-console.war!')
 
 
-class PrintLastStatus(LogRecordProcessor):
+class FindLastStatus(LogRecordProcessor):
 	def __init__(self, file_name):
 		self.file_name = file_name
 		self.last = None
@@ -104,19 +153,24 @@ class PrintLastStatus(LogRecordProcessor):
 		if record.date != None:
 			self.last = record
 	def finish(self):
-		print "%s: %s - [%s] (waiting from %s)" % (self.file_name, self.last.date, self.control.status, self.control.date)
+		if self.control == None:
+			print "%s: %s" % (self.file_name, self.last.date)
+		else:
+			print "%s: %s - [%s] (in this state from %s)" % (self.file_name, self.last.date, self.control.status, self.control.date)
 
-class PerFileProcessor(LogRecordProcessor):
-	def __init__(self, line_processor):
+class PerFileProcessors(LogRecordProcessor):
+	def __init__(self, *processors):
 		self.per_file = {}
-		self.line_processor = line_processor
+		self.processors = processors
 	def process(self, record):
 		if record.file not in self.per_file:
-			self.per_file[record.file] = self.line_processor(record.file)
-		self.per_file[record.file].process(record)
+			self.per_file[record.file] = [ processor(record.file) for processor in self.processors ] 
+		for processor in self.per_file[record.file]:
+			processor.process(record)
 	def finish(self):
 		for file_name in sorted(iter(self.per_file)):
-			self.per_file[file_name].finish()
+			for processor in self.per_file[file_name]:
+				processor.finish()
 
 class PrintAllSystemMessages(LogRecordProcessor):
 	def process(self, record):
@@ -171,11 +225,12 @@ class ReaderThread(threading.Thread):
 class ServerStatus:
 	def start(self, files):
 		#files = ["/Users/ivan/target/logs2/md.vpc-prd-web-01.log", "/Users/ivan/target/logs2/uploadws.vpc-prd-ups-01.log"]
-		#files = ["/Users/ivan/target/logs2/started.log", "/Users/ivan/target/logs2/started2.log", \
-		#"/Users/ivan/target/logs2/waiting.log", "/Users/ivan/target/logs2/wrapper_started.log"]
+		# files = ["/Users/ivan/target/logs2/started.log", "/Users/ivan/target/logs2/started2.log", \
+		# 	"/Users/ivan/target/logs2/waiting.log", "/Users/ivan/target/logs2/wrapper_started.log"]
 		queue = Queue.Queue();
 		#processor = QueueProcessor(queue, len(files), PrintAllSystemMessages())
-		processor = QueueProcessor(queue, len(files), PerFileProcessor(PrintLastStatus))
+		#processor = QueueProcessor(queue, len(files), PerFileProcessors(FindLastStatus))
+		processor = QueueProcessor(queue, len(files), PerFileProcessors(FindLastStatus, FindVersionProcessor, FindPropertiesProcessor))
 		processor.start()
 		threads = [ ReaderThread(fn, queue) for fn in files ]
 		for thread in threads:
