@@ -11,9 +11,9 @@ import sys
 
 
 ## TODO
-##  - version
-##  - configuration
 ##  - service name
+##  - find restarts
+##  - wait for start
 
 class LogRecord:
 	def __init__(self, line, fn, date, status):
@@ -58,11 +58,11 @@ class QueueProcessor(threading.Thread):
 				self.exit_after -= 1
 				if self.exit_after == 0:
 					self.processor.finish()
-					self.queue.task_done()
+					#self.queue.task_done()
 					break
 			else:
 				self.processor.process(record)
-			self.queue.task_done()
+			#self.queue.task_done()
 
 class LogRecordProcessor:		
 	def process(self, record):
@@ -216,8 +216,8 @@ class ReaderThread(threading.Thread):
 		self.queue.put(None)
 	DATE_RE = re.compile('(\d+)[/-](\d+)[/-](\d+)\s+(\d+):(\d+):(\d+)')
 	STARTED_RE = re.compile('Started @\d+\.\d+\.\d+\.\d+:\d+')
-	WRAPPER_STARTED_RE = re.compile('^STATUS.*Wrapper Started')
-	WRAPPER_STOPPED_RE = re.compile('^STATUS.*Wrapper Stopped')
+	WRAPPER_STARTED_RE = re.compile('^STATUS\\b.*\\bWrapper Started|^STATUS\\b.*\\bLaunching a JVM')
+	WRAPPER_STOPPED_RE = re.compile('^STATUS\\b.*\\bWrapper Stopped|^STATUS\\b.*\\bJVM process is gone')
 	WAITING_LIQUIBASE_RE = re.compile('Waiting for changelog lock\.\.\.\.')
 
 
@@ -235,12 +235,16 @@ class ServerStatus:
 		threads = [ ReaderThread(fn, queue) for fn in files ]
 		for thread in threads:
 			thread.start()
+
+		processor.join()
  		#fn = "/mnt/hgfs/Share/logs2/analytics.log"
 		# fn = "/mnt/hgfs/Share/logs2/uploadws.vpc-prd-ups-01.log"
 		# reader = LineReader(fn)
 		# for line in reader.lines():
 		# 	print "==>>[%s]<<==" % line
 
+
+import yappi
 
 if __name__ == "__main__":
 	# parser = argparse.ArgumentParser(description='Watch log files.')
@@ -253,5 +257,9 @@ if __name__ == "__main__":
 		print "need at least one file name"
 		sys.exit(1)
 
+	yappi.start()
+
 	server_status = ServerStatus()
 	server_status.start(args)
+
+	yappi.print_stats()
