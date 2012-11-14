@@ -98,39 +98,6 @@
       ],
       "priority" : "1"
    },
-   "address" : {
-      "to_table" : "address",
-      "action" : "remap-only",
-      "columns" : [
-         {
-            "column" : "id",
-            "comment" : "copy value from [address.id]",
-            "action" : "copy",
-            "from_table" : "address",
-            "from_column" : "id"
-         },
-         {
-            "column" : "pms_id",
-            "comment" : "copy value from [address.pms_id]",
-            "action" : "copy",
-            "from_table" : "address",
-            "from_column" : "pms_id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "eval [client-id]",
-            "action" : "eval",
-            "eval" : "client-id"
-         }
-      ],
-      "path_to_client" : [
-         {
-            "table" : "address",
-            "column" : "client_id"
-         }
-      ],
-      "priority" : "1"
-   },
    "referrer" : {
       "to_table" : "referrer",
       "action" : "remap-only",
@@ -291,39 +258,6 @@
       "path_to_client" : [
          {
             "table" : "responsible_patient",
-            "column" : "client_id"
-         }
-      ],
-      "priority" : "1"
-   },
-   "staff" : {
-      "to_table" : "staff",
-      "action" : "remap-only",
-      "columns" : [
-         {
-            "column" : "id",
-            "comment" : "copy value from [staff.id]",
-            "action" : "copy",
-            "from_table" : "staff",
-            "from_column" : "id"
-         },
-         {
-            "column" : "pms_id",
-            "comment" : "copy value from [staff.pms_id]",
-            "action" : "copy",
-            "from_table" : "staff",
-            "from_column" : "pms_id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "eval [client-id]",
-            "action" : "eval",
-            "eval" : "client-id"
-         }
-      ],
-      "path_to_client" : [
-         {
-            "table" : "staff",
             "column" : "client_id"
          }
       ],
@@ -1766,10 +1700,6 @@
          {
             "table" : "email_welcome_forcing",
             "column" : "client_id"
-         },
-         {
-            "table" : "visitor",
-            "column" : "client_id"
          }
       ],
       "priority" : "2",
@@ -1783,10 +1713,9 @@
          },
          {
             "column" : "client_id",
-            "comment" : "link to [visitor.id] from [email_welcome_forcing.client_id] (from pdm)",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor",
-            "lookup_column" : "id",
+            "comment" : "eval [client-id] value from [email_welcome_forcing.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
             "from_table" : "email_welcome_forcing",
             "from_column" : "client_id"
          },
@@ -3241,10 +3170,10 @@
       "path_to_client" : [
          {
             "table" : "invisalign_patient",
-            "column" : "patient_id"
+            "column" : "invisalign_client_id"
          },
          {
-            "table" : "visitor",
+            "table" : "invisalign_client",
             "column" : "client_id"
          }
       ],
@@ -7932,9 +7861,74 @@
          }
       ]
    },
+   "si_doctor:2" : {
+      "to_table" : "si_doctor",
+      "priority" : "2",
+      "path_to_client" : [
+         {
+            "table" : "si_doctor",
+            "column" : "client_id"
+         }
+      ],
+      "action" : "add-missing-si-admin",
+      "columns" : [
+         {
+            "column" : "Status",
+            "comment" : "eval [missing-si-admin-id]",
+            "action" : "eval",
+            "eval" : "missing-si-admin-id"
+         }
+      ]
+   },
+   "email_reminder_settings:3" : {
+      "to_table" : "email_reminder_settings",
+      "priority" : "2",
+      "update_on" : [
+         "client_id",
+         "type"
+      ],
+      "path_to_client" : [
+         {
+            "table" : "email_reminder_settings",
+            "column" : "client_id"
+         }
+      ],
+      "action" : "update-prepend-constant-text",
+      "columns" : [
+         {
+            "column" : "body",
+            "comment" : "eval [prepend-constant-text]",
+            "action" : "eval",
+            "eval" : "prepend-constant-text"
+         }
+      ]
+   },
+   "client_feature:2" : {
+      "to_table" : "client_feature",
+      "priority" : "2",
+      "update_on" : [
+         "client_id",
+         "feature_id"
+      ],
+      "path_to_client" : [
+         {
+            "table" : "client_feature",
+            "column" : "client_id"
+         }
+      ],
+      "action" : "update-website-analytics-feature",
+      "columns" : [
+         {
+            "column" : "is_enabled",
+            "comment" : "eval [website-analytics-feature]",
+            "action" : "eval",
+            "eval" : "website-analytics-feature"
+         }
+      ]
+   },
    "email_contact_log:2" : {
       "to_table" : "email_contact_log",
-      "action" : "insert",
+      "action" : "insert-contact-log",
       "path_to_client" : [
          {
             "table" : "email_contact_log",

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 sub match_visitor {
-	my ($candidate_manager, $visitor, $client_data) = @_;
+	my ($class, $candidate_manager, $visitor, $client_data) = @_;
 
 	if ($visitor->{'type'} eq 'patient') {
 		if ($candidate_manager->can_use_priority('by_pms_id')) {

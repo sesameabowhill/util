@@ -288,6 +288,7 @@ sub load_links_from_model {
 	$links->delete_link_between_tables("ppn_article_letter", "ppn_common_article");
 	$links->delete_link_between_tables("sms_message_history", "client");
 	$links->delete_link_between_tables("sms_message_response", "client");
+	$links->delete_link_between_tables("email_welcome_forcing", "visitor");
 	#$links->delete_link_between_tables("referrer_email_log", "referrer");
 }
 
@@ -467,6 +468,11 @@ sub make_date_column_rules {
 			$self->{'tables'}{$table_6.":2"} = \%new_tables;
 			tie my %new_rules, 'Tie::IxHash', %{ $self->{'rules'}{$table_6} };
 			$self->{'rules'}{$table_6.":2"} = \%new_rules;
+			if ($table_6 eq 'email_contact_log') {
+				# fix insertContactLog
+				$self->{'tables'}{$table_6.":2"}{'action'} = 'insert-contact-log';
+			}
+
 			$self->{'tables'}{$table_6}{'action'} = 'delete-insert';
 			$self->{'tables'}{$table_6}{'priority'} = '2';
 		}
@@ -1010,8 +1016,23 @@ sub apply_missing_eval {
 	$self->{'tables'}{'si_theme:2'} = { %{ $self->{'tables'}{'si_theme'} } };
 	$self->{'tables'}{'si_theme:2'}{'action'} = 'update-first-theme-message-id';
 
+	## eval for missing si colleague
+	$self->{'rules'}{'si_doctor:2'}{'Status'} = Migration::Rule::Eval->new('missing-si-admin-id', undef, undef);
+	$self->{'tables'}{'si_doctor:2'} = { %{ $self->{'tables'}{'si_doctor'} } };
+	$self->{'tables'}{'si_doctor:2'}{'action'} = 'add-missing-si-admin';
+
 	## fix ppn_article_letter:2 link
 	$self->{'rules'}{'ppn_article_letter:2'}{'let_id'} = Migration::Rule::ForeignKey->new('ppn_letter', 'id', 'ppn_article_letter_common_fake', 'let_id')->set_source("special hard-code");
+
+	## fix constant text in email_reminder settings
+	$self->{'rules'}{'email_reminder_settings:3'}{'body'} = Migration::Rule::Eval->new('prepend-constant-text', undef, undef);
+	$self->{'tables'}{'email_reminder_settings:3'} = { %{ $self->{'tables'}{'email_reminder_settings'} } };
+	$self->{'tables'}{'email_reminder_settings:3'}{'action'} = 'update-prepend-constant-text';
+
+	## fix website analytics feature
+	$self->{'rules'}{'client_feature:2'}{'is_enabled'} = Migration::Rule::Eval->new('website-analytics-feature', undef, undef);
+	$self->{'tables'}{'client_feature:2'} = { %{ $self->{'tables'}{'client_feature'} } };
+	$self->{'tables'}{'client_feature:2'}{'action'} = 'update-website-analytics-feature';
 
 }
 
@@ -1482,6 +1503,7 @@ sub new {
 				## pms data tables
 				'account', 'appointment_procedure', 'insurance_contract', 'ledger', 
 				'patient_referrer', 'patient_staff', 'treatment_plan', 'si_pms_referrer_link',
+				'staff', 'address',
 				## removed by Dan 
 				'upload_last', 
 			) 
@@ -1723,6 +1745,16 @@ sub new {
 					'table' => 'sms_client_settings',
 					'column' => 'client_id',
 				}
+			],
+			'invisalign_patient' => [
+	            {
+	                "table" => "invisalign_patient",
+	                "column" => "invisalign_client_id",
+	            },
+	            {
+	                "table" => "invisalign_client",
+	                "column" => "client_id",
+	            },
 			],
 		},
 		'need_convert_datetime' => {
@@ -2136,7 +2168,7 @@ sub load_hard_coded_links {
 		"appointment_reminder_schedule", "email_contact_log", "email_sent_mail_log", "upload_settings", 
 		"address_local", "email_local", "office_address_local", "patient_page_messages", "phone_local", "referrer_local",
 		"email_referral_mail", "ppn_article_letter", "email_referral", "voice_recipient_list", "referrer_email_log",
-		"referrer_user_sensitive", "si_doctor_email_log"
+		"referrer_user_sensitive", "si_doctor_email_log", "email_welcome_forcing"
 	) {
 		$links->add_link(
 			$from_table, 
