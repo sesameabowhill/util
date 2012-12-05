@@ -5,6 +5,7 @@ package Script;
 use strict;
 use warnings;
 
+use DateUtils;
 use Logger;
 
 ## posible params:
@@ -42,6 +43,9 @@ sub simple_client_loop {
 	    }
 	    if (exists $params->{'save_sql_to_file'}) {
 	    	my $fn = $params->{'save_sql_to_file'};
+	    	if ($fn =~ m{%s}) {
+	    		$fn = sprintf($fn, (@clients == 1 ? $clients[0] : DateUtils->get_current_date_filename()));
+	    	}
 			$logger->printf("write sql commands to [%s]", $fn);
 			$data_source->save_sql_commands_to_file($fn);
 	    }

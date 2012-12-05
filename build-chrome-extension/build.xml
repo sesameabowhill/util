@@ -1,5 +1,6 @@
 <project>
 	<target name="watch" description="automatically compile coffee files">
+		<!-- coffee --bare --output target/ --watch src/ -->
 		<exec executable="coffee" failonerror="true">
 			<arg value="--bare" />
 			<arg value="--output"/>

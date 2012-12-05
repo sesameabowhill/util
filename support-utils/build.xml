@@ -30,5 +30,25 @@
 		</scp>
 	</target>
 
+	<target name="package">
+		<tstamp>
+			<format property="version" pattern="yyyy-MM-dd" />
+		</tstamp>
+		<zip destfile="support-utils.${version}.zip">
+			<fileset dir=".">
+				<include name="**/*" />
+				<exclude name="**/.svn/**/*" />
+				<exclude name="**/_*" />
+				<exclude name="*" />
+				<exclude name="zip_codes/*.csv" />
+				<exclude name="zip_codes/*.CSV" />
+				<exclude name="zip_codes/*.txt" />
+				<exclude name="zip_codes/*.TXT" />
+				<exclude name=".**/*" />
+				<exclude name=".*" />
+			</fileset>
+		</zip>
+	</target>
+
 </project>
 

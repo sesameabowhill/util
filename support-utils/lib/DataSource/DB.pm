@@ -217,13 +217,13 @@ sub get_connection_info {
 }
 
 sub _do_query {
-	my ($self, $sql_pattern, $params) = @_;
+	my ($self, $sql_pattern, $params, $comment) = @_;
 
 	my $sql = sprintf($sql_pattern, map { $self->{'dbh'}->quote($_) } @$params);
 	$sql =~ s/\r?\n/ /g;
 	$sql =~ s/\s+/ /g;
 
-	$self->add_statement($sql);
+	$self->add_statement($sql, $comment);
 
 	if ($self->is_read_only()) {
 		return undef;

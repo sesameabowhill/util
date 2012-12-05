@@ -138,9 +138,9 @@ sub file_path_for_invisalign_comment {
 #}
 
 sub _do_query {
-	my ($self, $sql_pattern, $params) = @_;
+	my ($self, $sql_pattern, $params, $comment) = @_;
 
-	return $self->{'data_source'}->_do_query($sql_pattern, $params);
+	return $self->{'data_source'}->_do_query($sql_pattern, $params, $comment);
 }
 
 1;

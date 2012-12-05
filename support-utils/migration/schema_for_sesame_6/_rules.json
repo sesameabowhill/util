@@ -6415,7 +6415,7 @@
    },
    "token" : {
       "to_table" : "token",
-      "action" : "delete-insert",
+      "action" : "delete-insert-token",
       "path_to_client" : [
          {
             "table" : "token",

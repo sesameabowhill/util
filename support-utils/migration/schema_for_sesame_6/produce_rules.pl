@@ -1916,7 +1916,7 @@ sub ignore_table_6 {
 sub _generate_actions {
 	my ($self, $required_tables) = @_;
 	
-	my %know_actions = map {$_ => 1} ("delete-insert", "insert", "update", "update-insert", "remap-only", "delete-insert-where");
+	my %know_actions = map {$_ => 1} ("delete-insert", "insert", "update", "update-insert", "remap-only", "delete-insert-where", "delete-insert-token");
 	my %actions;
 	for my $table (@$required_tables) {
 		$table->{'action'} //= '';

@@ -811,6 +811,21 @@ VALUES (%s,%s,%s, %s,%s,%s, %s,%s,%s)
 SQL
 }
 
+sub update_email_reminder_setting_body {
+    my ($self, $id, $new_body, $comment) = @_;
+	
+	return $self->_do_query(<<'SQL', [ $new_body, $self->{'client_id'}, $id ], $comment);
+UPDATE email_reminder_settings SET body=%s WHERE client_id=%s AND id=%s LIMIT 1
+SQL
+}
+
+sub delete_email_reminder_setting_body {
+    my ($self, $id, $comment) = @_;
+	
+	return $self->_do_query(<<'SQL', [ $self->{'client_id'}, $id ], $comment);
+DELETE FROM email_reminder_settings WHERE client_id=%s AND id=%s LIMIT 1
+SQL
+}
 
 sub get_all_srm_resources {
 	my ($self) = @_;
