@@ -153,7 +153,7 @@ sub print_button {
     my ($action, $instance_id) = @_;
 	
 	print "<form method='post'><input type='hidden' name='action' value='".$action."'>";
-	print "<input type='hidden' name='instance_id' value='".$instance_id."'><button>".$action."</button></form>";
+	print "<input type='hidden' name='instance_id' value='".$instance_id."'><button type='submit'>".$action."</button></form>";
 }
 
 sub get_extractor_instances {

@@ -244,7 +244,7 @@ class ServerStatus:
 		# 	print "==>>[%s]<<==" % line
 
 
-import yappi
+#import yappi
 
 if __name__ == "__main__":
 	# parser = argparse.ArgumentParser(description='Watch log files.')
@@ -257,9 +257,9 @@ if __name__ == "__main__":
 		print "need at least one file name"
 		sys.exit(1)
 
-	yappi.start()
+	#yappi.start()
 
 	server_status = ServerStatus()
 	server_status.start(args)
 
-	yappi.print_stats()
+	#yappi.print_stats()
