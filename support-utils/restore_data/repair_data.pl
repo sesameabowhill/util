@@ -7,29 +7,30 @@ use warnings;
 use lib '../lib';
 
 use DataSource::DB;
-
+use Logger;
 use Repair::Address;
 use Repair::Appointments;
 use Repair::Banners;
 use Repair::Emails;
 use Repair::HolidaySettings;
-use Repair::Newsletters;
 use Repair::NewsletterArticleStat;
+use Repair::Newsletters;
 use Repair::Phones;
-use Logger;
+use Repair::VoiceReminderSettings;
 
 {
 	$|=1;
 	my $logger = Logger->new();
 	my %actions = (
-		'phones'  => 'Repair::Phones',
 		'address' => 'Repair::Address',
 		'appointments' => 'Repair::Appointments',
+		'banners' => 'Repair::Banners',
 		'emails'  => 'Repair::Emails',
 		'holiday_settings' => 'Repair::HolidaySettings',
-		'banners' => 'Repair::Banners',
 		'newsletters' => 'Repair::Newsletters',
+		'phones'  => 'Repair::Phones',
 		'ppn_article_stat' => 'Repair::NewsletterArticleStat',
+		'voice_reminder_settings' => 'Repair::VoiceReminderSettings',
 	);
 
 	my ($action, @clients) = @ARGV;
@@ -38,6 +39,7 @@ use Logger;
 	if (exists $actions{$action} && @clients) {
 		my $data_source = DataSource::DB->new();
 		$data_source->set_read_only(1);
+		$logger->printf("data from [%s]", $data_source->get_connection_info());
 		@clients = @{ $data_source->expand_client_group( \@clients ) };
 
 	    my $start_time = time();

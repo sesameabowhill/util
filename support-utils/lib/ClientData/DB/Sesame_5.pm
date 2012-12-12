@@ -1346,6 +1346,29 @@ sub get_all_holiday_settings {
 	);
 }
 
+sub get_all_holidays {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT hd_id AS id, hd_name AS name, hd_subject AS subject, hd_date AS date ".
+		"FROM holidays",
+		{ 'Slice' => {} },
+	);
+}
+
+sub update_holiday_setting_date {
+    my ($self, $id, $date) = @_;
+	
+	$self->_do_query(
+		"UPDATE holiday_settings SET hds_date=%s WHERE client_id=%s AND hds_id=%s LIMIT 1",
+		[
+			$date,
+			$self->{'client_id'},
+			$id,
+		],
+	);
+}
+
 sub delete_holiday_setting {
 	my ($self, $id) = @_;
 
@@ -1366,6 +1389,44 @@ sub is_ccp_enabled {
 		"SELECT count(*) FROM opse_client_settings WHERE client_id=?",
 		{ 'Slice' => {} },
 		$self->{'client_id'},
+	);
+}
+
+sub get_voice_reminder_settings {
+    my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT id, client_id, name, template, voice_menu, is_enabled, ".
+			"sending_template, transfer_phone, reminder_type ".
+			"FROM voice_reminder_settings WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+	);
+}
+
+sub delete_voice_setting {
+    my ($self, $id) = @_;
+
+	$self->_do_query(
+		"DELETE FROM voice_reminder_settings WHERE client_id=%s AND id=%s LIMIT 1",
+		[
+			$self->{'client_id'},
+			$id,
+		],
+	);
+}
+
+sub add_voice_setting {
+    my ($self, $reminder_type, $name, $is_enabled) = @_;
+	
+	$self->_do_query(
+		"INSERT INTO voice_reminder_settings (client_id, name, is_enabled, reminder_type) VALUES(%s, %s, %s, %s)",
+		[
+			$self->{'client_id'},
+			$name,
+			$is_enabled,
+			$reminder_type,
+		],
 	);
 }
 

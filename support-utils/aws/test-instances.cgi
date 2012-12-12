@@ -65,6 +65,7 @@ th {color: #999; font-weight: normal;}
 th a {color: #000;}
 .sort {background-color: #eee;}
 .running {background-color: #C9FFCF;}
+.price {color: #bbb; font-size: 9pt;}
 .state {font-style: italic; font-size: 11pt;}
 .action {font-style: italic; text-align: center;}
 .platform {font-size: 11pt;}
@@ -88,16 +89,18 @@ HTML
 		print "<th>Public Ip</th>";
 		print "<th".($sort eq 'comment' ? " class='sort'" : "")."><a href='?sort=comment'>Description</a></th>";
 		print "<th".($sort eq 'state' ? " class='sort'" : "")."><a href='?sort=state'>State</a></th>";
+		print "<th>Price</th>";
 		print "<th>Action</th>";
 		print "</tr>";
 
 		my $count = 1;
 		my $refresh = 0;
 		if ($sort eq 'state') {
-			$instances = [ sort {$a->{'instance_state'} cmp $b->{'instance_state'} || length $b->{'comment'} <=> length $a->{'comment'} || $a->{'comment'} cmp $b->{'comment'}}  @$instances ]
+			$instances = [ sort {$a->{'instance_state'} cmp $b->{'instance_state'} || !! length $b->{'comment'} <=> !! length $a->{'comment'} || $a->{'comment'} cmp $b->{'comment'}}  @$instances ]
 		} else {
-			$instances = [ sort {length $b->{'comment'} <=> length $a->{'comment'} || $a->{'comment'} cmp $b->{'comment'}}  @$instances ]
+			$instances = [ sort {!! length $b->{'comment'} <=> !! length $a->{'comment'} || $a->{'comment'} cmp $b->{'comment'}}  @$instances ]
 		}
+		my $total_cost = 0;
 		for my $instance (@$instances) {
 			print "<tr class='".$instance->{'instance_state'}."'>";
 			print "<td class='number'>".$count++."</td>";
@@ -112,6 +115,13 @@ HTML
 			print "[<a href='javascript: void(0)' onclick=\"update_comment('".$instance->{'instance_id'}."')\">edit</a>]</form></div>";
 			print "</td>";
 			print "<td class='state'>".$instance->{'instance_state'}."</td>";
+			my ($comment, $price) = get_price_per_instance($instance);
+			if (defined $price) {
+				$total_cost += $price;
+			}
+			print "<td class='price'>".(defined $price && $price ? 
+				sprintf("<span title='%s'>\$%.3f</span>", $comment, $price / 1000) : 
+				"<div class='action'>&mdash;</div>")."</td>";
 			print "<td class='action'>";
 			if ($instance->{'instance_state'} eq 'running') {
 				print_button('stop', $instance->{'instance_id'});
@@ -137,6 +147,7 @@ HTML
 		print <<HTML;
 		</table>
 HTML
+		printf "<p class='price'>Estimated total cost: \$%.3f per hour (\$%.2f per month)</p>", $total_cost / 1000, $total_cost * 24*30 / 1000;
 
 	} else {
 		print "<h2>No test instances found</h2>";
@@ -147,6 +158,38 @@ HTML
 </html>
 HTML
 
+}
+
+sub get_price_per_instance {
+    my ($instance) = @_;
+
+    my %prices = (
+    	'windows' => {
+	    	'm1.medium' => 230,
+	    	'm1.small' => 115,
+	    	't1.micro' => 20,
+    	},
+    	'' => {
+	    	'm1.medium' => 130,
+	    	'm1.small' => 65,
+	    	't1.micro' => 20,
+    	}
+	);
+	
+	if ($instance->{'instance_state'} eq 'running') {
+		my $platform = $instance->{'platform'} // '';
+		if (exists $prices{$platform}{$instance->{'instance_type'}}) {
+			return ($instance->{'instance_type'}, $prices{$platform}{$instance->{'instance_type'}});
+		} else {
+			return ('unknown', undef);
+		}
+	} elsif ($instance->{'instance_state'} eq 'stopped') {
+		if (defined $instance->{'public_ip'}) {
+			return ('public ip', 5);
+		} else {
+			return ('no cost', 0);
+		}
+	}
 }
 
 sub print_button {
@@ -182,6 +225,7 @@ sub get_extractor_instances {
 					'platform' => $instance->platform,
 					'public_ip' => $public_ips{$instance->instance_id},
 					'instance_state' => $instance->instance_state->name,
+					'instance_type' => $instance->instance_type,
 				}
 			);
 		}

@@ -1034,6 +1034,8 @@ sub apply_missing_eval {
 	$self->{'tables'}{'client_feature:2'} = { %{ $self->{'tables'}{'client_feature'} } };
 	$self->{'tables'}{'client_feature:2'}{'action'} = 'update-website-analytics-feature';
 
+	## skip nullable patient_id in invisalign_patient
+	$self->{'rules'}{'invisalign_patient'}{'patient_id'}->ignore_null();
 }
 
 sub apply_links {
@@ -2412,7 +2414,7 @@ sub as_json {
 	my ($self) = @_;
 
 	tie my %r, "Tie::IxHash", (
-		'action' => "foreign-key",
+		'action' => "foreign-key".($self->{'ignore_null'} ? "-skip-null" : ""),
 		'lookup_table' => $self->{'table'},
 		'lookup_column' => $self->{'column'},
 	);
@@ -2421,6 +2423,12 @@ sub as_json {
 		$r{'from_column'} = $self->{'from_column'};
 	}
 	return \%r;
+}
+
+sub ignore_null {
+    my ($self) = @_;
+	
+	$self->{'ignore_null'} = 1;
 }
 
 package Migration::Rule::CopyValue;

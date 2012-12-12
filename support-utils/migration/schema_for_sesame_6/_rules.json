@@ -3189,7 +3189,7 @@
          {
             "column" : "patient_id",
             "comment" : "link to [visitor.id] from [invisalign_patient.patient_id] (from pdm)",
-            "action" : "foreign-key",
+            "action" : "foreign-key-skip-null",
             "lookup_table" : "visitor",
             "lookup_column" : "id",
             "from_table" : "invisalign_patient",
