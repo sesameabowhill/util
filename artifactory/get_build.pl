@@ -7,7 +7,7 @@ use LWP::UserAgent;
 use JSON;
 use Getopt::Long;
 
-my ($module, $version, $save_as, $save_as_symlink, $print_url_only, $auto_save_as_symlink);
+my ($module, $version, $save_as, $save_as_symlink, $print_url_only, $auto_save_as_symlink, $delete_old_symlink);
 GetOptions(
 	'module=s' => \$module,
 	'version=s' => \$version,
@@ -15,6 +15,7 @@ GetOptions(
 	'save-as-symlink=s' => \$save_as_symlink,
 	'print-url-only!' => \$print_url_only,
 	'auto-save-as-symlink!' => \$auto_save_as_symlink,
+	'delete-current-symlink-target!' => \$delete_old_symlink,
 );
 $module = $ARGV[0] if defined $ARGV[0];
 $version = $ARGV[1] if defined $ARGV[1];
@@ -42,6 +43,20 @@ if (defined $version) {
 			}
 			unless (defined $save_as_symlink) {
 				$save_as_symlink = guess_name_without_version($details);
+			}
+			if (defined $delete_old_symlink) {
+				if (-l $save_as_symlink) {
+					my $target = readlink($save_as_symlink);
+					if ($target ne $name) {
+						$logger->info("delete [%s] target: rm [%s]", $save_as_symlink, $target);
+						unlink($save_as_symlink);
+						unlink($target);
+					} else {
+						$logger->info("symlink [%s] is already pointing to [%s]", $save_as_symlink, $name);
+					}
+				} else {
+					$logger->info("file [%s] is not symlink: can't delete target", $save_as_symlink);
+				}
 			}
 			$logger->info("creating symlink [%s] -> [%s]", $save_as_symlink, $name);
 			unlink($save_as_symlink);

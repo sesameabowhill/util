@@ -1,0 +1,124 @@
+<project>
+
+	<target name="deploy" depends="current.deplot_not_wait, legacy.deploy, current.wait" description="Deploy apps to both 24/7 and 5.0 servers" />
+
+	<target name="check.version">
+		<fail unless="version">specify -Dversion=? to deploy</fail>
+	</target>
+
+	<!-- STAGE MIGRATION -->
+
+	<property name="current.logs" value="/home/sites/wrapper/logs/analytics-etl.log /home/sites/wrapper/logs/authws-snapshot.vpc-test-stagemigration-01.sesamecom.com.log /home/sites/wrapper/logs/internal-snapshot.vpc-test-stagemigration-01.sesamecom.com.log /home/sites/wrapper/logs/janitor.log /home/sites/wrapper/logs/md-snapshot.vpc-test-stagemigration-01.sesamecom.com.log /home/sites/wrapper/logs/migration-current-activity-archive.log /home/sites/wrapper/logs/migration-current-activity-small-tasks.log /home/sites/wrapper/logs/migration-current-activity-verify-ui-tasks.log /home/sites/wrapper/logs/migration-current-activity.log /home/sites/wrapper/logs/migration-event.log /home/sites/wrapper/logs/migration-workflow.log /home/sites/wrapper/logs/pp-snapshot.vpc-test-stagemigration-01.sesamecom.com.log /home/sites/wrapper/logs/sicontrolpanel-snapshot.vpc-test-stagemigration-01.sesamecom.com.log /home/sites/wrapper/logs/siuploadws-snapshot.vpc-test-stagemigration-01.sesamecom.com.log /home/sites/wrapper/logs/upload-logs-snapshot.vpc-test-stagemigration-01.sesamecom.com.log /home/sites/wrapper/logs/upload-sibatch.log /home/sites/wrapper/logs/uploadws-snapshot.vpc-test-stagemigration-01.sesamecom.com.log /home/sites/wrapper/logs/visitor-facts.log" />
+	<property name="current.logs_wait" value="/home/sites/wrapper/logs/analytics-etl.log /home/sites/wrapper/logs/internal-snapshot.vpc-test-stagemigration-01.sesamecom.com.log /home/sites/wrapper/logs/janitor.log /home/sites/wrapper/logs/md-snapshot.vpc-test-stagemigration-01.sesamecom.com.log /home/sites/wrapper/logs/migration-current-activity-archive.log /home/sites/wrapper/logs/migration-current-activity-small-tasks.log /home/sites/wrapper/logs/migration-current-activity-verify-ui-tasks.log /home/sites/wrapper/logs/migration-current-activity.log /home/sites/wrapper/logs/migration-event.log /home/sites/wrapper/logs/migration-workflow.log /home/sites/wrapper/logs/pp-snapshot.vpc-test-stagemigration-01.sesamecom.com.log  /home/sites/wrapper/logs/upload-logs-snapshot.vpc-test-stagemigration-01.sesamecom.com.log /home/sites/wrapper/logs/upload-sibatch.log /home/sites/wrapper/logs/uploadws-snapshot.vpc-test-stagemigration-01.sesamecom.com.log /home/sites/wrapper/logs/visitor-facts.log" />
+	<property name="current.services" value="analytics-etl authws-snapshot internal-snapshot janitor md-snapshot migration-current-activity migration-current-activity-archive migration-current-activity-small-tasks migration-current-activity-verify-ui-tasks migration-event migration-workflow pp-snapshot sicontrolpanel-snapshot siuploadws-snapshot upload-logs-snapshot upload-sibatch uploadws-snapshot visitor-facts" />
+ 	<property name="current.artifacts" value="analytics fact-service internal janitor md member-migration patient-pages sesosh upload-authws upload-logs upload-sibatch upload-sicontrolpanel upload-siuploadws upload-uploadws" />
+
+	<property name="current.host" value="107.21.24.107" />
+	<property name="current.user" value="admin" />
+
+	<!-- TEST (stage migration) -->
+
+<!-- 	<property name="current.artifacts" value="analytics fact-service" /> -->
+<!-- 	<property name="current.services" value="analytics-etl visitor-facts" /> -->
+<!-- 	<property name="current.logs" value="/home/sites/wrapper/logs/analytics-etl.log /home/sites/wrapper/logs/visitor-facts.log" /> -->
+<!-- 	<property name="current.logs_wait" value="${current.logs}" /> -->
+
+
+
+ 	<!-- 5.0 STAGE -->
+
+	<property name="legacy.host" value="cp-stage1-1.sesamecommunications.com" />
+	<property name="legacy.user" value="admin" />
+
+	<property name="legacy.artifacts" value="member-migration" />
+	<property name="legacy.services" value="migration-legacy-activity migration-legacy-activity-archive migration-legacy-activity-small-tasks" />
+	<property name="legacy.logs" value="/home/sites/wrapper/logs/migration-legacy-activity-archive.log /home/sites/wrapper/logs/migration-legacy-activity.log /home/sites/wrapper/logs/migration-legacy-activity-small-tasks.log" />
+	<property name="legacy.logs_wait" value="${legacy.logs}" />
+
+	<!-- COMMON -->
+
+	<property name="deploy.folder" value="deploy-to-stage" />
+	<property name="file.get_build" value="get_build.pl" />
+	<property name="path.get_build" value="${basedir}/../artifactory/${file.get_build}" />
+
+	<property name="timeout.wait" value="900000" /> <!-- 15 minutes -->
+	<property name="timeout.command" value="300000" /> <!-- 5 minutes -->
+	<property name="wait.check_every" value="10" />
+
+
+	<!-- CURRENT -->
+
+	<target name="current.deploy" depends="current.deplot_not_wait, current.wait" description="Deploy apps to 24/7 server only" />
+	<target name="current.deplot_not_wait" depends="check.version, current.deploy_tools, current.stop, current.deploy_artifacts, current.clear_logs, current.start" />
+
+	<target name="current.get_home_folder">
+		<sshexec host="${current.host}" username="${current.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="cd; pwd | perl -ne 'chomp; print $_'" outputproperty="current.home_folder"/>
+		<echo>current home folder [${current.home_folder}]</echo>
+	</target>
+
+	<target name="current.deploy_tools" depends="current.get_home_folder">
+		<sshexec host="${current.host}" username="${current.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="echo mkdir -v -p ${current.home_folder}/${deploy.folder}"/>
+		<echo>copy ${path.get_build} -> ${current.host}:${current.home_folder}</echo>
+		<scp host="${current.host}" keyfile="${user.home}/.ssh/id_rsa" file="${path.get_build}" todir="${current.user}:@${current.host}:${current.home_folder}" />
+	</target>
+
+	<target name="current.stop">
+		<sshexec host="${current.host}" username="${current.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="for module in ${current.services} ; do echo stop [$module]; sudo /etc/init.d/$module stop ; done"/>
+	</target>
+
+	<target name="current.deploy_artifacts" depends="check.version, current.get_home_folder">
+		<sshexec host="${current.host}" username="${current.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="cd /home/sites/artifacts; for module in ${current.artifacts} ; do  sudo perl ${current.home_folder}/${file.get_build} --version=${version} --auto-save-as-symlink --module=$module --delete-current-symlink-target ; done" />
+	</target>
+
+	<target name="current.clear_logs">
+		<sshexec host="${current.host}" username="${current.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="for log_file in ${current.logs} ; do if [ -f $log_file ]; then sudo rm -v $log_file ; fi ; done" />
+	</target>
+
+	<target name="current.start">
+		<sshexec host="${current.host}" username="${current.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="for module in ${current.services} ; do echo start [$module]; sudo /etc/init.d/$module start ; done"/>
+	</target>
+
+	<target name="current.wait">
+		<sshexec host="${current.host}" username="${current.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.wait}" command="perl -mstrict -e 'do { for (@ARGV) { if (qx(fgrep SERVICE $_) !~ m{SERVICE STARTED}) { printf qq(waiting [%s] (%s)\n), $_, scalar localtime ; sleep ${wait.check_every}; redo } } } while (0)' ${current.logs_wait}"/>
+	</target>
+
+
+	<!-- LEGACY -->
+
+	<target name="legacy.deploy" depends="check.version, legacy.deploy_tools, legacy.stop, legacy.deploy_artifacts, legacy.clear_logs, legacy.start, legacy.wait" />
+
+	<target name="legacy.get_home_folder">
+		<sshexec host="${legacy.host}" username="${legacy.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="cd; pwd | perl -ne 'chomp; print $_'" outputproperty="legacy.home_folder"/>
+		<echo>legacy home folder [${legacy.home_folder}]</echo>
+	</target>
+
+	<target name="legacy.deploy_tools" depends="legacy.get_home_folder">
+		<sshexec host="${legacy.host}" username="${legacy.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="echo mkdir -v -p ${legacy.home_folder}/${deploy.folder}"/>
+		<echo>copy ${path.get_build} -> ${legacy.host}:${legacy.home_folder}</echo>
+		<scp host="${legacy.host}" keyfile="${user.home}/.ssh/id_rsa" file="${path.get_build}" todir="${legacy.user}:@${legacy.host}:${legacy.home_folder}" />
+	</target>
+
+	<target name="legacy.stop">
+		<sshexec host="${legacy.host}" username="${legacy.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="for module in ${legacy.services} ; do echo stop [$module]; sudo /etc/init.d/$module stop ; done"/>
+	</target>
+
+	<target name="legacy.deploy_artifacts" depends="check.version, legacy.get_home_folder">
+		<sshexec host="${legacy.host}" username="${legacy.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="cd /home/sites/artifacts; for module in ${legacy.artifacts} ; do sudo perl ${legacy.home_folder}/${file.get_build} --version=${version} --auto-save-as-symlink --module=$module --delete-legacy-symlink-target ; done" />
+	</target>
+
+	<target name="legacy.clear_logs">
+		<sshexec host="${legacy.host}" username="${legacy.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="for log_file in ${legacy.logs} ; do if [ -f $log_file ]; then sudo rm -v $log_file ; fi ; done" />
+	</target>
+
+	<target name="legacy.start">
+		<sshexec host="${legacy.host}" username="${legacy.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="for module in ${legacy.services} ; do echo start [$module]; sudo /etc/init.d/$module start ; done"/>
+	</target>
+
+	<target name="legacy.wait">
+		<sshexec host="${legacy.host}" username="${legacy.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.wait}" command="perl -mstrict -e 'do { for (@ARGV) { if (qx(fgrep SERVICE $_) !~ m{SERVICE STARTED}) { printf qq(waiting [%s] (%s)\n), $_, scalar localtime ; sleep ${wait.check_every}; redo } } } while (0)' ${legacy.logs_wait}"/>
+	</target>
+
+
+
+
+</project>
