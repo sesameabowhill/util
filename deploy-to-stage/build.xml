@@ -4,6 +4,7 @@
 
 	<target name="check.version">
 		<fail unless="version">specify -Dversion=? to deploy</fail>
+		<echo>deploy version [${version}]</echo>
 	</target>
 
 	<!-- STAGE MIGRATION -->
