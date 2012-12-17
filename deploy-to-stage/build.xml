@@ -67,7 +67,7 @@
 	<!-- CURRENT -->
 
 	<target name="current.deploy" depends="current.deploy_no_wait, current.wait" description="Deploy apps to 24/7 server only" />
-	<target name="current.deploy_no_wait" depends="check.version, current.deploy_tools, current.check_version, current.stop, current.deploy_artifacts, current.clear_logs, current.start" />
+	<target name="current.deploy_no_wait" depends="check.version, current.deploy_tools, current.check_version, current.stop, current.deploy_artifacts, current.clear_logs, current.start, current.install_send" />
 
 	<target name="current.get_home_folder">
 		<sshexec host="${current.host}" username="${current.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="cd; pwd | perl -ne 'chomp; print $_'" outputproperty="current.home_folder"/>
@@ -94,6 +94,10 @@
 
 	<target name="current.clear_logs">
 		<sshexec host="${current.host}" username="${current.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="for log_file in ${current.logs} ; do if [ -f $log_file ]; then sudo rm -v $log_file ; fi ; done" />
+	</target>
+
+	<target name="current.install_send">
+		<sshexec host="${current.host}" username="${current.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="pushd $PWD &amp;&amp; dir=$( mktemp -d ) &amp;&amp; cd $dir &amp;&amp; unzip /home/sites/artifacts/send.jar &amp;&amp; cd package-send &amp;&amp; ant install -Dsesame.server=Development -DpersistSchema=${persistSchema} -DpersistHost=${persistHost} -DpersistPort=${persistPort} -DpersistUser=${persistUser} -DpersistPassword=${persistPassword} -DsendSupportEmail=error_report@sesamecommunications.com -DsendConfigTemplate=production.conf.template &amp;&amp; popd &amp;&amp; rm -rf $dir" />
 	</target>
 
 	<target name="current.start">
@@ -147,7 +151,7 @@
 
 	<!-- IET -->
 
-	<target name="iet.deploy" depends="check.version, iet.deploy_tools, iet.check_version, iet.stop, iet.deploy_artifacts, iet.clear_logs, iet.install_send, iet.start, iet.wait" />
+	<target name="iet.deploy" depends="check.version, iet.deploy_tools, iet.check_version, iet.stop, iet.deploy_artifacts, iet.clear_logs, iet.start, iet.install_send, iet.wait" />
 
 	<target name="iet.get_home_folder">
 		<sshexec host="${iet.host}" username="${iet.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="cd; pwd | perl -ne 'chomp; print $_'" outputproperty="iet.home_folder"/>
