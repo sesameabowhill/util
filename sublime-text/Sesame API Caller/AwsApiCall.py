@@ -1,6 +1,6 @@
 import re, time, json
 from datetime import datetime, timedelta
-from DateUtils import convert_to_timestamp, timestamp_to_string
+from DateUtils import convert_to_timestamp, timestamp_to_string, convert_to_timedelta
 
 import boto
 
@@ -8,23 +8,35 @@ import boto.swf.layer1
 import boto.dynamodb.layer2
 
 class AwsApiCall:
-	def __init__(self, report, access):
+	def __init__(self, report):
 		self.report = report
-		self.access = access
-		self.report.report_info("using access key %s" % self.access[0])
+
+		access = self.report.find_access_keys('!aws:access_key_id', '!aws:secret_access_key')
+		if access != None:
+			self.access = access
+			self.report.report_info("using access key %s" % self.access[0])
+		else:
+			self.report.report_error("can't find value for access key (!aws:access_key_id=..., !aws:secret_access_key=...)")
+
 
 	def get_result(self, command):
 		if command[0] == 'swf':
 			if command[1] == 'list_domains':
 				return self.swf_list_domains()
 			elif command[1] == 'list_failed_workflows':
-				return self.swf_list_closed_workflow_executions(command[2][0], 'FAILED')
+				domain = command[2][0]
+				interval = timedelta(days = 1)
+				if len(command[2]) > 1:
+					interval_param = convert_to_timedelta(command[2][1])
+					if interval_param:
+						interval = interval_param
+				return self.swf_list_closed_workflow_executions(domain, interval, 'FAILED')
 			elif command[1] == 'workflow_status':
 				return self.swf_workflow_status(command[2][0], command[2][1])
 			else:
-				self.report.report_error("unexpected command [%s] in [%s] service" % (command[1], command[0]))
+				self.report.report_error("unexpected command [%s] in [%s] group" % (command[1], command[0]))
 		else:
-			self.report.report_error("unexpected service [%s]" % command[0])
+			self.report.report_error("unexpected group [%s]" % command[0])
 		return None
 
 	def swf_list_domains(self):
@@ -32,25 +44,35 @@ class AwsApiCall:
 		self.report.report_info("list domains")
 		return ', '.join(info['name'] for info in swf.list_domains('REGISTERED')['domainInfos'])
 
-	def swf_list_closed_workflow_executions(self, domain, status):
+	def swf_list_closed_workflow_executions(self, domain, interval, status):
 		swf = boto.connect_swf(*self.access)
 		now = datetime.utcnow()
-		day_before = now - timedelta(days = 1)
+		day_before = now - interval
 		self.report.report_info("list %s executions in [%s], from [%sZ], to [%sZ]" % 
 			(status, domain, str(day_before), str(now)))
 		executions = swf.list_closed_workflow_executions(domain, 
-			start_latest_date = convert_to_timestamp(now), 
-			start_oldest_date = convert_to_timestamp(day_before),
+			close_latest_date = convert_to_timestamp(now), 
+			close_oldest_date = convert_to_timestamp(day_before),
 			close_status = status)
 		return ', '.join('%s - %s' % (execution['execution']['workflowId'], timestamp_to_string(execution['closeTimestamp'])) 
 			for execution in executions['executionInfos'])
 
 	def swf_workflow_status(self, domain, workflow_id):
 		swf = boto.connect_swf(*self.access)
-		now = datetime.utcnow()
-		oldest = now - timedelta(days = 365)
+		now = datetime.utcnow() + timedelta(days = 365)
+		oldest = datetime.utcnow() - timedelta(days = 365)
 		self.report.report_info("get workflow [%s] status, from [%sZ], to [%sZ], domain %s" % 
 			(workflow_id, str(oldest), str(now), domain))
+
+		open_executions = swf.list_open_workflow_executions(domain,
+			latest_date = convert_to_timestamp(now), 
+			oldest_date = convert_to_timestamp(oldest),
+			workflow_id = workflow_id)
+
+		if len(open_executions['executionInfos']):
+			execution = open_executions['executionInfos'][0]
+			return "%s - %s" % (execution['executionStatus'], timestamp_to_string(execution['startTimestamp']))
+
 		executions = swf.list_closed_workflow_executions(domain, 
 			start_latest_date = convert_to_timestamp(now), 
 			start_oldest_date = convert_to_timestamp(oldest),

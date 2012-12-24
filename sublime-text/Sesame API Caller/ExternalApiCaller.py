@@ -2,20 +2,24 @@ import sublime, sublime_plugin, re, time, json
 from datetime import datetime, timedelta
 
 from AwsApiCall import AwsApiCall
+from UploadApiCall import UploadApiCall
 
 class CallExternalApiCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
-		access = self.find_access_keys()
-		if access != None:
-			for line in self.get_all_lines(self.view.sel()):
-				command = self.find_command(line)
-				if command:
-					aws_api = AwsApiCall(self, access)
-					result = aws_api.get_result(command)
+		apis = { 'swf' : AwsApiCall, 'upload' : UploadApiCall, 'client' : UploadApiCall }
+		api_cache = {}
+		for line in self.get_all_lines(self.view.sel()):
+			command = self.find_command(line)
+			if command:
+				command_group = command[0]
+				if command_group in apis:
+					if not command_group in api_cache:
+						api_cache[command_group] = apis[command_group](self)
+					result = api_cache[command_group].get_result(command)
 					if result:
 						self.insert_result(line, edit, result)
-		else:
-			self.report_error("can't find value for access key (!aws:access_key_id=..., !aws:secret_access_key=...)")
+				else:
+					self.report_error("unknown group [%s]" % command_group)
 
 	def insert_result(self, line, edit, result):
 		line_region = self.view.line(self.view.text_point(line, 0))
@@ -24,21 +28,21 @@ class CallExternalApiCommand(sublime_plugin.TextCommand):
 		line_text += ' -> ' + str(result)
 		self.view.replace(edit, line_region, line_text)
 
-	def find_access_keys(self):
+	def find_access_keys(self, key_param, secret_param):
 		access_key = None
-		secret_access_key = None
-		access_key_line = self.view.find('!aws:access_key_id', 0)
-		secret_access_key = self.view.find('!aws:secret_access_key', 0)
+		secret_key = None
+		access_key_line = self.view.find(key_param, 0)
+		secret_key_line = self.view.find(secret_param, 0)
 		if access_key_line != None:
 			found = self.get_setting_value(access_key_line)
 			if found != None:
 				access_key = found[1]
-		if secret_access_key != None:
-			found = self.get_setting_value(secret_access_key)
+		if secret_key_line != None:
+			found = self.get_setting_value(secret_key_line)
 			if found != None:
-				secret_access_key = found[1]
-		if access_key != None and secret_access_key != None:
-			return (access_key, secret_access_key)
+				secret_key = found[1]
+		if access_key != None and secret_key != None:
+			return (access_key, secret_key)
 		else:
 			return None
 
@@ -88,6 +92,6 @@ class CallExternalApiCommand(sublime_plugin.TextCommand):
 
 	FILE_PATH_RE = re.compile('^file:(?P<name>.+)')	
 	CLEAR_RESULT_RE = re.compile('\s?->.*')	
-	SETTING_RE = re.compile('^\s*!\s*aws\s*:\s*(?P<key>[^:]+?)\s*=\s*(?P<value>\S+)')	
+	SETTING_RE = re.compile('^\s*!\s*(?:aws|internal)\s*:\s*(?P<key>[^:]+?)\s*=\s*(?P<value>\S+)')	
 	COMMAND_RE = re.compile('^\s*!\s*(?P<service>[^:]+?)\s*:\s*(?P<command>[^(\s]+?)\\b(?:[\s|\(](?P<params>[^)]*)\)?)?')
 
