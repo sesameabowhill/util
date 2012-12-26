@@ -8,25 +8,37 @@ class CallExternalApiCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		apis = { 'swf' : AwsApiCall, 'upload' : UploadApiCall, 'client' : UploadApiCall }
 		api_cache = {}
+		commands = []
 		for line in self.get_all_lines(self.view.sel()):
 			command = self.find_command(line)
 			if command:
+				commands.append((line, command))
 				command_group = command[0]
 				if command_group in apis:
 					if not command_group in api_cache:
 						api_cache[command_group] = apis[command_group](self)
-					result = api_cache[command_group].get_result(command)
-					if result:
-						self.insert_result(line, edit, result)
 				else:
 					self.report_error("unknown group [%s]" % command_group)
+
+		call_thread = CallThread(self, edit, commands, api_cache)
+		call_thread.start()
+		#call_thread.join()
+		#call_thread.run()
+		results = call_thread.get_results()
+		self.view.sel().clear()
+		# for result in results:
+		# 	self.insert_result(result[0], edit, result[1])
 
 	def insert_result(self, line, edit, result):
 		line_region = self.view.line(self.view.text_point(line, 0))
 		line_text = self.view.substr(line_region)
 		line_text = CallExternalApiCommand.CLEAR_RESULT_RE.sub('', line_text)
-		line_text += ' -> ' + str(result)
+		line_text += ' -> '
+		start_column = len(line_text)
+		line_text += str(result)
+		end_column = len(line_text)
 		self.view.replace(edit, line_region, line_text)
+		self.view.sel().add(sublime.Region(self.view.text_point(line, start_column), self.view.text_point(line, end_column)))
 
 	def find_access_keys(self, key_param, secret_param):
 		access_key = None
@@ -95,3 +107,39 @@ class CallExternalApiCommand(sublime_plugin.TextCommand):
 	SETTING_RE = re.compile('^\s*!\s*(?:aws|internal)\s*:\s*(?P<key>[^:]+?)\s*=\s*(?P<value>\S+)')	
 	COMMAND_RE = re.compile('^\s*!\s*(?P<service>[^:]+?)\s*:\s*(?P<command>[^(\s]+?)\\b(?:[\s|\(](?P<params>[^)]*)\)?)?')
 
+class CallThread(threading.Thread):
+	def __init__(self, view, edit, commands, api_cache):
+		threading.Thread.__init__(self)
+		self.view = view
+		self.edit = edit
+		self.commands = commands
+		self.api_cache = api_cache
+		self.results = []
+
+	def run(self):
+		total = len(self.commands)
+		current = 0
+		start = time.time()
+		for command_line in self.commands:
+			current += 1
+			sublime.set_timeout(self.status_report(current, total), 10)
+			command = command_line[1]
+			result = self.api_cache[command[0]].get_result(command)
+			if result:
+				self.results.append((command_line[0], result))
+				sublime.set_timeout(self.insert_result(command_line[0], result), 10)
+
+		sublime.set_timeout(lambda: self.view.view.set_status('CallExternalApiCommand', 
+			"%d call%s took %.02f seconds" % (total, ('' if total == 1 else 's'), time.time() - start)), 10)
+		sublime.set_timeout(lambda: self.view.view.erase_status('CallExternalApiCommand'), 30000)
+
+	def get_results(self):
+		return self.results
+
+	def status_report(self, current, total):
+		return lambda: self.view.view.set_status('CallExternalApiCommand', "process %d of %d" % (current, total))
+
+	def insert_result(self, line, result):
+		return lambda: self.view.insert_result(line, self.edit, result)
+
+		

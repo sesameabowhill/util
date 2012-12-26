@@ -3,6 +3,7 @@ import urllib2
 import base64
 import re
 import urllib
+import threading
 
 class UploadApiCall:
 	def __init__(self, report):
@@ -38,6 +39,8 @@ class UploadApiCall:
 		if command[0] == 'client':
 			if command[1] == 'id':
 				return self.get_client_id(command[2][0])
+			elif command[1] == 'status':
+				return self.get_client_status(command[2][0])
 			else:
 				self.report.report_error("unexpected command [%s] in [%s] group" % (command[1], command[0]))
 		else:
@@ -45,12 +48,23 @@ class UploadApiCall:
 		return None
 
 	def get_client_id(self, username):
-		apis = self.get_apis(username)
-		return "5.0 - %s, 24/7 - %s" % (apis[0].get_client_id(), apis[1].get_client_id())
+		return self.run_func_in_both_apis(username, SesameApi.get_client_id)
 
 	def get_upload_status(self, username):
+		return self.run_func_in_both_apis(username, SesameApi.get_upload_status)
+
+	def get_client_status(self, username):
+		return self.run_func_in_both_apis(username, SesameApi.get_client_status)
+
+	def run_func_in_both_apis(self, username, func):
 		apis = self.get_apis(username)
-		return "5.0 - %s, 24/7 - %s" % (apis[0].get_upload_status(), apis[1].get_upload_status())
+		sesame_5 = ApiThread(apis[0], func)
+		sesame_6 = ApiThread(apis[1], func)
+		sesame_5.start()
+		sesame_6.start()
+		sesame_5.join()
+		sesame_6.join()
+		return "5.0 - %s, 24/7 - %s" % (sesame_5.get_result(), sesame_6.get_result())
 
 	def get_apis(self, username):
 		sesame_5_api = SesameApi(self.report, 'sesame 5: ', username, UploadApiCall.SESAME_5_FCS, UploadApiCall.SESAME_5_UPLOAD_LOGS)
@@ -64,6 +78,18 @@ class UploadApiCall:
 	SESAME_6_UPLOAD_LOGS = 'https://sync-logs.sesamecommunications.com/UploadLogs/memberUploads.html?clientId=%s'
 	SESAME_6_FCS = 'https://admin.sesamecommunications.com/support-tools/sesame/fast_client_search/xml.cgi'
 
+class ApiThread(threading.Thread):
+	def __init__(self, api, func):
+		threading.Thread.__init__(self)
+		self.api = api
+		self.func = func
+		self.result = None
+
+	def run(self):
+		self.result = self.func(self.api)
+
+	def get_result(self):
+		return self.result
 
 class SesameApi:
 	def __init__(self, report, prefix, username, fcs_url, upload_logs_url):
@@ -100,6 +126,34 @@ class SesameApi:
 		id_nodes = xml.findall('cl_id')
 		if len(id_nodes):
 			return id_nodes[0].text
+		return None
+
+	def get_client_status(self):
+		response = self.get_page_request_result(self.fcs_url, 
+			{'action' : 'general_info', 'search_param' : self.username})
+		xml = ET.fromstring(response)
+		status_nodes = xml.findall('cl_status')
+		id_nodes = xml.findall('cl_id')
+		if len(status_nodes) and len(id_nodes):
+			migration = self.get_migration_status(id_nodes[0].text.strip())
+			if migration:
+				migration = " (migration %s)" % migration
+			else:
+				migration = ""
+
+			status = status_nodes[0].text.strip()
+			if status == "0":
+				return "inactive" + migration
+			elif status == "1":
+				return "active" + migration
+			else:
+				return "status #" + status + migration
+		return None
+
+	def get_migration_status(self, client_id):
+		status = self.get_sql_result("client", "migration", "id=" + client_id)
+		if len(status):
+			return status[0]['migration']
 		return None
 
 	def get_sql_result(self, table, fields, condition):
