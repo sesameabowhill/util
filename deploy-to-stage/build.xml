@@ -42,7 +42,7 @@
 
  	<!-- IET -->
 
-	<property name="iet.host" value="ec2-23-21-11-46.compute-1.amazonaws.com" />
+	<property name="iet.host" value="50.16.204.63" />
 	<property name="iet.user" value="admin" />
 
 	<property name="iet.artifacts" value="${current.artifacts}" />
@@ -133,7 +133,7 @@
 	</target>
 
 	<target name="legacy.deploy_artifacts" depends="check.version, legacy.get_home_folder">
-		<sshexec host="${legacy.host}" username="${legacy.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="cd /home/sites/artifacts; for module in ${legacy.artifacts} ; do sudo perl ${legacy.home_folder}/${file.get_build} --version=${version} --auto-save-as-symlink --module=$module --delete-legacy-symlink-target ; done" />
+		<sshexec host="${legacy.host}" username="${legacy.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="cd /home/sites/artifacts; for module in ${legacy.artifacts} ; do sudo perl ${legacy.home_folder}/${file.get_build} --version=${version} --auto-save-as-symlink --module=$module --delete-current-symlink-target ; done" />
 	</target>
 
 	<target name="legacy.clear_logs">

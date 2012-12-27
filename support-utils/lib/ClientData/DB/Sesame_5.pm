@@ -572,10 +572,29 @@ sub get_all_si_images {
 	my ($self) = @_;
 
 	return $self->{'dbh'}->selectall_arrayref(
-        "SELECT ImageId, PatId, FileName FROM si_image WHERE client_id=?",
+        "SELECT ImageId, PatId, FileName, TypeId FROM si_image WHERE client_id=?",
 		{ 'Slice' => {} },
 		$self->{'client_id'},
     );
+}
+
+sub get_all_si_image_types {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT TypeId, TypeName FROM si_image_type WHERE client_id=?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+    );
+}
+
+sub delete_si_image {
+	my ($self, $id) = @_;
+
+	return $self->_do_query(
+		"DELETE FROM si_image WHERE ImageId=%s AND client_id=%s LIMIT 1",
+		[ $id, $self->{'client_id'} ]
+	);
 }
 
 sub get_all_si_patients {
@@ -887,6 +906,19 @@ sub delete_invisalign_processing_patient {
 	}
 }
 
+sub delete_invisalign_patient_by_invisalign_client {
+	my ($self, $case_number, $invisalign_client_id) = @_;
+
+	$self->_do_query(
+		"DELETE FROM invisalign_case_process_patient WHERE case_number=%s AND invisalign_client_id=%s",
+		[$case_number, $invisalign_client_id],
+	);
+	$self->_do_query(
+		"DELETE FROM invisalign_patient WHERE case_num=%s AND invisalign_client_id=%s",
+		[$case_number, $invisalign_client_id],
+	);
+}
+
 sub set_invisalign_processing_patient_processed {
 	my ($self, $case_number) = @_;
 
@@ -932,6 +964,17 @@ sub get_invisalign_processing_patient {
 	else {
 		return undef;
 	}
+}
+
+sub get_invisalign_processing_patients_by_client_id {
+	my ($self) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+		"SELECT case_number, fname, lname, vip_patient_id, processed, store_date, post_date, adf_file, linked, invisalign_client_id" .
+			" FROM invisalign_case_process_patient WHERE client_id = ?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+	);
 }
 
 sub get_invisalign_client_by_shared_invisalign_client {

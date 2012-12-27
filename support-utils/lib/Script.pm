@@ -47,7 +47,7 @@ sub simple_client_loop {
 	    		$fn = sprintf($fn, (@clients == 1 ? $clients[0] : DateUtils->get_current_date_filename()));
 	    	}
 			$logger->printf("write sql commands to [%s]", $fn);
-			$data_source->save_sql_commands_to_file($fn);
+			$data_source->save_sql_commands_to_file($fn, undef, "created at ".DateUtils->get_current_date_mysql());
 	    }
 		if (exists $params->{'save_handler_result'}) {
 	    	my $fn = $params->{'save_handler_result'}->get_file_name();

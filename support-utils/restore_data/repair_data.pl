@@ -7,15 +7,18 @@ use warnings;
 use lib '../lib';
 
 use DataSource::DB;
+use DateUtils;
 use Logger;
 use Repair::Address;
 use Repair::Appointments;
 use Repair::Banners;
 use Repair::Emails;
 use Repair::HolidaySettings;
+use Repair::InvisalignClientLinks;
 use Repair::NewsletterArticleStat;
 use Repair::Newsletters;
 use Repair::Phones;
+use Repair::SiImageTypes;
 use Repair::VoiceReminderSettings;
 
 {
@@ -27,9 +30,11 @@ use Repair::VoiceReminderSettings;
 		'banners' => 'Repair::Banners',
 		'emails'  => 'Repair::Emails',
 		'holiday_settings' => 'Repair::HolidaySettings',
+		'invisalign_client_links' => 'Repair::InvisalignClientLinks',
 		'newsletters' => 'Repair::Newsletters',
 		'phones'  => 'Repair::Phones',
 		'ppn_article_stat' => 'Repair::NewsletterArticleStat',
+		'si_image_types' => 'Repair::SiImageTypes',
 		'voice_reminder_settings' => 'Repair::VoiceReminderSettings',
 	);
 
@@ -52,12 +57,12 @@ use Repair::VoiceReminderSettings;
 		if (defined $repair->get_commands_extension()) {
 			my $fn = "_repair_".$action.$repair->get_commands_extension();
 			$logger->printf("write custom commands to [$fn]");
-			$logger->save_commands_to_file($fn);
+			$logger->save_commands_to_file($fn, undef, "created at ".DateUtils->get_current_date_mysql()."\nclients: ".join(', ', @clients));
 		}
 		else {
 			my $fn = "_repair_".$action.".sql";
 			$logger->printf("write repair commands to [$fn]");
-			$data_source->save_sql_commands_to_file($fn);
+			$data_source->save_sql_commands_to_file($fn, undef, "created at ".DateUtils->get_current_date_mysql()."\nclients: ".join(', ', @clients));
 		}
 
 		$logger->print_category_stat();

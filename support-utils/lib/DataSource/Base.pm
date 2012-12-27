@@ -23,7 +23,7 @@ sub get_statements {
 }
 
 sub save_sql_commands_to_file {
-	my ($self, $file_name, $filter_re) = @_;
+	my ($self, $file_name, $filter_re, $comment) = @_;
 
 	my $statements = $self->{'statements'};
 	if (defined $filter_re) {
@@ -33,6 +33,11 @@ sub save_sql_commands_to_file {
 	open(my $fh, '>', $file_name) or die "can't write [$file_name]: $!";
 	if (@$statements) {
 		print $fh "-- $file_name\n";
+		if (defined $comment) {
+			$comment =~ s/^/-- /gm;
+			$comment =~ s/\s+$//;
+			print $fh "$comment\n";
+		}
 		for my $sql (sort @$statements) {
 			(my $sql_cmd = $sql->{'sql'}) =~ s/\s+$//;
 			print $fh "$sql_cmd;".(defined $sql->{'comment'} ? " -- ".$sql->{'comment'} : "")."\n";

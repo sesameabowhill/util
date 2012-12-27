@@ -1771,7 +1771,7 @@ sub new {
 				# 'time2send' => 'utc',
 				# 'processed' => 'utc',
 				# 'SentTime' => 'utc',
-				'appointment_datetime' => 'server',
+				'appointment_datetime' => 'client',
 			},
 			'sms_queue' => {
 				'registered' => 'server',

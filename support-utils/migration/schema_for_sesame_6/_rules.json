@@ -5979,9 +5979,9 @@
          },
          {
             "column" : "appointment_datetime",
-            "comment" : "eval [convert-time-zone-from-server] value from [sms_message_history.appointment_datetime]",
+            "comment" : "eval [convert-time-zone-from-client] value from [sms_message_history.appointment_datetime]",
             "action" : "eval",
-            "eval" : "convert-time-zone-from-server",
+            "eval" : "convert-time-zone-from-client",
             "from_table" : "sms_message_history",
             "from_column" : "appointment_datetime"
          },
@@ -8287,9 +8287,9 @@
          },
          {
             "column" : "appointment_datetime",
-            "comment" : "eval [convert-time-zone-from-server] value from [sms_message_history.appointment_datetime]",
+            "comment" : "eval [convert-time-zone-from-client] value from [sms_message_history.appointment_datetime]",
             "action" : "eval",
-            "eval" : "convert-time-zone-from-server",
+            "eval" : "convert-time-zone-from-client",
             "from_table" : "sms_message_history",
             "from_column" : "appointment_datetime"
          },
