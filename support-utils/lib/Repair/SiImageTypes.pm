@@ -10,14 +10,19 @@ use base 'Repair::Base';
 sub repair {
 	my ($self, $client_data) = @_;
 
-	my %si_image_types = map {$_->{'TypeId'} => $_} @{ $client_data->get_all_si_image_types() };
+	my %si_image_types = map {lc $_->{'TypeId'} => $_} @{ $client_data->get_all_si_image_types() };
 	my $si_images = $client_data->get_all_si_images();
 	my $missing_count = 0;
+	my %restore_types;
 	for my $si_image (@$si_images) {
-		if (exists $si_image_types{$si_image->{'TypeId'}}) {
+		if (exists $si_image_types{lc $si_image->{'TypeId'}}) {
 			$self->{'logger'}->register_category('image with good type link');
 		} else {
-			$client_data->delete_si_image($si_image->{'ImageId'});
+			unless (exists $restore_types{lc $si_image->{'TypeId'}}) {
+				$client_data->add_si_image_type($si_image->{'TypeId'}, "Unknown ".$si_image->{'TypeId'});
+				$restore_types{lc $si_image->{'TypeId'}} = 1;
+				$self->{'logger'}->register_category('image type restored');
+			}
 			$self->{'logger'}->register_category('image missing type link');
 			$self->{'logger'}->printf_slow('%s: image type %s is not found', $client_data->get_username(), $si_image->{'TypeId'});
 			$missing_count ++;

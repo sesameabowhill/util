@@ -588,6 +588,15 @@ sub get_all_si_image_types {
     );
 }
 
+sub add_si_image_type {
+	my ($self, $type_id, $name) = @_;
+
+	return $self->_do_query("INSERT INTO si_image_type (TypeId, client_id, TypeName, " .
+		"Position, FlipH, FlipV, Date, hidden, TypeOrder) VALUES(%s, %s, %s, 0, 0, 0, NOW(), 0, 0)",
+		[ $type_id, $self->{'client_id'}, $name ]
+	);
+}
+
 sub delete_si_image {
 	my ($self, $id) = @_;
 
