@@ -1552,6 +1552,9 @@ sub new {
 			'ppn_article_letter:2' => {
 				'art_id' => 'newsletter-common-article-id',
 			},
+			'ppn_common_article_usage' => {
+				'art_id' => 'newsletter-common-article-id',
+			},
 			'email_reminder_settings' => {
 				'design_id' => 'email-design-id',
 			},

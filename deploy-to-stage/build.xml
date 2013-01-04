@@ -46,8 +46,8 @@
 	<property name="iet.user" value="admin" />
 
 	<property name="iet.artifacts" value="${current.artifacts}" />
-	<property name="iet.services" value="analytics-etl authws-snapshot internal-snapshot janitor md-snapshot pp-snapshot sicontrolpanel-snapshot siuploadws-snapshot upload-logs-snapshot upload-sibatch uploadws-snapshot visitor-facts" />
-	<property name="iet.logs" value="/home/sites/wrapper/logs/analytics-etl.log /home/sites/wrapper/logs/authws-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/internal-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/janitor.log /home/sites/wrapper/logs/md-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/pp-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/sicontrolpanel-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/siuploadws-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/upload-logs-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/upload-sibatch.log /home/sites/wrapper/logs/uploadws-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/visitor-facts.log" />
+	<property name="iet.services" value="analytics-etl authws-snapshot internal-snapshot janitor md-snapshot pp-snapshot sicontrolpanel-snapshot siuploadws-snapshot upload-logs-snapshot upload-sibatch uploadws-snapshot visitor-facts send-event-handler reactivation-activity-worker reactivation-workflow-worker" />
+	<property name="iet.logs" value="/home/sites/wrapper/logs/analytics-etl.log /home/sites/wrapper/logs/authws-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/internal-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/janitor.log /home/sites/wrapper/logs/md-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/pp-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/sicontrolpanel-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/siuploadws-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/upload-logs-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/upload-sibatch.log /home/sites/wrapper/logs/uploadws-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/visitor-facts.log /home/sites/wrapper/logs/reactivation-activity-worker.log /home/sites/wrapper/logs/reactivation-workflow-worker.log /home/sites/wrapper/logs/send-event-handler.log" />
 	<property name="iet.logs_wait" value="/home/sites/wrapper/logs/analytics-etl.log /home/sites/wrapper/logs/internal-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/janitor.log /home/sites/wrapper/logs/md-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/pp-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/upload-logs-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/upload-sibatch.log /home/sites/wrapper/logs/uploadws-snapshot.va-iet-web-01.log /home/sites/wrapper/logs/visitor-facts.log" />
 
 
@@ -173,7 +173,7 @@
 	</target>
 
 	<target name="iet.deploy_artifacts" depends="check.version, iet.get_home_folder">
-		<sshexec host="${iet.host}" username="${iet.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="cd /home/sites/artifacts; for module in ${iet.artifacts} ; do sudo perl ${iet.home_folder}/${file.get_build} --version=${version} --auto-save-as-symlink --module=$module --delete-iet-symlink-target ; done" />
+		<sshexec host="${iet.host}" username="${iet.user}" keyfile="${user.home}/.ssh/id_rsa" verbose="true" timeout="${timeout.command}" command="cd /home/sites/artifacts; for module in ${iet.artifacts} ; do sudo perl ${iet.home_folder}/${file.get_build} --version=${version} --auto-save-as-symlink --module=$module --delete-current-symlink-target ; done" />
 	</target>
 
 	<target name="iet.clear_logs">

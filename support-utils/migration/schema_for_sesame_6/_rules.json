@@ -4139,6 +4139,42 @@
          }
       ]
    },
+   "ppn_common_article_usage" : {
+      "to_table" : "ppn_common_article_usage",
+      "action" : "delete-insert",
+      "path_to_client" : [
+         {
+            "table" : "ppn_common_article_usage",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : [
+         {
+            "column" : "art_id",
+            "comment" : "hard-coded lookup: map [newsletter-common-article-id] value from [ppn_common_article_usage.art_id] ",
+            "action" : "hard-coded-lookup",
+            "map" : "newsletter-common-article-id",
+            "from_table" : "ppn_common_article_usage",
+            "from_column" : "art_id"
+         },
+         {
+            "column" : "client_id",
+            "comment" : "eval [client-id] value from [ppn_common_article_usage.client_id]",
+            "action" : "eval",
+            "eval" : "client-id",
+            "from_table" : "ppn_common_article_usage",
+            "from_column" : "client_id"
+         },
+         {
+            "column" : "state",
+            "comment" : "copy value from [ppn_common_article_usage.state]",
+            "action" : "copy",
+            "from_table" : "ppn_common_article_usage",
+            "from_column" : "state"
+         }
+      ]
+   },
    "ppn_email_queue" : {
       "to_table" : "ppn_email_queue",
       "action" : "delete-insert",
