@@ -5,6 +5,7 @@ use warnings;
 
 use Net::Amazon::EC2;
 use CGI;
+use List::Util 'sum';
 
 use constant 'TAG_NAME' => 'test-instance-for';
 
@@ -87,6 +88,7 @@ HTML
 		print "<th>Instance Id</th>";
 		print "<th>Platform</th>";
 		print "<th>Public Ip</th>";
+		print "<th>EBS size</th>";
 		print "<th".($sort eq 'comment' ? " class='sort'" : "")."><a href='?sort=comment'>Description</a></th>";
 		print "<th".($sort eq 'state' ? " class='sort'" : "")."><a href='?sort=state'>State</a></th>";
 		print "<th>Price</th>";
@@ -101,12 +103,15 @@ HTML
 			$instances = [ sort {!! length $b->{'comment'} <=> !! length $a->{'comment'} || $a->{'comment'} cmp $b->{'comment'}}  @$instances ]
 		}
 		my $total_cost = 0;
+		my $total_ebs_size = 0;
 		for my $instance (@$instances) {
+
 			print "<tr class='".$instance->{'instance_state'}."'>";
 			print "<td class='number'>".$count++."</td>";
 			print "<td title='".$instance->{'name'}."'>".$instance->{'instance_id'}."</td>";
 			print "<td class='platform'>".$instance->{'platform'}."</td>";
 			print "<td>".$instance->{'public_ip'}."</td>";
+			print "<td class='number'>".$instance->{'total_volume_size'}." GB</td>";
 			print "<td>";
 			print "<div class='comment'>".$instance->{'comment'}."</div>";
 			print "<div class='update-comment'><form class='edit' method='post'><input type='hidden' name='action' value='comment'>";
@@ -119,6 +124,7 @@ HTML
 			if (defined $price) {
 				$total_cost += $price;
 			}
+			$total_ebs_size += $instance->{'total_volume_size'};
 			print "<td class='price'>".(defined $price && $price ? 
 				sprintf("<span title='%s'>\$%.3f</span>", $comment, $price / 1000) : 
 				"<div class='action'>&mdash;</div>")."</td>";
@@ -137,7 +143,7 @@ HTML
 				print "&nbsp;";
 			}
 			print "</td>";
-			print "</tr>";
+			print "</tr>\n";
 		}
 
 		if ($refresh) {
@@ -147,7 +153,13 @@ HTML
 		print <<HTML;
 		</table>
 HTML
-		printf "<p class='price'>Estimated total cost: \$%.3f per hour (\$%.2f per month)</p>", $total_cost / 1000, $total_cost * 24*30 / 1000;
+		print "<p class='price'>";
+		my $ec2_cost_month = $total_cost * 24*30;
+		my $ebs_cost = $total_ebs_size * 100;
+		printf "Estimated EC2 instances cost: \$%.3f per hour (\$%.2f per month)</br>", $total_cost / 1000, $ec2_cost_month / 1000;
+		printf "Estimated EBS volumes cost: \$%.2f per month (%d GB)</br>", $ebs_cost / 1000, $total_ebs_size;
+		printf "Estimated total cost: \$%.3f per month</br>", ($ebs_cost + $ec2_cost_month) / 1000;
+		print "</p>";
 
 	} else {
 		print "<h2>No test instances found</h2>";
@@ -165,11 +177,13 @@ sub get_price_per_instance {
 
     my %prices = (
     	'windows' => {
+	    	'm1.large' => 460,
 	    	'm1.medium' => 230,
 	    	'm1.small' => 115,
 	    	't1.micro' => 20,
     	},
     	'' => {
+	    	'm1.large' => 260,
 	    	'm1.medium' => 130,
 	    	'm1.small' => 65,
 	    	't1.micro' => 20,
@@ -210,12 +224,16 @@ sub get_extractor_instances {
 	}
 
 	my @instances;
+	my @volume_ids;
 	my $instances = $ec2->describe_instances('Filter' => [ 'tag-key' => TAG_NAME ]);
 	for my $reservation (@$instances) {
 		for my $instance (@{ $reservation->instances_set }) {
 			my $tags = $instance->tag_set;
-			my @comment = map { $_->value } grep { $_->key eq TAG_NAME } (@$tags);
-			my @name = map { $_->value } grep { $_->key eq 'Name' } (@$tags);
+			my @comment = map { $_->value } grep { $_->key eq TAG_NAME } @$tags;
+			my @name = map { $_->value } grep { $_->key eq 'Name' } @$tags;
+
+			my @attached_volume_ids = grep { defined } map { $_->ebs->volume_id } @{ $instance->block_device_mapping };
+			push(@volume_ids, @attached_volume_ids);
 			push(
 				@instances,
 				{
@@ -226,10 +244,17 @@ sub get_extractor_instances {
 					'public_ip' => $public_ips{$instance->instance_id},
 					'instance_state' => $instance->instance_state->name,
 					'instance_type' => $instance->instance_type,
+					'volume_ids' => \@attached_volume_ids,
 				}
 			);
 		}
 	}
+	my $volumes = $ec2->describe_volumes('VolumeId' => \@volume_ids);
+	my %volume_sizes = map { $_->volume_id => $_->size } @$volumes;
+	for my $instance (@instances) {
+		$instance->{'total_volume_size'} = sum( map { $volume_sizes{$_} } @{ $instance->{'volume_ids'} } );
+	}
+
 	return \@instances;
 }
 
