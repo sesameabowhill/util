@@ -4,6 +4,7 @@ import git, os, re, jira.client, hashlib
 from datetime import datetime, timedelta
 from collections import Counter
 from string import replace, lower
+import optparse
 
 
 
@@ -187,9 +188,11 @@ class JiraReader:
 		return self.known_issues[issue_number]
 
 class ReportBuild:
-	def __init__(self, path, output):
+	def __init__(self, path, output, jira_user, jira_password):
 		self.path = path
 		self.output = output
+		self.jira_user = jira_user
+		self.jira_password = jira_password
 
 		self.jira_url = 'https://jira.sesamecommunications.com:8443/'
 		self.github_url = 'https://github.com/sesacom/web/'
@@ -198,7 +201,7 @@ class ReportBuild:
 		git_reader = GitReader(self.path)
 		git_reader.update_origin()
 		branches = git_reader.list_branches()
-		jira_reader = JiraReader(self.jira_url, 'ivan', '')
+		jira_reader = JiraReader(self.jira_url, self.jira_user, self.jira_password)
 		for logs in branches.values():
 			for log in logs:
 				log.find_issue(jira_reader)
@@ -627,7 +630,18 @@ class ReportBuild:
 
 
 if __name__ == "__main__":
-	os.environ['GIT_PYTHON_TRACE'] = 'full'
-	report_build = ReportBuild('C:/Users/ivan/Projects/web8', 'C:/Users/ivan/Desktop/rep.html')
+	#os.environ['GIT_PYTHON_TRACE'] = 'full'
+	#report_build = ReportBuild('C:/Users/ivan/Projects/web8', 'C:/Users/ivan/Desktop/rep.html')
 	#report_build = ReportBuild('/Users/ivan/web', '/Users/ivan/Desktop/rep.html')
+
+	parser = optparse.OptionParser()
+	parser.add_option("-g", "--git-folder", dest="git", help="Git folder to use")
+	parser.add_option("-o", "--output", dest="output", help="File to write HTML to")
+	parser.add_option("-u", "--jira-user", dest="jira_user", help="User for Jira api access")
+	parser.add_option("-p", "--jira-password", dest="jira_password", help="Password for Jira api access")
+	(options, args) = parser.parse_args()
+	if not options.git or not options.output or not options.jira_user or not options.jira_password:
+		parser.error("missing options")
+
+	report_build = ReportBuild(options.git, options.output, options.jira_user, options.jira_password)
 	report_build.build()
