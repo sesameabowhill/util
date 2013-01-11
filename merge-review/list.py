@@ -304,7 +304,7 @@ class ReportBuild:
 		.column-content {margin-left: 0.5em}
 		.versions {font-size: 10pt; color: #aaa}
 		.author {font-size: 10pt; color: #aaa}
-		.version-highlight {color: #000 !important; border-bottom: 1px dotted #000
+		.version-highlight {color: #000 !important; border-bottom: 1px dotted #000}
 		.commit-warn {background-color: #fdd2ad !important}
 		.commit-highlight {background-color: #fff2c7}
 		.commit-select {background-color: #ceffc7}
