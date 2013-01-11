@@ -20,6 +20,12 @@ sub _get_visitor_columns {
     return 'id, pms_id, address_id, type, first_name AS FName, last_name AS LName, birthday AS BDate, blocked, blocked_source, privacy, password, no_email, active, active AS Active, active_in_pms';
 }
 
+sub _get_invisalign_patient_columns {
+	my ($self) = @_;
+
+	return 'case_num AS case_number, invisalign_client_id, fname, lname, post_date, start_date, transfer_date, retire_date, stages, img_available, patient_id, refine, deleted, id';
+}
+
 
 sub get_all_sent_emails_with_body {
 	my ($self) = @_;

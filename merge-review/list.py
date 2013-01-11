@@ -2,7 +2,6 @@
 
 import git, os, re, jira.client, hashlib
 from datetime import datetime, timedelta
-from collections import Counter
 from string import replace, lower
 import optparse
 
@@ -157,7 +156,7 @@ class GitReader:
 				yield ((message_group), commits[0])
 
 	def get_log_entires(self, source, since):
-		log = self.git.log(source, pretty = 'format:%H%x01%an%x01%ae%x01%at%x01%B%x02', since = since, no_merges = True)
+		log = self.git.log(source, pretty = 'format:%H%x01%an%x01%ae%x01%at%x01%s%n%b%x02', since = since, no_merges = True)
 		return [ LogEntry(l.strip()) for l in log.split('\x02') if len(l) ]
 
 	# def get_branch_log(self, branch):

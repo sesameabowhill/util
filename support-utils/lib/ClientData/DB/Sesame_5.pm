@@ -464,6 +464,16 @@ sub get_invisalign_client_ids {
 	);
 }
 
+sub get_invisalign_patients_by_patient_id {
+	my ($self, $patient_id) = @_;
+
+    return $self->{'dbh'}->selectall_arrayref(
+        "SELECT ".$self->_get_invisalign_patient_columns()." FROM invisalign_patient WHERE patient_id=?",
+		{ 'Slice' => {} },
+		$patient_id,
+    );
+}
+
 sub get_invisalign_patients_by_name {
 	my ($self, $fname, $lname) = @_;
 
@@ -897,6 +907,12 @@ sub delete_invisalign_patient {
 			$self->{'dbh'}->do($sql);
 		}
 	}
+}
+
+sub delete_invisalign_patient_by_id {
+	my ($self, $id, $comment) = @_;
+
+	$self->_do_query("DELETE FROM invisalign_patient WHERE id=%s LIMIT 1", [$id], $comment);
 }
 
 sub delete_invisalign_processing_patient {
