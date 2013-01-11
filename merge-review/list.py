@@ -286,11 +286,15 @@ class ReportBuild:
 	<head>
 	<title>Merge Review</title>
 	<style>
-		body { font-family: Arial, Verdana, Helvetica}
-		table {border-collapse: collapse; border: 1px #000 solid; width: 100%}
+		body { font-family: Arial, Verdana, Helvetica; margin: 0}
+		table {border-collapse: collapse; border: 1px #000 solid; width: 100%; background-color: #fff}
+		.top-section {border-bottom: 1px solid grey; background-color: #fff; position: fixed; top: 0; 
+			-webkit-box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 15px; padding-bottom: 0.6em}
+		.middle-section {background-color: #ddd; margin-top: 6em}
+		.bottom-section {clear: both; padding: 0.5em; color: #555;}
 		td, th {border-bottom:  1px #000 solid; padding: 0.3em 0.5em; border-left: 1px #000 dashed}
 		th {color: #999; font-weight: normal;}
-		h2 {font-size: 14pt}
+		h2 {font-size: 14pt; margin-bottom: 0.3em}
 		.number {text-align: right;}
 		th a {color: #000;}
 		.sort {background-color: #eee;}
@@ -300,7 +304,7 @@ class ReportBuild:
 		.column-content {margin-left: 0.5em}
 		.versions {font-size: 10pt; color: #aaa}
 		.author {font-size: 10pt; color: #aaa}
-		.version-highlight {color: #000}
+		.version-highlight {color: #000 !important; text-decoration:underline}
 		.commit-warn {background-color: #fdd2ad !important}
 		.commit-highlight {background-color: #fff2c7}
 		.commit-select {background-color: #ceffc7}
@@ -322,6 +326,21 @@ class ReportBuild:
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 	<script>
 		$(function() {
+			var common_click_start = function (event) {
+				if (!event.shiftKey && !event.altKey) {
+					$(".commit-select").removeClass("commit-select");
+				}
+			};
+			var common_click = function (elems, event) {
+				console.log(elems)
+				if (event.shiftKey) {
+					elems.addClass("commit-select");
+				} else if (event.altKey) {
+					elems.removeClass("commit-select");
+				} else {
+					elems.addClass("commit-select");
+				}
+			};
 			var with_hightlight = function(elem_selector, prefix, callback) {
 				elem_selector.each(function (index, elem) {
 					var class_list = $(elem).attr('class').split(/\s+/);
@@ -332,10 +351,12 @@ class ReportBuild:
 					});
 				});
 			};
+			$("td a").bind("click", function (e) { e.stopPropagation() });
 			$(".highlight-commit").bind({
-				click: function() {
+				click: function(e) {
+					common_click_start(e);
 					with_hightlight($(this), "group-", function (class_name) {
-						$("." + class_name).parents("tr").toggleClass("commit-select");
+						common_click($("." + class_name).parents("tr"), e);
 					});
 				},
 				mouseenter: function() {
@@ -351,12 +372,13 @@ class ReportBuild:
 			});
 			$(".highlight-version").bind({
 				click: function(e) {
-					if (e.shiftKey) {
+					e.stopPropagation();
+					if (e.shiftKey || e.altKey) {
 						e.preventDefault();
 					}
+					common_click_start(e);
 					with_hightlight($(this), "group-", function (class_name) {
-						var elems = $("." + class_name).parents("tr");
-						elems.toggleClass("commit-select");
+						common_click($("." + class_name).parents("tr"), e);
 					});
 				},
 				mouseenter: function() {
@@ -374,15 +396,13 @@ class ReportBuild:
 			});
 			$(".highlight-branch").bind({
 				click: function(e) {
-					if (e.shiftKey) {
-						$(".commit-select").removeClass("commit-select");
-					}
+					common_click_start(e);
 					with_hightlight($(this), "branch-", function (branch_class_name) {
 						var selected = {};
 						with_hightlight($("." + branch_class_name), "group-", function (class_name) {
 							if (!selected[class_name]) {
 								selected[class_name] = 1;
-								$("." + class_name).parents("tr").toggleClass("commit-select");
+								common_click($("." + class_name).parents("tr"), e);
 							}
 						});
 					});
@@ -405,15 +425,13 @@ class ReportBuild:
 			$(".highlight-author").bind({
 				click: function(e) {
 					e.stopPropagation();
-					if (e.shiftKey) {
-						$(".commit-select").removeClass("commit-select");
-					}
+					common_click_start(e);
 					with_hightlight($(this), "author-", function (author_class_name) {
 						var selected = {};
 						with_hightlight($("." + author_class_name).parents("td"), "group-", function (class_name) {
 							if (!selected[class_name]) {
 								selected[class_name] = 1;
-								$("." + class_name).parents("tr").toggleClass("commit-select");
+								common_click($("." + class_name).parents("tr"), e);
 							}
 						});
 					});
@@ -452,12 +470,13 @@ class ReportBuild:
 			$(".highlight-issue").bind({
 				click: function(e) {
 					e.stopPropagation();
+					common_click_start(e);
 					with_hightlight($(this), "issue-", function (issue_class_name) {
 						var selected = {};
 						with_hightlight($("." + issue_class_name).parent(), "group-", function (class_name) {
 							if (!selected[class_name]) {
 								selected[class_name] = 1;
-								$("." + class_name).parents("tr").toggleClass("commit-select");
+								common_click($("." + class_name).parents("tr"), e);
 							}
 						});
 					});
@@ -496,12 +515,26 @@ class ReportBuild:
 	</head>
 <body>
 """)
+		lines.append("<div class='top-section'>")
+		column_width = int(100 / len(branches))
 		for name, log in branches.iteritems():
-			lines.append("<div class='column' style='width: %d%%'>" % int(100 / len(branches)))
+			lines.append("<div class='column' style='width: %d%%'>" % column_width)
+			lines.append("<div class='column-content'>")
+			lines += self.make_header(name, log)
+			lines.append("</div>")
+			lines.append("</div>")
+		lines.append("</div>")
+
+		lines.append("<div class='middle-section'>")
+		for name, log in branches.iteritems():
+			lines.append("<div class='column' style='width: %d%%'>" % column_width)
 			lines.append("<div class='column-content'>")
 			lines += self.make_table(name, log)
 			lines.append("</div>")
 			lines.append("</div>")
+		lines.append("</div>")
+		lines.append("<div class='bottom-section'>")
+		lines.append("Click - Select commits, Shift-Click - Add commits to selection, Alt-Click - Remove commits from selection.")
 		lines.append("</body>")
 		lines.append("</html>")
 		return lines
@@ -527,13 +560,18 @@ class ReportBuild:
 					self.escape_attr(name), self.escape_attr(version[0])))
 		return [ "<span class='github-link missing-versions'>%s</span>" %  ', '.join(links) ]
 
-	def make_table(self, name, logs):
+	def make_header(self, name, logs):
 		lines = []
 		name_class = replace(name, '.', '-')
-		lines.append("<h2 title='shift-click to select only this branch' class='highlight-branch branch-%s show-links'>%s" % (name_class, name))
+		lines.append("<h2 class='highlight-branch branch-%s show-links'>%s" % (name_class, name))
 		lines.append("<span class='github-link'>(<a href='%s' title='view on github'>log</a>)</span>" % (self.github_url + 'tree/' + name))
 		lines.append("</h2>")
 		lines += self.make_missing_issues_links(name, logs)
+		return lines
+
+	def make_table(self, name, logs):
+		lines = []
+		name_class = replace(name, '.', '-')
 		lines.append("<table>")
 		lines.append("<tr><th>Issue</th><th>Versions</th><th>Commit</th></tr>")
 		diff_link = {}
@@ -550,7 +588,7 @@ class ReportBuild:
 			if isinstance(log, TagEntry):
 				current_tag = replace(log.tag, '.', '-')
 				lines.append("<tr><td colspan='3' class='tag show-links'>")
-				lines.append("<span title='shift-click to select only this tag' class='highlight-branch branch-%s'>%s</span>" % (current_tag, log.tag))
+				lines.append("<span class='highlight-branch branch-%s'>%s</span>" % (current_tag, log.tag))
 				lines.append("<span class='github-link'>(<a href='%s' title='view on github'>log</a>%s)</span>" % 
 					(self.github_url + 'tree/' + log.tag, (diff_link[log.tag] if log.tag in diff_link else "")))
 				lines.append("</td></tr>")
@@ -588,7 +626,7 @@ class ReportBuild:
 			('' if len(authors) == 1 else 's', ', '.join("<span class='name-author highlight-author author-%s'>%s</span>" % 
 				(self.escape_class(name), self.escape(name)) for name in authors)))
 		lines.append("</td>")
-		lines.append("<td class='versions'>")
+		lines.append("<td class='versions %s'>" % group_highlight)
 		if log_issue:
 			lines.append('<br/>'.join("<span title='%s' class='highlight-version version-name group-version-%s'>%s</span>" % 
 				(self.escape_attr(v[0]), v[1], self.short(v[0], 15)) 

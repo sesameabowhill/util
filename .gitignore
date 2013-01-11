@@ -12,3 +12,7 @@ client-clone/demo_database.sql
 adminer/databases.inc.php
 
 *.pyc
+
+merge-review/merge-review.sublime-project
+
+merge-review/merge-review.sublime-workspace
