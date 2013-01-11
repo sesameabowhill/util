@@ -288,7 +288,7 @@ class ReportBuild:
 	<style>
 		body { font-family: Arial, Verdana, Helvetica; margin: 0}
 		table {border-collapse: collapse; border: 1px #000 solid; width: 100%; background-color: #fff}
-		.top-section {border-bottom: 1px solid grey; background-color: #fff; position: fixed; top: 0; 
+		.top-section {width: 100%; border-bottom: 1px solid grey; background-color: #fff; position: fixed; top: 0;
 			-webkit-box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 15px; padding-bottom: 0.6em}
 		.middle-section {background-color: #ddd; margin-top: 6em}
 		.bottom-section {clear: both; padding: 0.5em; color: #555;}
@@ -304,7 +304,7 @@ class ReportBuild:
 		.column-content {margin-left: 0.5em}
 		.versions {font-size: 10pt; color: #aaa}
 		.author {font-size: 10pt; color: #aaa}
-		.version-highlight {color: #000 !important; text-decoration:underline}
+		.version-highlight {color: #000 !important; border-bottom: 1px dotted #000
 		.commit-warn {background-color: #fdd2ad !important}
 		.commit-highlight {background-color: #fff2c7}
 		.commit-select {background-color: #ceffc7}
@@ -564,7 +564,7 @@ class ReportBuild:
 		lines = []
 		name_class = replace(name, '.', '-')
 		lines.append("<h2 class='highlight-branch branch-%s show-links'>%s" % (name_class, name))
-		lines.append("<span class='github-link'>(<a href='%s' title='view on github'>log</a>)</span>" % (self.github_url + 'tree/' + name))
+		lines.append("<span class='github-link'>(<a href='%s' title='view on github'>log</a>)</span>" % (self.github_url + 'commits/' + name))
 		lines.append("</h2>")
 		lines += self.make_missing_issues_links(name, logs)
 		return lines
