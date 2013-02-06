@@ -17,9 +17,10 @@ use Repair::HolidaySettings;
 use Repair::InvisalignClientLinks;
 use Repair::NewsletterArticleStat;
 use Repair::Newsletters;
-use Repair::OrphanClinchecks;
+#use Repair::OrphanClinchecks;
 use Repair::Phones;
 use Repair::SiImageTypes;
+use Repair::SiTimePoints;
 use Repair::VoiceReminderSettings;
 
 {
@@ -37,6 +38,7 @@ use Repair::VoiceReminderSettings;
 		'phones'  => 'Repair::Phones',
 		'ppn_article_stat' => 'Repair::NewsletterArticleStat',
 		'si_image_types' => 'Repair::SiImageTypes',
+		'si_time_points' => 'Repair::SiTimePoints',
 		'voice_reminder_settings' => 'Repair::VoiceReminderSettings',
 	);
 

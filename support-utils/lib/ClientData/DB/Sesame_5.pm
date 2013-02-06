@@ -582,11 +582,34 @@ sub get_all_si_images {
 	my ($self) = @_;
 
 	return $self->{'dbh'}->selectall_arrayref(
-        "SELECT ImageId, PatId, FileName, TypeId FROM si_image WHERE client_id=?",
+        "SELECT ImageId, PatId, FileName, TypeId, TimePoint FROM si_image WHERE client_id=?",
 		{ 'Slice' => {} },
 		$self->{'client_id'},
     );
 }
+
+sub get_si_images {
+    my ($self, $pat_id) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT ImageId, PatId, FileName, TypeId, TimePoint FROM si_image WHERE client_id=? AND PatId=?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+		$pat_id,
+    );
+}
+
+sub get_si_patient_timepoint_link {
+    my ($self, $pat_id) = @_;
+
+	return $self->{'dbh'}->selectall_arrayref(
+        "SELECT TpNum AS TimePoint, date AS Date, TpName AS TimePointName FROM si_patient_timepoint_link WHERE client_id=? AND PatId=?",
+		{ 'Slice' => {} },
+		$self->{'client_id'},
+		$pat_id,
+    );
+}
+
 
 sub get_all_si_image_types {
 	my ($self) = @_;
@@ -613,6 +636,26 @@ sub delete_si_image {
 	return $self->_do_query(
 		"DELETE FROM si_image WHERE ImageId=%s AND client_id=%s LIMIT 1",
 		[ $id, $self->{'client_id'} ]
+	);
+}
+
+sub update_si_image_time_point {
+	my ($self, $id, $time_point, $comment) = @_;
+
+	return $self->_do_query(
+		"UPDATE si_image SET TimePoint=%s WHERE ImageId=%s AND client_id=%s LIMIT 1",
+		[ $time_point, $id, $self->{'client_id'} ], 
+		$comment
+	);
+}
+
+sub insert_si_patient_timepoint_link {
+	my ($self, $pat_id, $time_point, $time_point_name, $comment) = @_;
+
+	return $self->_do_query(
+		"INSERT INTO si_patient_timepoint_link (PatId, client_id, TpNum, date, TpName) VALUES (%s, %s, %s, NULL, %s)",
+		[ $pat_id, $self->{'client_id'}, $time_point, $time_point_name ], 
+		$comment
 	);
 }
 
