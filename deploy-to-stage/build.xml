@@ -59,7 +59,7 @@
 	<property name="path.get_build" value="${basedir}/../artifactory/${file.get_build}" />
 
 	<property name="timeout.wait" value="900000" /> <!-- 15 minutes -->
-	<property name="timeout.command" value="300000" /> <!-- 5 minutes -->
+	<property name="timeout.command" value="600000" /> <!-- 10 minutes -->
 	<property name="wait.check_every" value="10" />
 	<property name="module.test" value="md" />
 
