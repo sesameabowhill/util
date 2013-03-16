@@ -181,12 +181,14 @@ sub get_price_per_instance {
 	    	'm1.medium' => 230,
 	    	'm1.small' => 115,
 	    	't1.micro' => 20,
+	    	'm3.xlarge' => 980,
     	},
     	'' => {
-	    	'm1.large' => 260,
-	    	'm1.medium' => 130,
-	    	'm1.small' => 65,
+	    	'm1.large' => 240,
+	    	'm1.medium' => 120,
+	    	'm1.small' => 60,
 	    	't1.micro' => 20,
+	    	'm3.xlarge' => 500,
     	}
 	);
 	

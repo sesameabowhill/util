@@ -1306,8 +1306,9 @@
          },
          {
             "column" : "response_options",
-            "comment" : "copy value from [email_reminder_settings.response_options]",
-            "action" : "copy",
+            "comment" : "eval [email-reminder-setting-response-options] value from [email_reminder_settings.response_options]",
+            "action" : "eval",
+            "eval" : "email-reminder-setting-response-options",
             "from_table" : "email_reminder_settings",
             "from_column" : "response_options"
          },
@@ -7845,13 +7846,13 @@
             "column" : "client_id"
          }
       ],
-      "action" : "update-si-auto-notify",
+      "action" : "update-active-patient-criteria",
       "columns" : [
          {
             "column" : "IVal",
-            "comment" : "eval [si-auto-notify]",
+            "comment" : "eval [active-patient-criteria]",
             "action" : "eval",
-            "eval" : "si-auto-notify"
+            "eval" : "active-patient-criteria"
          }
       ]
    },

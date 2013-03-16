@@ -1002,9 +1002,9 @@ sub apply_missing_eval {
 	$self->{'tables'}{'client_setting:2'}{'action'} = 'update-voice-end-message-id';
 
 	## eval for si auto notify
-	$self->{'rules'}{'client_setting:3'}{'IVal'} = Migration::Rule::Eval->new('si-auto-notify', undef, undef);
+	$self->{'rules'}{'client_setting:3'}{'IVal'} = Migration::Rule::Eval->new('active-patient-criteria', undef, undef);
 	$self->{'tables'}{'client_setting:3'} = { %{ $self->{'tables'}{'client_setting'} } };
-	$self->{'tables'}{'client_setting:3'}{'action'} = 'update-si-auto-notify';
+	$self->{'tables'}{'client_setting:3'}{'action'} = 'update-active-patient-criteria';
 
 	## eval for si auto notify
 	$self->{'rules'}{'client_setting:4'}{'IVal'} = Migration::Rule::Eval->new('voice-client-id', undef, undef);
@@ -1833,6 +1833,9 @@ sub new {
 			'email_reminder_settings' => {
 				'type' => {
 					'eval' => 'email-reminder-setting-type',
+				},
+				'response_options' => {
+					'eval' => 'email-reminder-setting-response-options',
 				},
 			},
 			'client' => {
