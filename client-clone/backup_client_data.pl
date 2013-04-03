@@ -735,60 +735,64 @@ sub new {
 
 	my %update_columns;
 	## obfuscate
-	$update_columns{$db_name.'.'.'address_local'}{'street'} = undef;
-	$update_columns{$db_name.'.'.'address_local'}{'city'} = undef;
-	$update_columns{$db_name.'.'.'address_versioned'}{'street'} = undef;
-	$update_columns{$db_name.'.'.'address_versioned'}{'city'} = undef;
-	$update_columns{$db_name.'.'.'address_versioned'}{'pms_id'} = undef;
+#	$update_columns{$db_name.'.'.'address_local'}{'street'} = undef;
+#	$update_columns{$db_name.'.'.'address_local'}{'city'} = undef;
+#	$update_columns{$db_name.'.'.'address_versioned'}{'street'} = undef;
+#	$update_columns{$db_name.'.'.'address_versioned'}{'city'} = undef;
+#	$update_columns{$db_name.'.'.'address_versioned'}{'pms_id'} = undef;
 	$update_columns{$db_name.'.'.'client_access'}{'user_passwd'} = undef;
 	$update_columns{$db_name.'.'.'client_access'}{'user_enc_passwd'} = undef;
-	$update_columns{$db_name.'.'.'email_local'}{'email'} = undef;
-	$update_columns{$db_name.'.'.'email_local'}{'relative_name'} = undef;
-	$update_columns{$db_name.'.'.'email_sent_mail_log'}{'sml_email'} = undef;
-	$update_columns{$db_name.'.'.'email_sent_mail_log'}{'sml_name'} = undef;
-	$update_columns{$db_name.'.'.'email_unsubscribe'}{'email'} = undef;
-	$update_columns{$db_name.'.'.'email_versioned'}{'email'} = undef;
-	$update_columns{$db_name.'.'.'email_versioned'}{'relative_name'} = undef;
-	$update_columns{$db_name.'.'.'email_versioned'}{'pms_id'} = undef;
-	$update_columns{$db_name.'.'.'hhf_applications'}{'fname'} = undef;
-	$update_columns{$db_name.'.'.'hhf_applications'}{'lname'} = undef;
+#	$update_columns{$db_name.'.'.'email_local'}{'email'} = undef;
+#	$update_columns{$db_name.'.'.'email_local'}{'relative_name'} = undef;
+#	$update_columns{$db_name.'.'.'email_sent_mail_log'}{'sml_email'} = undef;
+#	$update_columns{$db_name.'.'.'email_sent_mail_log'}{'sml_name'} = undef;
+#	$update_columns{$db_name.'.'.'email_unsubscribe'}{'email'} = undef;
+#	$update_columns{$db_name.'.'.'email_versioned'}{'email'} = undef;
+#	$update_columns{$db_name.'.'.'email_versioned'}{'relative_name'} = undef;
+#	$update_columns{$db_name.'.'.'email_versioned'}{'pms_id'} = undef;
+#	$update_columns{$db_name.'.'.'hhf_applications'}{'fname'} = undef;
+#	$update_columns{$db_name.'.'.'hhf_applications'}{'lname'} = undef;
 	$update_columns{$db_name.'.'.'invisalign_case_process_doctor'}{'password'} = undef;
 	$update_columns{$db_name.'.'.'invisalign_case_process_doctor'}{'adf_password'} = undef;
-	$update_columns{$db_name.'.'.'invisalign_case_process_patient'}{'fname'} = undef;
-	$update_columns{$db_name.'.'.'invisalign_case_process_patient'}{'lname'} = undef;
-	$update_columns{$db_name.'.'.'invisalign_case_process_patient'}{'adf_file'} = undef;
-	$update_columns{$db_name.'.'.'invisalign_patient'}{'fname'} = undef;
-	$update_columns{$db_name.'.'.'invisalign_patient'}{'lname'} = undef;
-	$update_columns{$db_name.'.'.'opse_payment_log'}{'FName'} = undef;
-	$update_columns{$db_name.'.'.'opse_payment_log'}{'LName'} = undef;
-	$update_columns{$db_name.'.'.'opse_payment_log'}{'EMail'} = undef;
-	$update_columns{$db_name.'.'.'opse_payment_log'}{'Comment'} = undef;
-	$update_columns{$db_name.'.'.'phone_local'}{'number'} = undef;
-	$update_columns{$db_name.'.'.'phone_versioned'}{'number'} = undef;
-	$update_columns{$db_name.'.'.'phone_versioned'}{'pms_id'} = undef;
-	$update_columns{$db_name.'.'.'referrer_local'}{'email'} = undef;
-	$update_columns{$db_name.'.'.'referrer_versioned'}{'email'} = undef;
+#	$update_columns{$db_name.'.'.'invisalign_case_process_patient'}{'fname'} = undef;
+#	$update_columns{$db_name.'.'.'invisalign_case_process_patient'}{'lname'} = undef;
+#	$update_columns{$db_name.'.'.'invisalign_case_process_patient'}{'adf_file'} = undef;
+#	$update_columns{$db_name.'.'.'invisalign_patient'}{'fname'} = undef;
+#	$update_columns{$db_name.'.'.'invisalign_patient'}{'lname'} = undef;
+#	$update_columns{$db_name.'.'.'opse_payment_log'}{'FName'} = undef;
+#	$update_columns{$db_name.'.'.'opse_payment_log'}{'LName'} = undef;
+#	$update_columns{$db_name.'.'.'opse_payment_log'}{'EMail'} = undef;
+#	$update_columns{$db_name.'.'.'opse_payment_log'}{'Comment'} = undef;
+#	$update_columns{$db_name.'.'.'phone_local'}{'number'} = undef;
+#	$update_columns{$db_name.'.'.'phone_versioned'}{'number'} = undef;
+#	$update_columns{$db_name.'.'.'phone_versioned'}{'pms_id'} = undef;
+#	$update_columns{$db_name.'.'.'referrer_local'}{'email'} = undef;
+#	$update_columns{$db_name.'.'.'referrer_versioned'}{'email'} = undef;
 	$update_columns{$db_name.'.'.'si_doctor'}{'Password'} = undef;
-	$update_columns{$db_name.'.'.'si_patient'}{'FName'} = undef;
-	$update_columns{$db_name.'.'.'si_patient'}{'LName'} = undef;
-	$update_columns{$db_name.'.'.'sms_message_history'}{'phone'} = undef;
+#	$update_columns{$db_name.'.'.'si_patient'}{'FName'} = undef;
+#	$update_columns{$db_name.'.'.'si_patient'}{'LName'} = undef;
+#	$update_columns{$db_name.'.'.'sms_message_history'}{'phone'} = undef;
 	$update_columns{$db_name.'.'.'visitor_user_sensitive'}{'password'} = undef;
-	$update_columns{$db_name.'.'.'visitor_versioned'}{'first_name'} = undef;
-	$update_columns{$db_name.'.'.'visitor_versioned'}{'last_name'} = undef;
-	$update_columns{$db_name.'.'.'visitor_versioned'}{'pms_id'} = undef;
-	$update_columns{$db_name.'.'.'email_referral'}{'ref_lname'} = undef;
-	$update_columns{$db_name.'.'.'email_referral'}{'ref_fname'} = undef;
-	$update_columns{$db_name.'.'.'email_referral'}{'ref_email'} = undef;
-	$update_columns{$db_name.'.'.'email_referral_mail'}{'from_email'} = undef;
-	$update_columns{$db_name.'.'.'voice_reminder_settings'}{'transfer_phone'} = undef;
+#	$update_columns{$db_name.'.'.'visitor_versioned'}{'first_name'} = undef;
+#	$update_columns{$db_name.'.'.'visitor_versioned'}{'last_name'} = undef;
+#	$update_columns{$db_name.'.'.'visitor_versioned'}{'pms_id'} = undef;
+#	$update_columns{$db_name.'.'.'email_referral'}{'ref_lname'} = undef;
+#	$update_columns{$db_name.'.'.'email_referral'}{'ref_fname'} = undef;
+#	$update_columns{$db_name.'.'.'email_referral'}{'ref_email'} = undef;
+#	$update_columns{$db_name.'.'.'email_referral_mail'}{'from_email'} = undef;
+#	$update_columns{$db_name.'.'.'voice_reminder_settings'}{'transfer_phone'} = undef;
 	## override
-	$update_columns{$db_name.'.'.'email_reminder_settings'}{'is_enabled'} = '0';
+#	$update_columns{$db_name.'.'.'email_reminder_settings'}{'is_enabled'} = '0';
 	$update_columns{$db_name.'.'.'email_sending_queue'}{'sent_date'} = '2010-09-08 07:06:05';
-	$update_columns{$db_name.'.'.'hhf_applications'}{'body'} = '<Groups/>';
+#	$update_columns{$db_name.'.'.'hhf_applications'}{'body'} = '<Groups/>';
 	$update_columns{$db_name.'.'.'holiday_settings'}{'hds_status'} = '0';
 	$update_columns{$db_name.'.'.'ppn_email_queue'}{'is_send'} = '1';
-	$update_columns{$db_name.'.'.'voice_reminder_settings'}{'is_enabled'} = '0';
+#	$update_columns{$db_name.'.'.'voice_reminder_settings'}{'is_enabled'} = '0';
+	
 	$update_columns{$db_name.'.'.'client'}{'cl_status'} = '0';
+	$update_columns{$db_name.'.'.'client'}{'pms_software_id'} = '24';
+	$update_columns{$db_name.'.'.'client'}{'pms_version'} = '';
+#	$update_columns{$db_name.'.'.'client_access'}{'user_password'} = '1';
 
 	my $data_seed = md5_base64(rand().time().hostname().'0scEru960WO8CiBcS82k');
 	return bless {
@@ -851,6 +855,7 @@ sub filter_row {
 		my $override = $self->{'update_column'}{$table};
 		while (my ($column, $override_value) = each %$override) {
 			if (exists $row->{$column}) {
+				
 				if (defined $override_value) {
 					$row->{$column} = $override_value;
 				}
@@ -860,10 +865,123 @@ sub filter_row {
 			}
 		}
 	}
-	else {
+	elsif (table_has_email($table))  {
+		while (my ($column, $value) = each %$row) {
+			$row->{$column} = make_email_invalid($column, $value);
+		}
+	} elsif (table_has_phone($table)) {
+		while (my ($column, $value) = each %$row) {
+			$row->{$column} = make_phone_invalid($column, $value);
+		}
+	}
+	else {		 
 		## do nothing for all other tables
 	}
 	return $row;
+}
+
+sub make_phone_invalid  {
+	my ($column, $value) = @_;
+	my $area_code;
+	my $klondike_5 = 555;
+	my $end;
+
+	if ($column eq 'number' || $column eq 'transfer_phone' || $column eq 'rec_phone' || $column eq 'phone' || $column eq 'value') {
+		if ($column eq 'value') {
+			# a special case for 'client_properties' because its column 'values' has phone numbers and other attributes
+			my $value_copy = $value;
+			$value_copy =~ s/[^0-9]*//g;
+				if (length $value_copy < 6) {
+					# it is not a number so don't modify it
+					return $value;
+				}
+		}
+		my $phone_length = length $value;
+		if ($phone_length == 7) {
+			$end = substr $value , 3, 4;
+			return $klondike_5.$end;
+		} elsif ($phone_length == 10) {
+			$area_code = substr $value, 0, 3;
+			$end = substr $value , 6, 4;
+			return $area_code.$klondike_5.$end;
+		} elsif ($phone_length == 11) {
+			$area_code = substr $value, 0, 4;
+			$end = substr $value , 7, 4;
+			return $area_code.$klondike_5.$end;
+		} elsif ($phone_length == 12) {
+			$area_code = substr $value, 0, 4;
+			$end = substr $value , 8, 4;
+			return $area_code.$klondike_5.$end;
+		}
+	} elsif ($column eq 'is_valid') {
+		my $int_value = unpack('c', $value);
+		return $int_value;
+	}
+	#It is not a phone number so don't modify
+	return $value;
+}
+
+sub make_email_invalid  {
+	my ($column, $value) = @_;
+	
+	if ($column eq 'email' || $column eq 'ref_email' || $column eq 'from_email' || $column eq 'email_from' || $column eq 'email_to' || $column eq 'sml_email' || $column eq 'sfl_emailto' || $column eq 'EMail') {
+		if (index($value, '.email') == -1) {
+			$value =  $value.'.email';
+			return $value;
+		} else {
+			return $value;
+		}
+	} elsif ($column eq 'is_valid') {
+		my $int_value = unpack('c', $value);
+		return $int_value;
+	}
+	#It is not an email address so don't modify
+	return $value;
+}
+
+sub table_has_email {
+	my ($table) = @_;
+	
+	if (	index($table, 'email_local') != -1 || 
+			index($table, 'email_versioned') != -1 || 
+			index($table, 'email_unsubscribe') != -1 || 
+			index($table, 'email_sent_mail_log') != -1 || 
+			index($table, 'email_referral') != -1 || 
+			index($table, 'email_sent_mail_log') != -1 || 
+			index($table, 'hhf_log') != -1 || 
+			index($table, 'invisalign_send2friend') != -1 || 
+			index($table, 'orphan_email') != -1 || 
+			index($table, 'opse_payment_log') != -1 || 
+			index($table, 'send2friend_log') != -1 || 
+			index($table, 'si_doctor') != -1
+		) {
+			#return true
+			return 1;
+		}
+		#return false
+		return 0;
+}
+sub table_has_phone {
+	my ($table) = @_;
+	
+	if (	index($table, 'phone_local') != -1 || 
+			index($table, 'phone_versioned') != -1 || 
+			index($table, 'voice_reminder_settings') != -1 || 
+			index($table, 'voice_no_call_list') != -1 || 
+			index($table, 'printable_ledger') != -1 || 
+			index($table, 'review_business_info') != -1 || 
+			index($table, 'sms_queue') != -1 || 
+			index($table, 'sms_message_history') != -1 || 
+			index($table, 'voice_message_history') != -1 || 
+			index($table, 'voice_queue') != -1 || 
+			index($table, 'voice_system_transaction_log') != -1 || 
+			index($table, 'client_properties') != -1
+		) {
+		#return true
+		return 1;		
+	}
+	#return false
+	return 0;
 }
 
 sub _hide_number_value {
