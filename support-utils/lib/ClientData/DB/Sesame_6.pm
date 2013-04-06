@@ -37,5 +37,35 @@ sub get_all_sent_emails_with_body {
 	);
 }
 
+sub get_last_initial_version_id {
+    my ($self) = @_;
+	
+    return scalar $self->{'dbh'}->selectrow_array(
+    	"SELECT last_initial_version_id FROM client_current_dataset WHERE client_id=?",
+    	undef,
+    	$self->{'client_id'},
+	);
+}
+
+sub get_unique_ids_from_vesioned_table {
+    my ($self, $table) = @_;
+
+	return $self->{'dbh'}->selectcol_arrayref(
+		"SELECT DISTINCT id FROM `${table}_versioned` WHERE client_id=?",
+		undef,
+		$self->{'client_id'},
+	);
+}
+
+sub get_vesioned_table_names {
+    my ($self) = @_;
+
+	my $tables = $self->{'dbh'}->selectcol_arrayref("SHOW TABLES like '%_versioned'");
+	for my $table (@$tables) {
+		$table =~ s/_versioned$//;
+	}
+	return $tables;
+}
+
 
 1;

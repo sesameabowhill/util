@@ -17,7 +17,7 @@ use Repair::HolidaySettings;
 use Repair::InvisalignClientLinks;
 use Repair::NewsletterArticleStat;
 use Repair::Newsletters;
-#use Repair::OrphanClinchecks;
+use Repair::OrphanClinchecks;
 use Repair::Phones;
 use Repair::SiImageTypes;
 use Repair::SiTimePoints;
