@@ -17,11 +17,13 @@ use Logger;
 	my $batch_size = 1000;
 	my $sleep = 0;
 	my $db_connection_string_for_read = undef;
+	my $db_connection_string_for_write = undef;
 	GetOptions(
 		'table=s' => \$table,
 		'type=s' => \$type,
 		'batch-size=s' => \$batch_size,
 		'sleep=s' => \$sleep,
+		'db-connection-string-for-write=s' => \$db_connection_string_for_write,
 		'db-connection-string-for-read=s' => \$db_connection_string_for_read,
 	);
 
@@ -31,7 +33,7 @@ use Logger;
 	my @clients = @ARGV;
 
 	if (@clients && $table) {
-		my $data_source = DataSource::DB->new();
+		my $data_source = DataSource::DB->new(undef, $db_connection_string_for_write);
 		my $read_data_source;
 		if (defined $db_connection_string_for_read) {
 			$read_data_source = DataSource::DB->new(undef, $db_connection_string_for_read);
@@ -75,7 +77,8 @@ use Logger;
 	    $logger->printf("done in %d:%02d", $work_time / 60, $work_time % 60);
 	}
 	else {
-		print "Usage: $0 <--table=...|:all> [--type=id|client_id] [--batch-size=100] [--sleep=0] [--db-connection-string-for-read=user:password\@host:port/schema] <client_db1> ...\n";
+		print "Usage: $0 <--table=...|:all> [--type=id|client_id] [--batch-size=100] [--sleep=0]  <client_db1> ...\n";
+		print "Database connections: [--db-connection-string-for-write=user:password\@host:port/schema] [--db-connection-string-for-read=user:password\@host:port/schema]\n"
 		print "Use --sleep=file:sleep.txt to read value from sleep.txt\n";
 		exit(1);
 	}
@@ -228,7 +231,7 @@ sub _read_number {
 
 	if (open(my $fh, "<", $file)) {
 		my $value = int(<$fh>);
-		close($fh);
+		CORE::close($fh);
 		return $value;
 	} else {
 		$self->{'logger'}->printf("can't read parameter [%s] from [%s]: %s", $name, $file, $!);
