@@ -78,7 +78,7 @@ use Logger;
 	}
 	else {
 		print "Usage: $0 <--table=...|:all> [--type=id|client_id] [--batch-size=100] [--sleep=0]  <client_db1> ...\n";
-		print "Database connections: [--db-connection-string-for-write=user:password\@host:port/schema] [--db-connection-string-for-read=user:password\@host:port/schema]\n"
+		print "Database connections: [--db-connection-string-for-write=user:password\@host:port/schema] [--db-connection-string-for-read=user:password\@host:port/schema]\n";
 		print "Use --sleep=file:sleep.txt to read value from sleep.txt\n";
 		exit(1);
 	}
