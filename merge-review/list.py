@@ -108,7 +108,7 @@ class GitReader:
 		remote_branches = [ r for r in self.repo.remotes.origin.refs if re.search("^origin/(?:master|release)", r.name) ]
 		# local_branchs = ( b.name for b in self.repo.branches )
 		print "found branches: %s" % ', '.join(b.name for b in remote_branches)
-		oldest_commit = (datetime.utcnow() - timedelta(days = 30*1)).strftime('%Y-%m-%d %H:%M:%S')
+		oldest_commit = (datetime.utcnow() - timedelta(days = 150*1)).strftime('%Y-%m-%d %H:%M:%S')
 
 		branches = {}
 		# same_commits = {}
@@ -116,7 +116,7 @@ class GitReader:
 			branch_name = branch.name.split('/')[1]
 			print "log [%s]" % branch
 			log_entries = self.get_log_entires(branch.name, oldest_commit)
-			branches[branch_name] = log_entries[0:100]
+			branches[branch_name] = log_entries[0:300]
 			for key, commit in self.unique_commits_by_message(log_entries):
 				commit.id = hashlib.md5('\n\n'.join(key)).hexdigest()
 
