@@ -112,8 +112,10 @@ class GitReader:
 
 		branches = {}
 		# same_commits = {}
+		names = []
 		for branch in remote_branches:
 			branch_name = branch.name.split('/')[1]
+			names.append(branch_name)
 			print "log [%s]" % branch
 			log_entries = self.get_log_entires(branch.name, oldest_commit)
 			branches[branch_name] = log_entries[0:300]
@@ -123,7 +125,7 @@ class GitReader:
 				# if not key in same_commits:
 				# 	same_commits[key] = []
 				# same_commits[key].append(commit)
-		return branches
+		return (branches, names)
 
 	def unique_commits_by_message(self, commits):
 		commits_by_message = {}
@@ -199,7 +201,7 @@ class ReportBuild:
 	def build(self):
 		git_reader = GitReader(self.path)
 		git_reader.update_origin()
-		branches = git_reader.list_branches()
+		branches, names = git_reader.list_branches()
 		jira_reader = JiraReader(self.jira_url, self.jira_user, self.jira_password)
 		for logs in branches.values():
 			for log in logs:
@@ -211,7 +213,7 @@ class ReportBuild:
 			logs = self.remove_jenkins(logs)
 			new_branches[branch] = logs
 		branches = self.group_by_issue(new_branches)
-		report = self.make_report(branches)
+		report = self.make_report(branches, names)
 		self.write_report(report)
 
 	def group_by_issue(self, all_branches):
@@ -279,7 +281,7 @@ class ReportBuild:
 			f.write(line + "\n")
 		f.close()
 
-	def make_report(self, branches):
+	def make_report(self, branches, names):
 		lines = []
 		lines.append("""
 <html>
@@ -517,7 +519,8 @@ class ReportBuild:
 """)
 		lines.append("<div class='top-section'>")
 		column_width = int(100 / len(branches))
-		for name, log in branches.iteritems():
+		for name in names:
+			log = branches[name]
 			lines.append("<div class='column' style='width: %d%%'>" % column_width)
 			lines.append("<div class='column-content'>")
 			lines += self.make_header(name, log)
@@ -526,7 +529,8 @@ class ReportBuild:
 		lines.append("</div>")
 
 		lines.append("<div class='middle-section'>")
-		for name, log in branches.iteritems():
+		for name in names:
+			log = branches[name]
 			lines.append("<div class='column' style='width: %d%%'>" % column_width)
 			lines.append("<div class='column-content'>")
 			lines += self.make_table(name, log)
