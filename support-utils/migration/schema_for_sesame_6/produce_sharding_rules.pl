@@ -23,7 +23,7 @@ use PDMParser;
 	my $links = Links->new();
 	load_links_from_model($logger, $links, "Unified DB.pdm");
 	my $rules = get_schema_diff($logger, $schema_6, $required_tables, $links);
-	$rules->save_json_to("_rules.json", 1);
+	$rules->save_json_to("_rules.json");
 }
 
 sub get_schema_diff {
@@ -351,6 +351,19 @@ sub apply_table_info {
 
 	{
 		my $stop = 0;
+		my $update_on_columns = $self->get_update_on_columns($schema_6, $migration);
+		for my $table (keys %{ $self->{'rules'} }) {
+			my $table_action = $migration->get_table_action($table);
+			tie my %r, 'Tie::IxHash', (
+				'action' => $table_action,
+			);
+			$self->{'tables'}{$table} = \%r;
+		}
+		$self->{'logger'}->stop($stop, "missing columns to update on");
+	}
+
+	{
+		my $stop = 0;
 		for my $table (keys %{ $self->{'rules'} }) {
 			if ($table ne 'client') {
 				if (defined $migration->get_path_to_client($table)) {
@@ -526,56 +539,6 @@ sub flat_rules {
 
 	tie my %rules_by_table, "Tie::IxHash";
 
-	for my $table_6 (@{ $self->{'remap_only_tables'} }) {
-		my ($column_to_save, $column_to_match) = ('id', 'pms_id');
-		# if ($table_6 eq 'email' || $table_6 eq 'phone') {
-		# 	($column_to_save, $column_to_match) = ('id', 'link_id');
-		# }
-		tie my %r, 'Tie::IxHash', (
-			'to_table' => _get_table_name($table_6),
-			'action' => 'remap-only',
-			'columns' => [
-				$self->_make_json_column_obj(
-					$table_6,
-					$column_to_save,
-					Migration::Rule::CopyValue->new($table_6, $column_to_save),
-					$no_missing_rules,
-				),
-				$self->_make_json_column_obj(
-					$table_6,
-					$column_to_match,
-					Migration::Rule::CopyValue->new($table_6, $column_to_match),
-					$no_missing_rules,
-				),
-				$self->_make_json_column_obj(
-					$table_6,
-					'client_id',
-					Migration::Rule::Eval->new('client-id', undef, undef),
-					$no_missing_rules,
-				),
-			],
-			'path_to_client' => [
-				{
-					'table' => $table_6,
-					'column' => 'client_id',
-				}
-			],
-			'priority' => '1',
-		);
-		if ($table_6 eq 'visitor') {
-			push(
-				@{ $r{'columns'} },
-				$self->_make_json_column_obj(
-					$table_6,
-					'type',
-					Migration::Rule::CopyValue->new($table_6, 'type'),
-					$no_missing_rules,
-				),
-			);
-		}
-		$rules_by_table{$table_6} = \%r;
-	}    
-
 	for my $table_6 (keys %$column_rules) {
 		my @missing_rules;
 		for my $column_6 (keys %{ $column_rules->{$table_6} }) {
@@ -597,18 +560,18 @@ sub flat_rules {
 				push(@missing_rules, $column_6);
 			}
 		}
-		if (!$no_missing_rules && @missing_rules) {
-			for my $column_6 (@missing_rules) {
-				tie my %r, "Tie::IxHash", (
-					'table' => $table_6,
-					'column' => $column_6,
-				);
-				push(
-					@{ $rules_by_table{$table_6}{'columns'} },
-					\%r
-				);
-			}
-		}
+		# if (!$no_missing_rules && @missing_rules) {
+		# 	for my $column_6 (@missing_rules) {
+		# 		tie my %r, "Tie::IxHash", (
+		# 			'table' => $table_6,
+		# 			'column' => $column_6,
+		# 		);
+		# 		push(
+		# 			@{ $rules_by_table{$table_6}{'columns'} },
+		# 			\%r
+		# 		);
+		# 	}
+		# }
 	}
 	return \%rules_by_table;
 }
@@ -998,13 +961,13 @@ sub apply_missing_eval {
 	# $self->{'tables'}{'client_feature:2'}{'action'} = 'update-website-analytics-feature';
 
 	## skip nullable patient_id in invisalign_patient
-	$self->{'rules'}{'invisalign_patient'}{'patient_id'}->ignore_null();
+	#$self->{'rules'}{'invisalign_patient'}{'patient_id'}->ignore_null();
 
 	$self->{'rules'}{'si_client_settings'}{'last_log_report_id'}->ignore_null();
 	$self->{'rules'}{'si_client_settings'}{'last_successful_log_report_id'}->ignore_null();
 	$self->{'rules'}{'si_client_settings'}{'last_modules_log_report_id'}->ignore_null();
 	
-	$self->{'rules'}{'visitor_versioned'}{'address_id'}->ignore_null();
+	#$self->{'rules'}{'visitor_versioned'}{'address_id'}->ignore_null();
 }
 
 sub apply_links {
@@ -1016,13 +979,17 @@ sub apply_links {
 
 			my $link = $links->get_link_from($table_6, $column_6);
 			if (defined $link && ! $migration->is_link_to_shared_table($table_6, $column_6)) {
-				my $link_info = $link->{'link_info'} // {};
-				return Migration::Rule::ForeignKey->new(
-					$link->{'to_table'}, 
-					$link->{'to_column'}, 
-					$link_info->{'table'}, 
-					$link_info->{'column'}
-				)->set_source($link->{'comment'});
+				if ($migration->is_table_with_stable_id($link->{'to_table'})) {
+					## no need to generate rule if link is stable
+				} else {
+					my $link_info = $link->{'link_info'} // {};
+					return Migration::Rule::ForeignKey->new(
+						$link->{'to_table'}, 
+						$link->{'to_column'}, 
+						$link_info->{'table'}, 
+						$link_info->{'column'}
+					)->set_source($link->{'comment'});
+				}
 			}
 			return undef;
 		}
@@ -1505,6 +1472,27 @@ sub new {
 			'upload_postprocessing_task.postprocessing_action_id' => 1,
 			'visitor_opinion.category_id' => 1,
 		},
+		'tables_with_stable_ids' => {
+			'account_versioned' => 1,
+			'address_versioned' => 1,
+			'appointment_procedure_versioned' => 1,
+			'appointment_versioned' => 1,
+			'client' => 1,
+			'email_versioned' => 1,
+			'insurance_contract_versioned' => 1,
+			'ledger_versioned' => 1,
+			'office_versioned' => 1,
+			'patient_referrer_versioned' => 1,
+			'patient_staff_versioned' => 1,
+			'phone_versioned' => 1,
+			'procedure_versioned' => 1,
+			'recall_versioned' => 1,
+			'referrer_versioned' => 1,
+			'responsible_patient_versioned' => 1,
+			'staff_versioned' => 1,
+			'treatment_plan_versioned' => 1,
+			'visitor_versioned' => 1,
+		}
 	}, $class;
 	$self->_generate_actions($required_tables);
 	$self->_generate_autoincrement($schema_6);
@@ -1588,6 +1576,12 @@ sub is_link_to_shared_table {
 	return exists $self->{'link_to_shared_table'}{$table_6.".".$column_6};
 }
 
+sub is_table_with_stable_id {
+    my ($self, $to_table) = @_;
+	
+	return $self->{'tables_with_stable_ids'}{$to_table};
+}
+
 sub get_update_on_columns {
 	my ($self, $table_6) = @_;
 	
@@ -1607,7 +1601,8 @@ sub get_table_action {
 	if (exists $self->{'actions'}{$table_6}) {
 		return $self->{'actions'}{$table_6};
 	} else {
-		die "can't find action for [$table_6]";
+		return "all";
+		#die "can't find action for [$table_6]";
 	}
 }
 
@@ -1627,7 +1622,7 @@ sub load_hard_coded_links {
 		"recall_versioned", "referrer_versioned", "responsible_patient_versioned", "staff_versioned", 
 		"treatment_plan_versioned", "visitor_versioned", "appointment_local", "email_user_sensitive", 
 		"office_user_sensitive", "phone_user_sensitive", "procedure_user_sensitive", "recall_user_sensitive", 
-		"responsible_patient_user_sensitive", "visitor_fact", "visitor_user_sensitive", 
+		"responsible_patient_user_sensitive", "visitor_fact", "visitor_user_sensitive", "client_current_dataset",
 	) {
 		$links->add_link(
 			$from_table, 
@@ -1650,7 +1645,8 @@ sub load_hard_coded_links {
 		"address_local.visitor_id", "appointment_local.patient_id", "appointment_versioned.patient_id", "email_local.visitor_id", 
 		"email_versioned.visitor_id", "patient_referrer_versioned.patient_id", "patient_staff_versioned.patient_id", 
 		"phone_local.visitor_id", "phone_versioned.visitor_id", "recall_versioned.patient_id", 
-		"responsible_patient_versioned.patient_id", "treatment_plan_versioned.patient_id", 
+		"responsible_patient_versioned.patient_id", "treatment_plan_versioned.patient_id", "email_patient_access_token.visitor_id",
+
 	) {
 		my ($from_table, $from_column) = split('\.', $link);
 		$links->add_link(

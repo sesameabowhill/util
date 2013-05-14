@@ -1,467 +1,114 @@
 {
-   "account_versioned" : {
-      "to_table" : "account_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "account_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "responsible_patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "insurance_contract_id",
-            "comment" : "link to [insurance_contract_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "insurance_contract_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
    "address_local" : {
       "to_table" : "address_local",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "address_local",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "address_versioned" : {
-      "to_table" : "address_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "address_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "appointment_confirmation_history" : {
       "to_table" : "appointment_confirmation_history",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "appointment_confirmation_history",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "appointment_id",
-            "comment" : "link to [appointment_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "appointment_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "appointment_local" : {
       "to_table" : "appointment_local",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "appointment_local",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "staff_id",
-            "comment" : "link to [staff_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "staff_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         },
-         {
-            "column" : "office_id",
-            "comment" : "link to [office_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "office_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "appointment_procedure_versioned" : {
-      "to_table" : "appointment_procedure_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "appointment_procedure_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "procedure_id",
-            "comment" : "link to [procedure_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "procedure_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "appointment_id",
-            "comment" : "link to [appointment_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "appointment_versioned",
-            "lookup_column" : "id"
          }
       ]
    },
    "appointment_reminder_schedule" : {
       "to_table" : "appointment_reminder_schedule",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "appointment_reminder_schedule",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "appointment_user_sensitive" : {
-      "to_table" : "appointment_user_sensitive",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "appointment_user_sensitive",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "appointment_id",
-            "comment" : "link to [appointment_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "appointment_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "appointment_versioned" : {
-      "to_table" : "appointment_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "appointment_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "office_id",
-            "comment" : "link to [office_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "office_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "staff_id",
-            "comment" : "link to [staff_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "staff_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "client_access" : {
-      "to_table" : "client_access",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "client_access",
-            "column" : "user_name"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "user_name",
-            "comment" : "link to [client.cl_username] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "cl_username"
          }
       ]
    },
    "client_feature" : {
       "to_table" : "client_feature",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "client_feature",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "client_note" : {
-      "to_table" : "client_note",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "client_note",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "client_properties" : {
-      "to_table" : "client_properties",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "client_properties",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "client_setting" : {
       "to_table" : "client_setting",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "client_setting",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "email_contact_log" : {
       "to_table" : "email_contact_log",
-      "priority" : "2",
-      "date_filter_column" : {
-         "table" : "email_contact_log",
-         "column" : "clog_sdate"
-      },
       "action" : "past-week-only",
       "path_to_client" : [
          {
@@ -469,76 +116,39 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "email_contact_log",
+         "column" : "clog_sdate"
+      },
       "columns" : [
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "email_local" : {
       "to_table" : "email_local",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "email_local",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "email_post_app_survey_log" : {
       "to_table" : "email_post_app_survey_log",
-      "priority" : "2",
-      "date_filter_column" : {
-         "table" : "email_post_app_survey_log",
-         "column" : "date"
-      },
       "action" : "past-week-only",
       "path_to_client" : [
          {
@@ -550,31 +160,21 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "email_post_app_survey_log",
+         "column" : "date"
+      },
       "columns" : [
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "email_referral" : {
       "to_table" : "email_referral",
-      "priority" : "2",
-      "date_filter_column" : {
-         "table" : "email_referral_mail",
-         "column" : "sending_date"
-      },
       "action" : "past-week-only",
       "path_to_client" : [
          {
@@ -582,36 +182,20 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "email_referral_mail",
+         "column" : "sending_date"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "referrer_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          },
          {
             "column" : "referral_mail_id",
             "comment" : "link to [email_referral_mail.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "email_referral_mail",
             "lookup_column" : "id"
@@ -620,11 +204,6 @@
    },
    "email_referral_mail" : {
       "to_table" : "email_referral_mail",
-      "priority" : "2",
-      "date_filter_column" : {
-         "table" : "email_referral_mail",
-         "column" : "sending_date"
-      },
       "action" : "past-week-only",
       "path_to_client" : [
          {
@@ -632,85 +211,57 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "email_referral_mail",
+         "column" : "sending_date"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "email_reminder_settings" : {
       "to_table" : "email_reminder_settings",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "email_reminder_settings",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "email_sending_queue" : {
       "to_table" : "email_sending_queue",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "email_sending_queue",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "email_sent_mail_log" : {
       "to_table" : "email_sent_mail_log",
-      "priority" : "2",
-      "date_filter_column" : {
-         "table" : "email_sent_mail_log",
-         "column" : "sml_date"
-      },
       "action" : "past-week-only",
       "path_to_client" : [
          {
@@ -718,454 +269,191 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "email_sent_mail_log",
+         "column" : "sml_date"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "contact_log_id",
             "comment" : "link to [email_contact_log.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "email_contact_log",
             "lookup_column" : "id"
          },
          {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "email_unsubscribe" : {
-      "to_table" : "email_unsubscribe",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "email_unsubscribe",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "email_user_sensitive" : {
-      "to_table" : "email_user_sensitive",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "email_user_sensitive",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "email_id",
-            "comment" : "link to [email_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "email_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "email_versioned" : {
-      "to_table" : "email_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "email_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "email_welcome_forcing" : {
-      "to_table" : "email_welcome_forcing",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "email_welcome_forcing",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "flex_plan_info" : {
-      "to_table" : "flex_plan_info",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "flex_plan_info",
-            "column" : "visitor_id"
-         },
-         {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
          }
       ]
    },
    "hhf_applications" : {
       "to_table" : "hhf_applications",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "hhf_applications",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "hhf_client_settings" : {
-      "to_table" : "hhf_client_settings",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "hhf_client_settings",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "hhf_log" : {
       "to_table" : "hhf_log",
-      "priority" : "3",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "hhf_log",
             "column" : "client_id"
          }
       ],
+      "priority" : "3",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "hhf_settings" : {
       "to_table" : "hhf_settings",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "hhf_settings",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "hhf_templates" : {
       "to_table" : "hhf_templates",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "hhf_templates",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "hide_patient_change_history" : {
       "to_table" : "hide_patient_change_history",
-      "priority" : "3",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "hide_patient_change_history",
             "column" : "client_id"
          }
       ],
+      "priority" : "3",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "responsible_patient_id",
-            "comment" : "link to [responsible_patient_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "responsible_patient_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "hits_count" : {
       "to_table" : "hits_count",
-      "priority" : "3",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "hits_count",
             "column" : "client_id"
          }
       ],
+      "priority" : "3",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "hcount_id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "hits_log" : {
       "to_table" : "hits_log",
-      "priority" : "3",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "hits_log",
             "column" : "client_id"
          }
       ],
+      "priority" : "3",
       "columns" : [
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "hlog_id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "holiday_delivery_log" : {
       "to_table" : "holiday_delivery_log",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "holiday_delivery_log",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "hdl_id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "holiday_settings" : {
       "to_table" : "holiday_settings",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "holiday_settings",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "hds_id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "holiday_settings_recipients_link" : {
       "to_table" : "holiday_settings_recipients_link",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "holiday_settings_recipients_link",
@@ -1176,12 +464,11 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "hds_id",
             "comment" : "link to [holiday_settings.hds_id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "holiday_settings",
             "lookup_column" : "hds_id"
@@ -1189,14 +476,13 @@
          {
             "column" : "hsrl_id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "holiday_settings_recipients_link_log" : {
       "to_table" : "holiday_settings_recipients_link_log",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "holiday_settings_recipients_link_log",
@@ -1207,48 +493,25 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "hsrll_id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          },
          {
             "column" : "hdl_id",
             "comment" : "link to [holiday_delivery_log.hdl_id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "holiday_delivery_log",
             "lookup_column" : "hdl_id"
          }
       ]
    },
-   "insurance_contract_versioned" : {
-      "to_table" : "insurance_contract_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "insurance_contract_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
    "insurance_plan_info" : {
       "to_table" : "insurance_plan_info",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "insurance_plan_info",
@@ -1259,165 +522,65 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "internal_sales_resource" : {
-      "to_table" : "internal_sales_resource",
-      "priority" : "3",
-      "path_to_client" : [
-         {
-            "table" : "internal_sales_resource",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "internal_sales_resource_quotes" : {
       "to_table" : "internal_sales_resource_quotes",
-      "priority" : "3",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "internal_sales_resource_quotes",
             "column" : "client_id"
          }
       ],
+      "priority" : "3",
       "columns" : [
          {
             "column" : "number",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "internal_salesforce_client_package" : {
-      "to_table" : "internal_salesforce_client_package",
-      "priority" : "3",
-      "path_to_client" : [
-         {
-            "table" : "internal_salesforce_client_package",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "internal_spm_idea" : {
       "to_table" : "internal_spm_idea",
-      "priority" : "3",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "internal_spm_idea",
             "column" : "client_id"
          }
       ],
+      "priority" : "3",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "internal_statistics_pre_sesame" : {
-      "to_table" : "internal_statistics_pre_sesame",
-      "priority" : "3",
-      "path_to_client" : [
-         {
-            "table" : "internal_statistics_pre_sesame",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "invisalign_case_process_doctor" : {
       "to_table" : "invisalign_case_process_doctor",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "invisalign_case_process_doctor",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "invisalign_client_id",
             "comment" : "link to [invisalign_client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "invisalign_client",
             "lookup_column" : "id"
@@ -1426,28 +589,18 @@
    },
    "invisalign_case_process_patient" : {
       "to_table" : "invisalign_case_process_patient",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "invisalign_case_process_patient",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "invisalign_client_id",
             "comment" : "link to [invisalign_client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "invisalign_client",
             "lookup_column" : "id"
@@ -1456,61 +609,43 @@
    },
    "invisalign_client" : {
       "to_table" : "invisalign_client",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "invisalign_client",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "invisalign_new_password_info" : {
       "to_table" : "invisalign_new_password_info",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "invisalign_new_password_info",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "invisalign_patient" : {
       "to_table" : "invisalign_patient",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "invisalign_patient",
@@ -1521,21 +656,11 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key-skip-null",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "invisalign_client_id",
             "comment" : "link to [invisalign_client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "invisalign_client",
             "lookup_column" : "id"
@@ -1543,14 +668,13 @@
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "invisalign_refinement" : {
       "to_table" : "invisalign_refinement",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "invisalign_refinement",
@@ -1561,12 +685,11 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "invisalign_client_id",
             "comment" : "link to [invisalign_client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "invisalign_client",
             "lookup_column" : "id"
@@ -1574,215 +697,67 @@
          {
             "column" : "Id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "invisalign_text" : {
       "to_table" : "invisalign_text",
-      "priority" : "3",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "invisalign_text",
             "column" : "client_id"
          }
       ],
+      "priority" : "3",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "ledger_versioned" : {
-      "to_table" : "ledger_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "ledger_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "account_id",
-            "comment" : "link to [account_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "account_versioned",
-            "lookup_column" : "id"
          }
       ]
    },
    "office_address_local" : {
       "to_table" : "office_address_local",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "office_address_local",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "office_id",
-            "comment" : "link to [office_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "office_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "office_user_sensitive" : {
-      "to_table" : "office_user_sensitive",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "office_user_sensitive",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "office_versioned" : {
-      "to_table" : "office_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "office_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "address_id",
-            "comment" : "link to [address_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "address_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "opse_client_settings" : {
-      "to_table" : "opse_client_settings",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "opse_client_settings",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "opse_payment_log" : {
       "to_table" : "opse_payment_log",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "opse_payment_log",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "LId",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "orthomation" : {
       "to_table" : "orthomation",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "orthomation",
@@ -1793,348 +768,126 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "patient_page_messages" : {
       "to_table" : "patient_page_messages",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "patient_page_messages",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "patient_referrer_versioned" : {
-      "to_table" : "patient_referrer_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "patient_referrer_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "referrer_id",
-            "comment" : "link to [referrer_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "referrer_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "patient_staff_versioned" : {
-      "to_table" : "patient_staff_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "patient_staff_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "staff_id",
-            "comment" : "link to [staff_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "staff_versioned",
-            "lookup_column" : "id"
          }
       ]
    },
    "phone_local" : {
       "to_table" : "phone_local",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "phone_local",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "phone_user_sensitive" : {
-      "to_table" : "phone_user_sensitive",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "phone_user_sensitive",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "phone_id",
-            "comment" : "link to [phone_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "phone_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "phone_versioned" : {
-      "to_table" : "phone_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "phone_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
          }
       ]
    },
    "pms_migration_log" : {
       "to_table" : "pms_migration_log",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "pms_migration_log",
             "column" : "client_id"
          }
       ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "id",
-            "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
-            "action" : "autoincrement"
-         }
-      ]
-   },
-   "pms_migration_remap" : {
-      "to_table" : "pms_migration_remap",
       "priority" : "2",
       "columns" : [
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "pms_migration_status" : {
       "to_table" : "pms_migration_status",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "pms_migration_status",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "ppn_activity_log" : {
       "to_table" : "ppn_activity_log",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "ppn_activity_log",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "ppn_article" : {
       "to_table" : "ppn_article",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "ppn_article",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "ppn_article_letter" : {
       "to_table" : "ppn_article_letter",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "ppn_article_letter",
@@ -2145,36 +898,23 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "art_id",
             "comment" : "link to [ppn_article.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "ppn_article",
             "lookup_column" : "id"
          },
          {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          },
          {
             "column" : "let_id",
             "comment" : "link to [ppn_letter.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "ppn_letter",
             "lookup_column" : "id"
@@ -2183,7 +923,7 @@
    },
    "ppn_article_queue" : {
       "to_table" : "ppn_article_queue",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "ppn_article_queue",
@@ -2194,69 +934,38 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "queue_id",
             "comment" : "link to [ppn_email_queue.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "ppn_email_queue",
             "lookup_column" : "id"
          }
       ]
    },
-   "ppn_common_article_usage" : {
-      "to_table" : "ppn_common_article_usage",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "ppn_common_article_usage",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
    "ppn_email_queue" : {
       "to_table" : "ppn_email_queue",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "ppn_email_queue",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "ppn_href" : {
       "to_table" : "ppn_href",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "ppn_href",
@@ -2267,18 +976,16 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          },
          {
             "column" : "let_id",
             "comment" : "link to [ppn_letter.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "ppn_letter",
             "lookup_column" : "id"
@@ -2287,34 +994,25 @@
    },
    "ppn_letter" : {
       "to_table" : "ppn_letter",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "ppn_letter",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "ppn_letter_logo" : {
       "to_table" : "ppn_letter_logo",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "ppn_letter_logo",
@@ -2325,12 +1023,11 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "let_id",
             "comment" : "link to [ppn_letter.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "ppn_letter",
             "lookup_column" : "id"
@@ -2339,346 +1036,81 @@
    },
    "printable_ledger" : {
       "to_table" : "printable_ledger",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "printable_ledger",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "procedure_user_sensitive" : {
-      "to_table" : "procedure_user_sensitive",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "procedure_user_sensitive",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "procedure_id",
-            "comment" : "link to [procedure_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "procedure_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "procedure_versioned" : {
-      "to_table" : "procedure_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "procedure_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "recall_user_sensitive" : {
-      "to_table" : "recall_user_sensitive",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "recall_user_sensitive",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "recall_id",
-            "comment" : "link to [recall_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "recall_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "recall_versioned" : {
-      "to_table" : "recall_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "recall_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "office_id",
-            "comment" : "link to [office_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "office_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "referrer_email_log" : {
       "to_table" : "referrer_email_log",
-      "priority" : "3",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "referrer_email_log",
             "column" : "client_id"
          }
       ],
+      "priority" : "3",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "referrer_id",
-            "comment" : "link to [referrer_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "referrer_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "referrer_user_sensitive" : {
       "to_table" : "referrer_user_sensitive",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "referrer_user_sensitive",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "si_doctor_id",
             "comment" : "link to [si_doctor.DocId] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "si_doctor",
             "lookup_column" : "DocId"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "referrer_id",
-            "comment" : "link to [referrer_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "referrer_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "referrer_versioned" : {
-      "to_table" : "referrer_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "referrer_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "responsible_patient_user_sensitive" : {
-      "to_table" : "responsible_patient_user_sensitive",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "responsible_patient_user_sensitive",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "responsible_patient_id",
-            "comment" : "link to [responsible_patient_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "responsible_patient_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "responsible_patient_versioned" : {
-      "to_table" : "responsible_patient_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "responsible_patient_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "responsible_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "satellite" : {
       "to_table" : "satellite",
-      "priority" : "1",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "satellite",
             "column" : "client_id"
          }
       ],
+      "priority" : "1",
       "columns" : [
          {
             "column" : "s_id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "send2friend_log" : {
       "to_table" : "send2friend_log",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "send2friend_log",
@@ -2689,27 +1121,18 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "sfl_id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         },
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
          }
       ]
    },
    "si_alerted_doctor_to_message" : {
       "to_table" : "si_alerted_doctor_to_message",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_alerted_doctor_to_message",
@@ -2720,12 +1143,11 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "DocId",
             "comment" : "link to [si_doctor.DocId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_doctor",
             "lookup_column" : "DocId"
@@ -2733,8 +1155,6 @@
          {
             "column" : "MsgId",
             "comment" : "link to [si_message.MsgId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_message",
             "lookup_column" : "MsgId"
@@ -2743,37 +1163,25 @@
    },
    "si_client_settings" : {
       "to_table" : "si_client_settings",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_client_settings",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "last_log_report_id",
             "comment" : "link to [si_upload_log_report.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key-skip-null",
             "lookup_table" : "si_upload_log_report",
             "lookup_column" : "id"
          },
          {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
             "column" : "last_successful_log_report_id",
             "comment" : "link to [si_upload_log_report.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key-skip-null",
             "lookup_table" : "si_upload_log_report",
             "lookup_column" : "id"
@@ -2781,8 +1189,6 @@
          {
             "column" : "last_modules_log_report_id",
             "comment" : "link to [si_upload_log_report.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key-skip-null",
             "lookup_table" : "si_upload_log_report",
             "lookup_column" : "id"
@@ -2791,112 +1197,61 @@
    },
    "si_client_task" : {
       "to_table" : "si_client_task",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_client_task",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "si_default_timepoint_name" : {
-      "to_table" : "si_default_timepoint_name",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "si_default_timepoint_name",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "si_doctor" : {
       "to_table" : "si_doctor",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_doctor",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "DocId",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "si_doctor_access" : {
       "to_table" : "si_doctor_access",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_doctor_access",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "PatId",
             "comment" : "link to [si_patient.PatId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_patient",
             "lookup_column" : "PatId"
          },
          {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
             "column" : "DocId",
             "comment" : "link to [si_doctor.DocId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_doctor",
             "lookup_column" : "DocId"
@@ -2905,43 +1260,32 @@
    },
    "si_doctor_email_log" : {
       "to_table" : "si_doctor_email_log",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_doctor_email_log",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "si_doctor_id",
             "comment" : "link to [si_doctor.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "si_doctor",
             "lookup_column" : "id"
          },
          {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "si_doctor_theme" : {
       "to_table" : "si_doctor_theme",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_doctor_theme",
@@ -2952,12 +1296,11 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "ThemeId",
             "comment" : "link to [si_theme.ThemeId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_theme",
             "lookup_column" : "ThemeId"
@@ -2965,8 +1308,6 @@
          {
             "column" : "DocId",
             "comment" : "link to [si_doctor.DocId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_doctor",
             "lookup_column" : "DocId"
@@ -2975,19 +1316,18 @@
    },
    "si_image" : {
       "to_table" : "si_image",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_image",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "PatId",
             "comment" : "link to [si_patient.PatId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_patient",
             "lookup_column" : "PatId"
@@ -2995,44 +1335,24 @@
          {
             "column" : "ImageId",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "si_image_to_message" : {
       "to_table" : "si_image_to_message",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_image_to_message",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "ImgId",
             "comment" : "link to [si_image.ImageId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_image",
             "lookup_column" : "ImageId"
@@ -3040,68 +1360,33 @@
          {
             "column" : "MsgId",
             "comment" : "link to [si_message.MsgId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_message",
             "lookup_column" : "MsgId"
          }
       ]
    },
-   "si_image_type" : {
-      "to_table" : "si_image_type",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "si_image_type",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
    "si_message" : {
       "to_table" : "si_message",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_message",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "ThemeId",
             "comment" : "link to [si_theme.ThemeId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_theme",
             "lookup_column" : "ThemeId"
          },
          {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
             "column" : "DocId",
             "comment" : "link to [si_doctor.DocId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_doctor",
             "lookup_column" : "DocId"
@@ -3109,14 +1394,13 @@
          {
             "column" : "MsgId",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "si_message_attachment" : {
       "to_table" : "si_message_attachment",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_message_attachment",
@@ -3127,84 +1411,41 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "FileId",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          },
          {
             "column" : "MsgId",
             "comment" : "link to [si_message.MsgId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_message",
             "lookup_column" : "MsgId"
          }
       ]
    },
-   "si_patient" : {
-      "to_table" : "si_patient",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "si_patient",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
    "si_patient_link" : {
       "to_table" : "si_patient_link",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_patient_link",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          },
          {
             "column" : "si_patient_id",
             "comment" : "link to [si_patient.PatId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_patient",
             "lookup_column" : "PatId"
@@ -3213,182 +1454,107 @@
    },
    "si_patient_profile" : {
       "to_table" : "si_patient_profile",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_patient_profile",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "PId",
             "comment" : "link to [si_patient.PatId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_patient",
             "lookup_column" : "PatId"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "si_patient_timepoint_link" : {
       "to_table" : "si_patient_timepoint_link",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_patient_timepoint_link",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "PatId",
             "comment" : "link to [si_patient.PatId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_patient",
             "lookup_column" : "PatId"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "si_standard_message" : {
       "to_table" : "si_standard_message",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_standard_message",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "Id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "si_theme" : {
       "to_table" : "si_theme",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "si_theme",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "PatId",
             "comment" : "link to [si_patient.PatId] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "si_patient",
             "lookup_column" : "PatId"
          },
          {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
             "column" : "ThemeId",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "si_upload_log_report" : {
       "to_table" : "si_upload_log_report",
-      "priority" : "2",
+      "action" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "si_upload_log_report",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "sms_client_settings" : {
-      "to_table" : "sms_client_settings",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "sms_client_settings",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "sms_message_history" : {
       "to_table" : "sms_message_history",
-      "priority" : "2",
-      "date_filter_column" : {
-         "table" : "sms_message_history",
-         "column" : "time2send"
-      },
       "action" : "past-week-only",
       "path_to_client" : [
          {
@@ -3400,27 +1566,20 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "sms_message_history",
+         "column" : "time2send"
+      },
       "columns" : [
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          },
          {
             "column" : "client_id",
             "comment" : "link to [sms_client_settings.Id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "sms_client_settings",
             "lookup_column" : "Id"
@@ -3429,11 +1588,6 @@
    },
    "sms_message_response" : {
       "to_table" : "sms_message_response",
-      "priority" : "2",
-      "date_filter_column" : {
-         "table" : "sms_message_response",
-         "column" : "ResponseReceiveDate"
-      },
       "action" : "past-week-only",
       "path_to_client" : [
          {
@@ -3445,12 +1599,15 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "sms_message_response",
+         "column" : "ResponseReceiveDate"
+      },
       "columns" : [
          {
             "column" : "client_id",
             "comment" : "link to [sms_client_settings.Id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "sms_client_settings",
             "lookup_column" : "Id"
@@ -3458,140 +1615,31 @@
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "srm_resource" : {
-      "to_table" : "srm_resource",
-      "priority" : "2",
-      "path_to_client" : [],
-      "columns" : [
-         {
-            "column" : "container",
-            "comment" : "link to [client.cl_username] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "cl_username"
-         }
-      ]
-   },
-   "staff_schedule" : {
-      "to_table" : "staff_schedule",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "staff_schedule",
-            "column" : "office_id"
-         },
-         {
-            "table" : "office_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "office_id",
-            "comment" : "link to [office_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "office_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "staff_schedule_rules" : {
-      "to_table" : "staff_schedule_rules",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "staff_schedule_rules",
-            "column" : "office_id"
-         },
-         {
-            "table" : "office_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "office_id",
-            "comment" : "link to [office_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "office_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "staff_versioned" : {
-      "to_table" : "staff_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "staff_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "survey_answer" : {
       "to_table" : "survey_answer",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "survey_answer",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "question_option_id",
             "comment" : "link to [survey_question_option.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "survey_question_option",
             "lookup_column" : "id"
          },
          {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
             "column" : "question_id",
             "comment" : "link to [survey_question.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "survey_question",
             "lookup_column" : "id"
@@ -3599,41 +1647,31 @@
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "survey_question" : {
       "to_table" : "survey_question",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "survey_question",
             "column" : "member_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "member_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "survey_question_option" : {
       "to_table" : "survey_question_option",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "survey_question_option",
@@ -3644,12 +1682,11 @@
             "column" : "member_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
          {
             "column" : "question_id",
             "comment" : "link to [survey_question.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "survey_question",
             "lookup_column" : "id"
@@ -3657,105 +1694,31 @@
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "token" : {
-      "to_table" : "token",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "token",
-            "column" : "user_id"
-         },
-         {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "user_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "treatment_plan_versioned" : {
-      "to_table" : "treatment_plan_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "treatment_plan_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "procedure_id",
-            "comment" : "link to [procedure_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "procedure_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
          }
       ]
    },
    "upload_postprocessing_task" : {
       "to_table" : "upload_postprocessing_task",
-      "priority" : "1",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "upload_postprocessing_task",
             "column" : "client_id"
          }
       ],
+      "priority" : "1",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "upload_postprocessing_task_param" : {
       "to_table" : "upload_postprocessing_task_param",
-      "priority" : "1",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "upload_postprocessing_task_param",
@@ -3766,18 +1729,16 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "1",
       "columns" : [
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          },
          {
             "column" : "task_id",
             "comment" : "link to [upload_postprocessing_task.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "upload_postprocessing_task",
             "lookup_column" : "id"
@@ -3786,100 +1747,43 @@
    },
    "upload_settings" : {
       "to_table" : "upload_settings",
-      "priority" : "1",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "upload_settings",
             "column" : "client_id"
          }
       ],
+      "priority" : "1",
       "columns" : [
          {
             "column" : "setting_id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "visitor_fact" : {
-      "to_table" : "visitor_fact",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "visitor_fact",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "visitor_opinion" : {
       "to_table" : "visitor_opinion",
-      "priority" : "3",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "visitor_opinion",
             "column" : "client_id"
          }
       ],
+      "priority" : "3",
       "columns" : [
-         {
-            "column" : "office_id",
-            "comment" : "link to [office_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "office_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "visitor_setting" : {
       "to_table" : "visitor_setting",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "visitor_setting",
@@ -3890,112 +1794,18 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "visitor_settings" : {
-      "to_table" : "visitor_settings",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "visitor_settings",
-            "column" : "visitor_id"
-         },
-         {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "visitor_user_sensitive" : {
-      "to_table" : "visitor_user_sensitive",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "visitor_user_sensitive",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "visitor_versioned" : {
-      "to_table" : "visitor_versioned",
-      "priority" : "1",
-      "path_to_client" : [
-         {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "address_id",
-            "comment" : "link to [address_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key-skip-null",
-            "lookup_table" : "address_versioned",
-            "lookup_column" : "id"
          }
       ]
    },
    "voice_appointment_reminder_procedure" : {
       "to_table" : "voice_appointment_reminder_procedure",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "voice_appointment_reminder_procedure",
@@ -4006,103 +1816,37 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "procedure_id",
-            "comment" : "link to [procedure_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "procedure_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "voice_reminder_settings_id",
             "comment" : "link to [voice_reminder_settings.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "voice_reminder_settings",
             "lookup_column" : "id"
          }
       ]
    },
-   "voice_autofills" : {
-      "to_table" : "voice_autofills",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "voice_autofills",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "voice_client_settings" : {
-      "to_table" : "voice_client_settings",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "voice_client_settings",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
    "voice_end_message" : {
       "to_table" : "voice_end_message",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "voice_end_message",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "voice_left_messages" : {
       "to_table" : "voice_left_messages",
-      "priority" : "2",
-      "date_filter_column" : {
-         "table" : "voice_left_messages",
-         "column" : "call_time"
-      },
       "action" : "past-week-only",
       "path_to_client" : [
          {
@@ -4110,21 +1854,15 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "voice_left_messages",
+         "column" : "call_time"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "rec_id",
             "comment" : "link to [voice_recipient_list.RLId] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "voice_recipient_list",
             "lookup_column" : "RLId"
@@ -4133,11 +1871,6 @@
    },
    "voice_message_history" : {
       "to_table" : "voice_message_history",
-      "priority" : "2",
-      "date_filter_column" : {
-         "table" : "voice_message_history",
-         "column" : "time2send"
-      },
       "action" : "past-week-only",
       "path_to_client" : [
          {
@@ -4145,21 +1878,15 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "voice_message_history",
+         "column" : "time2send"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "rec_id",
             "comment" : "link to [voice_recipient_list.RLId] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "voice_recipient_list",
             "lookup_column" : "RLId"
@@ -4167,64 +1894,12 @@
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "voice_no_call_list" : {
-      "to_table" : "voice_no_call_list",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "voice_no_call_list",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "voice_patient_name_pronunciation" : {
-      "to_table" : "voice_patient_name_pronunciation",
-      "priority" : "2",
-      "path_to_client" : [
-         {
-            "table" : "voice_patient_name_pronunciation",
-            "column" : "patient_id"
-         },
-         {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
          }
       ]
    },
    "voice_recipient_list" : {
       "to_table" : "voice_recipient_list",
-      "priority" : "2",
-      "date_filter_column" : {
-         "table" : "voice_message_history",
-         "column" : "time2send"
-      },
       "action" : "past-week-only",
       "path_to_client" : [
          {
@@ -4232,93 +1907,39 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "voice_message_history",
+         "column" : "time2send"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "voice_reminder_settings" : {
       "to_table" : "voice_reminder_settings",
-      "priority" : "2",
+      "action" : "all",
       "path_to_client" : [
          {
             "table" : "voice_reminder_settings",
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "voice_system_transaction_log" : {
-      "to_table" : "voice_system_transaction_log",
-      "priority" : "2",
-      "date_filter_column" : {
-         "table" : "voice_system_transaction_log",
-         "column" : "eventtime_utc"
-      },
-      "action" : "past-week-only",
-      "path_to_client" : [
-         {
-            "table" : "voice_system_transaction_log",
-            "column" : "client_id"
-         }
-      ],
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "voice_transactions_log" : {
       "to_table" : "voice_transactions_log",
-      "priority" : "2",
-      "date_filter_column" : {
-         "table" : "voice_transactions_log",
-         "column" : "starttime_utc"
-      },
       "action" : "past-week-only",
       "path_to_client" : [
          {
@@ -4326,72 +1947,44 @@
             "column" : "client_id"
          }
       ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "voice_transactions_log",
+         "column" : "starttime_utc"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "email_contact_log:2" : {
       "to_table" : "email_contact_log",
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "email_contact_log",
-         "column" : "clog_sdate"
-      },
+      "action" : "insert-contact-log",
       "path_to_client" : [
          {
             "table" : "email_contact_log",
             "column" : "client_id"
          }
       ],
-      "action" : "insert-contact-log",
+      "priority" : "3",
+      "date_filter_column" : {
+         "table" : "email_contact_log",
+         "column" : "clog_sdate"
+      },
       "columns" : [
-         {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "email_post_app_survey_log:2" : {
       "to_table" : "email_post_app_survey_log",
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "email_post_app_survey_log",
-         "column" : "date"
-      },
+      "action" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "email_post_app_survey_log",
@@ -4402,69 +1995,42 @@
             "column" : "client_id"
          }
       ],
-      "action" : "past-week-only",
+      "priority" : "3",
+      "date_filter_column" : {
+         "table" : "email_post_app_survey_log",
+         "column" : "date"
+      },
       "columns" : [
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "email_referral:2" : {
       "to_table" : "email_referral",
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "email_referral_mail",
-         "column" : "sending_date"
-      },
+      "action" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "email_referral",
             "column" : "client_id"
          }
       ],
-      "action" : "past-week-only",
+      "priority" : "3",
+      "date_filter_column" : {
+         "table" : "email_referral_mail",
+         "column" : "sending_date"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "referrer_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          },
          {
             "column" : "referral_mail_id",
             "comment" : "link to [email_referral_mail.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "email_referral_mail",
             "lookup_column" : "id"
@@ -4473,93 +2039,58 @@
    },
    "email_referral_mail:2" : {
       "to_table" : "email_referral_mail",
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "email_referral_mail",
-         "column" : "sending_date"
-      },
+      "action" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "email_referral_mail",
             "column" : "client_id"
          }
       ],
-      "action" : "past-week-only",
+      "priority" : "3",
+      "date_filter_column" : {
+         "table" : "email_referral_mail",
+         "column" : "sending_date"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "email_sent_mail_log:2" : {
       "to_table" : "email_sent_mail_log",
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "email_sent_mail_log",
-         "column" : "sml_date"
-      },
+      "action" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "email_sent_mail_log",
             "column" : "client_id"
          }
       ],
-      "action" : "past-week-only",
+      "priority" : "3",
+      "date_filter_column" : {
+         "table" : "email_sent_mail_log",
+         "column" : "sml_date"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "contact_log_id",
             "comment" : "link to [email_contact_log.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
             "action" : "foreign-key",
             "lookup_table" : "email_contact_log",
             "lookup_column" : "id"
          },
          {
-            "column" : "visitor_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
-         {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "sms_message_history:2" : {
       "to_table" : "sms_message_history",
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "sms_message_history",
-         "column" : "time2send"
-      },
+      "action" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "sms_message_history",
@@ -4570,28 +2101,20 @@
             "column" : "client_id"
          }
       ],
-      "action" : "past-week-only",
+      "priority" : "3",
+      "date_filter_column" : {
+         "table" : "sms_message_history",
+         "column" : "time2send"
+      },
       "columns" : [
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          },
          {
             "column" : "client_id",
             "comment" : "link to [sms_client_settings.Id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "sms_client_settings",
             "lookup_column" : "Id"
@@ -4600,11 +2123,7 @@
    },
    "sms_message_response:2" : {
       "to_table" : "sms_message_response",
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "sms_message_response",
-         "column" : "ResponseReceiveDate"
-      },
+      "action" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "sms_message_response",
@@ -4615,13 +2134,15 @@
             "column" : "client_id"
          }
       ],
-      "action" : "past-week-only",
+      "priority" : "3",
+      "date_filter_column" : {
+         "table" : "sms_message_response",
+         "column" : "ResponseReceiveDate"
+      },
       "columns" : [
          {
             "column" : "client_id",
             "comment" : "link to [sms_client_settings.Id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "sms_client_settings",
             "lookup_column" : "Id"
@@ -4629,40 +2150,28 @@
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "voice_left_messages:2" : {
       "to_table" : "voice_left_messages",
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "voice_left_messages",
-         "column" : "call_time"
-      },
+      "action" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "voice_left_messages",
             "column" : "client_id"
          }
       ],
-      "action" : "past-week-only",
+      "priority" : "3",
+      "date_filter_column" : {
+         "table" : "voice_left_messages",
+         "column" : "call_time"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "rec_id",
             "comment" : "link to [voice_recipient_list.RLId] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "voice_recipient_list",
             "lookup_column" : "RLId"
@@ -4671,33 +2180,22 @@
    },
    "voice_message_history:2" : {
       "to_table" : "voice_message_history",
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "voice_message_history",
-         "column" : "time2send"
-      },
+      "action" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "voice_message_history",
             "column" : "client_id"
          }
       ],
-      "action" : "past-week-only",
+      "priority" : "3",
+      "date_filter_column" : {
+         "table" : "voice_message_history",
+         "column" : "time2send"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "rec_id",
             "comment" : "link to [voice_recipient_list.RLId] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
             "action" : "foreign-key",
             "lookup_table" : "voice_recipient_list",
             "lookup_column" : "RLId"
@@ -4705,106 +2203,50 @@
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
    },
    "voice_recipient_list:2" : {
       "to_table" : "voice_recipient_list",
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "voice_message_history",
-         "column" : "time2send"
-      },
+      "action" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "voice_recipient_list",
             "column" : "client_id"
          }
       ],
-      "action" : "past-week-only",
+      "priority" : "3",
+      "date_filter_column" : {
+         "table" : "voice_message_history",
+         "column" : "time2send"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
-         {
-            "column" : "patient_id",
-            "comment" : "link to [visitor_versioned.id] (hard-coded)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "hard-coded",
-            "action" : "foreign-key",
-            "lookup_table" : "visitor_versioned",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
-         }
-      ]
-   },
-   "voice_system_transaction_log:2" : {
-      "to_table" : "voice_system_transaction_log",
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "voice_system_transaction_log",
-         "column" : "eventtime_utc"
-      },
-      "path_to_client" : [
-         {
-            "table" : "voice_system_transaction_log",
-            "column" : "client_id"
-         }
-      ],
-      "action" : "past-week-only",
-      "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
          }
       ]
    },
    "voice_transactions_log:2" : {
       "to_table" : "voice_transactions_log",
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "voice_transactions_log",
-         "column" : "starttime_utc"
-      },
+      "action" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "voice_transactions_log",
             "column" : "client_id"
          }
       ],
-      "action" : "past-week-only",
+      "priority" : "3",
+      "date_filter_column" : {
+         "table" : "voice_transactions_log",
+         "column" : "starttime_utc"
+      },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [client.id] (from pdm)",
-            "_ref" : "Migration::Rule::ForeignKey",
-            "_source" : "from pdm",
-            "action" : "foreign-key",
-            "lookup_table" : "client",
-            "lookup_column" : "id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
-            "_ref" : "Migration::Rule::AutoIncrement",
             "action" : "autoincrement"
          }
       ]
