@@ -45,15 +45,13 @@ sub get_schema_diff {
 
 	my $rules = MigrationRules->new($logger, $schema_6_list, $required, $migration);
 
-	$rules->make_secondary_rules($migration);
 	$rules->apply_simple_columns_info($migration);
 	$rules->apply_links($links, $migration);
 	$rules->apply_table_info($migration, $links, $schema_6_list);
 	$rules->apply_table_priority($migration, $required_tables);
 	$rules->update_copy_columns_for_link();
 	$rules->apply_missing_eval($migration, $links);
-	$rules->make_date_column_rules($migration);
-	$rules->make_multiple_tables_rules($migration, $schema_6);
+	$rules->generate_secondary_rules_for_date_filter($migration);
 	
 	$rules->save_json_to("_out.json", 1);
 	$rules->save_html_to("_out.html");
@@ -323,39 +321,17 @@ sub new {
 	return $self;
 }
 
-sub make_secondary_rules {
-	my ($self, $migration) = @_;
-
-	for my $table_6 (keys %{ $self->{'rules'} }) {
-		my $secondary_rules = $migration->get_secondary_rule_names($table_6);
-		for my $table_to (@$secondary_rules) {
-			$self->{'rules'}{$table_to} = { %{ $self->{'rules'}{$table_6} } };
-		}
-	}
-}
-
-# sub remove_ignored_columns {
-# 	my ($self, $migration) = @_;
-	
-# 	for my $table_6 (keys %{ $self->{'rules'} }) {
-# 		for my $column_6 (keys %{ $self->{'rules'}{$table_6} }) {
-# 			if ($migration->is_column_ignored($table_6, $column_6)) {
-# 				delete $self->{'rules'}{$table_6}{$column_6};
-# 			}
-# 		}
-# 	}
-# }
-
 sub apply_table_info {
 	my ($self, $migration, $links, $schema_6) = @_;
 
 	{
 		my $stop = 0;
-		my $update_on_columns = $self->get_update_on_columns($schema_6, $migration);
 		for my $table (keys %{ $self->{'rules'} }) {
 			my $table_action = $migration->get_table_action($table);
+			my $table_filter = $migration->get_table_filter($table);
 			tie my %r, 'Tie::IxHash', (
 				'action' => $table_action,
+				'filter' => $table_filter,
 			);
 			$self->{'tables'}{$table} = \%r;
 		}
@@ -388,7 +364,7 @@ sub apply_table_priority {
 
 	for my $table (@$required_tables) {
 		$self->{'tables'}{ $table->{'table'} }{'priority'} = $table->{'priority'};
-		if ($table->{'priority'} == 2 && $table->{'action'} eq 'past-week') {
+		if (defined $table->{'filter'} && $table->{'filter'} ~~ ['past-week', 'past-week-only']) {
 			my $date_column = $table->{'date column'};
 			unless (defined $date_column) {
 				die "no data column for [".$table->{'table'}."]";
@@ -415,33 +391,12 @@ sub apply_table_priority {
 	$self->{'logger'}->stop($stop, "tables without priority");
 }
 
-sub make_multiple_tables_rules {
-	my ($self, $migration, $schema_6) = @_;
-
-	my $stop = 0;
-	my $column_rules = $self->{'rules'};
-	
-	for my $table_6 (keys %$column_rules) {
-		my %from_tables;
-		for my $column_6 (keys %{ $column_rules->{$table_6} }) {
-			if (ref $column_rules->{$table_6}{$column_6} eq 'Migration::Rule::CopyValue') {
-				$from_tables{$column_rules->{$table_6}{$column_6}{'table'}} = 1;
-			}
-		}
-		if (keys %from_tables > 1) {
-			$self->{'logger'}->printf("%s rule uses multiple tables: %s", $table_6, join(', ', sort keys %from_tables));
-			$stop++;
-		}
-	}
-	##$self->{'logger'}->stop($stop, "tables with multiple source");
-}
-
-sub make_date_column_rules {
+sub generate_secondary_rules_for_date_filter {
     my ($self, $migration) = @_;
 
 	my $column_rules = $self->{'rules'};
 	for my $table_6 (keys %$column_rules) {
-		if ($self->{'tables'}{$table_6}{'date_filter_column'}) {
+		if (defined $self->{'tables'}{$table_6}{'filter'} && $self->{'tables'}{$table_6}{'filter'} eq 'past-week') {
 			if (exists $self->{'tables'}{$table_6.":2"}) {
 				die "not unique date filter column rule id for [$table_6]";
 			}
@@ -453,34 +408,15 @@ sub make_date_column_rules {
 				# fix insertContactLog
 				$self->{'tables'}{$table_6.":2"}{'action'} = 'insert-contact-log';
 			} else {
-				$self->{'tables'}{$table_6.":2"}{'action'} = 'past-week-only';
+				$self->{'tables'}{$table_6.":2"}{'action'} = 'insert';
 			}
+			$self->{'tables'}{$table_6.":2"}{'filter'} = 'older-than-week';
 			$self->{'tables'}{$table_6.":2"}{'priority'} = '3';
 
-			$self->{'tables'}{$table_6}{'action'} = 'past-week-only';
+			$self->{'tables'}{$table_6}{'filter'} = 'past-week-only';
 			$self->{'tables'}{$table_6}{'priority'} = '2';
 		}
 	}
-}
-
-sub get_update_on_columns {
-	my ($self, $schema_6, $migration) = @_;
-	
-	my (%primary_keys);
-	for my $column (@$schema_6) {
-		if ($column->{'COLUMN_KEY'} eq "PRI") {
-			unless ($column->{'EXTRA'} =~ m{auto_increment}i) {
-				push(@{ $primary_keys{$column->{'TABLE_NAME'}} }, $column->{'COLUMN_NAME'});
-			}
-		}
-	}
-	for my $column (@$schema_6) {
-		my $update_on = $migration->get_update_on_columns($column->{'TABLE_NAME'});
-		if (defined $update_on) {
-			$primary_keys{$column->{'TABLE_NAME'}} = $update_on;
-		}
-	}
-	return \%primary_keys;
 }
 
 sub find_path_to_client {
@@ -539,20 +475,18 @@ sub flat_rules {
 
 	tie my %rules_by_table, "Tie::IxHash";
 
-	for my $table_6 (keys %$column_rules) {
+	for my $table_6 (keys %{ $self->{'tables'} }) {
+		tie my %r, 'Tie::IxHash', (
+			'to_table' => _get_table_name($table_6),
+			(exists $self->{'tables'}{$table_6} ? %{ $self->{'tables'}{$table_6} } : () ),
+			'columns' => [],
+		);
+		$rules_by_table{$table_6} = \%r;
 		my @missing_rules;
 		for my $column_6 (keys %{ $column_rules->{$table_6} }) {
 			my $rule = $column_rules->{$table_6}{$column_6};
 			if (defined $rule) {
 				if (defined $rule->as_json()) {
-					unless (exists $rules_by_table{$table_6}) {
-						tie my %r, 'Tie::IxHash', (
-							'to_table' => _get_table_name($table_6),
-							(exists $self->{'tables'}{$table_6} ? %{ $self->{'tables'}{$table_6} } : () ),
-							'columns' => [],
-						);
-						$rules_by_table{$table_6} = \%r;
-					}
 					my $column = $self->_make_json_column_obj($table_6, $column_6, $rule, $no_missing_rules);
 					push(@{ $rules_by_table{$table_6}{'columns'} }, $column);
 				}
@@ -628,9 +562,12 @@ sub save_html_to {
 	for my $table (keys %$rules) {
 		push(@lines, "<h2><a name=\"table.".$table."\"></a>Table [$table]</h2>");
 		push(@lines, "<ul>");
-		push(@lines, "<li>To table: <span class=\"value\">".$rules->{$table}{'to_table'}."</span></li>");
+		push(@lines, "<li>Table: <span class=\"value\">".$rules->{$table}{'to_table'}."</span></li>");
 		push(@lines, "<li>Action: <span class=\"value\">".$rules->{$table}{'action'}."</span></li>");
 		push(@lines, "<li>Priority: <span class=\"value\">".$rules->{$table}{'priority'}."</span></li>");
+		if (defined $rules->{$table}{'filter'}) {
+			push(@lines, "<li>Filter: <span class=\"value\">".$rules->{$table}{'filter'}."</span></li>");
+		}
 		my %update_columns;
 		if ($rules->{$table}{'update_on'}) {
 			%update_columns = map {$_ => 1} @{ $rules->{$table}{'update_on'} };
@@ -645,11 +582,11 @@ sub save_html_to {
 		}
 		if ($rules->{$table}{'date_filter_column'}) {
 			$update_columns{$rules->{$table}{'date_filter_column'}} = 1;
-			push(@lines, "<li>Date column for priority 2 extraction: <span class=\"value\">".$rules->{$table}{'date_filter_column'}{'table'}
+			push(@lines, "<li>Date column: <span class=\"value\">".$rules->{$table}{'date_filter_column'}{'table'}
 				.".".$rules->{$table}{'date_filter_column'}{'column'}."</span></li>");
 		}
 		push(@lines, "</ul>");
-		if (exists $rules->{$table}{'columns'}) {
+		if (exists $rules->{$table}{'columns'} && @{ $rules->{$table}{'columns'} }) {
 			push(@lines, "<table><tr><th>column</th><th>action</th></tr>");
 			for my $column ($self->_sort_column_names( $rules->{$table}{'columns'} ) ) {
 				push(@lines, "<tr><td><a name=\"column.".$rules->{$table}{'to_table'}.".".$column->{'column'}."\"></a>".
@@ -690,6 +627,9 @@ sub save_jira_to {
 		push(@lines, "* To table: *".$rules->{$table}{'to_table'}."*");
 		push(@lines, "* Action: *".$rules->{$table}{'action'}."*");
 		push(@lines, "* Priority: *".$rules->{$table}{'priority'}."*");
+		if (defined $rules->{$table}{'filter'}) {
+			push(@lines, "* Filter: *".$rules->{$table}{'filter'}."*");
+		}
 		my %update_columns;
 		if ($rules->{$table}{'update_on'}) {
 			%update_columns = map {$_ => 1} @{ $rules->{$table}{'update_on'} };
@@ -701,22 +641,14 @@ sub save_jira_to {
 		}
 		if ($rules->{$table}{'date_filter_column'}) {
 			$update_columns{$rules->{$table}{'date_filter_column'}} = 1;
-			push(@lines, "*Date column for priority 2 extraction: *".$rules->{$table}{'date_filter_column'}{'table'}.".".$rules->{$table}{'date_filter_column'}{'column'}."*");
+			push(@lines, "*Date column: *".$rules->{$table}{'date_filter_column'}{'table'}.".".$rules->{$table}{'date_filter_column'}{'column'}."*");
 		}
 		push(@lines, "");
-		if (exists $rules->{$table}{'columns'}) {
-			push(@lines, "|| column || from || action ||");
+		if (exists $rules->{$table}{'columns'} && @{ $rules->{$table}{'columns'} }) {
+			push(@lines, "|| column || action ||");
 			for my $column ($self->_sort_column_names( $rules->{$table}{'columns'} ) ) {
 				my @row;
 				push(@row, _jira_highlight($column->{'column'}, $update_columns{$column->{'column'}}));
-				push(
-					@row, 
-					( $column->{'from_table'} ? 
-						_jira_nohighlight($column->{'from_table'}, $column->{'from_table'} ne $rules->{$table}{'to_table'}) . "." . 
-						_jira_nohighlight($column->{'from_column'}, $column->{'from_column'} ne $column->{'column'}) :
-						""
-					)
-				);
 				if (exists $column->{'action'}) {
 					if ($column->{'action'} eq "copy" && $rules->{$table}{'action'} eq 'remap-only') {
 						push(@row, $rules->{$table}{'action'});
@@ -849,19 +781,33 @@ sub update_copy_columns_for_link {
 		    my ($table_6, $column_6, $rule) = @_;
 			
 			if ($lookups{$table_6}{$column_6}) {
-				if (ref $rule eq 'Migration::Rule::CopyValue') {
-					$rule->set_copy_and_save();
+				if (ref $rule eq 'Migration::Rule::AutoIncrement') {
+					## autoincrement values will be saved
+				} else {
+					if (defined $rule) {
+						die "can't override rule with copy-and-save ".ref($rule);
+					}
+					$rule = Migration::Rule::CopyAndSaveValue->new(
+						$table_6, 
+						$column_6
+					);
 					$self->{'logger'}->printf("%s.%s <- %s", $table_6, $column_6, $rule->as_string());
 				}
 			}
-			return undef;
+			return $rule;
 		}
 	);
-	# unless (exists $self->{'rules'}{"voice_left_messages"}{"call_id"}) {
-	# 	die "can't set copy-and-save to missing [voice_left_messages.call_id]";
-	# }
-	# $self->{'rules'}{"voice_left_messages"}{"call_id"}->set_copy_and_save();
-	# $self->{'rules'}{"voice_system_transaction_log"}{"voice_queue_id"}->set_copy_and_save();
+	if ($self->{'rules'}{"voice_left_messages"}{"call_id"}) {
+		die "can't set copy-and-save on existing rule [voice_left_messages.call_id]";
+	}
+	$self->{'rules'}{"voice_left_messages"}{"call_id"} = Migration::Rule::CopyAndSaveValue->new(
+		"voice_left_messages", 
+		"call_id"
+	);
+	$self->{'rules'}{"voice_system_transaction_log"}{"voice_queue_id"} = Migration::Rule::CopyAndSaveValue->new(
+		"voice_system_transaction_log", 
+		"voice_queue_id"
+	);;
 
 }
 
@@ -967,6 +913,8 @@ sub apply_missing_eval {
 	$self->{'rules'}{'si_client_settings'}{'last_successful_log_report_id'}->ignore_null();
 	$self->{'rules'}{'si_client_settings'}{'last_modules_log_report_id'}->ignore_null();
 	
+	$self->{'rules'}{'ppn_article_letter'}{'art_id'}->set_ppn_article();
+
 	#$self->{'rules'}{'visitor_versioned'}{'address_id'}->ignore_null();
 }
 
@@ -1495,14 +1443,9 @@ sub new {
 		}
 	}, $class;
 	$self->_generate_actions($required_tables);
+	$self->_generate_filters($required_tables);
 	$self->_generate_autoincrement($schema_6);
 	return $self;
-}
-
-sub get_secondary_rule_names {
-	my ($self, $table_5) = @_;
-
-	return (exists $self->{'secondary_rules'}{$table_5} ? $self->{'secondary_rules'}{$table_5} : []);
 }
 
 sub get_table_name {
@@ -1519,23 +1462,39 @@ sub get_table_name {
 sub _generate_actions {
 	my ($self, $required_tables) = @_;
 	
-	my %know_actions = map {$_ => 1} ("past-week", "past-week-only", "versioned");
+	my %know_actions = map {$_ => 1} ("delete-insert", "insert");
 	my %actions;
 	for my $table (@$required_tables) {
 		$table->{'action'} //= '';
 		if (exists $know_actions{$table->{'action'}}) {
-			$actions{ $table->{'table'} } = $table->{'action'};
-			for my $secondary_rule (@{ $self->get_secondary_rule_names($table->{'table'}) }) {
-				$actions{$secondary_rule} = $table->{'action'};
-			}
+			$actions{$table->{'table'}} = $table->{'action'};
 		} elsif (!$table->{'action'}) {
-			## ignore empty actions
+			## ignore empty actions by now
 		} else {
 			die "unknown action [".$table->{'action'}."]";
 		}
 	}
 	$self->{'actions'} = \%actions;
 }
+
+sub _generate_filters {
+	my ($self, $required_tables) = @_;
+	
+	my %know_filters = map {$_ => 1} ("versioned", "past-week", "past-week-only");
+	my %filters;
+	for my $table (@$required_tables) {
+		$table->{'filter'} //= '';
+		if (exists $know_filters{$table->{'filter'}}) {
+			$filters{$table->{'table'}} = $table->{'filter'};
+		} elsif (!$table->{'filter'}) {
+			## ignore empty
+		} else {
+			die "unknown filter [".$table->{'filter'}."]";
+		}
+	}
+	$self->{'filters'} = \%filters;
+}
+
 
 sub _generate_autoincrement {
 	my ($self, $schema_6) = @_;
@@ -1582,13 +1541,6 @@ sub is_table_with_stable_id {
 	return $self->{'tables_with_stable_ids'}{$to_table};
 }
 
-sub get_update_on_columns {
-	my ($self, $table_6) = @_;
-	
-	$table_6 = $self->get_table_name($table_6);
-	return (exists $self->{'update_on'}{$table_6} ? [ @{ $self->{'update_on'}{$table_6} } ] : undef);
-}
-
 sub get_path_to_client {
 	my ($self, $table_6) = @_;
 
@@ -1601,11 +1553,15 @@ sub get_table_action {
 	if (exists $self->{'actions'}{$table_6}) {
 		return $self->{'actions'}{$table_6};
 	} else {
-		return "all";
-		#die "can't find action for [$table_6]";
+		die "can't find action for [$table_6]";
 	}
 }
 
+sub get_table_filter {
+	my ($self, $table_6) = @_;
+	
+	return $self->{'filters'}{$table_6};
+}
 
 sub load_hard_coded_links {
 	my ($self, $links) = @_;
@@ -1735,9 +1691,9 @@ sub load_hard_coded_links {
 			'recall_versioned.office_id' => 'office_versioned.id',
 			'referrer_email_log.referrer_id' => 'referrer_versioned.id',
 			'referrer_user_sensitive.si_doctor_id' => 'si_doctor.DocId',
-			'referrer_versioned.si_doctor_id' => 'si_doctor.id',
+			'referrer_versioned.si_doctor_id' => 'si_doctor.DocId',
 			'responsible_patient_versioned.responsible_id' => 'visitor_versioned.id',
-			'si_doctor_email_log.si_doctor_id' => 'si_doctor.id',
+			'si_doctor_email_log.si_doctor_id' => 'si_doctor.DocId',
 			'srm_resource.container' => 'client.cl_username',
 			'staff_schedule.office_id' => 'office_versioned.id',
 			'staff_schedule_rules.office_id' => 'office_versioned.id',
@@ -1862,7 +1818,7 @@ sub as_json {
 	my ($self) = @_;
 
 	tie my %r, "Tie::IxHash", (
-		'action' => "foreign-key".($self->{'ignore_null'} ? "-skip-null" : ""),
+		'action' => "foreign-key".($self->{'ignore_null'} ? "-skip-null" : "").($self->{'ppn'} ? "-ppn" : ""),
 		'lookup_table' => $self->{'table'},
 		'lookup_column' => $self->{'column'},
 	);
@@ -1879,7 +1835,13 @@ sub ignore_null {
 	$self->{'ignore_null'} = 1;
 }
 
-package Migration::Rule::CopyValue;
+sub set_ppn_article {
+    my ($self) = @_;
+	
+	$self->{'ppn'} = 1;
+}
+
+package Migration::Rule::CopyAndSaveValue;
 
 use base qw(Migration::Rule);
 
@@ -1889,7 +1851,7 @@ sub new {
 	my $self = bless {
 		'table' => $table,
 		'column' => $column,
-		'action' => 'copy',
+		'action' => 'copy-and-save',
 	}, $class;
 	return $self;
 }
@@ -1909,12 +1871,6 @@ sub as_json {
 		# 'from_column' => $self->{'column'},
 	);
 	return \%r;
-}
-
-sub set_copy_and_save {
-    my ($self) = @_;
-	
-	$self->{'action'} = 'copy-and-save';
 }
 
 package Migration::Rule::FromPMS;

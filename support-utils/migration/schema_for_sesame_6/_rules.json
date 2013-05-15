@@ -1,7 +1,21 @@
 {
+   "account_versioned" : {
+      "to_table" : "account_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "account_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
    "address_local" : {
       "to_table" : "address_local",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "address_local",
@@ -17,9 +31,23 @@
          }
       ]
    },
+   "address_versioned" : {
+      "to_table" : "address_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "address_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
    "appointment_confirmation_history" : {
       "to_table" : "appointment_confirmation_history",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "appointment_confirmation_history",
@@ -37,7 +65,8 @@
    },
    "appointment_local" : {
       "to_table" : "appointment_local",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "appointment_local",
@@ -53,9 +82,23 @@
          }
       ]
    },
+   "appointment_procedure_versioned" : {
+      "to_table" : "appointment_procedure_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "appointment_procedure_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
    "appointment_reminder_schedule" : {
       "to_table" : "appointment_reminder_schedule",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "appointment_reminder_schedule",
@@ -71,9 +114,69 @@
          }
       ]
    },
+   "appointment_user_sensitive" : {
+      "to_table" : "appointment_user_sensitive",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "appointment_user_sensitive",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "appointment_versioned" : {
+      "to_table" : "appointment_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "appointment_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
+   "client" : {
+      "to_table" : "client",
+      "action" : "delete-insert",
+      "filter" : null,
+      "priority" : "1",
+      "columns" : []
+   },
+   "client_access" : {
+      "to_table" : "client_access",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "client_access",
+            "column" : "user_name"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
+   "client_current_dataset" : {
+      "to_table" : "client_current_dataset",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "client_current_dataset",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
    "client_feature" : {
       "to_table" : "client_feature",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "client_feature",
@@ -89,9 +192,36 @@
          }
       ]
    },
+   "client_note" : {
+      "to_table" : "client_note",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "client_note",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "client_properties" : {
+      "to_table" : "client_properties",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "client_properties",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
    "client_setting" : {
       "to_table" : "client_setting",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "client_setting",
@@ -109,7 +239,8 @@
    },
    "email_contact_log" : {
       "to_table" : "email_contact_log",
-      "action" : "past-week-only",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "email_contact_log",
@@ -131,7 +262,8 @@
    },
    "email_local" : {
       "to_table" : "email_local",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "email_local",
@@ -147,9 +279,27 @@
          }
       ]
    },
+   "email_patient_access_token" : {
+      "to_table" : "email_patient_access_token",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "email_patient_access_token",
+            "column" : "visitor_id"
+         },
+         {
+            "table" : "visitor_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
    "email_post_app_survey_log" : {
       "to_table" : "email_post_app_survey_log",
-      "action" : "past-week-only",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "email_post_app_survey_log",
@@ -175,7 +325,8 @@
    },
    "email_referral" : {
       "to_table" : "email_referral",
-      "action" : "past-week-only",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "email_referral",
@@ -204,7 +355,8 @@
    },
    "email_referral_mail" : {
       "to_table" : "email_referral_mail",
-      "action" : "past-week-only",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "email_referral_mail",
@@ -226,7 +378,8 @@
    },
    "email_reminder_settings" : {
       "to_table" : "email_reminder_settings",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "email_reminder_settings",
@@ -244,7 +397,8 @@
    },
    "email_sending_queue" : {
       "to_table" : "email_sending_queue",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "email_sending_queue",
@@ -262,7 +416,8 @@
    },
    "email_sent_mail_log" : {
       "to_table" : "email_sent_mail_log",
-      "action" : "past-week-only",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "email_sent_mail_log",
@@ -289,9 +444,79 @@
          }
       ]
    },
+   "email_unsubscribe" : {
+      "to_table" : "email_unsubscribe",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "email_unsubscribe",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "email_user_sensitive" : {
+      "to_table" : "email_user_sensitive",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "email_user_sensitive",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "email_versioned" : {
+      "to_table" : "email_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "email_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
+   "email_welcome_forcing" : {
+      "to_table" : "email_welcome_forcing",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "email_welcome_forcing",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "flex_plan_info" : {
+      "to_table" : "flex_plan_info",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "flex_plan_info",
+            "column" : "visitor_id"
+         },
+         {
+            "table" : "visitor_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
    "hhf_applications" : {
       "to_table" : "hhf_applications",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "hhf_applications",
@@ -307,9 +532,23 @@
          }
       ]
    },
+   "hhf_client_settings" : {
+      "to_table" : "hhf_client_settings",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "hhf_client_settings",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
    "hhf_log" : {
       "to_table" : "hhf_log",
-      "action" : "all",
+      "action" : "insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "hhf_log",
@@ -327,7 +566,8 @@
    },
    "hhf_settings" : {
       "to_table" : "hhf_settings",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "hhf_settings",
@@ -345,7 +585,8 @@
    },
    "hhf_templates" : {
       "to_table" : "hhf_templates",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "hhf_templates",
@@ -363,7 +604,8 @@
    },
    "hide_patient_change_history" : {
       "to_table" : "hide_patient_change_history",
-      "action" : "all",
+      "action" : "insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "hide_patient_change_history",
@@ -381,7 +623,8 @@
    },
    "hits_count" : {
       "to_table" : "hits_count",
-      "action" : "all",
+      "action" : "insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "hits_count",
@@ -399,7 +642,8 @@
    },
    "hits_log" : {
       "to_table" : "hits_log",
-      "action" : "all",
+      "action" : "insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "hits_log",
@@ -417,7 +661,8 @@
    },
    "holiday_delivery_log" : {
       "to_table" : "holiday_delivery_log",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "holiday_delivery_log",
@@ -435,7 +680,8 @@
    },
    "holiday_settings" : {
       "to_table" : "holiday_settings",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "holiday_settings",
@@ -453,7 +699,8 @@
    },
    "holiday_settings_recipients_link" : {
       "to_table" : "holiday_settings_recipients_link",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "holiday_settings_recipients_link",
@@ -482,7 +729,8 @@
    },
    "holiday_settings_recipients_link_log" : {
       "to_table" : "holiday_settings_recipients_link_log",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "holiday_settings_recipients_link_log",
@@ -509,9 +757,23 @@
          }
       ]
    },
+   "insurance_contract_versioned" : {
+      "to_table" : "insurance_contract_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "insurance_contract_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
    "insurance_plan_info" : {
       "to_table" : "insurance_plan_info",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "insurance_plan_info",
@@ -531,9 +793,23 @@
          }
       ]
    },
+   "internal_sales_resource" : {
+      "to_table" : "internal_sales_resource",
+      "action" : "insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "internal_sales_resource",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "columns" : []
+   },
    "internal_sales_resource_quotes" : {
       "to_table" : "internal_sales_resource_quotes",
-      "action" : "all",
+      "action" : "insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "internal_sales_resource_quotes",
@@ -549,9 +825,23 @@
          }
       ]
    },
+   "internal_salesforce_client_package" : {
+      "to_table" : "internal_salesforce_client_package",
+      "action" : "insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "internal_salesforce_client_package",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "columns" : []
+   },
    "internal_spm_idea" : {
       "to_table" : "internal_spm_idea",
-      "action" : "all",
+      "action" : "insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "internal_spm_idea",
@@ -567,9 +857,23 @@
          }
       ]
    },
+   "internal_statistics_pre_sesame" : {
+      "to_table" : "internal_statistics_pre_sesame",
+      "action" : "insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "internal_statistics_pre_sesame",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "columns" : []
+   },
    "invisalign_case_process_doctor" : {
       "to_table" : "invisalign_case_process_doctor",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "invisalign_case_process_doctor",
@@ -589,7 +893,8 @@
    },
    "invisalign_case_process_patient" : {
       "to_table" : "invisalign_case_process_patient",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "invisalign_case_process_patient",
@@ -609,7 +914,8 @@
    },
    "invisalign_client" : {
       "to_table" : "invisalign_client",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "invisalign_client",
@@ -627,7 +933,8 @@
    },
    "invisalign_new_password_info" : {
       "to_table" : "invisalign_new_password_info",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "invisalign_new_password_info",
@@ -645,7 +952,8 @@
    },
    "invisalign_patient" : {
       "to_table" : "invisalign_patient",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "invisalign_patient",
@@ -674,7 +982,8 @@
    },
    "invisalign_refinement" : {
       "to_table" : "invisalign_refinement",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "invisalign_refinement",
@@ -703,7 +1012,8 @@
    },
    "invisalign_text" : {
       "to_table" : "invisalign_text",
-      "action" : "all",
+      "action" : "insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "invisalign_text",
@@ -719,9 +1029,23 @@
          }
       ]
    },
+   "ledger_versioned" : {
+      "to_table" : "ledger_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "ledger_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
    "office_address_local" : {
       "to_table" : "office_address_local",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "office_address_local",
@@ -737,9 +1061,49 @@
          }
       ]
    },
+   "office_user_sensitive" : {
+      "to_table" : "office_user_sensitive",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "office_user_sensitive",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "office_versioned" : {
+      "to_table" : "office_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "office_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
+   "opse_client_settings" : {
+      "to_table" : "opse_client_settings",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "opse_client_settings",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
    "opse_payment_log" : {
       "to_table" : "opse_payment_log",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "opse_payment_log",
@@ -757,7 +1121,8 @@
    },
    "orthomation" : {
       "to_table" : "orthomation",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "orthomation",
@@ -779,7 +1144,8 @@
    },
    "patient_page_messages" : {
       "to_table" : "patient_page_messages",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "patient_page_messages",
@@ -795,9 +1161,36 @@
          }
       ]
    },
+   "patient_referrer_versioned" : {
+      "to_table" : "patient_referrer_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "patient_referrer_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
+   "patient_staff_versioned" : {
+      "to_table" : "patient_staff_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "patient_staff_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
    "phone_local" : {
       "to_table" : "phone_local",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "phone_local",
@@ -813,9 +1206,36 @@
          }
       ]
    },
+   "phone_user_sensitive" : {
+      "to_table" : "phone_user_sensitive",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "phone_user_sensitive",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "phone_versioned" : {
+      "to_table" : "phone_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "phone_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
    "pms_migration_log" : {
       "to_table" : "pms_migration_log",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "pms_migration_log",
@@ -833,7 +1253,8 @@
    },
    "pms_migration_status" : {
       "to_table" : "pms_migration_status",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "pms_migration_status",
@@ -851,7 +1272,8 @@
    },
    "ppn_activity_log" : {
       "to_table" : "ppn_activity_log",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "ppn_activity_log",
@@ -869,7 +1291,8 @@
    },
    "ppn_article" : {
       "to_table" : "ppn_article",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "ppn_article",
@@ -887,7 +1310,8 @@
    },
    "ppn_article_letter" : {
       "to_table" : "ppn_article_letter",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "ppn_article_letter",
@@ -903,7 +1327,7 @@
          {
             "column" : "art_id",
             "comment" : "link to [ppn_article.id] (from pdm)",
-            "action" : "foreign-key",
+            "action" : "foreign-key-ppn",
             "lookup_table" : "ppn_article",
             "lookup_column" : "id"
          },
@@ -923,7 +1347,8 @@
    },
    "ppn_article_queue" : {
       "to_table" : "ppn_article_queue",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "ppn_article_queue",
@@ -945,9 +1370,23 @@
          }
       ]
    },
+   "ppn_common_article_usage" : {
+      "to_table" : "ppn_common_article_usage",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "ppn_common_article_usage",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
    "ppn_email_queue" : {
       "to_table" : "ppn_email_queue",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "ppn_email_queue",
@@ -965,7 +1404,8 @@
    },
    "ppn_href" : {
       "to_table" : "ppn_href",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "ppn_href",
@@ -994,7 +1434,8 @@
    },
    "ppn_letter" : {
       "to_table" : "ppn_letter",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "ppn_letter",
@@ -1012,7 +1453,8 @@
    },
    "ppn_letter_logo" : {
       "to_table" : "ppn_letter_logo",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "ppn_letter_logo",
@@ -1036,7 +1478,8 @@
    },
    "printable_ledger" : {
       "to_table" : "printable_ledger",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "printable_ledger",
@@ -1052,9 +1495,62 @@
          }
       ]
    },
+   "procedure_user_sensitive" : {
+      "to_table" : "procedure_user_sensitive",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "procedure_user_sensitive",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "procedure_versioned" : {
+      "to_table" : "procedure_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "procedure_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
+   "recall_user_sensitive" : {
+      "to_table" : "recall_user_sensitive",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "recall_user_sensitive",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "recall_versioned" : {
+      "to_table" : "recall_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "recall_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
    "referrer_email_log" : {
       "to_table" : "referrer_email_log",
-      "action" : "all",
+      "action" : "insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "referrer_email_log",
@@ -1072,7 +1568,8 @@
    },
    "referrer_user_sensitive" : {
       "to_table" : "referrer_user_sensitive",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "referrer_user_sensitive",
@@ -1090,9 +1587,49 @@
          }
       ]
    },
+   "referrer_versioned" : {
+      "to_table" : "referrer_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "referrer_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
+   "responsible_patient_user_sensitive" : {
+      "to_table" : "responsible_patient_user_sensitive",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "responsible_patient_user_sensitive",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "responsible_patient_versioned" : {
+      "to_table" : "responsible_patient_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "responsible_patient_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
    "satellite" : {
       "to_table" : "satellite",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "satellite",
@@ -1110,7 +1647,8 @@
    },
    "send2friend_log" : {
       "to_table" : "send2friend_log",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "send2friend_log",
@@ -1132,7 +1670,8 @@
    },
    "si_alerted_doctor_to_message" : {
       "to_table" : "si_alerted_doctor_to_message",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_alerted_doctor_to_message",
@@ -1163,7 +1702,8 @@
    },
    "si_client_settings" : {
       "to_table" : "si_client_settings",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_client_settings",
@@ -1197,7 +1737,8 @@
    },
    "si_client_task" : {
       "to_table" : "si_client_task",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_client_task",
@@ -1213,9 +1754,23 @@
          }
       ]
    },
+   "si_default_timepoint_name" : {
+      "to_table" : "si_default_timepoint_name",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "si_default_timepoint_name",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
    "si_doctor" : {
       "to_table" : "si_doctor",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_doctor",
@@ -1233,7 +1788,8 @@
    },
    "si_doctor_access" : {
       "to_table" : "si_doctor_access",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_doctor_access",
@@ -1260,7 +1816,8 @@
    },
    "si_doctor_email_log" : {
       "to_table" : "si_doctor_email_log",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_doctor_email_log",
@@ -1271,10 +1828,10 @@
       "columns" : [
          {
             "column" : "si_doctor_id",
-            "comment" : "link to [si_doctor.id] (hard-coded)",
+            "comment" : "link to [si_doctor.DocId] (hard-coded)",
             "action" : "foreign-key",
             "lookup_table" : "si_doctor",
-            "lookup_column" : "id"
+            "lookup_column" : "DocId"
          },
          {
             "column" : "id",
@@ -1285,7 +1842,8 @@
    },
    "si_doctor_theme" : {
       "to_table" : "si_doctor_theme",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_doctor_theme",
@@ -1316,7 +1874,8 @@
    },
    "si_image" : {
       "to_table" : "si_image",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_image",
@@ -1341,7 +1900,8 @@
    },
    "si_image_to_message" : {
       "to_table" : "si_image_to_message",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_image_to_message",
@@ -1366,9 +1926,23 @@
          }
       ]
    },
+   "si_image_type" : {
+      "to_table" : "si_image_type",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "si_image_type",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
    "si_message" : {
       "to_table" : "si_message",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_message",
@@ -1400,7 +1974,8 @@
    },
    "si_message_attachment" : {
       "to_table" : "si_message_attachment",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_message_attachment",
@@ -1427,9 +2002,29 @@
          }
       ]
    },
+   "si_patient" : {
+      "to_table" : "si_patient",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "si_patient",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : [
+         {
+            "column" : "PatId",
+            "comment" : "copy-and-save value from [si_patient.PatId]",
+            "action" : "copy-and-save"
+         }
+      ]
+   },
    "si_patient_link" : {
       "to_table" : "si_patient_link",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_patient_link",
@@ -1454,7 +2049,8 @@
    },
    "si_patient_profile" : {
       "to_table" : "si_patient_profile",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_patient_profile",
@@ -1474,7 +2070,8 @@
    },
    "si_patient_timepoint_link" : {
       "to_table" : "si_patient_timepoint_link",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_patient_timepoint_link",
@@ -1494,7 +2091,8 @@
    },
    "si_standard_message" : {
       "to_table" : "si_standard_message",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_standard_message",
@@ -1512,7 +2110,8 @@
    },
    "si_theme" : {
       "to_table" : "si_theme",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "si_theme",
@@ -1537,7 +2136,8 @@
    },
    "si_upload_log_report" : {
       "to_table" : "si_upload_log_report",
-      "action" : "past-week-only",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "si_upload_log_report",
@@ -1545,6 +2145,10 @@
          }
       ],
       "priority" : "2",
+      "date_filter_column" : {
+         "table" : "si_upload_log_report",
+         "column" : "started"
+      },
       "columns" : [
          {
             "column" : "id",
@@ -1553,9 +2157,29 @@
          }
       ]
    },
+   "sms_client_settings" : {
+      "to_table" : "sms_client_settings",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "sms_client_settings",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : [
+         {
+            "column" : "Id",
+            "comment" : "copy-and-save value from [sms_client_settings.Id]",
+            "action" : "copy-and-save"
+         }
+      ]
+   },
    "sms_message_history" : {
       "to_table" : "sms_message_history",
-      "action" : "past-week-only",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "sms_message_history",
@@ -1588,7 +2212,8 @@
    },
    "sms_message_response" : {
       "to_table" : "sms_message_response",
-      "action" : "past-week-only",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "sms_message_response",
@@ -1619,9 +2244,65 @@
          }
       ]
    },
+   "srm_resource" : {
+      "to_table" : "srm_resource",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [],
+      "priority" : "2",
+      "columns" : []
+   },
+   "staff_schedule" : {
+      "to_table" : "staff_schedule",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "staff_schedule",
+            "column" : "office_id"
+         },
+         {
+            "table" : "office_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "staff_schedule_rules" : {
+      "to_table" : "staff_schedule_rules",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "staff_schedule_rules",
+            "column" : "office_id"
+         },
+         {
+            "table" : "office_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "staff_versioned" : {
+      "to_table" : "staff_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "staff_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
    "survey_answer" : {
       "to_table" : "survey_answer",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "survey_answer",
@@ -1653,7 +2334,8 @@
    },
    "survey_question" : {
       "to_table" : "survey_question",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "survey_question",
@@ -1671,7 +2353,8 @@
    },
    "survey_question_option" : {
       "to_table" : "survey_question_option",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "survey_question_option",
@@ -1698,9 +2381,44 @@
          }
       ]
    },
+   "token" : {
+      "to_table" : "token",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
+      "path_to_client" : [
+         {
+            "table" : "token",
+            "column" : "user_id"
+         },
+         {
+            "table" : "visitor_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "token",
+         "column" : "timestamp"
+      },
+      "columns" : []
+   },
+   "treatment_plan_versioned" : {
+      "to_table" : "treatment_plan_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "treatment_plan_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
    "upload_postprocessing_task" : {
       "to_table" : "upload_postprocessing_task",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "upload_postprocessing_task",
@@ -1718,7 +2436,8 @@
    },
    "upload_postprocessing_task_param" : {
       "to_table" : "upload_postprocessing_task_param",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "upload_postprocessing_task_param",
@@ -1747,7 +2466,8 @@
    },
    "upload_settings" : {
       "to_table" : "upload_settings",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "upload_settings",
@@ -1763,9 +2483,23 @@
          }
       ]
    },
+   "visitor_fact" : {
+      "to_table" : "visitor_fact",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "visitor_fact",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
    "visitor_opinion" : {
       "to_table" : "visitor_opinion",
-      "action" : "all",
+      "action" : "insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "visitor_opinion",
@@ -1783,7 +2517,8 @@
    },
    "visitor_setting" : {
       "to_table" : "visitor_setting",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "visitor_setting",
@@ -1803,9 +2538,53 @@
          }
       ]
    },
+   "visitor_settings" : {
+      "to_table" : "visitor_settings",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "visitor_settings",
+            "column" : "visitor_id"
+         },
+         {
+            "table" : "visitor_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "visitor_user_sensitive" : {
+      "to_table" : "visitor_user_sensitive",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "visitor_user_sensitive",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "visitor_versioned" : {
+      "to_table" : "visitor_versioned",
+      "action" : "delete-insert",
+      "filter" : "versioned",
+      "path_to_client" : [
+         {
+            "table" : "visitor_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "1",
+      "columns" : []
+   },
    "voice_appointment_reminder_procedure" : {
       "to_table" : "voice_appointment_reminder_procedure",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "voice_appointment_reminder_procedure",
@@ -1827,9 +2606,36 @@
          }
       ]
    },
+   "voice_autofills" : {
+      "to_table" : "voice_autofills",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "voice_autofills",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "voice_client_settings" : {
+      "to_table" : "voice_client_settings",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "voice_client_settings",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
    "voice_end_message" : {
       "to_table" : "voice_end_message",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "voice_end_message",
@@ -1847,7 +2653,8 @@
    },
    "voice_left_messages" : {
       "to_table" : "voice_left_messages",
-      "action" : "past-week-only",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "voice_left_messages",
@@ -1861,6 +2668,11 @@
       },
       "columns" : [
          {
+            "column" : "call_id",
+            "comment" : "copy-and-save value from [voice_left_messages.call_id]",
+            "action" : "copy-and-save"
+         },
+         {
             "column" : "rec_id",
             "comment" : "link to [voice_recipient_list.RLId] (hard-coded)",
             "action" : "foreign-key",
@@ -1871,7 +2683,8 @@
    },
    "voice_message_history" : {
       "to_table" : "voice_message_history",
-      "action" : "past-week-only",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "voice_message_history",
@@ -1898,9 +2711,40 @@
          }
       ]
    },
+   "voice_no_call_list" : {
+      "to_table" : "voice_no_call_list",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "voice_no_call_list",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
+   "voice_patient_name_pronunciation" : {
+      "to_table" : "voice_patient_name_pronunciation",
+      "action" : "delete-insert",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "voice_patient_name_pronunciation",
+            "column" : "patient_id"
+         },
+         {
+            "table" : "visitor_versioned",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "columns" : []
+   },
    "voice_recipient_list" : {
       "to_table" : "voice_recipient_list",
-      "action" : "past-week-only",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "voice_recipient_list",
@@ -1917,12 +2761,18 @@
             "column" : "id",
             "comment" : "auto increment",
             "action" : "autoincrement"
+         },
+         {
+            "column" : "RLId",
+            "comment" : "copy-and-save value from [voice_recipient_list.RLId]",
+            "action" : "copy-and-save"
          }
       ]
    },
    "voice_reminder_settings" : {
       "to_table" : "voice_reminder_settings",
-      "action" : "all",
+      "action" : "delete-insert",
+      "filter" : null,
       "path_to_client" : [
          {
             "table" : "voice_reminder_settings",
@@ -1938,9 +2788,33 @@
          }
       ]
    },
+   "voice_system_transaction_log" : {
+      "to_table" : "voice_system_transaction_log",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
+      "path_to_client" : [
+         {
+            "table" : "voice_system_transaction_log",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "2",
+      "date_filter_column" : {
+         "table" : "voice_system_transaction_log",
+         "column" : "eventtime_utc"
+      },
+      "columns" : [
+         {
+            "column" : "voice_queue_id",
+            "comment" : "copy-and-save value from [voice_system_transaction_log.voice_queue_id]",
+            "action" : "copy-and-save"
+         }
+      ]
+   },
    "voice_transactions_log" : {
       "to_table" : "voice_transactions_log",
-      "action" : "past-week-only",
+      "action" : "delete-insert",
+      "filter" : "past-week-only",
       "path_to_client" : [
          {
             "table" : "voice_transactions_log",
@@ -1963,6 +2837,7 @@
    "email_contact_log:2" : {
       "to_table" : "email_contact_log",
       "action" : "insert-contact-log",
+      "filter" : "older-than-week",
       "path_to_client" : [
          {
             "table" : "email_contact_log",
@@ -1984,7 +2859,8 @@
    },
    "email_post_app_survey_log:2" : {
       "to_table" : "email_post_app_survey_log",
-      "action" : "past-week-only",
+      "action" : "insert",
+      "filter" : "older-than-week",
       "path_to_client" : [
          {
             "table" : "email_post_app_survey_log",
@@ -2010,7 +2886,8 @@
    },
    "email_referral:2" : {
       "to_table" : "email_referral",
-      "action" : "past-week-only",
+      "action" : "insert",
+      "filter" : "older-than-week",
       "path_to_client" : [
          {
             "table" : "email_referral",
@@ -2039,7 +2916,8 @@
    },
    "email_referral_mail:2" : {
       "to_table" : "email_referral_mail",
-      "action" : "past-week-only",
+      "action" : "insert",
+      "filter" : "older-than-week",
       "path_to_client" : [
          {
             "table" : "email_referral_mail",
@@ -2061,7 +2939,8 @@
    },
    "email_sent_mail_log:2" : {
       "to_table" : "email_sent_mail_log",
-      "action" : "past-week-only",
+      "action" : "insert",
+      "filter" : "older-than-week",
       "path_to_client" : [
          {
             "table" : "email_sent_mail_log",
@@ -2090,7 +2969,8 @@
    },
    "sms_message_history:2" : {
       "to_table" : "sms_message_history",
-      "action" : "past-week-only",
+      "action" : "insert",
+      "filter" : "older-than-week",
       "path_to_client" : [
          {
             "table" : "sms_message_history",
@@ -2123,7 +3003,8 @@
    },
    "sms_message_response:2" : {
       "to_table" : "sms_message_response",
-      "action" : "past-week-only",
+      "action" : "insert",
+      "filter" : "older-than-week",
       "path_to_client" : [
          {
             "table" : "sms_message_response",
@@ -2156,7 +3037,8 @@
    },
    "voice_left_messages:2" : {
       "to_table" : "voice_left_messages",
-      "action" : "past-week-only",
+      "action" : "insert",
+      "filter" : "older-than-week",
       "path_to_client" : [
          {
             "table" : "voice_left_messages",
@@ -2170,6 +3052,11 @@
       },
       "columns" : [
          {
+            "column" : "call_id",
+            "comment" : "copy-and-save value from [voice_left_messages.call_id]",
+            "action" : "copy-and-save"
+         },
+         {
             "column" : "rec_id",
             "comment" : "link to [voice_recipient_list.RLId] (hard-coded)",
             "action" : "foreign-key",
@@ -2180,7 +3067,8 @@
    },
    "voice_message_history:2" : {
       "to_table" : "voice_message_history",
-      "action" : "past-week-only",
+      "action" : "insert",
+      "filter" : "older-than-week",
       "path_to_client" : [
          {
             "table" : "voice_message_history",
@@ -2209,7 +3097,8 @@
    },
    "voice_recipient_list:2" : {
       "to_table" : "voice_recipient_list",
-      "action" : "past-week-only",
+      "action" : "insert",
+      "filter" : "older-than-week",
       "path_to_client" : [
          {
             "table" : "voice_recipient_list",
@@ -2226,12 +3115,41 @@
             "column" : "id",
             "comment" : "auto increment",
             "action" : "autoincrement"
+         },
+         {
+            "column" : "RLId",
+            "comment" : "copy-and-save value from [voice_recipient_list.RLId]",
+            "action" : "copy-and-save"
+         }
+      ]
+   },
+   "voice_system_transaction_log:2" : {
+      "to_table" : "voice_system_transaction_log",
+      "action" : "insert",
+      "filter" : "older-than-week",
+      "path_to_client" : [
+         {
+            "table" : "voice_system_transaction_log",
+            "column" : "client_id"
+         }
+      ],
+      "priority" : "3",
+      "date_filter_column" : {
+         "table" : "voice_system_transaction_log",
+         "column" : "eventtime_utc"
+      },
+      "columns" : [
+         {
+            "column" : "voice_queue_id",
+            "comment" : "copy-and-save value from [voice_system_transaction_log.voice_queue_id]",
+            "action" : "copy-and-save"
          }
       ]
    },
    "voice_transactions_log:2" : {
       "to_table" : "voice_transactions_log",
-      "action" : "past-week-only",
+      "action" : "insert",
+      "filter" : "older-than-week",
       "path_to_client" : [
          {
             "table" : "voice_transactions_log",
