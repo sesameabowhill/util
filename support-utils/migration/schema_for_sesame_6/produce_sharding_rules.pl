@@ -868,25 +868,10 @@ sub apply_missing_eval {
 	# $self->{'rules'}{'referrer_user_sensitive'}{'si_doctor_id'} = Migration::Rule::Eval->new('si-doctor-id', 'si_pms_referrer_link', 'referrer_id');
 	# $self->{'rules'}{'si_doctor_email_log'}{'si_doctor_id'} = Migration::Rule::Eval->new('si-doctor-referrer-id', 'si_doctor_email_log_fake', 'referrer_id');
 
-	# ## eval for voice end message id
-	# $self->{'rules'}{'client_setting:2'}{'IVal'} = Migration::Rule::Eval->new('voice-end-message-id', undef, undef);
-	# $self->{'tables'}{'client_setting:2'} = { %{ $self->{'tables'}{'client_setting'} } };
-	# $self->{'tables'}{'client_setting:2'}{'action'} = 'update-voice-end-message-id';
-
-	# ## eval for si auto notify
-	# $self->{'rules'}{'client_setting:3'}{'IVal'} = Migration::Rule::Eval->new('active-patient-criteria', undef, undef);
-	# $self->{'tables'}{'client_setting:3'} = { %{ $self->{'tables'}{'client_setting'} } };
-	# $self->{'tables'}{'client_setting:3'}{'action'} = 'update-active-patient-criteria';
-
 	# ## eval for si auto notify
 	# $self->{'rules'}{'client_setting:4'}{'IVal'} = Migration::Rule::Eval->new('voice-client-id', undef, undef);
 	# $self->{'tables'}{'client_setting:4'} = { %{ $self->{'tables'}{'client_setting'} } };
 	# $self->{'tables'}{'client_setting:4'}{'action'} = 'update-voice-client-id';
-
-	# ## eval for first si theme message id
-	# $self->{'rules'}{'si_theme:2'}{'FirstMesId'} = Migration::Rule::Eval->new('first-theme-message-id', undef, undef);
-	# $self->{'tables'}{'si_theme:2'} = { %{ $self->{'tables'}{'si_theme'} } };
-	# $self->{'tables'}{'si_theme:2'}{'action'} = 'update-first-theme-message-id';
 
 	# ## eval for missing si colleague
 	# $self->{'rules'}{'si_doctor:2'}{'Status'} = Migration::Rule::Eval->new('missing-si-admin-id', undef, undef);
@@ -908,6 +893,14 @@ sub apply_missing_eval {
 
 	## skip nullable patient_id in invisalign_patient
 	#$self->{'rules'}{'invisalign_patient'}{'patient_id'}->ignore_null();
+
+	## eval for voice end message id
+	$self->{'tables'}{'client_setting:2'} = { %{ $self->{'tables'}{'client_setting'} } };
+	$self->{'tables'}{'client_setting:2'}{'action'} = 'update-voice-end-message-id';
+
+	## eval for first si theme message id
+	$self->{'tables'}{'si_theme:2'} = { %{ $self->{'tables'}{'si_theme'} } };
+	$self->{'tables'}{'si_theme:2'}{'action'} = 'update-first-theme-message-id';
 
 	$self->{'rules'}{'si_client_settings'}{'last_log_report_id'}->ignore_null();
 	$self->{'rules'}{'si_client_settings'}{'last_successful_log_report_id'}->ignore_null();
@@ -944,139 +937,6 @@ sub apply_links {
 	);
 }
 
-# sub apply_moved_tables {
-# 	my ($self, $migration, $schema_5_list, $schema_6, $links) = @_;
-
-# 	my $column_rules = $self->{'rules'};
-
-# 	my $stop = 0;
-# 	for my $column (@$schema_5_list) {
-# 		my $new_names = $migration->get_new_names($column->{'TABLE_NAME'});
-# 		for my $new_name (@$new_names) {
-# 			if (exists $column_rules->{$new_name}) {
-# 				my $new_column = $migration->column_name_after_rename($column->{'TABLE_NAME'}, $column->{'COLUMN_NAME'});
-# 				if (exists $column_rules->{$new_name}{$new_column} && 
-# 					! defined $column_rules->{$new_name}{$new_column}
-# 				) {
-# 					if (defined $migration->get_column_eval($new_name, $new_column, $links)) {
-# 						my $column_eval = $migration->get_column_eval($new_name, $new_column, $links);
-# 						$column_rules->{$new_name}{$new_column} = Migration::Rule::Eval->new(
-# 							$column_eval->{'eval'}, 
-# 							($column_eval->{'unknown_column'} ? (
-# 								undef,
-# 								undef,
-# 							) : (							
-# 								$column->{'TABLE_NAME'},
-# 								$column->{'COLUMN_NAME'},
-# 							) )
-# 						);
-# 					} elsif (defined $migration->get_hardcoded_lookup($new_name, $new_column)) {
-# 						$column_rules->{$new_name}{$new_column} = Migration::Rule::HardCodedLookup->new(
-# 							$migration->get_hardcoded_lookup($new_name, $new_column), 
-# 							$column->{'TABLE_NAME'},
-# 							$column->{'COLUMN_NAME'}
-# 						);
-# 					} elsif ($self->can_copy_type(
-# 							\$stop, 
-# 							$migration, $column, 
-# 							$schema_6->{ $migration->get_table_name($new_name) }{$new_column}
-# 						)
-# 					) {
-# 						if ($new_name eq $column->{'TABLE_NAME'}) {
-# 							$column_rules->{$new_name}{$new_column} = Migration::Rule::CopyValue->new(
-# 								$column->{'TABLE_NAME'}, 
-# 								$column->{'COLUMN_NAME'}
-# 							);
-# 						} else {
-# 							$column_rules->{$new_name}{$new_column} = Migration::Rule::CopyValue->new(
-# 								$column->{'TABLE_NAME'}, 
-# 								$column->{'COLUMN_NAME'}
-# 							);
-# 						}
-# 					}
-# 				}
-# 			}
-# 		}
-# 	}
-# 	$self->{'logger'}->stop($stop, "incompatible column types");
-# }
-
-# sub can_copy_type {
-# 	my ($self, $stop_ref, $migration, $from_column, $to_column) = @_;
-
-# 	if (lc $from_column->{'IS_NULLABLE'} eq lc $to_column->{'IS_NULLABLE'}) {
-# 		if ($migration->is_column_type_ignored($to_column->{'TABLE_NAME'}, $to_column->{'COLUMN_NAME'})) {
-# 			return 1;
-# 		} else {
-# 			if ($self->_is_column_type_equal($from_column->{'COLUMN_TYPE'}, $to_column->{'COLUMN_TYPE'})) {
-# 				return 1;
-# 			} else {
-# 				$self->{'logger'}->printf(
-# 					"types didn't match [%s.%s: %s] => [%s.%s: %s]",
-# 					$from_column->{'TABLE_NAME'},
-# 					$from_column->{'COLUMN_NAME'},
-# 					$from_column->{'COLUMN_TYPE'},
-# 					$to_column->{'TABLE_NAME'},
-# 					$to_column->{'COLUMN_NAME'},
-# 					$to_column->{'COLUMN_TYPE'},
-# 				);
-# 				$$stop_ref ++;
-# 			}
-# 		}
-# 	} else {
-# 		if (lc $to_column->{'IS_NULLABLE'} eq 'no' && ! $migration->is_nullable_ignored($to_column->{'TABLE_NAME'}, $to_column->{'COLUMN_NAME'})) {
-# 			$self->{'logger'}->printf(
-# 				"nullable didn't match [%s.%s: %s] => [%s.%s: %s]",
-# 				$from_column->{'TABLE_NAME'},
-# 				$from_column->{'COLUMN_NAME'},
-# 				(lc $from_column->{'IS_NULLABLE'} eq 'no' ? "NOT NULL" : "NULL"),
-# 				$to_column->{'TABLE_NAME'},
-# 				$to_column->{'COLUMN_NAME'},
-# 				(lc $to_column->{'IS_NULLABLE'} eq 'no' ? "NOT NULL" : "NULL"),
-# 			);
-# 			$$stop_ref ++;
-# 		} else {
-# 			return 1;
-# 		}
-# 	}
-# 	return 0;
-# }
-
-# sub _is_column_type_equal {
-# 	my ($self, $from_type, $to_type) = @_;
-	
-# 	my $from = $self->_prepare_type($from_type);
-# 	my $to = $self->_prepare_type($to_type);
-
-# 	if ($from eq $to) {
-# 		return 1;
-# 	} elsif ($from eq "text" && $to eq "mediumtext") {
-# 		return 1;
-# 	} elsif ($from eq "text" && $to eq "longtext") {
-# 		return 1;
-# 	} elsif ($from eq "tinyint" && $to eq "int") {
-# 		return 1;
-# 	} elsif ($from =~ m{^enum} && $to =~ m{^enum}) {
-# 		my ($from_set) = ($from =~ m{^enum\((.*)\)$});
-# 		my ($to_set) = ($to =~ m{^enum\((.*)\)$});
-# 		my %to_enum = map {$_ => 1} split(',', $to_set);
-# 		for my $from_val (split(',', $from_set)) {
-# 			unless (exists $to_enum{$from_val}) {
-# 				return 0;
-# 			}
-# 		}
-# 		return 1;
-# 	} else {
-# 		return 0;
-# 	}
-# }
-
-# sub _prepare_type {
-# 	my ($self, $type) = @_;
-
-# 	$type =~ s{(?<=int)\(\d+\)}{}g;
-# 	return lc $type;
-# }
 
 sub check_column_rules {
 	my ($self) = @_;

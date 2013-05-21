@@ -170,7 +170,7 @@
             "column" : "client_id"
          }
       ],
-      "priority" : "2",
+      "priority" : "1",
       "columns" : []
    },
    "client_feature" : {
@@ -2833,6 +2833,32 @@
             "action" : "autoincrement"
          }
       ]
+   },
+   "client_setting:2" : {
+      "to_table" : "client_setting",
+      "priority" : "2",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "client_setting",
+            "column" : "client_id"
+         }
+      ],
+      "action" : "update-voice-end-message-id",
+      "columns" : []
+   },
+   "si_theme:2" : {
+      "to_table" : "si_theme",
+      "priority" : "2",
+      "filter" : null,
+      "path_to_client" : [
+         {
+            "table" : "si_theme",
+            "column" : "client_id"
+         }
+      ],
+      "action" : "update-first-theme-message-id",
+      "columns" : []
    },
    "email_contact_log:2" : {
       "to_table" : "email_contact_log",
