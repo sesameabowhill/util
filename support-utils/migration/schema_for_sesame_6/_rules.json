@@ -5,8 +5,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "account_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -18,8 +19,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "address_local",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -37,8 +39,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "address_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -50,8 +53,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "appointment_confirmation_history",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -69,8 +73,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "appointment_local",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -88,8 +93,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "appointment_procedure_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -101,8 +107,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "appointment_reminder_schedule",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -120,8 +127,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "appointment_user_sensitive",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -133,8 +141,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "appointment_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -153,8 +162,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "client_access",
-            "column" : "user_name"
+            "column" : "user_name",
+            "join_table" : "client",
+            "join_column" : "cl_username"
          }
       ],
       "priority" : "1",
@@ -166,8 +176,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "client_current_dataset",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -179,8 +190,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "client_feature",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -198,8 +210,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "client_note",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -211,8 +224,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "client_properties",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -224,8 +238,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "client_setting",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -243,8 +258,9 @@
       "filter" : "past-week-only",
       "path_to_client" : [
          {
-            "table" : "email_contact_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -266,8 +282,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "email_local",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -285,12 +302,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "email_patient_access_token",
-            "column" : "visitor_id"
+            "column" : "visitor_id",
+            "join_table" : "visitor_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -302,12 +321,14 @@
       "filter" : "past-week-only",
       "path_to_client" : [
          {
-            "table" : "email_post_app_survey_log",
-            "column" : "patient_id"
+            "column" : "patient_id",
+            "join_table" : "visitor_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -326,18 +347,15 @@
    "email_referral" : {
       "to_table" : "email_referral",
       "action" : "delete-insert",
-      "filter" : "past-week-only",
+      "filter" : null,
       "path_to_client" : [
          {
-            "table" : "email_referral",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
-      "date_filter_column" : {
-         "table" : "email_referral_mail",
-         "column" : "sending_date"
-      },
       "columns" : [
          {
             "column" : "id",
@@ -356,18 +374,15 @@
    "email_referral_mail" : {
       "to_table" : "email_referral_mail",
       "action" : "delete-insert",
-      "filter" : "past-week-only",
+      "filter" : null,
       "path_to_client" : [
          {
-            "table" : "email_referral_mail",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
-      "date_filter_column" : {
-         "table" : "email_referral_mail",
-         "column" : "sending_date"
-      },
       "columns" : [
          {
             "column" : "id",
@@ -382,8 +397,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "email_reminder_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -401,8 +417,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "email_sending_queue",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -420,8 +437,9 @@
       "filter" : "past-week-only",
       "path_to_client" : [
          {
-            "table" : "email_sent_mail_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -450,8 +468,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "email_unsubscribe",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -463,8 +482,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "email_user_sensitive",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -476,8 +496,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "email_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -489,8 +510,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "email_welcome_forcing",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -502,12 +524,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "flex_plan_info",
-            "column" : "visitor_id"
+            "column" : "visitor_id",
+            "join_table" : "visitor_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -519,8 +543,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "hhf_applications",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -538,8 +563,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "hhf_client_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -551,8 +577,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "hhf_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -570,8 +597,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "hhf_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -589,8 +617,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "hhf_templates",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -608,8 +637,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "hide_patient_change_history",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -627,8 +657,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "hits_count",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -646,8 +677,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "hits_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -665,8 +697,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "holiday_delivery_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -684,8 +717,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "holiday_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -703,12 +737,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "holiday_settings_recipients_link",
-            "column" : "hds_id"
+            "column" : "hds_id",
+            "join_table" : "holiday_settings",
+            "join_column" : "hds_id"
          },
          {
-            "table" : "holiday_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -733,12 +769,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "holiday_settings_recipients_link_log",
-            "column" : "hdl_id"
+            "column" : "hdl_id",
+            "join_table" : "holiday_delivery_log",
+            "join_column" : "hdl_id"
          },
          {
-            "table" : "holiday_delivery_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -763,8 +801,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "insurance_contract_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -776,12 +815,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "insurance_plan_info",
-            "column" : "patient_id"
+            "column" : "patient_id",
+            "join_table" : "visitor_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -799,8 +840,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "internal_sales_resource",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -812,8 +854,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "internal_sales_resource_quotes",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -831,8 +874,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "internal_salesforce_client_package",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -844,8 +888,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "internal_spm_idea",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -863,8 +908,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "internal_statistics_pre_sesame",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -876,8 +922,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "invisalign_case_process_doctor",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -897,8 +944,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "invisalign_case_process_patient",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -918,8 +966,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "invisalign_client",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -937,8 +986,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "invisalign_new_password_info",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -956,12 +1006,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "invisalign_patient",
-            "column" : "invisalign_client_id"
+            "column" : "invisalign_client_id",
+            "join_table" : "invisalign_client",
+            "join_column" : "id"
          },
          {
-            "table" : "invisalign_client",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -986,12 +1038,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "invisalign_refinement",
-            "column" : "invisalign_client_id"
+            "column" : "invisalign_client_id",
+            "join_table" : "invisalign_client",
+            "join_column" : "id"
          },
          {
-            "table" : "invisalign_client",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1016,8 +1070,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "invisalign_text",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -1035,8 +1090,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "ledger_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -1048,8 +1104,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "office_address_local",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1067,8 +1124,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "office_user_sensitive",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1080,8 +1138,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "office_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -1093,8 +1152,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "opse_client_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1106,8 +1166,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "opse_payment_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1125,12 +1186,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "orthomation",
-            "column" : "patient_id"
+            "column" : "patient_id",
+            "join_table" : "visitor_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1148,8 +1211,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "patient_page_messages",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1167,8 +1231,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "patient_referrer_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -1180,8 +1245,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "patient_staff_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -1193,8 +1259,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "phone_local",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1212,8 +1279,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "phone_user_sensitive",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1225,8 +1293,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "phone_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -1238,8 +1307,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "pms_migration_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1257,8 +1327,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "pms_migration_status",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1276,8 +1347,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "ppn_activity_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1295,8 +1367,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "ppn_article",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1314,12 +1387,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "ppn_article_letter",
-            "column" : "let_id"
+            "column" : "let_id",
+            "join_table" : "ppn_letter",
+            "join_column" : "id"
          },
          {
-            "table" : "ppn_letter",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1351,12 +1426,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "ppn_article_queue",
-            "column" : "queue_id"
+            "column" : "queue_id",
+            "join_table" : "ppn_email_queue",
+            "join_column" : "id"
          },
          {
-            "table" : "ppn_email_queue",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1376,8 +1453,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "ppn_common_article_usage",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1389,8 +1467,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "ppn_email_queue",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1408,12 +1487,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "ppn_href",
-            "column" : "let_id"
+            "column" : "let_id",
+            "join_table" : "ppn_letter",
+            "join_column" : "id"
          },
          {
-            "table" : "ppn_letter",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1438,8 +1519,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "ppn_letter",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1457,12 +1539,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "ppn_letter_logo",
-            "column" : "let_id"
+            "column" : "let_id",
+            "join_table" : "ppn_letter",
+            "join_column" : "id"
          },
          {
-            "table" : "ppn_letter",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1482,8 +1566,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "printable_ledger",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1501,8 +1586,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "procedure_user_sensitive",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1514,8 +1600,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "procedure_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -1527,8 +1614,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "recall_user_sensitive",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1540,8 +1628,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "recall_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -1553,8 +1642,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "referrer_email_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -1572,8 +1662,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "referrer_user_sensitive",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1593,8 +1684,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "referrer_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -1606,8 +1698,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "responsible_patient_user_sensitive",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1619,8 +1712,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "responsible_patient_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -1632,8 +1726,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "satellite",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -1651,12 +1746,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "send2friend_log",
-            "column" : "patient_id"
+            "column" : "patient_id",
+            "join_table" : "visitor_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1674,12 +1771,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_alerted_doctor_to_message",
-            "column" : "MsgId"
+            "column" : "MsgId",
+            "join_table" : "si_message",
+            "join_column" : "MsgId"
          },
          {
-            "table" : "si_message",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1706,8 +1805,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_client_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1741,8 +1841,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_client_task",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1760,8 +1861,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_default_timepoint_name",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1773,8 +1875,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_doctor",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1792,8 +1895,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_doctor_access",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1820,8 +1924,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_doctor_email_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1846,12 +1951,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_doctor_theme",
-            "column" : "ThemeId"
+            "column" : "ThemeId",
+            "join_table" : "si_theme",
+            "join_column" : "ThemeId"
          },
          {
-            "table" : "si_theme",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1878,8 +1985,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_image",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1904,8 +2012,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_image_to_message",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1932,8 +2041,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_image_type",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1945,8 +2055,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_message",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -1978,12 +2089,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_message_attachment",
-            "column" : "MsgId"
+            "column" : "MsgId",
+            "join_table" : "si_message",
+            "join_column" : "MsgId"
          },
          {
-            "table" : "si_message",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2008,8 +2121,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_patient",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2027,8 +2141,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_patient_link",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2053,8 +2168,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_patient_profile",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2074,8 +2190,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_patient_timepoint_link",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2095,8 +2212,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_standard_message",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2114,8 +2232,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_theme",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2140,8 +2259,9 @@
       "filter" : "past-week-only",
       "path_to_client" : [
          {
-            "table" : "si_upload_log_report",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2163,18 +2283,13 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "sms_client_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
-      "columns" : [
-         {
-            "column" : "Id",
-            "comment" : "copy-and-save value from [sms_client_settings.Id]",
-            "action" : "copy-and-save"
-         }
-      ]
+      "columns" : []
    },
    "sms_message_history" : {
       "to_table" : "sms_message_history",
@@ -2182,12 +2297,14 @@
       "filter" : "past-week-only",
       "path_to_client" : [
          {
-            "table" : "sms_message_history",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "sms_client_settings",
+            "join_column" : "Id"
          },
          {
-            "table" : "sms_client_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2200,13 +2317,6 @@
             "column" : "id",
             "comment" : "auto increment",
             "action" : "autoincrement"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [sms_client_settings.Id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "sms_client_settings",
-            "lookup_column" : "Id"
          }
       ]
    },
@@ -2216,12 +2326,14 @@
       "filter" : "past-week-only",
       "path_to_client" : [
          {
-            "table" : "sms_message_response",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "sms_client_settings",
+            "join_column" : "Id"
          },
          {
-            "table" : "sms_client_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2230,13 +2342,6 @@
          "column" : "ResponseReceiveDate"
       },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [sms_client_settings.Id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "sms_client_settings",
-            "lookup_column" : "Id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
@@ -2248,7 +2353,13 @@
       "to_table" : "srm_resource",
       "action" : "delete-insert",
       "filter" : null,
-      "path_to_client" : [],
+      "path_to_client" : [
+         {
+            "column" : "container",
+            "join_table" : "client",
+            "join_column" : "cl_username"
+         }
+      ],
       "priority" : "2",
       "columns" : []
    },
@@ -2258,12 +2369,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "staff_schedule",
-            "column" : "office_id"
+            "column" : "office_id",
+            "join_table" : "office_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "office_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2275,12 +2388,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "staff_schedule_rules",
-            "column" : "office_id"
+            "column" : "office_id",
+            "join_table" : "office_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "office_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2292,8 +2407,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "staff_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -2305,8 +2421,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "survey_answer",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2338,8 +2455,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "survey_question",
-            "column" : "member_id"
+            "column" : "member_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2357,12 +2475,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "survey_question_option",
-            "column" : "question_id"
+            "column" : "question_id",
+            "join_table" : "survey_question",
+            "join_column" : "id"
          },
          {
-            "table" : "survey_question",
-            "column" : "member_id"
+            "column" : "member_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2387,12 +2507,14 @@
       "filter" : "past-week-only",
       "path_to_client" : [
          {
-            "table" : "token",
-            "column" : "user_id"
+            "column" : "user_id",
+            "join_table" : "visitor_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2408,8 +2530,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "treatment_plan_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -2421,8 +2544,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "upload_postprocessing_task",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -2440,12 +2564,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "upload_postprocessing_task_param",
-            "column" : "task_id"
+            "column" : "task_id",
+            "join_table" : "upload_postprocessing_task",
+            "join_column" : "id"
          },
          {
-            "table" : "upload_postprocessing_task",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -2470,8 +2596,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "upload_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -2489,8 +2616,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "visitor_fact",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2502,8 +2630,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "visitor_opinion",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -2521,12 +2650,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "visitor_setting",
-            "column" : "visitor_id"
+            "column" : "visitor_id",
+            "join_table" : "visitor_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2544,12 +2675,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "visitor_settings",
-            "column" : "visitor_id"
+            "column" : "visitor_id",
+            "join_table" : "visitor_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2561,8 +2694,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "visitor_user_sensitive",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2574,8 +2708,9 @@
       "filter" : "versioned",
       "path_to_client" : [
          {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "1",
@@ -2587,12 +2722,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "voice_appointment_reminder_procedure",
-            "column" : "procedure_id"
+            "column" : "procedure_id",
+            "join_table" : "procedure_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "procedure_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2612,8 +2749,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "voice_autofills",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2625,8 +2763,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "voice_client_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2638,8 +2777,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "voice_end_message",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2657,8 +2797,9 @@
       "filter" : "past-week-only",
       "path_to_client" : [
          {
-            "table" : "voice_left_messages",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2687,8 +2828,9 @@
       "filter" : "past-week-only",
       "path_to_client" : [
          {
-            "table" : "voice_message_history",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2717,8 +2859,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "voice_no_call_list",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2730,12 +2873,14 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "voice_patient_name_pronunciation",
-            "column" : "patient_id"
+            "column" : "patient_id",
+            "join_table" : "visitor_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2747,8 +2892,14 @@
       "filter" : "past-week-only",
       "path_to_client" : [
          {
-            "table" : "voice_recipient_list",
-            "column" : "client_id"
+            "column" : "RLId",
+            "join_table" : "voice_message_history",
+            "join_column" : "rec_id"
+         },
+         {
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2775,8 +2926,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "voice_reminder_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2794,8 +2946,9 @@
       "filter" : "past-week-only",
       "path_to_client" : [
          {
-            "table" : "voice_system_transaction_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2817,8 +2970,9 @@
       "filter" : "past-week-only",
       "path_to_client" : [
          {
-            "table" : "voice_transactions_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "2",
@@ -2840,8 +2994,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "client_setting",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "action" : "update-voice-end-message-id",
@@ -2853,8 +3008,9 @@
       "filter" : null,
       "path_to_client" : [
          {
-            "table" : "si_theme",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "action" : "update-first-theme-message-id",
@@ -2866,8 +3022,9 @@
       "filter" : "older-than-week",
       "path_to_client" : [
          {
-            "table" : "email_contact_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -2889,12 +3046,14 @@
       "filter" : "older-than-week",
       "path_to_client" : [
          {
-            "table" : "email_post_app_survey_log",
-            "column" : "patient_id"
+            "column" : "patient_id",
+            "join_table" : "visitor_versioned",
+            "join_column" : "id"
          },
          {
-            "table" : "visitor_versioned",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -2910,67 +3069,15 @@
          }
       ]
    },
-   "email_referral:2" : {
-      "to_table" : "email_referral",
-      "action" : "insert",
-      "filter" : "older-than-week",
-      "path_to_client" : [
-         {
-            "table" : "email_referral",
-            "column" : "client_id"
-         }
-      ],
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "email_referral_mail",
-         "column" : "sending_date"
-      },
-      "columns" : [
-         {
-            "column" : "id",
-            "comment" : "auto increment",
-            "action" : "autoincrement"
-         },
-         {
-            "column" : "referral_mail_id",
-            "comment" : "link to [email_referral_mail.id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "email_referral_mail",
-            "lookup_column" : "id"
-         }
-      ]
-   },
-   "email_referral_mail:2" : {
-      "to_table" : "email_referral_mail",
-      "action" : "insert",
-      "filter" : "older-than-week",
-      "path_to_client" : [
-         {
-            "table" : "email_referral_mail",
-            "column" : "client_id"
-         }
-      ],
-      "priority" : "3",
-      "date_filter_column" : {
-         "table" : "email_referral_mail",
-         "column" : "sending_date"
-      },
-      "columns" : [
-         {
-            "column" : "id",
-            "comment" : "auto increment",
-            "action" : "autoincrement"
-         }
-      ]
-   },
    "email_sent_mail_log:2" : {
       "to_table" : "email_sent_mail_log",
       "action" : "insert",
       "filter" : "older-than-week",
       "path_to_client" : [
          {
-            "table" : "email_sent_mail_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -2999,12 +3106,14 @@
       "filter" : "older-than-week",
       "path_to_client" : [
          {
-            "table" : "sms_message_history",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "sms_client_settings",
+            "join_column" : "Id"
          },
          {
-            "table" : "sms_client_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -3017,13 +3126,6 @@
             "column" : "id",
             "comment" : "auto increment",
             "action" : "autoincrement"
-         },
-         {
-            "column" : "client_id",
-            "comment" : "link to [sms_client_settings.Id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "sms_client_settings",
-            "lookup_column" : "Id"
          }
       ]
    },
@@ -3033,12 +3135,14 @@
       "filter" : "older-than-week",
       "path_to_client" : [
          {
-            "table" : "sms_message_response",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "sms_client_settings",
+            "join_column" : "Id"
          },
          {
-            "table" : "sms_client_settings",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -3047,13 +3151,6 @@
          "column" : "ResponseReceiveDate"
       },
       "columns" : [
-         {
-            "column" : "client_id",
-            "comment" : "link to [sms_client_settings.Id] (hard-coded)",
-            "action" : "foreign-key",
-            "lookup_table" : "sms_client_settings",
-            "lookup_column" : "Id"
-         },
          {
             "column" : "id",
             "comment" : "auto increment",
@@ -3067,8 +3164,9 @@
       "filter" : "older-than-week",
       "path_to_client" : [
          {
-            "table" : "voice_left_messages",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -3097,8 +3195,9 @@
       "filter" : "older-than-week",
       "path_to_client" : [
          {
-            "table" : "voice_message_history",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -3127,8 +3226,14 @@
       "filter" : "older-than-week",
       "path_to_client" : [
          {
-            "table" : "voice_recipient_list",
-            "column" : "client_id"
+            "column" : "RLId",
+            "join_table" : "voice_message_history",
+            "join_column" : "rec_id"
+         },
+         {
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -3155,8 +3260,9 @@
       "filter" : "older-than-week",
       "path_to_client" : [
          {
-            "table" : "voice_system_transaction_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",
@@ -3178,8 +3284,9 @@
       "filter" : "older-than-week",
       "path_to_client" : [
          {
-            "table" : "voice_transactions_log",
-            "column" : "client_id"
+            "column" : "client_id",
+            "join_table" : "client",
+            "join_column" : "id"
          }
       ],
       "priority" : "3",

@@ -62,6 +62,12 @@ sub get_schema_diff {
 	return $rules;
 }
 
+sub ordered_hash {
+    
+	tie my %r, 'Tie::IxHash', @_;
+	return \%r;
+}
+
 sub group_by_columns {
 	my ($rows, $columns) = @_;
 	
@@ -428,13 +434,16 @@ sub find_path_to_client {
 	};
 	my @found_paths;
 	if ($links->is_link_exists_between_tables($table, "client")) {
+		my ($from_column, $to_column) = $links->get_link_column_between_tables($table, "client");
 		push(
 			@found_paths,
 			[
-				{
-					'table' => $table,
-					'column' => $links->get_link_column_between_tables($table, "client"),
-				},
+				main::ordered_hash(
+					#'table' => $table,
+					'column' => $from_column,
+					'join_table' => "client",
+					'join_column' => $to_column,
+				),
 			]
 		);
 	} else {
@@ -449,10 +458,11 @@ sub find_path_to_client {
 					if (defined $path && 1 == keys %$columns) {
 						unshift(
 							@$path, 
-							{
-								'table' => $table,
+							main::ordered_hash(
 								'column' => ((keys %$columns)[0]),
-							}
+								'join_table' => $to_table,
+								'join_column' => ((values %$columns)[0]),
+							)
 						);
 						push(@found_paths, $path);
 					}
@@ -1093,7 +1103,8 @@ sub get_link_column_between_tables {
 		die "link from [$from_table] to [$to_table] doesn't exist";
 	}
 	my $link_info = $self->{'links'}{$from_table}{$to_table};
-	return (keys %{ (values %$link_info)[0] })[0];
+	my $link_column = (keys %{ (values %$link_info)[0] })[0];
+	return $link_column => (values %$link_info)[0]{$link_column};
 }
 
 sub get_link_from {
@@ -1192,66 +1203,73 @@ sub new {
 	my ($class, $schema_6, $required_tables) = @_;
 
 	my $self = bless {
-		'update_on' => {
-			'client' => ['cl_username'],
-			'client_setting' => ['client_id', 'PKey'],
-			'email_reminder_settings' => ['client_id', 'type'],
-			'srm_resource' => ['id'],
-			'upload_settings' => ['client_id', 'name'],
-			'sms_client_settings' => ['client_id'],
-			'client_feature' => ['client_id', 'feature_id'],
-		},
 		'path_to_client' => {
 			'ppn_article_letter' => [
-				{
-					'table' => 'ppn_article_letter',
+				main::ordered_hash(
 					'column' => 'let_id',
-				},
-				{
-					'table' => 'ppn_letter',
+					'join_table' => 'ppn_letter',
+					'join_column' => 'id',
+				),
+				main::ordered_hash(
 					'column' => 'client_id',
-				},
+					'join_table' => 'client',
+					'join_column' => 'id',
+				),
 			],
-			'ppn_article_letter:2' => [
-				{
-					'table' => 'ppn_article_letter',
-					'column' => 'let_id',
-				},
-				{
-					'table' => 'ppn_letter',
-					'column' => 'client_id',
-				},
+			'srm_resource' => [
+				main::ordered_hash(
+					'column' => 'container',
+					'join_table' => 'client',
+					'join_column' => 'cl_username',
+				),
 			],
-			'srm_resource' => [],
 			'sms_message_history' => [
-				{
-					'table' => 'sms_message_history',
+				main::ordered_hash(
 					'column' => 'client_id',
-				},
-				{
-					'table' => 'sms_client_settings',
+					'join_table' => 'sms_client_settings',
+					'join_column' => 'Id',
+				),
+				main::ordered_hash(
 					'column' => 'client_id',
-				}
+					'join_table' => 'client',
+					'join_column' => 'id',
+				),
 			],
 			'sms_message_response' => [
-				{
-					'table' => 'sms_message_response',
+				main::ordered_hash(
 					'column' => 'client_id',
-				},
-				{
-					'table' => 'sms_client_settings',
+					'join_table' => 'sms_client_settings',
+					'join_column' => 'Id',
+				),
+				main::ordered_hash(
 					'column' => 'client_id',
-				}
+					'join_table' => 'client',
+					'join_column' => 'id',
+				),
 			],
 			'invisalign_patient' => [
-	            {
-	                "table" => "invisalign_patient",
+	            main::ordered_hash(
 	                "column" => "invisalign_client_id",
-	            },
-	            {
-	                "table" => "invisalign_client",
+					'join_table' => 'invisalign_client',
+					'join_column' => 'id',
+	            ),
+	            main::ordered_hash(
 	                "column" => "client_id",
-	            },
+					'join_table' => 'client',
+					'join_column' => 'id',
+	            ),
+			],			
+			'voice_recipient_list' => [
+	            main::ordered_hash(
+	                "column" => "RLId",
+					'join_table' => 'voice_message_history',
+					'join_column' => 'rec_id',
+	            ),
+	            main::ordered_hash(
+	                "column" => "client_id",
+					'join_table' => 'client',
+					'join_column' => 'id',
+	            ),
 			],
 		},
 		'link_to_shared_table' => {
@@ -1300,6 +1318,7 @@ sub new {
 			'staff_versioned' => 1,
 			'treatment_plan_versioned' => 1,
 			'visitor_versioned' => 1,
+			'sms_client_settings' => 1,
 		}
 	}, $class;
 	$self->_generate_actions($required_tables);
