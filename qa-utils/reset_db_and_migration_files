@@ -1,0 +1,121 @@
+#!/bin/sh
+
+# Needs to source the bashrc to have the mysql alias and the sesosh commands availiable
+source ~/.bashrc
+
+
+#
+# Run this as admin to restore 24-7 stage-migration environment
+# to pre-migration state as follows:
+#
+#   1. Stop Sesame apps.
+#   2. Drop, then recreate (using Sesosh and Liquibase) persist
+#      and analytics databases 
+#   3. Reset migration files to 2012-10-01T1740 state.
+#   4. Populate server table
+#   5. Deploy Send
+#   5. Deploy big-files
+#   6. Start Sesame apps
+#
+
+# exit if effective user ID is not 300 (admin)
+if [[ $EUID -ne 300 ]]; then
+   echo "This script must be run as admin." 1>&2
+   exit 1
+fi
+
+for svc in  \
+    analytics-etl \
+    authws-snapshot \
+    internal-snapshot \
+    janitor \
+    md-snapshot \
+    migration-current-activity \
+    migration-current-activity-archive \
+    migration-current-activity-small-tasks \
+    migration-current-activity-verify-ui-tasks \
+    migration-event \
+    migration-workflow \
+    pp-snapshot \
+    sicontrolpanel-snapshot \
+    siuploadws-snapshot \
+    upload-logs-snapshot \
+    upload-sibatch \
+    uploadws-snapshot \
+    visitor-facts
+do
+    sudo service $svc stop &
+done
+
+sleep 5
+
+echo 'drop database sesame_stage_db;'             | mysql 
+echo 'drop database sesame_stage_analytics_db;'   | mysql
+echo 'create database sesame_stage_db;'           | mysql
+echo 'create database sesame_stage_analytics_db;' | mysql
+
+# (XXX: Consider updating build artifacts here)
+
+#Added exit in order for liquibase to return to the script
+cat <<EOF | sesosh
+liquibaseUpdate("background");
+exit;
+EOF
+
+sudo rm -rf /home/sites/Common/invisalign-cases/* \
+    /home/sites/Common/members/* \
+    /home/sites/Common/messages/* \
+    /home/sites/Common/sent-mail-log/* \
+    /home/sites/Common/srm/* \
+    /home/sites/site/web/hhf/users/css/* \
+    /home/sites/Common/image-systems/* \
+    /home/sites/Common/image-systems-fake-nas/* \
+    /home/sites/Common/image-systems-cache/{control-panel,patient-pages}/* \
+    /home/sites/Common/storage/{backup,received}/* \
+    /home/sites/Common/sent-mails/*
+
+cd / && sudo tar xzvf /home/admin/migration_files.2012-10-01T1740.tar.gz
+
+cat <<EOF | mysql
+use sesame_stage_db;
+insert into server
+    (name,host_name,http_port,https_port,context_path,default_scheme)
+values
+    ('Upload',         'up-stgmigr.sesamecom.com', '80', '443', '', 'https'),
+    ('Patient Pages',  'pp-stgmigr.sesamecom.com', '80', '443', '', 'https'),
+    ('Control Panel',  'md-stgmigr.sesamecom.com', '80', '443', '', 'https'),
+    ('Internal',       'ip-stgmigr.sesamecom.com', '80', '443', '', 'https'),
+    ('UploadLogs',     'ul-stgmigr.sesamecom.com', '80', '443', '', 'https'),
+    ('Sending',     'cdyne-stgmigr.sesamecom.com', '80', '443', '', 'https'),
+    ('SIUpload',       'up-stgmigr.sesamecom.com', '80', '443', '', 'https');
+EOF
+
+/home/sites/artifacts/deploy_send.sh
+cd /home/sites/artifacts/big-files
+git pull
+ant install
+
+for svc in  \
+    analytics-etl \
+    authws-snapshot \
+    internal-snapshot \
+    janitor \
+    md-snapshot \
+    migration-current-activity \
+    migration-current-activity-archive \
+    migration-current-activity-small-tasks \
+    migration-current-activity-verify-ui-tasks \
+    migration-event \
+    migration-workflow \
+    pp-snapshot \
+    sicontrolpanel-snapshot \
+    siuploadws-snapshot \
+    upload-logs-snapshot \
+    upload-sibatch \
+    uploadws-snapshot \
+    visitor-facts
+do
+    sudo service $svc start
+
+stty sane
+done
