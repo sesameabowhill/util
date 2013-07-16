@@ -42,7 +42,7 @@
 
  	<!-- IET -->
 
-	<property name="iet.host" value="50.16.204.63" />
+	<property name="iet.host" value="50.17.3.15" />
 	<property name="iet.user" value="admin" />
 
 	<property name="iet.artifacts" value="${current.artifacts}" />
