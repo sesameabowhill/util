@@ -1,0 +1,5 @@
+SPD-2484: zipcodes mapped to wrong area code
+
+UPDATE `sesame_db`.`zip_code_area` 
+SET area_code='619'
+WHERE zip in ('92119', '92120');
