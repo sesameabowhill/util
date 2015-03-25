@@ -33,12 +33,14 @@ if ($list) {
 	$logger->info("delete artifacts from [%s] version%s [%s]", $repository, (@versions == 1 ? '' : 's'), join(', ', @versions));
 	my $total_count = 0;
 	for my $version (@versions) {
-		my $urls = search($logger, $repository, $group_id, $version);
+		my $urls = search_folders($logger, $repository, $group_id, $version);
 		$logger->info("%d artifact%s to delete in [%s] version", scalar @$urls, (@$urls == 1 ? '' : 's'), $version);
 		my $count = @$urls;
 		for my $u (sort @$urls) {
 			$u =~ s{api/storage/}{};
-			$logger->info("delete [%s] (%d to go)", (split('/', $u))[-1], --$count);
+            # Delete folder (deleting only files left empty folders)
+#            $logger->info("folder: $u");
+			$logger->info("delete [%s] (%d to go)", (split('/', $u))[-2].'/'.(split('/', $u))[-1], --$count);
 			delete_artifact($u);
 			$total_count ++;
 		}
@@ -77,6 +79,23 @@ sub search {
     }
     return $result;
 }
+sub search_folders {
+    my ($logger, $repository, $group_id, $version) = @_;
+    
+    my $result = search($logger, $repository, $group_id, $version);
+    my %folders = ();
+    foreach my $url (@$result) {
+        my @parts = split /\//, $url; 
+        $url = join( "/", @parts[0 .. $#parts-1] );
+        $folders{$url} = 1;
+    }
+    my @r = keys %folders;
+    unless (@r) {
+	    $logger->info("no folder artifacts found");
+    }
+    return \@r;
+}
+
 sub delete_artifact {
     my ($url) = @_;
 	
