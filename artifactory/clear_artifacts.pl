@@ -1,5 +1,17 @@
 #!/usr/bin/perl
-
+#
+# https://wiki.sesamecommunications.com/display/PD/Artifactory+Cleanup
+#
+# To list all versions in libs-snapshot-local:
+#      perl clear_artifacts.pl --list --repository=libs-snapshot-local
+#
+#  The list of libs-release-local will probably timeout as it is very large.
+#
+#  To delete files in libs-release-local for versions 10.0.0 and 10.0.1
+#      perl clear_artifacts.pl 10.0.0 10.0.1 --repository=libs-release-local
+#
+#  You can specify one or more versions to delete on the command line.
+#
 use strict;
 use warnings;
 
