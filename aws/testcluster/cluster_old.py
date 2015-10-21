@@ -10,16 +10,16 @@ aws_secret = 'REPLACE_ME'
 
 tc1_priority1 = { "i-b3cdd8d8" : "test-cluster-1-nas-01",
 "i-c8726bab" : "test-cluster-1-nas-02",
+"i-2cd7987f" :	"test-cluster-1-nasEnctest-03",
+"i-c80ddbe3" :  "test-cluster-1-nasEnctest-04",
 "i-45308425" : "test-cluster-1-jump",
 "i-35c4ae58" : "test-cluster-1-nat-01",
 "i-26a8db45" : "test-cluster-1-nat-02",
 "i-f6e65e93" : "test-cluster-1-chef",
-"i-b0fc1ad3" : "test-cluster-1-db1",
-"i-1936ae74" : "test-cluster-1-db2"}
+"i-b0fc1ad3" : "test-cluster-1-db1"}
 
 tc1_priority2 = { "i-f12f9c91" : "test-cluster-1-smtp",
 "i-984155b9" : "test-cluster-1-sendng",
-"i-18deac65" : "test-cluster-1-profiles",
 "i-7e4ff712" : "test-cluster-1-web-01",
 "i-6d889b0d" : "test-cluster-1-web-02",
 "i-fe5b3a92" : "test-cluster-1-facts",
@@ -35,16 +35,13 @@ tc1_priority2 = { "i-f12f9c91" : "test-cluster-1-smtp",
 "i-898eb064" : "test-cluster-1-stats-01",
 "i-cc5d3ca0" : "test-cluster-1-status",
 "i-c7cdd8ac" : "test-cluster-1-migration",
-"i-dec8278d" : "test-cluster-1-janitor",
-"i-17cdd87c" : "test-cluster-1-etl",
-"i-a8b9a283" : "test-cluster-1-haproxy" }
+"i-17cdd87c" : "test-cluster-1-etl" }
 
 tc2_priority1 = {"i-6b40f087" : "test-cluster-2-nas-01",
 "i-e583ad0f" : "test-cluster-2-nas-02",
 "i-822943e7" : "test-cluster-2-nat-01",
 "i-43ffb421" : "test-cluster-2-nat-02",
 "i-d82aedb4" : "test-cluster-2-db1",
-"i-a6e192cd" : "test-cluster-2-db2",
 "i-c03de3ab" : "test-cluster-2-jump",
 "i-38d4c85b" : "test-cluster-2-chef"}
 
