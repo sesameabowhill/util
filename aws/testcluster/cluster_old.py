@@ -1,3 +1,5 @@
+import boto.ec2
+import boto.ec2.elb
 import boto.sns
 import smtplib
 import time as timer
