@@ -1,0 +1,4 @@
+FROM c7_network
+RUN yum -y install net-tools; yum clean all
+EXPOSE 80
+CMD ["/usr/sbin/init"]
