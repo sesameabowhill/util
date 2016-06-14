@@ -1,10 +1,21 @@
+====================
+OBTAIN THIS COOKBOOK
+====================
+
+Make a working directory.
+Git clone the sesame utilities folders to your current working directory:
+
+~~~
+git clone git@github.com/sesacom/util.git
+~~~
+
 =============
 PREREQUISITES
 =============
-To run locally, you will need to create a CentOS 7 chef workstation.
+To run locally, you will need to being running a CentOS Xwindows workstation.
 This can be done in a Virtualbox if needed.
 
-* Update your system before starting: 
+* Update your OS before starting: 
 ~~~
 sudo yum update
 ~~~~
@@ -20,17 +31,17 @@ sudo firewall-cmd --reload
 INSTALL CHEF
 ============
 
-Install Chef DevKit on your Chef Workstation
+Install the Chef Development Kit
 
 ~~~
-# obtain and install a new chef via web browser
+# obtain and install a new chef archive
 wget https://packages.chef.io/stable/el/7/chefdk-0.13.21-1.el7.x86_64.rpm
 rpm -ivh chefdk-0.13.21-1.el7.x86_64.rpm
 
 # edit .bash-profile for build environment settings
 eval "$(chef shell-init bash)"
 
-# test chef build environment setting is correct
+# verify the chef build environment settings are correct
 which ruby
 /opt/chefdk/embedded/bin/ruby --version
 chef-client --version
@@ -70,33 +81,25 @@ Follow these instructions to install Docker:
 https://docs.docker.com/engine/installation/linux/centos/
 ~~~
 
-====================
-OBTAIN THIS COOKBOOK
-====================
-
-Copy the jenkinsjava folder from:
-~~~
-\\gibson\data\personal folders\abowhill\CHEF_PROJECTS\jenkinsjava
-~~~
-to your current working directory
 
 ===============
 INSTALL JENKINS
 ===============
-
 
 ~~~
 cd jenkinsjava
 kitchen converge
 ~~~
 
-  - installation will take about 10 min
-  - verify by visiting jenkins home page
-      http://172.17.0.2:8080
-  - login as chef
-  - no password
+- installation will take about 10 min
+- verify by visiting jenkins home page
+  http://172.17.0.2:8080
+- login as chef
+- no password
 
-The following Jenkins plugins will installed automatically:
+
+
+NOTE: The following Jenkins plugins will installed automatically
 ~~~
 ant                     java make system
 pam-auth                unix host auth method (v. 1.2)
@@ -147,13 +150,13 @@ token-macro             macro expansions (v 1.12.1)
 Upgrade GIT
 ===========
 
-At this point, GIT must be upgraded to the latest version, or subsequent attempts to connect to github will not work.
+Once the Chef build is complete, you will need to upgrade to a new verison of git, or subsequent attempts to connect to github will not work.
 
 ~~~
 # Login to the VM
 kitchen login
 
-# start
+# check git
 cd 
 git --version     ## should read 1.7.0 or thereabout. 
                   ## this version is too old.
@@ -168,12 +171,12 @@ curl https://www.kernel.org/pub/software/scm/git/git-2.8.4.tar.gz > git-2.8.4.ta
 gzip -dc git-2.8.4.tar.gz | tar xvf -
 cd git-2.8.4
 
-# install depends - remove olds
+# install modern git depends - remove olds
 sudo yum install curl-devel expat-devel gettext-devel openssl-devel zlib-devel
-sudo yum install  gcc perl-ExtUtils-MakeMaker
+sudo yum install gcc perl-ExtUtils-MakeMaker
 sudo yum remove git
 
-# build and install
+# build and install to /usr
 make configure
 ./configure --prefix=/usr
 sudo make install
@@ -191,9 +194,9 @@ sudo rm -rfv temp
 sudo service jenkins restart
 ~~~
 
-=========================
-Global Tool Configuration
-=========================
+==================================
+Jemnkins Global Tool Configuration
+==================================
 
 These are the locations of all the system tools installed for this to work.
 
@@ -201,7 +204,6 @@ Most of the values can be obtained by entering:
 ~~~
 mvn --version 
 ~~~
-* Ignore the values for GIT for the moment 
 
 Complete each section with information about what is installed on the system.
 
@@ -218,9 +220,10 @@ Complete each section with information about what is installed on the system.
    - MAVEN_HOME                /usr/local/maven
 - Click Save
 
----------------
-GLOBAL SETTINGS
----------------
+
+-----------------------
+JENKINS GLOBAL SETTINGS
+-----------------------
 
 Global settings provide defaults for project settings. 
 The following settings are grouped by section of Global configuration: 
@@ -316,9 +319,9 @@ Click Apply
 
 End global configuration by Clicking SAVE
 
-----------------
-PROJECT SETTINGS
-----------------
+------------------------
+JENKINS PROJECT SETTINGS
+------------------------
 ====================
 SETTING UP A PROJECT
 ====================
@@ -328,8 +331,8 @@ to build. First, you'll need to create the project.
 
 Login to jenkins as chef - no password and select:
 
-~~~
 New Item
+~~~
    Enter "sesame-api-dev" in the field at the top of the page
    Select "Maven Project" from the list
 click OK
@@ -344,8 +347,8 @@ Each of the following sections are listed in the navigation tabs at the
 top of the page. It is recommended to click "Apply" after completing each
 section, then finally clicking "Save" when all sections are complete.
 
-~~~
 General 
+~~~
    Maven Project Name: sesame-api-dev
    check Discard old builds
       log rotation strategy
@@ -354,8 +357,8 @@ General
    project URL: https://github.com/sesacom/sesame_api/
 ~~~
 
-~~~
 Source Code Management
+~~~
    Check GIT
    Repositories
      repository URL: https://github.com/sesacom/sesame_api.git
@@ -371,8 +374,8 @@ Source Code Management
      URL: https://github.com/sesamecom/web/
 ~~~
 
-~~~
 Build Triggers:
+~~~
     check: Build whenever a SNAPSHOT dependency is built
     check: build periodically 
       (once every half hour schedule)
@@ -380,16 +383,17 @@ Build Triggers:
       Build when a change is pushed to GitHub
 ~~~
 
-~~~
 Build Environment:
+~~~
     check Resolve artifacts from Artifactory
        select globally configured artifactory server from popdown
     override resolver credentials 
        select jenkins/*****
     click refresh repositories
 ~~~
-~~~
+
 Build:
+~~~
     (ignore error message abotu missing pom)
     goals and options: 
          clean package -DsesameConfigurationFile=$WORKSPACE/../../sesame.properties -DpersistSchema=persist_web_master_snapshot -DanalyticsSchema=analytics_report_master_snapshot -DlogSchema=upload_logs
@@ -397,17 +401,20 @@ Build:
         Check: Use Private Maven Repository
         Select: Local to the workspace 
 ~~~
-~~~     
+
 Build Settings:
+~~~     
     check: e-mail notification
     email: eng-seattle@sesamecommunications.com
 ~~~
-~~~
+
 Post-steps
+~~~
     select Add post-build-step
 ~~~
-~~~   
+
 Post-build actions:
+~~~   
    click: Add post-build action
    select: Aggragate downstream test results
    check: Automatically aggregate all downstream tests
