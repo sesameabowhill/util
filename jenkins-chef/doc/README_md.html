@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>README - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="file">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+<div class="nav-section">
+  <h3>Table of Contents</h3>
+
+  <ul class="link-list" role="directory">
+    <li><a href="#label-OBTAIN+THIS+COOKBOOK">OBTAIN THIS COOKBOOK</a>
+    <li><a href="#label-PREREQUISITES">PREREQUISITES</a>
+    <li><a href="#label-INSTALL+CHEF">INSTALL CHEF</a>
+    <li><a href="#label-obtain+and+install+a+new+chef+archive">obtain and install a new chef archive</a>
+    <li><a href="#label-edit+.bash-profile+for+build+environment+settings">edit .bash-profile for build environment settings</a>
+    <li><a href="#label-verify+the+chef+build+environment+settings+are+correct">verify the chef build environment settings are correct</a>
+    <li><a href="#label-INSTALL+DOCKER">INSTALL DOCKER</a>
+    <li><a href="#label-INSTALL+JENKINS">INSTALL JENKINS</a>
+    <li><a href="#label-Upgrade+GIT">Upgrade GIT</a>
+    <li><a href="#label-Login+to+the+VM">Login to the VM</a>
+    <li><a href="#label-check+git">check git</a>
+    <li><a href="#label-make+temp+dir">make temp dir</a>
+    <li><a href="#label-download+new+git">download new git</a>
+    <li><a href="#label-install+modern+git+depends+-+remove+olds">install modern git depends - remove olds</a>
+    <li><a href="#label-build+and+install+to+-2Fusr">build and install to /usr</a>
+    <li><a href="#label-confirm">confirm</a>
+    <li><a href="#label-cleanup">cleanup</a>
+    <li><a href="#label-restart+jenkins">restart jenkins</a>
+    <li><a href="#label-Jemnkins+Global+Tool+Configuration">Jemnkins Global Tool Configuration</a>
+    <li><a href="#label------------------------">————————</a>
+    <li><a href="#label-SETTING+UP+A+PROJECT">SETTING UP A PROJECT</a>
+  </ul>
+</div>
+
+
+  <div id="project-metadata">
+    <div id="fileindex-section" class="nav-section">
+  <h3>Pages</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="./Berksfile.html">Berksfile</a>
+  
+    <li><a href="./Berksfile_lock.html">Berksfile.lock</a>
+  
+    <li><a href="./C7SystemDWithNetwork_docker.html">C7SystemDWithNetwork.docker</a>
+  
+    <li><a href="./Gemfile.html">Gemfile</a>
+  
+    <li><a href="./README_md.html">README</a>
+  
+    <li><a href="./chefignore.html">chefignore</a>
+  
+    <li><a href="./dta.html">dta</a>
+  
+    <li><a href="./test/Dockerfile.html">Dockerfile</a>
+  
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-label="Page README.md">
+
+<p>====================</p>
+
+<h1 id="label-OBTAIN+THIS+COOKBOOK">OBTAIN THIS COOKBOOK<span><a href="#label-OBTAIN+THIS+COOKBOOK">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>Make a working directory. Git clone the sesame utilities folders to your
+current working directory:</p>
+
+<p>~~~ git clone git@github.com/sesacom/util.git ~~~</p>
+
+<p>=============</p>
+
+<h1 id="label-PREREQUISITES">PREREQUISITES<span><a href="#label-PREREQUISITES">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>To run locally, you will need to being running a CentOS Xwindows
+workstation. This can be done in a Virtualbox if needed.</p>
+<ul><li>
+<p>Update your OS before starting: ~~~ sudo yum update ~~~~</p>
+</li></ul>
+
+<p>It may also be worthwhile to open a firewall on your machine: ~~~ sudo
+firewall-cmd –zone=public –add-port=8080/tcp –permanent sudo firewall-cmd
+–zone=public –add-service=http –permanent sudo firewall-cmd –reload ~~~</p>
+
+<p>============</p>
+
+<h1 id="label-INSTALL+CHEF">INSTALL CHEF<span><a href="#label-INSTALL+CHEF">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>Install the Chef Development Kit</p>
+
+<p>~~~</p>
+
+<h1 id="label-obtain+and+install+a+new+chef+archive">obtain and install a new chef archive<span><a href="#label-obtain+and+install+a+new+chef+archive">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>wget <a
+href="https://packages.chef.io/stable/el/7/chefdk-0.13.21-1.el7.x86_64.rpm">packages.chef.io/stable/el/7/chefdk-0.13.21-1.el7.x86_64.rpm</a>
+rpm -ivh chefdk-0.13.21-1.el7.x86_64.rpm</p>
+
+<h1 id="label-edit+.bash-profile+for+build+environment+settings">edit .bash-profile for build environment settings<span><a href="#label-edit+.bash-profile+for+build+environment+settings">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>eval “$(chef shell-init bash)”</p>
+
+<h1 id="label-verify+the+chef+build+environment+settings+are+correct">verify the chef build environment settings are correct<span><a href="#label-verify+the+chef+build+environment+settings+are+correct">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>which ruby /opt/chefdk/embedded/bin/ruby –version chef-client –version ~~~</p>
+
+<p>Edit Gemfile: ~~~ source “<a href="https://rubygems.org">rubygems.org</a>”</p>
+
+<p>gem “test-kitchen” gem “kitchen-docker” gem “kitchen-vagrant” gem
+“chef-sugar” ~~~</p>
+
+<p>Run bundler ~~~ bundle install ~~~</p>
+
+<p>==============</p>
+
+<h1 id="label-INSTALL+DOCKER">INSTALL DOCKER<span><a href="#label-INSTALL+DOCKER">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>Update your system: ~~~ sudo yum update ~~~</p>
+
+<p>Verify requisite dependencies are installed: ~~~ ls -l
+/sys/class/misc/device-mapper (should show files) sudo rpm -Uvh <a
+href="http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm">download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm</a>
+~~~</p>
+
+<p>Follow these instructions to install Docker: ~~~ <a
+href="https://docs.docker.com/engine/installation/linux/centos">docs.docker.com/engine/installation/linux/centos</a>/
+~~~</p>
+
+<p>===============</p>
+
+<h1 id="label-INSTALL+JENKINS">INSTALL JENKINS<span><a href="#label-INSTALL+JENKINS">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>~~~ cd jenkinsjava kitchen converge ~~~</p>
+<ul><li>
+<p>installation will take about 10 min</p>
+</li><li>
+<p>verify by visiting jenkins home page  <a
+href="http://172.17.0.2:8080">172.17.0.2:8080</a></p>
+</li><li>
+<p>login as chef</p>
+</li><li>
+<p>no password</p>
+</li></ul>
+
+<p>NOTE: The following Jenkins plugins will installed automatically ~~~ ant
+java make system pam-auth unix host auth method (v. 1.2) junit java unit
+testing (v. 1.13, restart) git integrates git (v. 2.4.4, restart)
+git-client git library for plugins github integrates github github-api
+github API library versionnumber rich version numbers credentials manage
+credentials and groups (restart) mailer smtp mailing (restart) email-ext
+smtp mailing matrix-auth matrix authorization method matrix-project matrix
+authorization strategies ssh-credentials allows ssh cred storage (v 1.12)
+plain-credentials new creds, secret text (v 1.2) ssh-agent ssh-agent to
+builds workflow-step-api workflow pipline component (v 2.1)
+external-monitor-job interact and monitor jobs maven-plugin build via
+special project type (v 2.13, restart) nodenamecolumn Adds column showing
+node name jobtype-column Adds column showing job type greenballs Adds green
+balls icon view-job-filters mix and match filters dashboard-view portal
+view for jenkins javadoc javadoc support (v 1.3) instant-messaging bot and
+build notifications for messanging jabber jabber notifier for
+instant-messanging artifactdeployer shows artifacts on site and deploys
+artifactory interface to artifactory copy-to-slave copy files to slave and
+back slave-setup copy files to slaves before build ssh-slaves manage slaves
+over ssh slave-status monitor resource use on slave slack post build
+notifications to slack channel performance capture reports from Jmeter and
+Junit cobertura code coverage report tool envfile stores environment in a
+file file-leak-detector lists open file handles scm-api SCM dependency (v
+1.2) script-security script approval workflow (v 1.19) token-macro macro
+expansions (v 1.12.1) ~~~</p>
+
+<p>===========</p>
+
+<h1 id="label-Upgrade+GIT">Upgrade GIT<span><a href="#label-Upgrade+GIT">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>Once the Chef build is complete, you will need to upgrade to a new verison
+of git, or subsequent attempts to connect to github will not work.</p>
+
+<p>~~~</p>
+
+<h1 id="label-Login+to+the+VM">Login to the VM<span><a href="#label-Login+to+the+VM">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>kitchen login</p>
+
+<h1 id="label-check+git">check git<span><a href="#label-check+git">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>cd git –version ## should read 1.7.0 or thereabout.  ## this version is too
+old.  ## you will need at least 1.8.1</p>
+
+<h1 id="label-make+temp+dir">make temp dir<span><a href="#label-make+temp+dir">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>mkdir temp cd temp</p>
+
+<h1 id="label-download+new+git">download new git<span><a href="#label-download+new+git">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>curl <a
+href="https://www.kernel.org/pub/software/scm/git/git-2.8.4.tar.gz">www.kernel.org/pub/software/scm/git/git-2.8.4.tar.gz</a>
+&gt; git-2.8.4.tar.gz gzip -dc git-2.8.4.tar.gz | tar xvf - cd git-2.8.4</p>
+
+<h1 id="label-install+modern+git+depends+-+remove+olds">install modern git depends - remove olds<span><a href="#label-install+modern+git+depends+-+remove+olds">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>sudo yum install curl-devel expat-devel gettext-devel openssl-devel
+zlib-devel sudo yum install gcc perl-ExtUtils-MakeMaker sudo yum remove git</p>
+
+<h1 id="label-build+and+install+to+-2Fusr">build and install to /usr<span><a href="#label-build+and+install+to+-2Fusr">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>make configure ./configure –prefix=/usr sudo make install</p>
+
+<h1 id="label-confirm">confirm<span><a href="#label-confirm">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>which git # confirm it&#39;s /usr/bin/git ls -alt <code>which git</code> #
+look at install date git –version # version should say 2.8.4 or whatever
+you downloaded</p>
+
+<h1 id="label-cleanup">cleanup<span><a href="#label-cleanup">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>cd sudo rm -rfv temp</p>
+
+<h1 id="label-restart+jenkins">restart jenkins<span><a href="#label-restart+jenkins">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>sudo service jenkins restart ~~~</p>
+
+<p>==================================</p>
+
+<h1 id="label-Jemnkins+Global+Tool+Configuration">Jemnkins Global Tool Configuration<span><a href="#label-Jemnkins+Global+Tool+Configuration">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>These are the locations of all the system tools installed for this to work.</p>
+
+<p>Most of the values can be obtained by entering: ~~~ mvn –version ~~~</p>
+
+<p>Complete each section with information about what is installed on the
+system.</p>
+<ul><li>
+<p>JDK</p>
+</li><li>
+<p>uncheck “install automatically”</p>
+</li><li>
+<p>Name java-1.8.0_91-b14</p>
+</li><li>
+<p>JAVA_HOME /usr/lib/jvm/java-1.8.0</p>
+</li><li>
+<p>Git</p>
+</li><li>
+<p>Name 2.8.4</p>
+</li><li>
+<p>Path to Git Executable /usr/bin/git</p>
+</li><li>
+<p>Maven</p>
+</li><li>
+<p>uncheck “install automatically”</p>
+</li><li>
+<p>Name maven-3.3.9</p>
+</li><li>
+<p>MAVEN_HOME /usr/local/maven</p>
+</li><li>
+<p>Click Save</p>
+</li></ul>
+
+<p>———————– JENKINS GLOBAL SETTINGS ———————–</p>
+
+<p>Global settings provide defaults for project settings. The following
+settings are grouped by section of Global configuration:</p>
+
+<p>Jenkins &gt; Manage Jenkins &gt; Configure System</p>
+
+<p>Go through each of the sections below and enter or cut-and-paste data into
+the corresponding Jenkins configuration fields. Sections are easily located
+directly under the Jenkins logo at the top of the page. Hover over the
+“Jenkins &gt; configuration” item, and click on the triangle. This will
+expose section names listed below.</p>
+
+<p>~~~ Maven Project Configuration  Global Maven Opts: -Xmx1024m  Jenkins
+Location  System Admin e-mail address: jenkins@sesamecommunications.com
+click Apply ~~~</p>
+
+<p>~~~ Github Github Servers  Click Add  API URL: <a
+href="https://api.github.com">api.github.com</a>  Credentials: MySecretText
+(NOTE: if this doesn&#39;t exist, perform the following sub-steps)  Click
+ADD &gt; Jenkins  Under KIND, select Secret Text  In the SECRET field,
+enter your real Gitub access token from:  <a
+href="https://github.com/settings/tokens">github.com/settings/tokens</a> 
+(generate new token under your username if you don&#39;t have one) 
+(otherwise use mine, for user sesameabowhill:) 
+7e26fb3e9cd207a5ccc85f399f8502167e6c762d  Secret: &lt;token&gt; 
+Description: (leave blank)  Click Add  Now you should see this token in
+credentials popdown.  select it and click TEST CONNECTION  it should say
+“credentials verified for …”  Uncheck Manage Hooks Click Apply ~~~</p>
+
+<p>~~~ Artifactory  Check: Use Credentials Plugin  Click: Add  Artifactory
+Server ID: main  URL: <a
+href="http://artifactory.sesamecom.com/artifactory">artifactory.sesamecom.com/artifactory</a>
+Default Deployer Credentials  select “jenkins/*****” from popdown  IF such
+a selection is not there do the following:  click Add &gt; Jenkins  select:
+Username with password  enter username: Jenkins  enter password:
+{DESede}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==  click Add
+select “jenkins/*****” from popdown  click: Test Connection  should return:
+Found Artifactory 2.4.2  check: use different resolver credentials  select
+“jenkins/*****” from popdown Click Apply ~~~</p>
+
+<p>~~~ Git Plugin  Global Config user.name Value: jenkins  Global Config
+user.email Value: jenkins@sesamecommunications.com Click Apply ~~~</p>
+
+<p>~~~ Extended E-mail Notification  SMTP server 
+smtp2.sesamecommunications.com  Default user e-mail suffix 
+@sesamecommunications.com Click Apply ~~~</p>
+
+<p>~~~ Global Slack Notifer Settings  Team Subdomain sesamecom  Outgoing
+Webhook Token 6My6VBHcvVxvAELFKL5o9Xd5  Outgoing Webhook URL Endpoint / 
+Click Test Click Apply ~~~</p>
+
+<p>End global configuration by Clicking SAVE</p>
+
+<p>———————— JENKINS PROJECT SETTINGS</p>
+
+<h1 id="label------------------------">————————<span><a href="#label------------------------">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<h1 id="label-SETTING+UP+A+PROJECT">SETTING UP A PROJECT<span><a href="#label-SETTING+UP+A+PROJECT">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>Following are the project settings needed to get the sesame-api project to
+build. First, you&#39;ll need to create the project.</p>
+
+<p>Login to jenkins as chef - no password and select:</p>
+
+<p>New Item ~~~  Enter “sesame-api-dev” in the field at the top of the page 
+Select “Maven Project” from the list click OK ~~~</p>
+
+<p>You will be brought into the sesame-api-dev project configuration page, but
+can always return to it by pathing to:</p>
+
+<p>Jenkins &gt; sesame-api-dev (clickable text) &gt; configure</p>
+
+<p>Each of the following sections are listed in the navigation tabs at the top
+of the page. It is recommended to click “Apply” after completing each
+section, then finally clicking “Save” when all sections are complete.</p>
+
+<p>General ~~~  Maven Project Name: sesame-api-dev  check Discard old builds 
+log rotation strategy  keep 2 builds  check github project  project URL: <a
+href="https://github.com/sesacom/sesame_api">github.com/sesacom/sesame_api</a>/
+~~~</p>
+
+<p>Source Code Management ~~~  Check GIT  Repositories  repository URL: <a
+href="https://github.com/sesacom/sesame_api.git">github.com/sesacom/sesame_api.git</a>
+credentials:  configure your own personal sesame creds here to access
+github  click Add &gt; Jenkins  select: username with password  enter
+username: &lt;your sesame username&gt;  enter password: &lt;your sesame
+password&gt;  select your creds from popdown (aka: &lt;yourname&gt;/*****) 
+branch specifier: origin/dev  repository browser: githubweb  URL: <a
+href="https://github.com/sesamecom/web">github.com/sesamecom/web</a>/ ~~~</p>
+
+<p>Build Triggers: ~~~  check: Build whenever a SNAPSHOT dependency is built 
+check: build periodically  (once every half hour schedule)  enter schedule:
+H * * * *<br>  Build when a change is pushed to GitHub ~~~</p>
+
+<p>Build Environment: ~~~  check Resolve artifacts from Artifactory  select
+globally configured artifactory server from popdown  override resolver
+credentials  select jenkins/*****  click refresh repositories ~~~</p>
+
+<p>Build: ~~~  (ignore error message abotu missing pom)  goals and options: 
+clean package -DsesameConfigurationFile=$WORKSPACE/../../sesame.properties
+-DpersistSchema=persist_web_master_snapshot
+-DanalyticsSchema=analytics_report_master_snapshot -DlogSchema=upload_logs 
+Click Advanced  Check: Use Private Maven Repository  Select: Local to the
+workspace ~~~</p>
+
+<p>Build Settings: ~~~<br>  check: e-mail notification  email:
+eng-seattle@sesamecommunications.com ~~~</p>
+
+<p>Post-steps ~~~  select Add post-build-step ~~~</p>
+
+<p>Post-build actions: ~~~<br>  click: Add post-build action  select:
+Aggragate downstream test results  check: Automatically aggregate all
+downstream tests</p>
+
+<p>click: Add post-build action  select: deploy artifacts to maven repository 
+ckick advanced  repo url: <a
+href="http://artifactory.sesamecom.com/artifactory/libs-sesame-api-local">artifactory.sesamecom.com/artifactory/libs-sesame-api-local</a>
+repo id : snapshots  check: Assign unique versions to snapshots</p>
+
+<p>click: Add post-build action  select: Slack Notifications  &lt;check all 7
+visible items&gt; ~~~ Click SAVE</p>
+</main>
+
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

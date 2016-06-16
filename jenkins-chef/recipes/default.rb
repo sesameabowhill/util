@@ -20,11 +20,7 @@
 # with Jenkins, just that they forgot to put in all the correct libraries. This plugin requires
 # Jenkins to be restarted. Without this step, users cannot be added to the system using the 
 # Jenkins cookbook.
-#
-# 3. Add users
-#
 
-# This is most important - centos7 image doesn't come with network enabled
 package 'net-tools'
 
 include_recipe 'java' 
@@ -42,213 +38,58 @@ include_recipe 'chef-sugar::default'
 #  action [:create, :start]
 #end
 
-# git config --global user.name "sesameabowhill"
-# sudo yum install curl-devel expat-devel gettext-devel openssl-devel zlib-devel
-# sudo yum install  gcc perl-ExtUtils-MakeMaker
-# sudo yum remove git
-#
-
-
-
-
 git_client 'default' do
   action :install
+  version '1.8.1'
 end
 
-#service "jenkins" do 
-#   action [ :start, :enable ]
-#end
+# jenkins_plugin supports:
+# name 
+# version (string/symbol, default: latest)
+# source (string)
+# install_deps (boolean, default true)
+# options (string)
+
+# This command reads all installed modules, gets their version numbers and places them into 
+# a dictionary -- for testing 
+#curl -uabowhill:sesame3 -X GET 'http://172.17.0.2:8080/pluginManager/api/xml?depth=1&xpath=//shortName|//version&wrapper=plugins' | ruby -ne 'list = $_.split /<shortName>|<version>/; list.map! { |item| /(\w|\.|-|_)+/.match(item) }; list.shift; h = Hash[*list]; puts h.to_a' | less
 
 
-jenkins_plugin 'ant' do
-   :enable
+
+#################
+# Install Plugins
+#################
+
+# reads each row of an attribute array and just does the "jenkins_plugin" command with optional 
+# version specification and trigger restart commands (both specified in the input row)
+
+installers = node.default.jenkins.module.list
+
+installers.each do |installer|
+   nam, ver, trigger_restart = installer
+   
+   jenkins_plugin nam do
+      if ver
+         version ver
+      end
+      if trigger_restart
+         notifies :restart, 'service[jenkins]', :immediately
+      end
+   end
 end
 
-jenkins_plugin 'pam-auth' do
-   version '1.2'
-   :enable
-end
-#
-jenkins_plugin 'junit' do
-   version '1.13'
-   :enable
-#   notifies :restart, 'service[jenkins]', :immediately
-end
-#
-jenkins_plugin 'git' do
-   version '2.4.4'
-   :enable
-   notifies :restart, 'service[jenkins]', :immediately
-end
 
-jenkins_plugin 'git-client' do
-   :enable
-end
+# represent each module that has specific version upgrades.
+# try each out at the top first
+# avoid using 'enable' keyword unless absolutely necessary
+# if it fails in the top, move it to the bottom.
 
-jenkins_plugin 'github' do
-   :enable
-end
+#jenkins_plugin 'workflow-aggregator'
+#jenkins_plugin 'mysql-auth-plugin' 
 
-jenkins_plugin 'github-api' do
-   :enable
-end
-
-jenkins_plugin 'versionnumber' do
-   :enable
-end
-
-jenkins_plugin 'credentials' do
-   :enable
-   notifies :restart, 'service[jenkins]', :immediately
-end
-
-jenkins_plugin 'mailer' do
-   :enable
-   notifies :restart, 'service[jenkins]', :immediately
-end
-
-jenkins_plugin 'email-ext' do
-   :enable
-end
-
-jenkins_plugin 'matrix-auth' do
-   :enable
-end
-
-jenkins_plugin 'matrix-project' do
-   version '1.7'
-   :enable
-end
-
-jenkins_plugin 'ssh-credentials' do
-   version '1.12'
-   :enable
-end
-
-jenkins_plugin 'plain-credentials' do
-   version '1.2'
-   :enable
-end
-
-jenkins_plugin 'ssh-agent' do
-   :enable
-   notifies :restart, 'service[jenkins]', :immediately
-end
-
-jenkins_plugin 'workflow-step-api' do
-   version '2.1'
-   :enable
-end
-
-jenkins_plugin 'external-monitor-job' do
-   :enable
-end
-
-jenkins_plugin 'maven-plugin' do 
-   version '2.13'
-   :enable 
-   notifies :restart, 'service[jenkins]', :immediately
-end
-
-jenkins_plugin 'nodenamecolumn' do
-   :enable
-end
-
-jenkins_plugin 'jobtype-column' do
-   :enable
-end
-
-jenkins_plugin 'greenballs' do
-   :enable
-end
-
-jenkins_plugin 'view-job-filters' do
-   :enable
-end
-
-jenkins_plugin 'dashboard-view' do
-   :enable
-end
-
-jenkins_plugin 'javadoc' do
-   version '1.3'
-   :enable
-end
-
-jenkins_plugin 'instant-messaging' do
-   :enable
-end
-
-jenkins_plugin 'jabber' do
-   :enable
-end
-
-jenkins_plugin 'artifactdeployer' do
-   :enable
-end
-
-jenkins_plugin 'artifactory' do
-   :enable
-end
-
-jenkins_plugin 'copy-to-slave' do
-   :enable
-end
-
-jenkins_plugin 'slave-setup' do
-   :enable
-end
-
-jenkins_plugin 'ssh-slaves' do
-   :enable
-end
-
-jenkins_plugin 'slave-status' do
-   :enable
-end
-
-jenkins_plugin 'slack' do
-   :enable
-end
-
-jenkins_plugin 'performance' do
-   :enable
-end
- 
-jenkins_plugin 'cobertura' do
-   :enable
-end
-
-jenkins_plugin 'envfile' do
-   :enable
-end
-
-jenkins_plugin 'file-leak-detector' do
-   :enable
-end
-
-jenkins_plugin 'scm-api' do
-   version '1.2'
-   :enable
-end
-
-jenkins_plugin 'script-security' do
-   version '1.19'
-   :enable
-end
-
-jenkins_plugin 'token-macro' do
-   version '1.12.1'
-   :enable
-end
-
-#jenkins_plugin 'mysql-auth-plugin' do
-#   :enable
-#end
-
-###############
-# Admin Users
-###############
+#################
+# Add Admin Users
+#################
 
 jenkins_user 'abowhill' do
    full_name    'Allan Bowhill'
@@ -272,9 +113,9 @@ jenkins_user 'thunter' do
 end
 
 
-###########################
-# Chef user : experimental
-###########################
+#########################
+# Chef user: experimental
+#########################
 
 unless node['jenkins']['executor']['private_key']
 require 'net/ssh'
@@ -309,15 +150,14 @@ if node['jenkins-chef']['auth']
 end
 
 
-
 ##########################
 # Commit security changes
 ##########################
 
-
 # Basic Jenkins authentication policy activation
 # Must appear near end of recipt or it will not be allowed to be created
 # by anonymous user. This script is run once in this blockr. NOT IDEMPONTENT
+
 jenkins_script 'setup authentication' do
   command <<-EOH.gsub(/^ {4}/, '')
     import jenkins.model.*
@@ -343,8 +183,6 @@ end
 #node.run_state[:jenkins_private_key] = private_key
 
 
-
-
 ##########################################################
 #jenkins_keys = encrypted_data_bag_item('jenkins', 'keys')
 
@@ -365,7 +203,8 @@ end
 ########################################################
 
 
-#service "jenkins" do 
-#   action [ :restart ]
-#end
+## Jenkins restart before use
+## This command is compatible with CenOS7 serviced
 jenkins_command 'safe-restart'
+
+
