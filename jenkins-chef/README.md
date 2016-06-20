@@ -195,7 +195,7 @@ sudo service jenkins restart
 ~~~
 
 ==================================
-Jemnkins Global Tool Configuration
+Jenkins Global Tool Configuration
 ==================================
 
 These are the locations of all the system tools installed for this to work.
@@ -363,11 +363,11 @@ Source Code Management
    Repositories
      repository URL: https://github.com/sesacom/sesame_api.git
        credentials:
-          configure your own personal sesame creds here to access github
+          configure your own personal GIT sesame creds here to access github
           click Add > Jenkins
-             select: username with password
-             enter username: <your sesame username>
-             enter password: <your sesame password>
+             select: Git username with password
+             enter username: <your Git username>
+             enter password: <your Git  password>
           select your creds from popdown (aka: <yourname>/*****)
      branch specifier: origin/dev
      repository browser: githubweb

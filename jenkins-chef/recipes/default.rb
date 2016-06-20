@@ -29,6 +29,7 @@ include_recipe 'git'
 include_recipe 'jenkins::master'
 include_recipe 'chef-sugar::default'
 
+#jenkins_plugin 'mysql-auth-plugin' 
 #mysql_service 'local' do
 #  version '5.7'
 #  bind_address '127.0.0.1'
@@ -42,13 +43,6 @@ git_client 'default' do
   action :install
   version '1.8.1'
 end
-
-# jenkins_plugin supports:
-# name 
-# version (string/symbol, default: latest)
-# source (string)
-# install_deps (boolean, default true)
-# options (string)
 
 # This command reads all installed modules, gets their version numbers and places them into 
 # a dictionary -- for testing 
@@ -79,38 +73,31 @@ installers.each do |installer|
 end
 
 
-# represent each module that has specific version upgrades.
-# try each out at the top first
-# avoid using 'enable' keyword unless absolutely necessary
-# if it fails in the top, move it to the bottom.
-
-#jenkins_plugin 'workflow-aggregator'
-#jenkins_plugin 'mysql-auth-plugin' 
 
 #################
 # Add Admin Users
 #################
 
-jenkins_user 'abowhill' do
-   full_name    'Allan Bowhill'
-   email        'abowhill@sesamecommunications.com'
-   public_keys  node.default.jenkins.user.abowhill.public_key
-   password    'sesame3'
-end
-
-jenkins_user 'astighall' do
-   full_name    'Annalise Stighall'
-   email        'astighall@sesamecommunications.com'
-   public_keys  node.default.jenkins.user.abowhill.public_key
-   password    'sesame2'
-end
-
-jenkins_user 'thunter' do
-   full_name    'Teo Hunter'
-   email        'thunter@sesamecommunications.com'
-   public_keys  node.default.jenkins.user.abowhill.public_key
-   password    'sesame1'
-end
+#jenkins_user 'abowhill' do
+#   full_name    'Allan Bowhill'
+#   email        'abowhill@sesamecommunications.com'
+#   public_keys  node.default.jenkins.user.abowhill.public_key
+#   password    'sesame3'
+#end
+#
+#jenkins_user 'astighall' do
+#   full_name    'Annalise Stighall'
+#   email        'astighall@sesamecommunications.com'
+#   public_keys  node.default.jenkins.user.abowhill.public_key
+#   password    'sesame2'
+#end
+#
+#jenkins_user 'thunter' do
+#   full_name    'Teo Hunter'
+#   email        'thunter@sesamecommunications.com'
+#   public_keys  node.default.jenkins.user.abowhill.public_key
+#   password    'sesame1'
+#end
 
 
 #########################
@@ -158,25 +145,23 @@ end
 # Must appear near end of recipt or it will not be allowed to be created
 # by anonymous user. This script is run once in this blockr. NOT IDEMPONTENT
 
-jenkins_script 'setup authentication' do
-  command <<-EOH.gsub(/^ {4}/, '')
-    import jenkins.model.*
-    import hudson.security.*
-    import org.jenkinsci.plugins.*
-
-    def instance = Jenkins.getInstance()
-
-    def realm = new HudsonPrivateSecurityRealm(false)
-    instance.setSecurityRealm(realm)
-
-    def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
-    instance.setAuthorizationStrategy(strategy)
-
-    instance.save()
-  EOH
-end
-
-
+#jenkins_script 'setup authentication' do
+#  command <<-EOH.gsub(/^ {4}/, '')
+#    import jenkins.model.*
+#    import hudson.security.*
+#    import org.jenkinsci.plugins.*
+#
+#    def instance = Jenkins.getInstance()
+#
+#    def realm = new HudsonPrivateSecurityRealm(false)
+#    instance.setSecurityRealm(realm)
+#
+#    def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
+#    instance.setAuthorizationStrategy(strategy)
+#
+#    instance.save()
+#  EOH
+#end
 
 # Using encrypted data bags and chef-sugar
 #private_key = encrypted_data_bag_item('jenkins', 'keys')['private_key']
@@ -208,3 +193,68 @@ end
 jenkins_command 'safe-restart'
 
 
+jenkins_script 'setup authentication' do
+  command <<-EOH.gsub(/^ {4}/, '')
+import hudson.security.SecurityRealm
+import org.jenkinsci.plugins.GithubSecurityRealm
+import jenkins.model.Jenkins
+String githubWebUri = 'https://github.com'
+String githubApiUri = 'https://api.github.com'
+String clientID = '84389e1a195eee676128'
+String clientSecret = '4773bd184883cec9b4bd2bf7074d427758054fb4'
+String oauthScopes = 'read:org'
+SecurityRealm github_realm = new GithubSecurityRealm(githubWebUri,
+githubApiUri, clientID, clientSecret, oauthScopes)
+//check for equality, no need to modify the runtime if no settings changed
+if(!github_realm.equals(Jenkins.instance.getSecurityRealm())) {
+    Jenkins.instance.setSecurityRealm(github_realm)
+    Jenkins.instance.save()
+}
+   EOH
+end
+
+
+jenkins_script 'setup access' do
+  command <<-EOH.gsub(/^ {4}/, '')
+import org.jenkinsci.plugins.GithubAuthorizationStrategy
+import hudson.security.AuthorizationStrategy
+import jenkins.model.Jenkins
+
+//permissions are ordered similar to web UI
+//Admin User Names
+String adminUserNames = 'sesameabowhill, thunter, astighall'
+//Participant in Organization
+String organizationNames = 'sesacom*Development'
+//Use Github repository permissions
+boolean useRepositoryPermissions = true
+//Grant READ permissions to all Authenticated Users
+boolean authenticatedUserReadPermission = true
+//Grant CREATE Job permissions to all Authenticated Users
+boolean authenticatedUserCreateJobPermission = true
+//Grant READ permissions for /github-webhook
+boolean allowGithubWebHookPermission = false
+//Grant READ permissions for /cc.xml
+boolean allowCcTrayPermission = false
+//Grant READ permissions for Anonymous Users
+boolean allowAnonymousReadPermission = false
+//Grant ViewStatus permissions for Anonymous Users
+boolean allowAnonymousJobStatusPermission = false
+
+AuthorizationStrategy github_authorization = new
+GithubAuthorizationStrategy(adminUserNames,
+    authenticatedUserReadPermission,
+    useRepositoryPermissions,
+    authenticatedUserCreateJobPermission,
+    organizationNames,
+    allowGithubWebHookPermission,
+    allowCcTrayPermission,
+    allowAnonymousReadPermission,
+    allowAnonymousJobStatusPermission)
+
+//check for equality, no need to modify the runtime if no settings changed
+if(!github_authorization.equals(Jenkins.instance.getAuthorizationStrategy())) {
+    Jenkins.instance.setAuthorizationStrategy(github_authorization)
+    Jenkins.instance.save()
+}
+   EOH
+end
