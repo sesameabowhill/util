@@ -5,8 +5,11 @@ OBTAIN THIS COOKBOOK
 Make a working directory.
 Git clone the sesame utilities folders to your current working directory:
 
+IMPORTANT: in-house recipes were cloned as submodules to this project.
+Therefore you MUST use the --recursive option when cloning!
+
 ~~~
-git clone git@github.com/sesacom/util.git
+git clone --recursive git@github.com/sesacom/util.git
 ~~~
 
 =============
