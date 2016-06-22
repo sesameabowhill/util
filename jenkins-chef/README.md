@@ -200,14 +200,15 @@ Jenkins Global Tool Configuration
 
 These are the locations of all the system tools installed for this to work.
 
-Most of the values can be obtained by entering: 
+Most of the values can be obtained by entering the following on the virtual machine after building it (kitchen login): 
 ~~~
 mvn --version 
 ~~~
 
-Complete each section with information about what is installed on the system.
+In Jenkins > Manage Jenkins > Global Tool Configuration, complete each section with information about what is installed on the system.
 
 - JDK
+   - click Add JDK
    - uncheck "install automatically"
    - Name                      java-1.8.0_91-b14
    - JAVA_HOME                 /usr/lib/jvm/java-1.8.0
@@ -215,6 +216,7 @@ Complete each section with information about what is installed on the system.
    - Name                      2.8.4
    - Path to Git Executable    /usr/bin/git
 - Maven 
+   - click Add Maven
    - uncheck "install automatically"
    - Name                      maven-3.3.9
    - MAVEN_HOME                /usr/local/maven
@@ -276,6 +278,7 @@ Artifactory
    Artifactory Server ID: main
    URL: http://artifactory.sesamecom.com/artifactory
    Default Deployer Credentials
+      (save settings and re-enter if the following doesn't show)
       select "jenkins/*****" from popdown
       IF such a selection is not there do the following:
          click Add > Jenkins
@@ -329,7 +332,7 @@ SETTING UP A PROJECT
 Following are the project settings needed to get the sesame-api project
 to build. First, you'll need to create the project.
 
-Login to jenkins as chef - no password and select:
+Login to jenkins
 
 New Item
 ~~~
