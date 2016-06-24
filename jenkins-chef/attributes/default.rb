@@ -24,8 +24,6 @@ node.debug_value('jvm_options')
 #node.set['jenkins']['master']['jenkins_args'] = '--argumentsRealm.roles.$ADMIN_USER=admin'
 #node.set['jenkins']['master']['jenkins_args'] = '--argumentsRealm.passwd.$ADMIN_USER=sesame'
 
-node.set.jenkins.master['jenkins_args'] ='-Djenkins.install.runSetupWizard=false'
-
 default['jenkins']['master']['port'] = 8080
 default['jenkins']['master']['endpoint'] = "http://#{node['jenkins']['master']['host']}:#{node['jenkins']['master']['port']}"
 
@@ -60,7 +58,7 @@ node.default.jenkins.module.list = [
    [ 'junit', '1.13', false ],
    [ 'git', '2.5.0', true ],
    [ 'git-server', '1.6', false ],
-   [ 'github', nil, false ],
+   [ 'github', '1.19.2', false ],
    [ 'github-api', '1.75', true ],
    [ 'github-oauth', nil, true ],
    [ 'versionnumber', nil, false ],

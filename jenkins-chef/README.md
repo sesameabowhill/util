@@ -94,59 +94,12 @@ cd jenkinsjava
 kitchen converge
 ~~~
 
+NOTE: Numerous Jenkins plugins will installed automatically
+
 - installation will take about 10 min
 - verify by visiting jenkins home page
   http://172.17.0.2:8080
-- login as chef
-- no password
-
-
-
-NOTE: The following Jenkins plugins will installed automatically
-~~~
-ant                     java make system
-pam-auth                unix host auth method (v. 1.2)
-junit                   java unit testing (v. 1.13, restart)
-git                     integrates git (v. 2.4.4, restart)
-git-client              git library for plugins
-github                  integrates github
-github-api              github API library
-versionnumber           rich version numbers
-credentials             manage credentials and groups (restart)
-mailer                  smtp mailing (restart) 
-email-ext               smtp mailing
-matrix-auth             matrix authorization method
-matrix-project          matrix authorization strategies
-ssh-credentials         allows ssh cred storage (v 1.12)
-plain-credentials       new creds, secret text (v 1.2)
-ssh-agent               ssh-agent to builds
-workflow-step-api       workflow pipline component (v 2.1)
-external-monitor-job    interact and monitor jobs
-maven-plugin            build via special project type (v 2.13, restart)
-nodenamecolumn          Adds column showing node name
-jobtype-column          Adds column showing job type
-greenballs              Adds green balls icon
-view-job-filters        mix and match filters
-dashboard-view          portal view for jenkins
-javadoc                 javadoc support (v 1.3)
-instant-messaging       bot and build notifications for messanging
-jabber                  jabber notifier for instant-messanging
-artifactdeployer        shows artifacts on site and deploys
-artifactory             interface to artifactory
-copy-to-slave           copy files to slave and back
-slave-setup             copy files to slaves before build
-ssh-slaves              manage slaves over ssh
-slave-status            monitor resource use on slave
-slack                   post build notifications to slack channel
-performance             capture reports from Jmeter and Junit
-cobertura               code coverage report tool
-envfile                 stores environment in a file
-file-leak-detector      lists open file handles
-scm-api                 SCM dependency (v 1.2)
-script-security         script approval workflow (v 1.19)
-token-macro             macro expansions (v 1.12.1)
-~~~
-
+- login will be authenticated through github, so authenticate with your Github username and password.
 
 
 ===========
@@ -155,6 +108,9 @@ Upgrade GIT
 
 Once the Chef build is complete, you will need to upgrade to a new verison of git, or subsequent attempts to connect to github will not work.
 
+
+NOTE: You can just cut-n-paste blocks from the following shell script.
+Make sure to execute only one yum line at a time, however.
 ~~~
 # Login to the VM
 kitchen login
@@ -274,6 +230,9 @@ Github Servers
 Click Apply
 ~~~
 
+
+NOTE: In the following section, if credentials controls do not appear, click SAVE and \
+re-enter the configuration again. They will re-appear.
 ~~~
 Artifactory
    Check: Use Credentials Plugin
@@ -414,11 +373,6 @@ Build Settings:
     email: eng-seattle@sesamecommunications.com
 ~~~
 
-Post-steps
-~~~
-    select Add post-build-step
-~~~
-
 Post-build actions:
 ~~~   
    click: Add post-build action
@@ -438,3 +392,126 @@ Post-build actions:
 ~~~
 Click SAVE
 
+------------------------
+MANUAL SETUP FOR COMPILE
+------------------------
+====================
+sesame-api project
+====================
+
+There is one project that will be initially configured with Jenkins with Java 8, and this is the sesame-api project. Below is the procedure for setting up a manual build environment in the UNIX console. This can serve to instruct as a model for adding additional jobs to Jenkins.
+
+First, this chef cookbook will automatically install Mysql on the target machine and initialize all prerequisite databases. These databases are used by liquibase during unit testing near the middle of the build and deployment pipeline.
+
+So to get a development environment working, you will need to perform the following steps on the target machine to which Jenkins, Maven, Java8 and Mysql were installed.
+
+~~~ shell
+# create a subdirectory called temp
+mkdir temp
+cd temp
+# clone the git repo for sesame-api, forcing dev branch
+git clone -b dev https://github.com/sesacom/sesame_api.git
+# copy chef-installed sesame.properties to root of the build tree
+sudo cp /var/lib/jenkins/jobs/sesame.properties sesame-api-dev
+# copy settings.xml to ~/.m2
+sudo cp /var/lib/jenkins/jobs/sesame-api-dev/workspace/settings.xml ~/.m2
+# compile and test - building 1st time may need repeating if jars are connection-dropped
+cd sesame-api-dev
+mvn test -DsesameConfigurationFile=sesame.properties
+~~~
+
+Below are copies of the files themselves: 
+
+sesame.properties
+~~~
+persistHost=localhost
+persistPort=3306
+persistUser=root
+persistPassword=sesame
+persistSchema=md_snapshot
+
+dataSourceProvider=HikariCpPersistDataSourceProvider
+hikaricp.maximumPoolSize=10
+hikaricp.connectionTimeout=10000
+hikaricp.leakDetectionThreshold=20000
+
+httpsKeystorePassword=testing
+httpsKeystoreType=PKCS12
+
+ibConnectUrl=https://ci.slogin.smb.internetbrands.com
+enableInsecureSslMode=true
+
+siUploadImageBucket=test-si-images
+useBasicDataSource=false
+skipLiquibaseUpdate=false
+~~~
+
+(MINIMAL) settings.xml
+
+This XML is generated by artifactory's 
+   client settings > maven settings > generate settings
+
+With some modifications of jenkins user and password being hard-coded.
+~~~
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd" xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <servers>
+    <server>
+      <username>jenkins</username>
+      <password>\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==</password>
+      <id>central</id>
+    </server>
+    <server>
+      <username>jenkins</username>
+      <password>\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==</password>
+      <id>snapshots</id>
+    </server>
+    <server>
+      <username>jenkins</username>
+      <password>\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==</password>
+      <id>sesame-artifactory-release</id>
+    </server>
+  </servers>
+  <profiles>
+    <profile>
+      <repositories>
+        <repository>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+          <id>central</id>
+          <name>libs-release</name>
+          <url>http://artifactory.sesamecom.com/artifactory/libs-release</url>
+        </repository>
+        <repository>
+          <snapshots />
+          <id>snapshots</id>
+          <name>libs-snapshot</name>
+          <url>http://artifactory.sesamecom.com/artifactory/libs-snapshot</url>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+          <id>central</id>
+          <name>plugins-release</name>
+          <url>http://artifactory.sesamecom.com/artifactory/plugins-release</url>
+        </pluginRepository>
+        <pluginRepository>
+          <snapshots />
+          <id>snapshots</id>
+          <name>plugins-snapshot</name>
+          <url>http://artifactory.sesamecom.com/artifactory/plugins-snapshot</url>
+        </pluginRepository>
+      </pluginRepositories>
+      <id>artifactory</id>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>artifactory</activeProfile>
+  </activeProfiles>
+</settings>
+~~~

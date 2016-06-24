@@ -14,12 +14,7 @@
 #
 # node.set.jenkins.master['jvm_options'] = '-Djenkins.install.runSetupWizard=false'
 # 
-# 2. Install unbroken credentials plugin
-# Once the Jenkins instance started, the "credentials" plugin must be added explicity 
-# to install missing Groovy libraries. This is a known bug, as the credentials plugin comes packaged
-# with Jenkins, just that they forgot to put in all the correct libraries. This plugin requires
-# Jenkins to be restarted. Without this step, users cannot be added to the system using the 
-# Jenkins cookbook.
+
 
 package 'net-tools'
 
@@ -27,23 +22,39 @@ include_recipe 'java'
 include_recipe 'maven' 
 include_recipe 'git'
 include_recipe 'jenkins::master'
-include_recipe 'chef-sugar::default'
+#include_recipe 'chef-sugar::default'
 
-
-jenkins_plugin 'mysql-auth' 
 mysql_service 'local' do
   version '5.7'
-  bind_address '127.0.0.1'
+  bind_address '0.0.0.0'
   port '3306'
   data_dir '/data'
-  initial_root_password 'FishVapor97'
+  initial_root_password 'sesame'
   action [:create, :start]
+end
+
+template "/var/lib/mysql-files/create_mysql_tables.sql" do
+   source 'create_mysql_tables.erb'
+   mode '0644'
+end
+
+execute 'create databases' do
+   command "mysql -h 127.0.0.1 -u root --password='sesame' < /var/lib/mysql-files/create_mysql_tables.sql"
 end
 
 git_client 'default' do
   action :install
-  version '1.8.1'
 end
+
+template '/var/lib/jenkins/jobs/sesame.properties' do
+   source 'sesame.properties'
+   mode '0644'
+end    
+
+template '/var/lib/jenkins/jobs/settings.xml' do
+   source 'settings.xml'
+   mode '0644'
+end    
 
 # This command reads all installed modules, gets their version numbers and places them into 
 # a dictionary -- for testing 
@@ -73,9 +84,7 @@ installers.each do |installer|
    end
 end
 
-
 jenkins_command 'safe-restart'
-
 
 jenkins_script 'setup authentication' do
   command <<-EOH.gsub(/^ {4}/, '')
@@ -142,5 +151,4 @@ if(!github_authorization.equals(Jenkins.instance.getAuthorizationStrategy())) {
 }
    EOH
 end
-
 

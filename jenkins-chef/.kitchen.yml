@@ -8,9 +8,6 @@ provisioner:
 platforms:
   - name: centos-6.8
     driver:
-#       dockerfile: C7SystemDWithNetwork.docker
-#       privileged: true
-#       run_command: /usr/sbin/init
        use_sudo: false
        network:
        - ["private network", { ip: "172.17.0.2" }]
