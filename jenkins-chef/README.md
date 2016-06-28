@@ -1,22 +1,7 @@
-====================
-OBTAIN THIS COOKBOOK
-====================
-
-Make a working directory.
-Git clone the sesame utilities folders to your current working directory:
-
-IMPORTANT: in-house recipes were cloned as submodules to this project.
-Therefore you MUST use the --recursive option when cloning!
-
-~~~
-git clone --recursive git@github.com/sesacom/util.git
-~~~
-
 =============
 PREREQUISITES
 =============
-To run locally, you will need to being running a CentOS Xwindows workstation.
-This can be done in a Virtualbox if needed.
+To run locally, you will need to being running a CentOS Xwindows installation to make into a Chef Workstation. Chef scripts generally need to be developed on a dedicated workstation. This can be done in a Virtualbox if needed.
 
 * Update your OS before starting: 
 ~~~
@@ -30,11 +15,24 @@ sudo firewall-cmd --zone=public --add-service=http --permanent
 sudo firewall-cmd --reload
 ~~~
 
+====================
+OBTAIN THIS COOKBOOK
+====================
+
+Make a working directory.
+Git clone the sesame utilities folders to your current working directory:
+
+~~~
+git clone git@github.com/sesacom/util.git
+~~~
+
 ============
 INSTALL CHEF
 ============
 
 Install the Chef Development Kit
+
+The Chef DK goes on your workstation. 
 
 ~~~
 # obtain and install a new chef archive
@@ -50,17 +48,7 @@ which ruby
 chef-client --version
 ~~~
 
-Edit Gemfile:
-~~~
-source "https://rubygems.org"
-
-gem "test-kitchen"
-gem "kitchen-docker"
-gem "kitchen-vagrant"
-gem "chef-sugar"
-~~~
-
-Run bundler 
+Run Ruby Bundler 
 ~~~
 bundle install
 ~~~
@@ -199,7 +187,7 @@ section names listed below.
 
 ~~~
 Maven Project Configuration
-   Global Maven Opts: -Xmx1024m
+   Global Maven Opts: -Xmx1024m -XX:MaxPermSize=128m
    Jenkins Location
       System Admin e-mail address: jenkins@sesamecommunications.com
 click Apply
@@ -296,8 +284,8 @@ to build. First, you'll need to create the project.
 
 Login to jenkins
 
-New Item
 ~~~
+New Item
    Enter "sesame-api-dev" in the field at the top of the page
    Select "Maven Project" from the list
 click OK
@@ -414,9 +402,9 @@ git clone -b dev https://github.com/sesacom/sesame_api.git
 # copy chef-installed sesame.properties to root of the build tree
 sudo cp /var/lib/jenkins/jobs/sesame.properties sesame-api-dev
 # copy settings.xml to ~/.m2
-sudo cp /var/lib/jenkins/jobs/sesame-api-dev/workspace/settings.xml ~/.m2
+sudo cp /var/lib/jenkins/jobs/settings.xml ~/.m2
 # compile and test - building 1st time may need repeating if jars are connection-dropped
-cd sesame-api-dev
+cd sesame-api
 mvn test -DsesameConfigurationFile=sesame.properties
 ~~~
 
