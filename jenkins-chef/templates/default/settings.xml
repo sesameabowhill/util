@@ -3,15 +3,20 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <servers>
     <server>
-      <username>abowhill</username>
-      <password>\{DESede\}/vU4CKaExtl2WQY2oM2XAQ==</password>
+      <username>jenkins</username>
+      <password>\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==</password>
       <id>central</id>
     </server>
     <server>
-      <username>abowhill</username>
-      <password>\{DESede\}/vU4CKaExtl2WQY2oM2XAQ==</password>
+      <username>jenkins</username>
+      <password>\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==</password>
       <id>snapshots</id>
     </server>
+<!--    <server>
+      <username>jenkins</username>
+      <password>\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==</password>
+      <id>sesame-artifactory-snapshot</id>
+    </server> -->
   </servers>
   <profiles>
     <profile>

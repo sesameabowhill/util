@@ -1,0 +1,169 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<maven2-moduleset plugin="maven-plugin@2.13">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>2</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.19.2">
+      <projectUrl>https://github.com/sesacom/sesame_api/</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.5.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://github.com/sesacom/sesame_api.git</url>
+        <credentialsId>0e77c240-db19-42cc-a9e8-fad79f155ac6</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>dev</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <browser class="hudson.plugins.git.browser.GithubWeb">
+      <url>https://github.com/sesamecom/web/</url>
+    </browser>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>H * * * * </spec>
+    </hudson.triggers.TimerTrigger>
+    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.19.2">
+      <spec></spec>
+    </com.cloudbees.jenkins.GitHubPushTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <goals>clean compile -gs ../../settings.xml -DsesameConfigurationFile=sesame.properties</goals>
+  <aggregatorStyleBuild>true</aggregatorStyleBuild>
+  <incrementalBuild>false</incrementalBuild>
+  <localRepository class="hudson.maven.local_repo.PerJobLocalRepositoryLocator"/>
+  <ignoreUpstremChanges>false</ignoreUpstremChanges>
+  <ignoreUnsuccessfulUpstreams>false</ignoreUnsuccessfulUpstreams>
+  <archivingDisabled>false</archivingDisabled>
+  <siteArchivingDisabled>false</siteArchivingDisabled>
+  <fingerprintingDisabled>false</fingerprintingDisabled>
+  <resolveDependencies>false</resolveDependencies>
+  <processPlugins>false</processPlugins>
+  <mavenValidationLevel>-1</mavenValidationLevel>
+  <runHeadless>false</runHeadless>
+  <disableTriggerDownstreamProjects>false</disableTriggerDownstreamProjects>
+  <blockTriggerWhenBuilding>true</blockTriggerWhenBuilding>
+  <settings class="jenkins.mvn.FilePathSettingsProvider">
+    <path>../../settings.xml</path>
+  </settings>
+  <globalSettings class="jenkins.mvn.FilePathGlobalSettingsProvider">
+    <path>../../settings.xml</path>
+  </globalSettings>
+  <reporters>
+    <hudson.maven.reporters.MavenMailer>
+      <recipients>eng-seattle@sesamecommunications.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+      <perModuleEmail>true</perModuleEmail>
+    </hudson.maven.reporters.MavenMailer>
+  </reporters>
+  <publishers>
+    <hudson.tasks.test.AggregatedTestResultPublisher plugin="junit@1.13">
+      <includeFailedBuilds>false</includeFailedBuilds>
+    </hudson.tasks.test.AggregatedTestResultPublisher>
+    <hudson.maven.RedeployPublisher>
+      <id>snapshots</id>
+      <url>http://artifactory.sesamecom.com/artifactory/libs-sesame-api-local</url>
+      <uniqueVersion>true</uniqueVersion>
+      <evenIfUnstable>false</evenIfUnstable>
+    </hudson.maven.RedeployPublisher>
+    <jenkins.plugins.slack.SlackNotifier plugin="slack@2.0.1">
+      <teamDomain></teamDomain>
+      <authToken></authToken>
+      <buildServerUrl>/</buildServerUrl>
+      <room></room>
+      <startNotification>true</startNotification>
+      <notifySuccess>true</notifySuccess>
+      <notifyAborted>true</notifyAborted>
+      <notifyNotBuilt>true</notifyNotBuilt>
+      <notifyUnstable>true</notifyUnstable>
+      <notifyFailure>true</notifyFailure>
+      <notifyBackToNormal>false</notifyBackToNormal>
+      <notifyRepeatedFailure>false</notifyRepeatedFailure>
+      <includeTestSummary>false</includeTestSummary>
+      <commitInfoChoice>NONE</commitInfoChoice>
+      <includeCustomMessage>false</includeCustomMessage>
+      <customMessage></customMessage>
+    </jenkins.plugins.slack.SlackNotifier>
+  </publishers>
+  <buildWrappers>
+    <org.jfrog.hudson.maven3.ArtifactoryMaven3NativeConfigurator plugin="artifactory@2.5.0">
+      <details>
+        <artifactoryName>main</artifactoryName>
+        <artifactoryUrl>http://artifactory.sesamecom.com/artifactory</artifactoryUrl>
+        <resolveSnapshotRepository>
+          <keyFromText></keyFromText>
+          <keyFromSelect>libs-snapshot</keyFromSelect>
+          <dynamicMode>false</dynamicMode>
+        </resolveSnapshotRepository>
+        <resolveReleaseRepository>
+          <keyFromText></keyFromText>
+          <keyFromSelect>libs-release</keyFromSelect>
+          <dynamicMode>false</dynamicMode>
+        </resolveReleaseRepository>
+        <stagingPlugin/>
+      </details>
+      <resolverCredentialsConfig>
+        <credentials>
+          <username></username>
+          <password></password>
+        </credentials>
+        <credentialsId>7aefe5d0-5bb8-4091-89fc-1f570c673aa3</credentialsId>
+        <overridingCredentials>false</overridingCredentials>
+      </resolverCredentialsConfig>
+    </org.jfrog.hudson.maven3.ArtifactoryMaven3NativeConfigurator>
+  </buildWrappers>
+  <prebuilders>
+    <hudson.tasks.Shell>
+      <command># clear local cache of all sesame artifacts.
+rm -rfv $WORKSPACE/*
+
+## not sure why, but otherwise it&apos;ll fail on push
+#git checkout dev || exit 1
+#git checkout $GIT_BRANCH || exit 1
+
+# apparently the previous build failed, so we must first clean up after it.
+#if [ -f &quot;pom.xml.releaseBackup&quot; ]; then
+#  mvn -B release:rollback || exit 1
+#  mvn -B release:clean || exit 1
+
+  # local changes will have prevented previous pull
+#  git pull origin $GIT_BRANCH || exit 1
+#fi
+
+# pull latest version of all child modules.
+#git reset --hard origin/$GIT_BRANCH || exit 1
+#git pull origin $GIT_BRANCH || exit 1
+</command>
+    </hudson.tasks.Shell>
+  </prebuilders>
+  <postbuilders/>
+  <runPostStepsIfResult>
+    <name>FAILURE</name>
+    <ordinal>2</ordinal>
+    <color>RED</color>
+    <completeBuild>true</completeBuild>
+  </runPostStepsIfResult>
+</maven2-moduleset>

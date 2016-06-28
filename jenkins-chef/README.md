@@ -90,6 +90,13 @@ NOTE: Numerous Jenkins plugins will installed automatically
 - login will be authenticated through github, so authenticate with your Github username and password.
 
 
+NOTE ABOUT MODULES:
+-------------------
+- Occasionally modules break build settings in subtle ways. For example, Version 2.5.0 of the Git
+  module creates git problems early in builds. If you revert to the previous version of the module
+  the problem goes away. If problems are detected, the module will be left not-upgraded in the 
+  module manager.
+
 ===========
 Upgrade GIT
 ===========
@@ -187,7 +194,7 @@ section names listed below.
 
 ~~~
 Maven Project Configuration
-   Global Maven Opts: -Xmx1024m -XX:MaxPermSize=128m
+   Global Maven Opts: -Xmx1024m
    Jenkins Location
       System Admin e-mail address: jenkins@sesamecommunications.com
 click Apply
@@ -219,8 +226,7 @@ Click Apply
 ~~~
 
 
-NOTE: In the following section, if credentials controls do not appear, click SAVE and \
-re-enter the configuration again. They will re-appear.
+NOTE: In the following section, if credentials controls do not appear, click SAVE and re-enter the configuration again. They will re-appear.
 ~~~
 Artifactory
    Check: Use Credentials Plugin
@@ -322,7 +328,7 @@ Source Code Management
              enter username: <your Git username>
              enter password: <your Git  password>
           select your creds from popdown (aka: <yourname>/*****)
-     branch specifier: origin/dev
+     branch specifier: */jenkins-test-branch
      repository browser: githubweb
      URL: https://github.com/sesamecom/web/
 ~~~
@@ -338,18 +344,21 @@ Build Triggers:
 
 Build Environment:
 ~~~
-    check Resolve artifacts from Artifactory
-       select globally configured artifactory server from popdown
-    override resolver credentials 
-       select jenkins/*****
-    click refresh repositories
+    check: Resolve artifacts from Artifactory
+    under: Artifactory Server 
+       select: http://artifactory.sesamecom.com/artifactory
+    click: Refresh Repositories
+       under: Resolution snapshots repository
+          select: libs-snapshot
+    under: Override default resolver credentials 
+       select: jenkins/*****
 ~~~
 
 Build:
 ~~~
-    (ignore error message abotu missing pom)
+    (ignore error message about missing pom)
     goals and options: 
-         clean package -DsesameConfigurationFile=$WORKSPACE/../../sesame.properties -DpersistSchema=persist_web_master_snapshot -DanalyticsSchema=analytics_report_master_snapshot -DlogSchema=upload_logs
+         clean package -gs ../../settings.xml -DsesameConfigurationFile=../../sesame.properties -DpersistSchema=md_snapshot -DanalyticsSchema=analytics_report_master_snapshot -DlogSchema=upload_logs
      Click Advanced
         Check: Use Private Maven Repository
         Select: Local to the workspace 
@@ -370,8 +379,8 @@ Post-build actions:
    click: Add post-build action
    select: deploy artifacts to maven repository
    ckick advanced
-      repo url: http://artifactory.sesamecom.com/artifactory/libs-sesame-api-local
-         repo id : snapshots
+      repo url: http://artifactory.sesamecom.com/artifactory/libs-release-local
+         repo id : sesame-artifactory-snapshots
          check: Assign unique versions to snapshots
 
    click: Add post-build action
@@ -400,12 +409,12 @@ cd temp
 # clone the git repo for sesame-api, forcing dev branch
 git clone -b dev https://github.com/sesacom/sesame_api.git
 # copy chef-installed sesame.properties to root of the build tree
-sudo cp /var/lib/jenkins/jobs/sesame.properties sesame-api-dev
+sudo cp /var/lib/jenkins/jobs/sesame.properties .
 # copy settings.xml to ~/.m2
-sudo cp /var/lib/jenkins/jobs/settings.xml ~/.m2
+sudo cp /var/lib/jenkins/jobs/settings.xml .
 # compile and test - building 1st time may need repeating if jars are connection-dropped
 cd sesame-api
-mvn test -DsesameConfigurationFile=sesame.properties
+mvn test -gs ../settings.xml -DsesameConfigurationFile=../sesame.properties
 ~~~
 
 Below are copies of the files themselves: 

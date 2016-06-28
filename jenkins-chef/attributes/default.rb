@@ -56,7 +56,7 @@ node.default.jenkins.module.list = [
    [ 'ant', nil, false ],
    [ 'pam-auth', '1.3', true ],
    [ 'junit', '1.13', false ],
-   [ 'git', '2.5.0', true ],
+   [ 'git', '2.4.4', true ],
    [ 'git-server', '1.6', false ],
    [ 'github', '1.19.2', false ],
    [ 'github-api', '1.75', true ],
