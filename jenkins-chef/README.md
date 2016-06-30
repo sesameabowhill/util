@@ -126,8 +126,7 @@ gzip -dc git-2.8.4.tar.gz | tar xvf -
 cd git-2.8.4
 
 # install modern git depends - remove olds
-sudo yum install curl-devel expat-devel gettext-devel openssl-devel zlib-devel
-sudo yum install gcc perl-ExtUtils-MakeMaker
+sudo yum install curl-devel expat-devel gettext-devel openssl-devel zlib-devel gcc perl-ExtUtils-MakeMaker
 sudo yum remove git
 
 # build and install to /usr
@@ -194,7 +193,7 @@ section names listed below.
 
 ~~~
 Maven Project Configuration
-   Global Maven Opts: -Xmx1024m
+   Global Maven Opts: -Xms1024M -Xmx2048M -XX:-UseGCOverheadLimit
    Jenkins Location
       System Admin e-mail address: jenkins@sesamecommunications.com
 click Apply
@@ -379,8 +378,8 @@ Post-build actions:
    click: Add post-build action
    select: deploy artifacts to maven repository
    ckick advanced
-      repo url: http://artifactory.sesamecom.com/artifactory/libs-release-local
-         repo id : sesame-artifactory-snapshots
+      repo url: http://artifactory.sesamecom.com/artifactory/libs-snapshot-local
+         repo id : sesame-artifactory-snapshot
          check: Assign unique versions to snapshots
 
    click: Add post-build action
@@ -467,7 +466,7 @@ With some modifications of jenkins user and password being hard-coded.
     <server>
       <username>jenkins</username>
       <password>\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==</password>
-      <id>sesame-artifactory-release</id>
+      <id>sesame-artifactory-snapshot</id>
     </server>
   </servers>
   <profiles>

@@ -12,11 +12,11 @@
       <password>\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==</password>
       <id>snapshots</id>
     </server>
-<!--    <server>
+    <server>
       <username>jenkins</username>
       <password>\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==</password>
       <id>sesame-artifactory-snapshot</id>
-    </server> -->
+    </server>
   </servers>
   <profiles>
     <profile>
