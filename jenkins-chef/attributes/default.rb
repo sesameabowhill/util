@@ -85,7 +85,6 @@ node.default.jenkins.module.list = [
    [ 'slave-setup', nil, false ],
    [ 'ssh-slaves', nil, false ],
    [ 'slave-status', nil, false ],
-   [ 'slack', nil, false ],
    [ 'performance', nil, false ],
    [ 'cobertura', nil, false ],
    [ 'envfile', nil, false ],
