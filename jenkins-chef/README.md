@@ -176,9 +176,9 @@ In Jenkins > Manage Jenkins > Global Tool Configuration, complete each section w
 - Click Save
 
 
------------------------
-JENKINS GLOBAL SETTINGS
------------------------
+------------------------
+JENKINS CONFIGURE SYSTEM
+------------------------
 
 Global settings provide defaults for project settings. 
 The following settings are grouped by section of Global configuration: 
@@ -193,12 +193,10 @@ section names listed below.
 
 ~~~
 Maven Project Configuration
-   Global Maven Opts: -Xms1024M -Xmx2048M -XX:-UseGCOverheadLimit
    Jenkins Location
       System Admin e-mail address: jenkins@sesamecommunications.com
 click Apply
 ~~~
-
 
 ~~~
 Github
@@ -215,7 +213,6 @@ Github Servers
             (otherwise use mine, for user sesameabowhill:)
                7e26fb3e9cd207a5ccc85f399f8502167e6c762d
             Secret: <token>
-            Description: (leave blank)
          Click Add
          Now you should see this token in credentials popdown.
           select it and click TEST CONNECTION
@@ -245,8 +242,6 @@ Artifactory
       select "jenkins/*****" from popdown
       click: Test Connection
          should return: Found Artifactory 2.4.2
-      check: use different resolver credentials
-      select "jenkins/*****" from popdown
 Click Apply
 ~~~
 
@@ -263,15 +258,6 @@ Extended E-mail Notification
       smtp2.sesamecommunications.com
    Default user e-mail suffix
       @sesamecommunications.com
-Click Apply
-~~~
-
-~~~
-Global Slack Notifer Settings
-   Team Subdomain                   sesamecom
-   Outgoing Webhook Token           6My6VBHcvVxvAELFKL5o9Xd5
-   Outgoing Webhook URL Endpoint    /
-   Click Test 
 Click Apply
 ~~~
 
@@ -335,32 +321,16 @@ Source Code Management
 Build Triggers:
 ~~~
     check: Build whenever a SNAPSHOT dependency is built
-    check: build periodically 
-      (once every half hour schedule)
-      enter schedule: H * * * *      
-      Build when a change is pushed to GitHub
-~~~
-
-Build Environment:
-~~~
-    check: Resolve artifacts from Artifactory
-    under: Artifactory Server 
-       select: http://artifactory.sesamecom.com/artifactory
-    click: Refresh Repositories
-       under: Resolution snapshots repository
-          select: libs-snapshot
-    under: Override default resolver credentials 
-       select: jenkins/*****
+           Build when a change is pushed to GitHub
 ~~~
 
 Build:
 ~~~
-    (ignore error message about missing pom)
     goals and options: 
-         clean package -gs ../../settings.xml -DsesameConfigurationFile=../../sesame.properties -DpersistSchema=md_snapshot -DanalyticsSchema=analytics_report_master_snapshot -DlogSchema=upload_logs
-     Click Advanced
-        Check: Use Private Maven Repository
-        Select: Local to the workspace 
+       clean package -gs ../../settings.xml -DsesameConfigurationFile=../../sesame.properties -DpersistSchema=md_snapshot -DanalyticsSchema=analytics_report_master_snapshot -DlogSchema=upload_logs
+    click advanced
+       Check: Use Private Maven Repository
+       Select: Local to the workspace 
 ~~~
 
 Build Settings:
@@ -374,17 +344,6 @@ Post-build actions:
    click: Add post-build action
    select: Aggragate downstream test results
    check: Automatically aggregate all downstream tests
-
-   click: Add post-build action
-   select: deploy artifacts to maven repository
-   ckick advanced
-      repo url: http://artifactory.sesamecom.com/artifactory/libs-snapshot-local
-         repo id : sesame-artifactory-snapshot
-         check: Assign unique versions to snapshots
-
-   click: Add post-build action
-   select: Slack Notifications
-     <check all 7 visible items>
 ~~~
 Click SAVE
 
@@ -395,119 +354,38 @@ MANUAL SETUP FOR COMPILE
 sesame-api project
 ====================
 
-There is one project that will be initially configured with Jenkins with Java 8, and this is the sesame-api project. Below is the procedure for setting up a manual build environment in the UNIX console. This can serve to instruct as a model for adding additional jobs to Jenkins.
+There is one project that will be initially configured with Jenkins with Java 8, and this is the sesame-api project. Below is the procedure for setting up a manual build environment for sesame-api in the UNIX console. This can serve as a model to instruct on how to test and add additional jobs to Jenkins.
 
-First, this chef cookbook will automatically install Mysql on the target machine and initialize all prerequisite databases. These databases are used by liquibase during unit testing near the middle of the build and deployment pipeline.
+The easiest way to setup a manual build is to deploy Jenkins to a VM using this cookbook and the command:
+~~~
+kitchen converge
+~~~
 
-So to get a development environment working, you will need to perform the following steps on the target machine to which Jenkins, Maven, Java8 and Mysql were installed.
+If you login to the VM using ```kitchen login``` all dependencies will be established with the correct values for a manual build.
 
 ~~~ shell
-# create a subdirectory called temp
+cd
 mkdir temp
 cd temp
-# clone the git repo for sesame-api, forcing dev branch
-git clone -b dev https://github.com/sesacom/sesame_api.git
-# copy chef-installed sesame.properties to root of the build tree
-sudo cp /var/lib/jenkins/jobs/sesame.properties .
-# copy settings.xml to ~/.m2
-sudo cp /var/lib/jenkins/jobs/settings.xml .
-# compile and test - building 1st time may need repeating if jars are connection-dropped
+(perform UPGRADE GIT steps listed near staret of this document)
+git clone -b jenkins-test-branch https://github.com/sesacom/sesame_api.git
+git clone https://github.com/sesacom/util.gi
+mysql -u root <  util/jenkins-chef/templates/default/create_mysql_tables.erb 
 cd sesame-api
-mvn test -gs ../settings.xml -DsesameConfigurationFile=../sesame.properties
+mvn clean deploy -gs ../util/jenkins-chef/templates/default/settings.xml -DsesameConfigurationFile=../util/jenkins-chef/templates/default/sesame.properties
 ~~~
 
-Below are copies of the files themselves: 
+This cookbook will not work on On Centos 7, due to systemd changes.
+In this case you will need to perform the following steps beforehand:
 
-sesame.properties
 ~~~
-persistHost=localhost
-persistPort=3306
-persistUser=root
-persistPassword=sesame
-persistSchema=md_snapshot
-
-dataSourceProvider=HikariCpPersistDataSourceProvider
-hikaricp.maximumPoolSize=10
-hikaricp.connectionTimeout=10000
-hikaricp.leakDetectionThreshold=20000
-
-httpsKeystorePassword=testing
-httpsKeystoreType=PKCS12
-
-ibConnectUrl=https://ci.slogin.smb.internetbrands.com
-enableInsecureSslMode=true
-
-siUploadImageBucket=test-si-images
-useBasicDataSource=false
-skipLiquibaseUpdate=false
+# install mariadb or mysql
+sudo yum -y install mariadb-server mariadb
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+sudo mysql_secure_installation
+sudo yum install java-1.8.0-openjdk-devel.x86_64
+sudo yum install 
 ~~~
 
-(MINIMAL) settings.xml
-
-This XML is generated by artifactory's 
-   client settings > maven settings > generate settings
-
-With some modifications of jenkins user and password being hard-coded.
-~~~
-<?xml version="1.0" encoding="UTF-8"?>
-<settings xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd" xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <servers>
-    <server>
-      <username>jenkins</username>
-      <password>\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==</password>
-      <id>central</id>
-    </server>
-    <server>
-      <username>jenkins</username>
-      <password>\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==</password>
-      <id>snapshots</id>
-    </server>
-    <server>
-      <username>jenkins</username>
-      <password>\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==</password>
-      <id>sesame-artifactory-snapshot</id>
-    </server>
-  </servers>
-  <profiles>
-    <profile>
-      <repositories>
-        <repository>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-          <id>central</id>
-          <name>libs-release</name>
-          <url>http://artifactory.sesamecom.com/artifactory/libs-release</url>
-        </repository>
-        <repository>
-          <snapshots />
-          <id>snapshots</id>
-          <name>libs-snapshot</name>
-          <url>http://artifactory.sesamecom.com/artifactory/libs-snapshot</url>
-        </repository>
-      </repositories>
-      <pluginRepositories>
-        <pluginRepository>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-          <id>central</id>
-          <name>plugins-release</name>
-          <url>http://artifactory.sesamecom.com/artifactory/plugins-release</url>
-        </pluginRepository>
-        <pluginRepository>
-          <snapshots />
-          <id>snapshots</id>
-          <name>plugins-snapshot</name>
-          <url>http://artifactory.sesamecom.com/artifactory/plugins-snapshot</url>
-        </pluginRepository>
-      </pluginRepositories>
-      <id>artifactory</id>
-    </profile>
-  </profiles>
-  <activeProfiles>
-    <activeProfile>artifactory</activeProfile>
-  </activeProfiles>
-</settings>
-~~~
+Installing the default Java and Git are fine for CentOS7

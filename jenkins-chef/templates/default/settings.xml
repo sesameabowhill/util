@@ -27,13 +27,13 @@
           </snapshots>
           <id>central</id>
           <name>libs-release</name>
-          <url>http://artifactory.sesamecom.com/artifactory/libs-release</url>
+          <url>https://artifactory.sesamecom.com/artifactory/libs-release</url>
         </repository>
         <repository>
           <snapshots />
           <id>snapshots</id>
           <name>libs-snapshot</name>
-          <url>http://artifactory.sesamecom.com/artifactory/libs-snapshot</url>
+          <url>https://artifactory.sesamecom.com/artifactory/libs-snapshot</url>
         </repository>
       </repositories>
       <pluginRepositories>
@@ -43,13 +43,13 @@
           </snapshots>
           <id>central</id>
           <name>plugins-release</name>
-          <url>http://artifactory.sesamecom.com/artifactory/plugins-release</url>
+          <url>https://artifactory.sesamecom.com/artifactory/plugins-release</url>
         </pluginRepository>
         <pluginRepository>
           <snapshots />
           <id>snapshots</id>
           <name>plugins-snapshot</name>
-          <url>http://artifactory.sesamecom.com/artifactory/plugins-snapshot</url>
+          <url>https://artifactory.sesamecom.com/artifactory/plugins-snapshot</url>
         </pluginRepository>
       </pluginRepositories>
       <id>artifactory</id>
