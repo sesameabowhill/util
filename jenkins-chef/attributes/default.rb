@@ -1,10 +1,9 @@
 require 'pp'
 
-node['default']['java']['install_flavor'] = 'openjdk'
-node['default']['java']['jdk_version']= 8
-node['default']['jenkins']['master']['install_method'] = 'package'
-node['set']['jenkins']['master']['jvm_options'] = '-Djenkins.install.runSetupWizard=false'
-node['debug_value']('jvm_options')
+default['java']['install_flavor'] = 'openjdk'
+default['java']['jdk_version']= 8
+default['jenkins']['master']['install_method'] = 'package'
+set['jenkins']['master']['jvm_options'] = '-Djenkins.install.runSetupWizard=false'
 
 default['jenkins']['master']['port'] = 8080
 default['jenkins']['master']['endpoint'] = "http://#{node['jenkins']['master']['host']}:#{node['jenkins']['master']['port']}"
