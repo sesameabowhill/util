@@ -15,14 +15,16 @@
 # node.set.jenkins.master['jvm_options'] = '-Djenkins.install.runSetupWizard=false'
 # 
 
-
 package 'net-tools'
 
 include_recipe 'java' 
 include_recipe 'maven' 
 include_recipe 'git'
 include_recipe 'jenkins::master'
-#include_recipe 'chef-sugar::default'
+
+execute 'update OS' do
+   command "yum -y update"
+end
 
 mysql_service 'local' do
   version '5.7'
@@ -42,8 +44,13 @@ execute 'create databases' do
    command "mysql -h 127.0.0.1 -u root --password='sesame' < /var/lib/mysql-files/create_mysql_tables.sql"
 end
 
-git_client 'default' do
-  action :install
+template "/var/lib/jenkins/jobs/upgrade_git.sh" do
+   source "upgrade_git.erb"
+   mode '0744'
+end
+
+execute 'upgrade git' do
+   command '/bin/sh /var/lib/jenkins/jobs/upgrade_git.sh'
 end
 
 template '/var/lib/jenkins/jobs/sesame.properties' do

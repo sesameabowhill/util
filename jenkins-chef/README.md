@@ -97,55 +97,6 @@ NOTE ABOUT MODULES:
   the problem goes away. If problems are detected, the module will be left not-upgraded in the 
   module manager.
 
-===========
-Upgrade GIT
-===========
-
-Once the Chef build is complete, you will need to upgrade to a new verison of git, or subsequent attempts to connect to github will not work.
-
-
-NOTE: You can just cut-n-paste blocks from the following shell script.
-Make sure to execute only one yum line at a time, however.
-~~~
-# Login to the VM
-kitchen login
-
-# check git
-cd 
-git --version     ## should read 1.7.0 or thereabout. 
-                  ## this version is too old.
-                  ## you will need at least 1.8.1
-
-# make temp dir
-mkdir temp
-cd temp
-
-# download new git
-curl https://www.kernel.org/pub/software/scm/git/git-2.8.4.tar.gz > git-2.8.4.tar.gz
-gzip -dc git-2.8.4.tar.gz | tar xvf -
-cd git-2.8.4
-
-# install modern git depends - remove olds
-sudo yum install curl-devel expat-devel gettext-devel openssl-devel zlib-devel gcc perl-ExtUtils-MakeMaker
-sudo yum remove git
-
-# build and install to /usr
-make configure
-./configure --prefix=/usr
-sudo make install
-
-# confirm
-which git            # confirm it's /usr/bin/git
-ls -alt `which git`  # look at install date 
-git --version        # version should say 2.8.4 or whatever you downloaded
-
-# cleanup
-cd
-sudo rm -rfv temp
-
-# restart jenkins
-sudo service jenkins restart
-~~~
 
 ==================================
 Jenkins Global Tool Configuration
