@@ -24,6 +24,7 @@ include_recipe 'jenkins::master'
 
 execute 'update OS' do
    command "yum -y update"
+   command "yum clean all"
 end
 
 mysql_service 'local' do
@@ -62,6 +63,12 @@ template '/var/lib/jenkins/jobs/settings.xml' do
    source 'settings.xml'
    mode '0644'
 end    
+
+template '/var/lib/jenkins/jobs/manual_build.sh' do
+   source 'manual_build.sh'
+   mode '0744'
+end    
+
 
 # This command reads all installed modules, gets their version numbers and places them into 
 # a dictionary -- for testing 

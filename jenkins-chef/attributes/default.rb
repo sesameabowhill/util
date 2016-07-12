@@ -3,7 +3,7 @@ require 'pp'
 default['java']['install_flavor'] = 'openjdk'
 default['java']['jdk_version']= 8
 default['jenkins']['master']['install_method'] = 'package'
-set['jenkins']['master']['jvm_options'] = '-Djenkins.install.runSetupWizard=false'
+default['jenkins']['master']['jvm_options'] = '-Djenkins.install.runSetupWizard=false'
 
 default['jenkins']['master']['port'] = 8080
 default['jenkins']['master']['endpoint'] = "http://#{node['jenkins']['master']['host']}:#{node['jenkins']['master']['port']}"

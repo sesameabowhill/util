@@ -3,10 +3,10 @@ PREREQUISITES
 =============
 To run locally, you will need to being running a CentOS Xwindows installation to make into a Chef Workstation. Chef scripts generally need to be developed on a dedicated workstation. This can be done in a Virtualbox if needed.
 
-* Update your OS before starting: 
+Update your packages: 
 ~~~
 sudo yum update
-~~~~
+~~~
 
 It may also be worthwhile to open a firewall on your machine:
 ~~~
@@ -19,11 +19,10 @@ sudo firewall-cmd --reload
 OBTAIN THIS COOKBOOK
 ====================
 
-Make a working directory.
-Git clone the sesame utilities folders to your current working directory:
+Git clone the sesame utilities folders to a directory called SESACOM
 
 ~~~
-git clone git@github.com/sesacom/util.git
+git clone git@github.com/sesacom/util.git SESACOM
 ~~~
 
 ============
@@ -56,10 +55,6 @@ bundle install
 ==============
 INSTALL DOCKER
 ==============
-Update your system:
-~~~
-sudo yum update
-~~~
 
 Verify requisite dependencies are installed:
 ~~~
@@ -312,22 +307,11 @@ The easiest way to setup a manual build is to deploy Jenkins to a VM using this 
 kitchen converge
 ~~~
 
-If you login to the VM using ```kitchen login``` all dependencies will be established with the correct values for a manual build.
+If you login to the VM using ```kitchen login``` all dependencies will be established with the correct values for a manual build. 
 
-~~~ shell
-cd
-mkdir temp
-cd temp
-(perform UPGRADE GIT steps listed near staret of this document)
-git clone -b jenkins-test-branch https://github.com/sesacom/sesame_api.git
-git clone https://github.com/sesacom/util.gi
-mysql -u root <  util/jenkins-chef/templates/default/create_mysql_tables.erb 
-cd sesame-api
-mvn clean deploy -gs ../util/jenkins-chef/templates/default/settings.xml -DsesameConfigurationFile=../util/jenkins-chef/templates/default/sesame.properties
-~~~
+Run the script: ``/var/lib/jenkins/jobs/manual_build.sh```
 
-This cookbook will not work on On Centos 7, due to systemd changes.
-In this case you will need to perform the following steps beforehand:
+On CentOS 7, this Docker-based cookbook will not work due to systemd revisions. In this case you will need to perform the following steps beforehand:
 
 ~~~
 # install mariadb or mysql
@@ -335,8 +319,9 @@ sudo yum -y install mariadb-server mariadb
 sudo systemctl start mariadb
 sudo systemctl enable mariadb
 sudo mysql_secure_installation
-sudo yum install java-1.8.0-openjdk-devel.x86_64
-sudo yum install 
 ~~~
 
 Installing the default Java and Git are fine for CentOS7
+
+
+Better yet, for CentOS 7, clone the VirtualBox version of this cookbook. VirtualBox works with CentOS 7, but performs more slowly.
