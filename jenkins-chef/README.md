@@ -325,3 +325,26 @@ Installing the default Java and Git are fine for CentOS7
 
 
 Better yet, for CentOS 7, clone the VirtualBox version of this cookbook. VirtualBox works with CentOS 7, but performs more slowly.
+
+
+----------
+API ACCESS
+----------
+
+Since Oauth will not allow standard login access, you have to use an API key after logging in via Oauth to use Jenkins' RESTful API. To do this, in your normal web browser visit http://<jenkins-server>/user/<username>/configure and copy your user API token from there.
+
+Example:
+~~~
+(if your Github username is barney, and your Jenkins server name is wilma)
+http://wilma:8080/user/barney/configure
+<click "Show API Token" Button>
+<copy Token to clipboard>
+~~~
+
+At that point, you should be able to access the Jenkins API with curl:
+
+~~~
+# return a list of Jenkins users in XML
+curl -X POST barney:198012acc88999fac09098090988aa@wilma:8080/asynchPeople/api/xml
+~~~
+

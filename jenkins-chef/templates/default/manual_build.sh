@@ -1,5 +1,6 @@
 #!/usr/bin/sh
-export MAVEN_OPTS="-Xmx4096m"
+#export MAVEN_OPTS="-Xmx4096m"
+export MAVEN_OPTS='-Xmx512m -XX:MaxPermSize=128m'
 echo "Artifactory Username:"
 read artifactory_user
 echo "Artifactory Password:"
