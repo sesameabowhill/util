@@ -348,3 +348,46 @@ At that point, you should be able to access the Jenkins API with curl:
 curl -X POST barney:198012acc88999fac09098090988aa@wilma:8080/asynchPeople/api/xml
 ~~~
 
+~~~
+# list all installed plugins using XML API [1]
+JENKINS_HOST=barney:c12cf5da8b3bb0eb3389247ca29bb116@wilma:8080
+curl -sSL "http://$JENKINS_HOST/pluginManager/api/xml?depth=1&xpath=/*/*/shortName|/*/*/version&wrapper=plugins" | perl -pe 's/.*?<shortName>([\w-]+).*?<version>([^<]+)()(<\/\w+>)+/\1 \2\n/g'|sed 's/ /:/'
+~~~
+[1] https://github.com/fabric8io/jenkins-base/blob/master/README.md
+
+~~~
+# [2] Create a job 
+JENKINS_HOST=barney:c12cf5da8b3bb0eb3389247ca29bb116@wilma:8080
+curl -X POST -H "Content-Type:application/xml" -d "<project><builders/><publishers/><buildWrappers/></project>" "http://${JENKINS_HOST}/createItem?name=AA_TEST_JOB2"
+~~~
+[2] http://stackoverflow.com/questions/15909650/create-jobs-and-execute-them-in-jenkins-using-rest
+
+---------------
+RUNNING SCRIPTS
+---------------
+
+One way to run scripts in the Jenkins JVM from outside it is to used the script API that Jenkins offers at /script. This runs inside the Jenkins web console view so thus contains a lot of extra HTML on return and isn't purely programmatic. It may take some work to extract returned data. However it will, execute what you hand it inline:
+
+~~~
+curl -d 'script=println(Jenkins.instance.pluginManager.plugins)' http://barney:8187218182371823718237123@wilma:8080/script > 123.html
+~~~
+
+Again, this command can be issued after obtaining an API key for the user _barney_ on the server _wilma_.
+Below is a similar command that takes an external _groovy_ program filename to execute:
+
+Suppose we have a groovy script called addmaven.groovy in the current directory, to add new settings to the current maven installation in Global Tools Configuration:
+~~~
+a=Jenkins.instance.getExtensionList(hudson.tasks.Maven.DescriptorImpl.class)[0];
+b=(a.installations as List);
+b.add(new hudson.tasks.Maven.MavenInstallation("maven-3.3.9", "/usr/local/maven", []));
+a.installations=b
+a.save()
+~~~
+
+If we execute the following (again, barney and wilma used for user and host respectively)
+~~~
+curl --user 'sesameabowhill:c12cf5da8b3bb0eb3389247ca29bb116' --data-urlencode "script=$(<./chucknorris.groovy)" http://172.17.0.2:8080/scriptText
+~~~
+
+We will get the fields filled in the global tools configuration view.
+
