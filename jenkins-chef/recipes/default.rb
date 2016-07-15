@@ -22,7 +22,7 @@ include_recipe 'maven'
 include_recipe 'git'
 include_recipe 'jenkins::master'
 
-execute 'update OS' do
+execute 'Update OS' do
    command "yum -y update"
    command "yum clean all"
 end
@@ -41,7 +41,7 @@ template "/var/lib/mysql-files/create_mysql_tables.sql" do
    mode '0644'
 end
 
-execute 'create databases' do
+execute 'Create Databases' do
    command "mysql -h 127.0.0.1 -u root --password='sesame' < /var/lib/mysql-files/create_mysql_tables.sql"
 end
 
@@ -50,30 +50,25 @@ template "/var/lib/jenkins/jobs/upgrade_git.sh" do
    mode '0744'
 end
 
-execute 'upgrade git' do
+execute 'Upgrade Git' do
    command '/bin/sh /var/lib/jenkins/jobs/upgrade_git.sh'
 end
 
 template '/var/lib/jenkins/jobs/sesame.properties' do
    source 'sesame.properties'
    mode '0644'
-end    
+end 
 
 template '/var/lib/jenkins/jobs/settings.xml' do
    source 'settings.xml'
    mode '0644'
 end    
 
+# Script not used by Jenkins directly. For manual development and testing in console. 
 template '/var/lib/jenkins/jobs/manual_build.sh' do
    source 'manual_build.sh'
    mode '0744'
 end    
-
-
-# This command reads all installed modules, gets their version numbers and places them into 
-# a dictionary -- for testing 
-#curl -uabowhill:sesame3 -X GET 'http://172.17.0.2:8080/pluginManager/api/xml?depth=1&xpath=//shortName|//version&wrapper=plugins' | ruby -ne 'list = $_.split /<shortName>|<version>/; list.map! { |item| /(\w|\.|-|_)+/.match(item) }; list.shift; h = Hash[*list]; puts h.to_a' | less
-
 
 
 #################
@@ -98,9 +93,46 @@ installers.each do |installer|
    end
 end
 
+# restart Jenkins to ensure all modules finish install
 jenkins_command 'safe-restart'
 
-jenkins_script 'setup authentication' do
+
+# 
+jenkins_script 'Configure Global Tools' do
+  command <<-EOH.gsub(/^ {4}/, '')
+import jenkins.model.Jenkins
+
+// Set properties in Global Tools Locations entry for local Maven installation
+// (idempotent function)
+// Maven is a special case and is built-into Jenkins
+a=Jenkins.instance.getExtensionList(hudson.tasks.Maven.DescriptorImpl.class)[0];
+b=(a.installations as List);
+
+if (b.size == 0)
+   {
+   b.add(new hudson.tasks.Maven.MavenInstallation("maven-3.3.9", "/usr/local/maven", []));
+   a.installations=b;
+   a.save();
+   }
+
+// Set properties in Global Tools Locations entry for local JDK installation
+// (idempotent function)
+// JDK is not accessible as an extension, but has its own classes built-in
+hudson_functions = new hudson.Functions();
+jdk_descriptor = hudson_functions.getJDKDescriptor();
+jdk_installations = jdk_descriptor.getInstallations();
+
+if (jdk_installations.size() == 0)
+   {
+   this_jdk = new hudson.model.JDK("JDK 8","/usr/lib/jvm/java-1.8.0") as List;
+   jdk_descriptor.setInstallations(new hudson.model.JDK("JDK 8","/usr/lib/jvm/java-1.8.0"));
+   jdk_descriptor.save();
+   }
+   EOH
+end
+
+
+jenkins_script 'Setup Oauth Authentication' do
   command <<-EOH.gsub(/^ {4}/, '')
 import hudson.security.SecurityRealm
 import org.jenkinsci.plugins.GithubSecurityRealm
@@ -121,7 +153,7 @@ if(!github_realm.equals(Jenkins.instance.getSecurityRealm())) {
 end
 
 
-jenkins_script 'setup access' do
+jenkins_script 'Setup Oauth Access' do
   command <<-EOH.gsub(/^ {4}/, '')
 import org.jenkinsci.plugins.GithubAuthorizationStrategy
 import hudson.security.AuthorizationStrategy
@@ -165,4 +197,5 @@ if(!github_authorization.equals(Jenkins.instance.getAuthorizationStrategy())) {
 }
    EOH
 end
+
 

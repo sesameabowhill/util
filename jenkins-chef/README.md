@@ -99,26 +99,11 @@ Jenkins Global Tool Configuration
 
 These are the locations of all the system tools installed for this to work.
 
-Most of the values can be obtained by entering the following on the virtual machine after building it (kitchen login): 
-~~~
-mvn --version 
-~~~
+In Jenkins > Manage Jenkins > Global Tool Configuration
 
-In Jenkins > Manage Jenkins > Global Tool Configuration, complete each section with information about what is installed on the system.
-
-- JDK
-   - click Add JDK
-   - uncheck "install automatically"
-   - Name                      java-1.8.0_91-b14
-   - JAVA_HOME                 /usr/lib/jvm/java-1.8.0
 - Git
    - Name                      2.8.4
    - Path to Git Executable    /usr/bin/git
-- Maven 
-   - click Add Maven
-   - uncheck "install automatically"
-   - Name                      maven-3.3.9
-   - MAVEN_HOME                /usr/local/maven
 - Click Save
 
 
@@ -366,7 +351,7 @@ curl -X POST -H "Content-Type:application/xml" -d "<project><builders/><publishe
 RUNNING SCRIPTS
 ---------------
 
-One way to run scripts in the Jenkins JVM from outside it is to used the script API that Jenkins offers at /script. This runs inside the Jenkins web console view so thus contains a lot of extra HTML on return and isn't purely programmatic. It may take some work to extract returned data. However it will, execute what you hand it inline:
+One way to run scripts in the Jenkins JVM insdtance from outside that instance is to use the script API offered at /script. This is actually a call to the view that displays the Groovy console so the response to script runs will contain a lot of redundant HTML on return. This method is a bit less desirable for automation, because it is more like you are injecting a Groovy script into a Jenkins web page with a Groovy console on it, then extracting the results from HTML normally returned by the web server. It may take some extra work to extract returned data. However it will, execute whatever you hand it.
 
 ~~~
 curl -d 'script=println(Jenkins.instance.pluginManager.plugins)' http://barney:8187218182371823718237123@wilma:8080/script > 123.html
@@ -384,10 +369,12 @@ a.installations=b
 a.save()
 ~~~
 
-If we execute the following (again, barney and wilma used for user and host respectively)
+If we execute the following 
+
 ~~~
-curl --user 'sesameabowhill:c12cf5da8b3bb0eb3389247ca29bb116' --data-urlencode "script=$(<./chucknorris.groovy)" http://172.17.0.2:8080/scriptText
+curl --user 'barney:8187218182371823718237123' --data-urlencode "script=$(<./myscript.groovy)" http://172.17.0.2:8080/scriptText
 ~~~
 
-We will get the fields filled in the global tools configuration view.
+We get the fields filled for the Maven tool location in the Global Tools Configuration view.
+
 
