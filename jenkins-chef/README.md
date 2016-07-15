@@ -97,15 +97,7 @@ NOTE ABOUT MODULES:
 Jenkins Global Tool Configuration
 ==================================
 
-These are the locations of all the system tools installed for this to work.
-
-In Jenkins > Manage Jenkins > Global Tool Configuration
-
-- Git
-   - Name                      2.8.4
-   - Path to Git Executable    /usr/bin/git
-- Click Save
-
+Done automatically.
 
 ------------------------
 JENKINS CONFIGURE SYSTEM

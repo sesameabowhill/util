@@ -70,6 +70,12 @@ template '/var/lib/jenkins/jobs/manual_build.sh' do
    mode '0744'
 end    
 
+# install git global config settings the old-fashioned way
+template '/var/lib/jenkins/hudson.plugins.git.GitTool.xml' do
+   source 'hudson.plugins.git.GitTool.xml'
+   mode '0744'
+end
+
 
 #################
 # Install Plugins
