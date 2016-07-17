@@ -8,6 +8,8 @@ default['jenkins']['master']['jvm_options'] = '-Djenkins.install.runSetupWizard=
 default['jenkins']['master']['port'] = 8080
 default['jenkins']['master']['endpoint'] = "http://#{node['jenkins']['master']['host']}:#{node['jenkins']['master']['port']}"
 
+default['passwords']['mysql'] = 'sesame'
+
 ## List of modules to install in Jenkins
 ## each row is :   [ shortname , version (or nil for latest), restart server after install T or F ]
 

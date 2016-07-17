@@ -1,14 +1,35 @@
+========
+VERSIONS
+========
+
+The main branch of this project is designed to install Jenkins on CentOS 6.8 using Docker for development purposes.
+If you need a dev installation to work on CentOS 7, clone the centos7 branch of utils.
+
+The CentOS 7 branch version lags further behind featurewise and uses vbox which is slower than docker.
+Using the centos7 branch you may need to perform the following steps manually to prepare mysql:
+~~~
+# install mariadb or mysql
+sudo yum -y install mariadb-server mariadb
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+sudo mysql_secure_installation
+~~~
+
+Irrespective of development branch versions, this project aims to keep pace with whichever OS currently in use.
+
 =============
 PREREQUISITES
 =============
-To run locally, you will need to being running a CentOS Xwindows installation to make into a Chef Workstation. Chef scripts generally need to be developed on a dedicated workstation. This can be done in a Virtualbox if needed.
+Chef scripts should be developed and tested on a dedcated workstation, called a _Chef Workstation_. You can run this project locally on a Centos-7.x machine or a Windows machine running VirtualBox under a CentOS-7 image. Within CentOS-7, the Jenkins installation itself will be run on a centos-6.8 virtual Docker machine, and will be accessible on completion using a local web browser on ```http://172.17.0.2:8080```. Since the Jenkins installation authenticates via Github, you will be asked by Github to provide your Sesame Github username and password. All other accesses will be blocked.
 
-Update your packages: 
+A CentOS-7 installation can be obtained via https://wiki.centos.org/Download . The DVD ISO should work.
+
+Once your CentOS-7 host is installed on a machine or VirtualBox machine, update your packages: 
 ~~~
 sudo yum update
 ~~~
 
-It may also be worthwhile to open a firewall on your machine:
+It may also be worthwhile to open a firewall:
 ~~~
 sudo firewall-cmd --zone=public --add-port=8080/tcp --permanent
 sudo firewall-cmd --zone=public --add-service=http --permanent
@@ -19,35 +40,38 @@ sudo firewall-cmd --reload
 OBTAIN THIS COOKBOOK
 ====================
 
-Git clone the sesame utilities folders to a directory called SESACOM
+Git clone the sesame utilities folders to a directory, for example, one called SESACOM
 
 ~~~
 git clone git@github.com/sesacom/util.git SESACOM
 ~~~
 
+This project will be under SESACOM/utils/jenkins-chef, which is where you will eventually run ```kitchen converge``` to install Jenkins.
+
 ============
 INSTALL CHEF
 ============
 
-Install the Chef Development Kit
-
-The Chef DK goes on your workstation. 
+But first, you will need to install the Chef Development Kit in your copy of CentOS-7.
 
 ~~~
+# remove iany previous version of chefdk
+rpm -e chefdk
+
 # obtain and install a new chef archive
-wget https://packages.chef.io/stable/el/7/chefdk-0.13.21-1.el7.x86_64.rpm
-rpm -ivh chefdk-0.13.21-1.el7.x86_64.rpm
+wget https://packages.chef.io/stable/el/7/chefdk-0.15.16-1.el7.x86_64.rpm
+rpm -ivh chefdk-0.15.16-1.el7.x86_64.rpm
 
 # edit .bash-profile for build environment settings
 eval "$(chef shell-init bash)"
 
-# verify the chef build environment settings are correct
+# verify the chef build environment settings are correct (should return reasonable values)
 which ruby
 /opt/chefdk/embedded/bin/ruby --version
 chef-client --version
 ~~~
 
-Run Ruby Bundler 
+Next, run Ruby Bundler
 ~~~
 bundle install
 ~~~
@@ -62,24 +86,29 @@ ls -l /sys/class/misc/device-mapper  (should show files)
 sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
 ~~~
 
-Follow these instructions to install Docker:
+Finally, follow these instructions to install Docker:
 ~~~
 https://docs.docker.com/engine/installation/linux/centos/
 ~~~
 
+At this point, your CentOS-7 Chef Workstation is ready to run chef cookbooks.
 
 ===============
 INSTALL JENKINS
 ===============
 
+To install Jenkins, just change to the jenkins-chef project directory and run ```kitchen converge```. 
+
 ~~~
-cd jenkinsjava
+cd SESACOM/utils/jenkins-chef
 kitchen converge
 ~~~
 
-NOTE: Numerous Jenkins plugins will installed automatically
+NOTE: A lot of software gets upgraded and built, and numerous Jenkins plugins will installed automatically
+so there may be periods of apparent inactivity lasting 5 minutes or more at some stages. Just let it run, or 
+login (if the converge has progressed through the initial stages) with ```kitchen login``` to perform a ```ps auxwww``` to view process mechanics.
 
-- installation will take about 10 min
+- installation will take about 30 min
 - verify by visiting jenkins home page
   http://172.17.0.2:8080
 - login will be authenticated through github, so authenticate with your Github username and password.
@@ -90,20 +119,29 @@ NOTE ABOUT MODULES:
 - Occasionally modules break build settings in subtle ways. For example, Version 2.5.0 of the Git
   module creates git problems early in builds. If you revert to the previous version of the module
   the problem goes away. If problems are detected, the module will be left not-upgraded in the 
-  module manager.
+  module manager, so some Jenkins modules will appear to be not upgraded.
 
+
+NOTE: Although the installation of Jenkins is automatic, the configuration of Jenkins is only partly-automated, 
+and currently being developed. Below, are a list of steps required to fully configure Jenkins. Three main sections
+are covered:
+
+- Global Tool Configuration (automation complete)
+- Global Jenkins System Configuration (automation partial)
+- sesame-api job configuration (not automated)
 
 ==================================
 Jenkins Global Tool Configuration
 ==================================
+Under Jenkins > Manage Jenkins > Global Tool Configuration
 
 Done automatically.
 
-------------------------
-JENKINS CONFIGURE SYSTEM
-------------------------
+----------------------------
+GLOBAL SYSTEM CONFIGURATION
+----------------------------
 
-Global settings provide defaults for project settings. 
+Global settings provide defaults for all project settings. 
 The following settings are grouped by section of Global configuration: 
 
 Jenkins > Manage Jenkins > Configure System
@@ -186,17 +224,14 @@ Click Apply
 
 End global configuration by Clicking SAVE
 
-------------------------
-JENKINS PROJECT SETTINGS
-------------------------
-====================
-SETTING UP A PROJECT
-====================
+---------------------------
+SESAME-API PROJECT SETTINGS
+---------------------------
 
-Following are the project settings needed to get the sesame-api project
-to build. First, you'll need to create the project.
+Following are the project settings for the sesame-api project.
+First, you'll need to create the project.
 
-Login to jenkins
+Jenkins > New Item
 
 ~~~
 New Item
@@ -208,7 +243,7 @@ click OK
 You will be brought into the sesame-api-dev project configuration page, 
 but can always return to it by pathing to:
 
-Jenkins > sesame-api-dev (clickable text) > configure
+Jenkins > sesame-api-dev (clickable text mid-page) > configure
 
 Each of the following sections are listed in the navigation tabs at the 
 top of the page. It is recommended to click "Apply" after completing each
@@ -270,45 +305,27 @@ Post-build actions:
 ~~~
 Click SAVE
 
-------------------------
-MANUAL SETUP FOR COMPILE
-------------------------
-====================
-sesame-api project
-====================
+This completes Jenkins setup with the sesame-api project preinstalled.
+You should be able to build a harmless development version of sesame-api by navigating to:
 
-There is one project that will be initially configured with Jenkins with Java 8, and this is the sesame-api project. Below is the procedure for setting up a manual build environment for sesame-api in the UNIX console. This can serve as a model to instruct on how to test and add additional jobs to Jenkins.
+Jenkins > sesame-api-dev (clickable text mid-page) > Build Now
 
-The easiest way to setup a manual build is to deploy Jenkins to a VM using this cookbook and the command:
-~~~
-kitchen converge
-~~~
 
-If you login to the VM using ```kitchen login``` all dependencies will be established with the correct values for a manual build. 
+-------------------------------------
+MANUAL SETUP FOR COMPILING SESAME-API
+-------------------------------------
+The sesame-api project is initially configured with this installation of Jenkins. However, the project changes a lot and sometimes the build may go out of sync with what developers are currenly using. In case you want to test comple sesame-api in a UNIX console without the aid of Jenkins, a shell script has been provided to verify the build and perform the same steps Jenkins would use to build the artifacts.
+
+If you login to the Jenkins iinstance using ```kitchen login``` all dependencies will be established with the correct values for a manual build using the shell script.
 
 Run the script: ``/var/lib/jenkins/jobs/manual_build.sh```
 
-On CentOS 7, this Docker-based cookbook will not work due to systemd revisions. In this case you will need to perform the following steps beforehand:
+----------------
+API ACCESS NOTES
+----------------
+This section is for people who want to perform various automation tasks with Jenkins.
 
-~~~
-# install mariadb or mysql
-sudo yum -y install mariadb-server mariadb
-sudo systemctl start mariadb
-sudo systemctl enable mariadb
-sudo mysql_secure_installation
-~~~
-
-Installing the default Java and Git are fine for CentOS7
-
-
-Better yet, for CentOS 7, clone the VirtualBox version of this cookbook. VirtualBox works with CentOS 7, but performs more slowly.
-
-
-----------
-API ACCESS
-----------
-
-Since Oauth will not allow standard login access, you have to use an API key after logging in via Oauth to use Jenkins' RESTful API. To do this, in your normal web browser visit http://<jenkins-server>/user/<username>/configure and copy your user API token from there.
+Since Oauth will not allow standard login access, you have to use an API key after logging in via Oauth to use Jenkins' RESTful API. To do this, in your normal web browser visit ```http://<jenkins-server>/user/<username>/configure``` and copy your user API token from there.
 
 Example:
 ~~~
@@ -318,13 +335,17 @@ http://wilma:8080/user/barney/configure
 <copy Token to clipboard>
 ~~~
 
-At that point, you should be able to access the Jenkins API with curl:
+At that point, you should be able to access the Jenkins API with curl from the UNIX prompt:
 
 ~~~
 # return a list of Jenkins users in XML
 curl -X POST barney:198012acc88999fac09098090988aa@wilma:8080/asynchPeople/api/xml
 ~~~
+========
+EXAMPLES
+========
 
+This command will list all installed Jenkins Plugins:
 ~~~
 # list all installed plugins using XML API [1]
 JENKINS_HOST=barney:c12cf5da8b3bb0eb3389247ca29bb116@wilma:8080
@@ -332,6 +353,8 @@ curl -sSL "http://$JENKINS_HOST/pluginManager/api/xml?depth=1&xpath=/*/*/shortNa
 ~~~
 [1] https://github.com/fabric8io/jenkins-base/blob/master/README.md
 
+
+This command will create a new Job:
 ~~~
 # [2] Create a job 
 JENKINS_HOST=barney:c12cf5da8b3bb0eb3389247ca29bb116@wilma:8080
@@ -343,14 +366,16 @@ curl -X POST -H "Content-Type:application/xml" -d "<project><builders/><publishe
 RUNNING SCRIPTS
 ---------------
 
-One way to run scripts in the Jenkins JVM insdtance from outside that instance is to use the script API offered at /script. This is actually a call to the view that displays the Groovy console so the response to script runs will contain a lot of redundant HTML on return. This method is a bit less desirable for automation, because it is more like you are injecting a Groovy script into a Jenkins web page with a Groovy console on it, then extracting the results from HTML normally returned by the web server. It may take some extra work to extract returned data. However it will, execute whatever you hand it.
+One way to run scripts in the Jenkins JVM instance from outside that instance is to use the script API offered at /script. 
+
+This is actually a call to the view that displays the Groovy console. So the response will contain a lot of redundant HTML on return. This method is a bit less desirable for automation, because you are injecting a Groovy script into a Jenkins web page with a Groovy console on it, then extracting the results from HTML normally returned by the web server to a web browser. It may take some extra work to extract returned data. However it will execute whatever you hand it.
 
 ~~~
-curl -d 'script=println(Jenkins.instance.pluginManager.plugins)' http://barney:8187218182371823718237123@wilma:8080/script > 123.html
+curl -d 'script=println(Jenkins.instance.pluginManager.plugins)' http://barney:c12cf5da8b3bb0eb3389247ca29bb116@wilma:8080/script > 123.html
 ~~~
 
 Again, this command can be issued after obtaining an API key for the user _barney_ on the server _wilma_.
-Below is a similar command that takes an external _groovy_ program filename to execute:
+Below is a similar command that takes an external _groovy_ program filename to execute, rather than inline code:
 
 Suppose we have a groovy script called addmaven.groovy in the current directory, to add new settings to the current maven installation in Global Tools Configuration:
 ~~~
@@ -364,7 +389,7 @@ a.save()
 If we execute the following 
 
 ~~~
-curl --user 'barney:8187218182371823718237123' --data-urlencode "script=$(<./myscript.groovy)" http://172.17.0.2:8080/scriptText
+curl --user 'barney:c12cf5da8b3bb0eb3389247ca29bb116' --data-urlencode "script=$(<./myscript.groovy)" http://wilma/scriptText
 ~~~
 
 We get the fields filled for the Maven tool location in the Global Tools Configuration view.

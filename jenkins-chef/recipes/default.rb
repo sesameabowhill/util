@@ -15,16 +15,15 @@
 # node.set.jenkins.master['jvm_options'] = '-Djenkins.install.runSetupWizard=false'
 # 
 
-package 'net-tools'
+run_context = node['virtualization']['system']
+puts "Run context is: [#{run_context}]"
 
-include_recipe 'java' 
-include_recipe 'maven' 
-include_recipe 'git'
-include_recipe 'jenkins::master'
 
-execute 'Update OS' do
-   command "yum -y update"
-   command "yum clean all"
+if run_context.match(/docker|vbox/)
+   execute "update_os" do
+      live_stream true
+      command "yum -y update"
+   end
 end
 
 mysql_service 'local' do
@@ -32,7 +31,7 @@ mysql_service 'local' do
   bind_address '0.0.0.0'
   port '3306'
   data_dir '/data'
-  initial_root_password 'sesame'
+  initial_root_password node['passwords']['mysql']
   action [:create, :start]
 end
 
@@ -42,16 +41,28 @@ template "/var/lib/mysql-files/create_mysql_tables.sql" do
 end
 
 execute 'Create Databases' do
-   command "mysql -h 127.0.0.1 -u root --password='sesame' < /var/lib/mysql-files/create_mysql_tables.sql"
+   live_stream true
+   command "mysql -h 127.0.0.1 -u root --password=#{node['passwords']['mysql']} < /var/lib/mysql-files/create_mysql_tables.sql"
 end
 
-template "/var/lib/jenkins/jobs/upgrade_git.sh" do
+template "/tmp/upgrade_git.sh" do
    source "upgrade_git.erb"
    mode '0744'
 end
 
 execute 'Upgrade Git' do
-   command '/bin/sh /var/lib/jenkins/jobs/upgrade_git.sh'
+   live_stream true
+   command 'bin/sh /tmp/upgrade_git.sh'
+end
+
+include_recipe 'java' 
+include_recipe 'maven' 
+include_recipe 'jenkins::master'
+
+# wait 20 seconds for jenkins to boot
+execute 'Pause for Jenkins Bootup' do
+   live_stream true
+   command "sleep 20"
 end
 
 template '/var/lib/jenkins/jobs/sesame.properties' do
@@ -70,10 +81,11 @@ template '/var/lib/jenkins/jobs/manual_build.sh' do
    mode '0744'
 end    
 
+
 # install git global config settings the old-fashioned way
 template '/var/lib/jenkins/hudson.plugins.git.GitTool.xml' do
    source 'hudson.plugins.git.GitTool.xml'
-   mode '0744'
+   mode '0644'
 end
 
 
@@ -103,7 +115,7 @@ end
 jenkins_command 'safe-restart'
 
 
-# 
+# global tools configuration
 jenkins_script 'Configure Global Tools' do
   command <<-EOH.gsub(/^ {4}/, '')
 import jenkins.model.Jenkins
@@ -203,5 +215,3 @@ if(!github_authorization.equals(Jenkins.instance.getAuthorizationStrategy())) {
 }
    EOH
 end
-
-
