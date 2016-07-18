@@ -88,6 +88,12 @@ template '/var/lib/jenkins/hudson.plugins.git.GitTool.xml' do
    mode '0644'
 end
 
+# install git global config settings the old-fashioned way
+template '/var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml' do
+   source 'jenkins.model.JenkinsLocationConfiguration.xml'
+   mode '0644'
+end
+
 
 #################
 # Install Plugins

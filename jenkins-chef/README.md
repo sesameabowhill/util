@@ -153,13 +153,6 @@ directly under the Jenkins logo at the top of the page. Hover over the
 section names listed below.
 
 ~~~
-Maven Project Configuration
-   Jenkins Location
-      System Admin e-mail address: jenkins@sesamecommunications.com
-click Apply
-~~~
-
-~~~
 Github
 Github Servers
    Click Add
