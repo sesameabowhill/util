@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<org.jfrog.hudson.ArtifactoryBuilder_-DescriptorImpl plugin="artifactory@2.5.1">
+  <useCredentialsPlugin>false</useCredentialsPlugin>
+  <pushToBintrayEnabled>true</pushToBintrayEnabled>
+</org.jfrog.hudson.ArtifactoryBuilder_-DescriptorImpl>

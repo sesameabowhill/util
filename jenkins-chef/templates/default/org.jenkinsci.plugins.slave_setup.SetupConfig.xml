@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<org.jenkinsci.plugins.slave__setup.SetupConfig plugin="slave-setup@1.10">
+  <setupConfigItems/>
+</org.jenkinsci.plugins.slave__setup.SetupConfig>

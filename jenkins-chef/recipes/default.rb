@@ -53,6 +53,7 @@ end
 execute 'Upgrade Git' do
    live_stream true
    command 'bin/sh /tmp/upgrade_git.sh'
+#not if ~/temp/
 end
 
 include_recipe 'java' 
@@ -81,6 +82,10 @@ template '/var/lib/jenkins/jobs/manual_build.sh' do
    mode '0744'
 end    
 
+###
+### Stuff OK to put on before modules are installed
+###
+
 
 # install git global config settings the old-fashioned way
 template '/var/lib/jenkins/hudson.plugins.git.GitTool.xml' do
@@ -88,11 +93,16 @@ template '/var/lib/jenkins/hudson.plugins.git.GitTool.xml' do
    mode '0644'
 end
 
-# install git global config settings the old-fashioned way
+# install Jenkins Global Location information
 template '/var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml' do
    source 'jenkins.model.JenkinsLocationConfiguration.xml'
    mode '0644'
 end
+
+
+
+
+
 
 
 #################
@@ -116,6 +126,184 @@ installers.each do |installer|
       end
    end
 end
+
+# global credentials file
+# This must:
+# 1. contain a secret which is your raw API key
+# 2. must overwrite existing config after modules install
+# 3. must be followed by a safe restart
+template '/var/lib/jenkins/credentials.xml' do
+   source 'credentials.xml'
+   mode '0644'
+end
+
+# restart Jenkins to ensure all modules finish install
+jenkins_command 'safe-restart'
+
+=begin
+# global jenkins config file
+template '/var/lib/jenkins/config.xml' do
+   source 'config.xml'
+   mode '0644'
+end
+=end
+
+# restart Jenkins to ensure all modules finish install
+jenkins_command 'safe-restart'
+
+
+
+
+
+# extract secret from credentials in xml file.
+# based on : 
+# docker-plugin at http://www.programcreek.com/java-api-examples/index.php?source_dir=docker-plugin-master/docker-plugin/src/main/java/com/nirima/jenkins/plugins/docker/client/ClientConfigBuilderForPlugin.java
+jenkins_script 'Extract Secret from Credentials' do
+  command <<-EOH.gsub(/^ {4}/, '')
+import com.cloudbees.plugins.credentials.Credentials; 
+import com.cloudbees.plugins.credentials.common.CertificateCredentials; 
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials; 
+import com.cloudbees.plugins.credentials.domains.DomainRequirement; 
+import hudson.security.ACL; 
+import jenkins.model.Jenkins; 
+ 
+import javax.annotation.Nullable; 
+import java.net.URI; 
+import java.util.Collections; 
+import java.util.logging.Level; 
+import java.util.logging.Logger; 
+ 
+import static com.cloudbees.plugins.credentials.CredentialsMatchers.firstOrNull; 
+import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId; 
+import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials; 
+import static org.apache.commons.lang.StringUtils.isNotBlank; 
+
+private static Credentials lookupSystemCredentials(String credentialsId) {
+    return firstOrNull(
+            lookupCredentials(
+                    Credentials.class,
+                    Jenkins.getInstance(),
+                    ACL.SYSTEM,
+                    Collections.<DomainRequirement>emptyList()
+            ),
+            withId(credentialsId)
+    );
+}
+
+a = lookupSystemCredentials ("b6da4a9d-31d6-48dd-98c2-064af651294f");
+println "EXTRACTED SYSTEM CREDS:"
+println a.getSecret();
+   EOH
+end
+
+# Set GitBlit Repo Browser ...
+# from: jenkins-ci.org
+# https://wiki.jenkins-ci.org/display/JENKINS/Set+GitBlitRepositoryBrowser+with+custum+settings+on+all+repos
+=begin
+import hudson.model.*
+import hudson.triggers.*
+import hudson.plugins.git.browser.GitBlitRepositoryBrowser
+
+// you might want to change here
+def url = 'https://mygitblitserver/gitblit/'
+def i = 0
+for(item in Hudson.instance.items) {
+  def scm = item.scm
+  if((scm instanceof hudson.plugins.git.GitSCM) && !(scm.browser instanceof GitBlitRepositoryBrowser)) {
+    println('##########')
+    println(scm.dump())
+    // you might want to change here
+    def match = scm.userRemoteConfigs =~ /\/spu\/test\/git\/(.*?.git)/
+    if(match) {
+      i++
+      def projectName = match[0][1]
+      println projectName
+      scm.browser = new GitBlitRepositoryBrowser(url, projectName)
+    }
+  }
+}
+println("$i projects updated")
+=end
+
+
+
+
+# github plugin config
+template '/var/lib/jenkins/github-plugin-configuration.xml' do
+   source 'github-plugin-configuration.xml'
+   mode '0644'
+end
+
+# 
+template '/var/lib/jenkins/hudson.ivy.IvyBuildTrigger.xml' do
+   source 'hudson.ivy.IvyBuildTrigger.xml'
+   mode '0644'
+end
+
+# MavenModuleSet
+template '/var/lib/jenkins/hudson.maven.MavenModuleSet.xml' do 
+   source 'hudson.maven.MavenModuleSet.xml'
+   mode '0644'
+end
+
+# GitSCM
+template '/var/lib/jenkins/hudson.plugins.git.GitSCM.xml' do
+   source 'hudson.plugins.git.GitSCM.xml'
+   mode '0644'
+end
+
+# Mailer
+template '/var/lib/jenkins/hudson.tasks.Mailer.xml' do
+   source 'hudson.tasks.Mailer.xml'
+   mode '0644'
+end
+
+# 
+template '/var/lib/jenkins/hudson.tasks.Shell.xml' do
+   source 'hudson.tasks.Shell.xml'
+   mode '0644'
+end
+
+template '/var/lib/jenkins/hudson.triggers.SCMTrigger.xml' do
+   source 'hudson.triggers.SCMTrigger.xml'
+   mode '0644'
+end
+
+template '/var/lib/jenkins/hudson.triggers.SCMTrigger.xml' do
+   source 'hudson.triggers.SCMTrigger.xml'
+   mode '0644'
+end
+
+template '/var/lib/jenkins/jenkins.model.ArtifactManagerConfiguration.xml' do
+   source 'jenkins.model.ArtifactManagerConfiguration.xml'
+   mode '0644'
+end
+
+template '/var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml' do
+   source 'jenkins.model.JenkinsLocationConfiguration.xml'
+   mode '0644'
+end
+
+template '/var/lib/jenkins/org.jenkinsci.plugins.slave_setup.SetupConfig.xml' do
+   source 'org.jenkinsci.plugins.slave_setup.SetupConfig.xml'
+   mode '0644'
+end
+
+template '/var/lib/jenkins/org.jenkinsci.plugins.zapper.ZapRunner.xml' do
+   source 'org.jenkinsci.plugins.zapper.ZapRunner.xml'
+   mode '0644'
+end
+
+template '/var/lib/jenkins/org.jfrog.hudson.ArtifactoryBuilder.xml' do
+   source 'org.jfrog.hudson.ArtifactoryBuilder.xml'
+   mode '0644'
+end
+
+template '/var/lib/jenkins/slave-status.xml' do
+   source 'slave-status.xml'
+   mode '0644'
+end
+
 
 # restart Jenkins to ensure all modules finish install
 jenkins_command 'safe-restart'
