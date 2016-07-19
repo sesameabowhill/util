@@ -152,29 +152,6 @@ directly under the Jenkins logo at the top of the page. Hover over the
 "Jenkins > configuration" item, and click on the triangle. This will expose
 section names listed below.
 
-~~~
-Github
-Github Servers
-   Click Add
-      API URL: https://api.github.com
-      Credentials: MySecretText
-         (NOTE: if this doesn't exist, perform the following sub-steps)
-      Click ADD > Jenkins
-         Under KIND, select Secret Text
-         In the SECRET field, enter  your real Gitub access token from:
-            https://github.com/settings/tokens
-            (generate new token under your username if you don't have one)
-            (otherwise use mine, for user sesameabowhill:)
-               7e26fb3e9cd207a5ccc85f399f8502167e6c762d
-            Secret: <token>
-         Click Add
-         Now you should see this token in credentials popdown.
-          select it and click TEST CONNECTION
-            it should say "credentials verified for ..."
-         Uncheck Manage Hooks
-Click Apply
-~~~
-
 
 NOTE: In the following section, if credentials controls do not appear, click SAVE and re-enter the configuration again. They will re-appear.
 ~~~
