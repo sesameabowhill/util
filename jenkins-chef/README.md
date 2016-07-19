@@ -141,28 +141,9 @@ Done automatically.
 GLOBAL SYSTEM CONFIGURATION
 ----------------------------
 
-Global settings provide defaults for all project settings. 
-The following settings are grouped by section of Global configuration: 
-
+Global settings provide defaults for all project settings.
 Jenkins > Manage Jenkins > Configure System
-
-Go through each of the sections below and enter or cut-and-paste data into
-the corresponding Jenkins configuration fields. Sections are easily located 
-directly under the Jenkins logo at the top of the page. Hover over the 
-"Jenkins > configuration" item, and click on the triangle. This will expose
-section names listed below.
-
-
-~~~
-Extended E-mail Notification
-   SMTP server
-      smtp2.sesamecommunications.com
-   Default user e-mail suffix
-      @sesamecommunications.com
-Click Apply
-~~~
-
-End global configuration by Clicking SAVE
+Initial properties and settings are set automatically.
 
 ---------------------------
 SESAME-API PROJECT SETTINGS

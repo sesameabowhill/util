@@ -299,6 +299,11 @@ template '/var/lib/jenkins/org.jfrog.hudson.ArtifactoryBuilder.xml' do
    mode '0644'
 end
 
+template '/var/lib/jenkins/hudson.plugins.emailext.ExtendedEmailPublisher.xml' do
+   source 'hudson.plugins.emailext.ExtendedEmailPublisher.xml'
+   mode '0644'
+end
+
 template '/var/lib/jenkins/slave-status.xml' do
    source 'slave-status.xml'
    mode '0644'
