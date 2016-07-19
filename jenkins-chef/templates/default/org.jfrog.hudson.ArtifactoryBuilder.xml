@@ -1,5 +1,21 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <org.jfrog.hudson.ArtifactoryBuilder_-DescriptorImpl plugin="artifactory@2.5.1">
-  <useCredentialsPlugin>false</useCredentialsPlugin>
+  <useCredentialsPlugin>true</useCredentialsPlugin>
+  <artifactoryServers>
+    <org.jfrog.hudson.ArtifactoryServer>
+      <url>http://artifactory.sesamecom.com/artifactory</url>
+      <id>main</id>
+      <timeout>300</timeout>
+      <bypassProxy>false</bypassProxy>
+      <deployerCredentialsConfig>
+        <credentials>
+          <username></username>
+          <password></password>
+        </credentials>
+        <credentialsId>6602b717-f01f-41d1-9202-ceb4881dc9ef</credentialsId>
+        <overridingCredentials>false</overridingCredentials>
+      </deployerCredentialsConfig>
+    </org.jfrog.hudson.ArtifactoryServer>
+  </artifactoryServers>
   <pushToBintrayEnabled>true</pushToBintrayEnabled>
 </org.jfrog.hudson.ArtifactoryBuilder_-DescriptorImpl>
