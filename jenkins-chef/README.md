@@ -153,36 +153,6 @@ directly under the Jenkins logo at the top of the page. Hover over the
 section names listed below.
 
 
-NOTE: In the following section, if credentials controls do not appear, click SAVE and re-enter the configuration again. They will re-appear.
-~~~
-Artifactory
-   Check: Use Credentials Plugin
-   Click: Add
-   Artifactory Server ID: main
-   URL: http://artifactory.sesamecom.com/artifactory
-   Default Deployer Credentials
-      (save settings and re-enter if the following doesn't show)
-      select "jenkins/*****" from popdown
-      IF such a selection is not there do the following:
-         click Add > Jenkins
-         select: Username with password
-         enter username: Jenkins
-         enter password: 
-\{DESede\}r3kV1LVjU7osjr73Z+LjwdptISVysRNdDdUFvLG79e9qhuHdm9p4uw==
-      click Add
-      select "jenkins/*****" from popdown
-      click: Test Connection
-         should return: Found Artifactory 2.4.2
-Click Apply
-~~~
-
-~~~
-Git Plugin
-   Global Config user.name Value: jenkins
-   Global Config user.email Value: jenkins@sesamecommunications.com
-Click Apply
-~~~
-
 ~~~
 Extended E-mail Notification
    SMTP server
