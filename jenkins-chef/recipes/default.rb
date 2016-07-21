@@ -140,24 +140,12 @@ end
 # restart Jenkins to ensure all modules finish install
 jenkins_command 'safe-restart'
 
+
 =begin
-# global jenkins config file
-template '/var/lib/jenkins/config.xml' do
-   source 'config.xml'
-   mode '0644'
-end
-=end
-
-# restart Jenkins to ensure all modules finish install
-jenkins_command 'safe-restart'
-
-
-
-
-
 # extract secret from credentials in xml file.
 # based on : 
 # docker-plugin at http://www.programcreek.com/java-api-examples/index.php?source_dir=docker-plugin-master/docker-plugin/src/main/java/com/nirima/jenkins/plugins/docker/client/ClientConfigBuilderForPlugin.java
+
 jenkins_script 'Extract Secret from Credentials' do
   command <<-EOH.gsub(/^ {4}/, '')
 import com.cloudbees.plugins.credentials.Credentials; 
@@ -178,51 +166,64 @@ import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId;
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials; 
 import static org.apache.commons.lang.StringUtils.isNotBlank; 
 
-private static Credentials lookupSystemCredentials(String credentialsId) {
-    return firstOrNull(
-            lookupCredentials(
-                    Credentials.class,
-                    Jenkins.getInstance(),
-                    ACL.SYSTEM,
-                    Collections.<DomainRequirement>emptyList()
-            ),
-            withId(credentialsId)
-    );
+private static Credentials lookupSystemCredentials(String credentialsId) 
+   {
+   return firstOrNull (
+      lookupCredentials (
+         Credentials.class,
+         Jenkins.getInstance(),
+         ACL.SYSTEM,
+         Collections.<DomainRequirement>emptyList()
+         ),
+      withId(credentialsId)
+      );
+   }
+
+import hudson.model.*;
+
+creds = lookupSystemCredentials("b6da4a9d-31d6-48dd-98c2-064af651294f");
+sstring = creds.getSecret().toString();
+println "EXTRACTED SYSTEM CREDS:"
+println sstring;
+
+pv = new StringParameterValue("GIT_PASS", sstring);
+pa = new ParametersAction ([ pv ]);
+//Thread.currentThread().executable.addAction(pa);
+
+
+def kreds = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(
+      com.cloudbees.plugins.credentials.common.StandardUsernameCredentials.class,
+      Jenkins.instance,
+      null,
+      null
+  );
+
+println kreds.size;
+
+for (c in kreds) {
+       println(c.id + ":" + c.description + ":" )
+  };
+
+
+println "FOO:"
+
+def credentials_store = jenkins.model.Jenkins.instance.getExtensionList(
+        'com.cloudbees.plugins.credentials.SystemCredentialsProvider'
+        )
+
+println "credentials_store: ${credentials_store}"
+credentials_store.each {  println "credentials_store.each: ${it}" }
+
+credentials_store[0].credentials.each { it ->
+    println "credentials: -> ${it}"
+    if (it instanceof com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl) {
+        println "XXX: username: ${it.username} password: ${it.password} description: ${it.description}"
+    }
 }
 
-a = lookupSystemCredentials ("b6da4a9d-31d6-48dd-98c2-064af651294f");
-println "EXTRACTED SYSTEM CREDS:"
-println a.getSecret();
    EOH
 end
 
-# Set GitBlit Repo Browser ...
-# from: jenkins-ci.org
-# https://wiki.jenkins-ci.org/display/JENKINS/Set+GitBlitRepositoryBrowser+with+custum+settings+on+all+repos
-=begin
-import hudson.model.*
-import hudson.triggers.*
-import hudson.plugins.git.browser.GitBlitRepositoryBrowser
-
-// you might want to change here
-def url = 'https://mygitblitserver/gitblit/'
-def i = 0
-for(item in Hudson.instance.items) {
-  def scm = item.scm
-  if((scm instanceof hudson.plugins.git.GitSCM) && !(scm.browser instanceof GitBlitRepositoryBrowser)) {
-    println('##########')
-    println(scm.dump())
-    // you might want to change here
-    def match = scm.userRemoteConfigs =~ /\/spu\/test\/git\/(.*?.git)/
-    if(match) {
-      i++
-      def projectName = match[0][1]
-      println projectName
-      scm.browser = new GitBlitRepositoryBrowser(url, projectName)
-    }
-  }
-}
-println("$i projects updated")
 =end
 
 
@@ -234,7 +235,7 @@ template '/var/lib/jenkins/github-plugin-configuration.xml' do
    mode '0644'
 end
 
-# 
+# Ivy configuration 
 template '/var/lib/jenkins/hudson.ivy.IvyBuildTrigger.xml' do
    source 'hudson.ivy.IvyBuildTrigger.xml'
    mode '0644'
@@ -258,57 +259,87 @@ template '/var/lib/jenkins/hudson.tasks.Mailer.xml' do
    mode '0644'
 end
 
-# 
+# Shell config
 template '/var/lib/jenkins/hudson.tasks.Shell.xml' do
    source 'hudson.tasks.Shell.xml'
    mode '0644'
 end
 
+# SCMTrigger
 template '/var/lib/jenkins/hudson.triggers.SCMTrigger.xml' do
    source 'hudson.triggers.SCMTrigger.xml'
    mode '0644'
 end
 
-template '/var/lib/jenkins/hudson.triggers.SCMTrigger.xml' do
-   source 'hudson.triggers.SCMTrigger.xml'
-   mode '0644'
-end
-
+# Artifactory
 template '/var/lib/jenkins/jenkins.model.ArtifactManagerConfiguration.xml' do
    source 'jenkins.model.ArtifactManagerConfiguration.xml'
    mode '0644'
 end
 
+# Gobal Jenkins location config
 template '/var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml' do
    source 'jenkins.model.JenkinsLocationConfiguration.xml'
    mode '0644'
 end
 
+# Slave config
 template '/var/lib/jenkins/org.jenkinsci.plugins.slave_setup.SetupConfig.xml' do
    source 'org.jenkinsci.plugins.slave_setup.SetupConfig.xml'
    mode '0644'
 end
 
+# (unknown)
 template '/var/lib/jenkins/org.jenkinsci.plugins.zapper.ZapRunner.xml' do
    source 'org.jenkinsci.plugins.zapper.ZapRunner.xml'
    mode '0644'
 end
 
+# Artifacory Builder
 template '/var/lib/jenkins/org.jfrog.hudson.ArtifactoryBuilder.xml' do
    source 'org.jfrog.hudson.ArtifactoryBuilder.xml'
    mode '0644'
 end
 
+# Extended E-mail
 template '/var/lib/jenkins/hudson.plugins.emailext.ExtendedEmailPublisher.xml' do
    source 'hudson.plugins.emailext.ExtendedEmailPublisher.xml'
    mode '0644'
 end
 
+# Slave status
 template '/var/lib/jenkins/slave-status.xml' do
    source 'slave-status.xml'
    mode '0644'
 end
 
+
+##
+## Create api-dev job
+##
+
+# restart Jenkins to ensure all modules finish installing
+jenkins_command 'safe-restart'
+
+# wait 20 seconds for jenkins to boot
+execute 'Pause for Jenkins Bootup' do
+   live_stream true
+   command "sleep 20"
+end
+
+# copy over the job definition file 
+template '/tmp/config.xml' do
+   source 'jobconfig.xml'
+   mode '0644'
+end
+
+# connect into Jenkins JVM to install job just as if we were doing it remotely
+if run_context.match(/docker|vbox/)
+   execute "add_job" do
+      live_stream true
+      command 'curl -X POST -H "Content-Type:application/xml" -d @/tmp/config.xml sesameabowhill:7e26fb3e9cd207a5ccc85f399f8502167e6c762d@172.17.0.2:8080/createItem?name=sesame-api'
+   end
+end
 
 # restart Jenkins to ensure all modules finish install
 jenkins_command 'safe-restart'
@@ -414,3 +445,5 @@ if(!github_authorization.equals(Jenkins.instance.getAuthorizationStrategy())) {
 }
    EOH
 end
+
+
