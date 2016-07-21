@@ -148,89 +148,15 @@ Initial properties and settings are set automatically.
 ---------------------------
 SESAME-API PROJECT SETTINGS
 ---------------------------
+This installation comes with a snapshot of sesame-api which you can perform a one-click build of.
+Project settings can be created in a job.xml and uploaded to Jenkins with curl.
 
-Following are the project settings for the sesame-api project.
-First, you'll need to create the project.
-
-Jenkins > New Item
-
+The included build should complete successfully, and is an integration test of the installation.
 ~~~
-New Item
-   Enter "sesame-api-dev" in the field at the top of the page
-   Select "Maven Project" from the list
-click OK
+curl -X POST -H "Content-Type:application/xml" -d @/tmp/config.xml sesameabowhill:7e26fb3e9cd207a5ccc85f399f8502167e6c762d@172.17.0.2:8080/createItem?name=sesame-api
 ~~~
 
-You will be brought into the sesame-api-dev project configuration page, 
-but can always return to it by pathing to:
-
-Jenkins > sesame-api-dev (clickable text mid-page) > configure
-
-Each of the following sections are listed in the navigation tabs at the 
-top of the page. It is recommended to click "Apply" after completing each
-section, then finally clicking "Save" when all sections are complete.
-
-General 
-~~~
-   Maven Project Name: sesame-api-dev
-   check Discard old builds
-      log rotation strategy
-      keep 2 builds
-   check github project
-   project URL: https://github.com/sesacom/sesame_api/
-~~~
-
-Source Code Management
-~~~
-   Check GIT
-   Repositories
-     repository URL: https://github.com/sesacom/sesame_api.git
-       credentials:
-          configure your own personal GIT sesame creds here to access github
-          click Add > Jenkins
-             select: Git username with password
-             enter username: <your Git username>
-             enter password: <your Git  password>
-          select your creds from popdown (aka: <yourname>/*****)
-     branch specifier: */jenkins-test-branch
-     repository browser: githubweb
-     URL: https://github.com/sesamecom/web/
-~~~
-
-Build Triggers:
-~~~
-    check: Build whenever a SNAPSHOT dependency is built
-           Build when a change is pushed to GitHub
-~~~
-
-Build:
-~~~
-    goals and options: 
-       clean package -gs ../../settings.xml -DsesameConfigurationFile=../../sesame.properties -DpersistSchema=md_snapshot -DanalyticsSchema=analytics_report_master_snapshot -DlogSchema=upload_logs
-    click advanced
-       Check: Use Private Maven Repository
-       Select: Local to the workspace 
-~~~
-
-Build Settings:
-~~~     
-    check: e-mail notification
-    email: eng-seattle@sesamecommunications.com
-~~~
-
-Post-build actions:
-~~~   
-   click: Add post-build action
-   select: Aggragate downstream test results
-   check: Automatically aggregate all downstream tests
-~~~
-Click SAVE
-
-This completes Jenkins setup with the sesame-api project preinstalled.
-You should be able to build a harmless development version of sesame-api by navigating to:
-
-Jenkins > sesame-api-dev (clickable text mid-page) > Build Now
-
+The username (sesameabowhill:<git personal access token>) can be substituted with your own.
 
 -------------------------------------
 MANUAL SETUP FOR COMPILING SESAME-API
