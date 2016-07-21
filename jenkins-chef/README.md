@@ -1,30 +1,50 @@
+=====
+ABOUT
+=====
+
+This project is designed to install a Jenkins system that will ultimately replace the existing one at http://jenkins.sesamecommunications.com. 
+
+The existing production version of Jenkins is over 5 years old and is a manually-maintained installation on a physical machine with a kernel date of 2011. The software on this machine is so out of sync, it cannot be upgraded safely.
+
+The purpose of this project is to create a replacement installation that is 
+
+1. Similar to the existing Jenkins in features 
+2. Fully replicable 
+3. Uses all new, modern up-to-date tools and modules
+4. Is deployable to any kind of server, including cloud
+5. Builds software on Java 8
+
+This cookbook installs all-new versions of the following software:
+
+- Jenkins
+- Jenkins Modules
+- Java 8
+- Maven
+- Git
+
+It also uses Oauth validation via Github and does not store system passwords of users. If you have a Github Sesacom account, you will be able to access this system.
+
 ========
 VERSIONS
 ========
 
-The main branch of this project is designed to install Jenkins on CentOS 6.8 using Docker for development purposes.
-If you need a dev installation to work on CentOS 7, clone the centos7 branch of utils.
-
-The CentOS 7 branch version lags further behind featurewise and uses vbox which is slower than docker.
-Using the centos7 branch you may need to perform the following steps manually to prepare mysql:
-~~~
-# install mariadb or mysql
-sudo yum -y install mariadb-server mariadb
-sudo systemctl start mariadb
-sudo systemctl enable mariadb
-sudo mysql_secure_installation
-~~~
-
-Irrespective of development branch versions, this project aims to keep pace with whichever OS currently in use.
+The main branch of this project is designed to install Jenkins on CentOS 6.8 using Docker for development purposes. This should run fine locally on CentOS 7 Chef Workstation or a CentOS 6.x machine. If deployment on CentOS 7 is required, check out the centos7 branch of this project. It currently lags behind the master branch.
 
 =============
 PREREQUISITES
 =============
-Chef scripts should be developed and tested on a dedcated workstation, called a _Chef Workstation_. You can run this project locally on a Centos-7.x machine or a Windows machine running VirtualBox under a CentOS-7 image. Within CentOS-7, the Jenkins installation itself will be run on a centos-6.8 virtual Docker machine, and will be accessible on completion using a local web browser on ```http://172.17.0.2:8080```. Since the Jenkins installation authenticates via Github, you will be asked by Github to provide your Sesame Github username and password. All other accesses will be blocked.
 
-A CentOS-7 installation can be obtained via https://wiki.centos.org/Download . The DVD ISO should work.
+Chef scripts should be developed and tested on a dedcated workstation, called a _Chef Workstation_. You can run this project locally on a Centos-7.x machine or a Windows machine running VirtualBox using a CentOS-7 image. 
 
-Once your CentOS-7 host is installed on a machine or VirtualBox machine, update your packages: 
+Within CentOS-7, the Jenkins installation itself will deploy to a centos-6.8 virtual Docker machine, and will be accessible on completion using a local web browser on ```http://172.17.0.2:8080```. Since the Jenkins installation authenticates via Github, you will be asked by Github to provide your Sesame Github username and password. All other access will be blocked.
+
+So the first step is to build yourself a CentOS-7 Chef Workstation.
+
+A CentOS-7 installation can be obtained via https://wiki.centos.org/Download. The DVD ISO should work.
+In the setup wizard, select X-Windows and Server - the combined version - as you will need both. 
+Other software you choose to install won't matter.
+
+Once your CentOS-7 host is prepared on a fresh physical machine or fresh VirtualBox machine, update your packages: 
 ~~~
 sudo yum update
 ~~~
@@ -40,19 +60,27 @@ sudo firewall-cmd --reload
 OBTAIN THIS COOKBOOK
 ====================
 
-Git clone the sesame utilities folders to a directory, for example, one called SESACOM
-
+Next step is to install Git. 
 ~~~
-git clone git@github.com/sesacom/util.git SESACOM
+sudo yum install git
 ~~~
 
-This project will be under SESACOM/utils/jenkins-chef, which is where you will eventually run ```kitchen converge``` to install Jenkins.
+Clone the sesame utilities folders to a directory, for example, one called SESACOM
+(use your sesame Git username and Password)
+~~~
+mkdir SESACOM
+cd SESACOM
+git clone https://<sesame_git_username>:<sesame_git_password>@github.com/sesacom/util.git SESACOM
+cd SESACOM/utils/jenkins-chef
+~~~
+
+This installtion project will be under SESACOM/utils/jenkins-chef.
 
 ============
 INSTALL CHEF
 ============
 
-But first, you will need to install the Chef Development Kit in your copy of CentOS-7.
+Once CentOS 7 is on, you will need to install the Chef Development Kit.
 
 ~~~
 # remove iany previous version of chefdk
@@ -62,17 +90,20 @@ rpm -e chefdk
 wget https://packages.chef.io/stable/el/7/chefdk-0.15.16-1.el7.x86_64.rpm
 rpm -ivh chefdk-0.15.16-1.el7.x86_64.rpm
 
-# edit .bash-profile for build environment settings
+# run this, but also add it afterwards to .bash-profile for proper future build environment settings
 eval "$(chef shell-init bash)"
 
-# verify the chef build environment settings are correct (should return reasonable values)
+# verify the chef build environment settings are correct (each should return reasonable values)
 which ruby
 /opt/chefdk/embedded/bin/ruby --version
 chef-client --version
 ~~~
 
-Next, run Ruby Bundler
+Next, run Ruby Bundler. 
+
+Ruby should be on the path if you ran ```eval "$(chef shell-init bash)"```
 ~~~
+cd ~/SESACOM/utils/jenkins-chef
 bundle install
 ~~~
 
@@ -80,88 +111,54 @@ bundle install
 INSTALL DOCKER
 ==============
 
+The next step is to install Docker.
+
 Verify requisite dependencies are installed:
 ~~~
-ls -l /sys/class/misc/device-mapper  (should show files)
+ls -l /sys/class/misc/device-mapper  (should show files. If not, download this:)
 sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
 ~~~
 
-Finally, follow these instructions to install Docker:
+Finally, follow these instructions to install Docker.
 ~~~
 https://docs.docker.com/engine/installation/linux/centos/
 ~~~
 
-At this point, your CentOS-7 Chef Workstation is ready to run chef cookbooks.
+At this point, your CentOS-7 Chef Workstation is ready to run chef cookbooks, including this one.
 
 ===============
 INSTALL JENKINS
 ===============
 
-To install Jenkins, just change to the jenkins-chef project directory and run ```kitchen converge```. 
+Last, run:
 
 ~~~
 cd SESACOM/utils/jenkins-chef
 kitchen converge
 ~~~
 
-NOTE: A lot of software gets upgraded and built, and numerous Jenkins plugins will installed automatically
-so there may be periods of apparent inactivity lasting 5 minutes or more at some stages. Just let it run, or 
-login (if the converge has progressed through the initial stages) with ```kitchen login``` to perform a ```ps auxwww``` to view process mechanics.
-
-- installation will take about 30 min
-- verify by visiting jenkins home page
-  http://172.17.0.2:8080
-- login will be authenticated through github, so authenticate with your Github username and password.
+The installation and configuration takes about 10-30 minutes, you should be able to access the completed installation at ```http://172.17.0.2:8080```.  Your login will be authenticated through github, so authenticate with your Github username and password.
 
 
-NOTE ABOUT MODULES:
--------------------
-- Occasionally modules break build settings in subtle ways. For example, Version 2.5.0 of the Git
-  module creates git problems early in builds. If you revert to the previous version of the module
-  the problem goes away. If problems are detected, the module will be left not-upgraded in the 
-  module manager, so some Jenkins modules will appear to be not upgraded.
+- You can dispose of the whole installation by issuing a ```kitchen destroy```. 
+- You can login to the virtual machine running Jenkins using ```kitchen login``` or ssh as kitchen to the machine address with the password ```kitchen```.
+- You can test the installation by building the inluded mock job of the sesame-api project. Click 'sesame-api' then 'build now'. This is a special demo/test branch.
 
 
-NOTE: Although the installation of Jenkins is automatic, the configuration of Jenkins is only partly-automated, 
-and currently being developed. Below, are a list of steps required to fully configure Jenkins. Three main sections
-are covered:
-
-- Global Tool Configuration (automation complete)
-- Global Jenkins System Configuration (automation partial)
-- sesame-api job configuration (not automated)
-
-==================================
-Jenkins Global Tool Configuration
-==================================
-Under Jenkins > Manage Jenkins > Global Tool Configuration
-
-Done automatically.
-
-----------------------------
-GLOBAL SYSTEM CONFIGURATION
-----------------------------
-
-Global settings provide defaults for all project settings.
-Jenkins > Manage Jenkins > Configure System
-Initial properties and settings are set automatically.
-
----------------------------
-SESAME-API PROJECT SETTINGS
----------------------------
-This installation comes with a snapshot of sesame-api which you can perform a one-click build of.
-Project settings can be created in a job.xml and uploaded to Jenkins with curl.
-
-The included build should complete successfully, and is an integration test of the installation.
+----------------
+MAKING A PROJECT
+----------------
+Project settings can be created in a config.xml and uploaded to Jenkins with curl. If you want to submit your own build project, do the following:
 ~~~
-curl -X POST -H "Content-Type:application/xml" -d @/tmp/config.xml sesameabowhill:7e26fb3e9cd207a5ccc85f399f8502167e6c762d@172.17.0.2:8080/createItem?name=sesame-api
+curl -X POST -H "Content-Type:application/xml" -d @config.xml <username>:<password>@172.17.0.2:8080/createItem?name=sesame-api
 ~~~
-
-The username (sesameabowhill:<git personal access token>) can be substituted with your own.
+Substitute your own Github username and password.
+config.xml is the project configuration, and should refer to module settings for mods that have already been installed globally.
 
 -------------------------------------
 MANUAL SETUP FOR COMPILING SESAME-API
 -------------------------------------
-The sesame-api project is initially configured with this installation of Jenkins. However, the project changes a lot and sometimes the build may go out of sync with what developers are currenly using. In case you want to test comple sesame-api in a UNIX console without the aid of Jenkins, a shell script has been provided to verify the build and perform the same steps Jenkins would use to build the artifacts.
+The sesame-api project is initially configured for Jenkins. However, the project changes a lot and sometimes the build may go out of sync with what developers are currenly using. In case you want to test comple sesame-api in a UNIX console without the aid of Jenkins, a shell script has been provided to verify the build and perform the same steps Jenkins would use to build the artifacts.
 
 If you login to the Jenkins iinstance using ```kitchen login``` all dependencies will be established with the correct values for a manual build using the shell script.
 
@@ -242,3 +239,14 @@ curl --user 'barney:c12cf5da8b3bb0eb3389247ca29bb116' --data-urlencode "script=$
 We get the fields filled for the Maven tool location in the Global Tools Configuration view.
 
 
+CentOS 7 Notes:
+---------------
+
+Using the centos7 branch you may need to perform the following steps manually to prepare mysql:
+~~~
+# install mariadb or mysql
+sudo yum -y install mariadb-server mariadb
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+sudo mysql_secure_installation
+~~~
