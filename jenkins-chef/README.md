@@ -2,7 +2,7 @@
 ABOUT
 =====
 
-This project is designed to install a Jenkins system that will ultimately replace the existing one at http://jenkins.sesamecommunications.com. 
+This project is designed to install a Jenkins system that will ultimately replace the existing one at http://jenkins.sesamecom.com.
 
 The existing production version of Jenkins is over 5 years old and is a manually-maintained installation on a physical machine with a kernel date of 2011. The software on this machine is so out of sync, it cannot be upgraded safely.
 
@@ -115,7 +115,7 @@ The next step is to install Docker.
 
 Verify requisite dependencies are installed:
 ~~~
-ls -l /sys/class/misc/device-mapper  (should show files. If not, download this:)
+ls -l /sys/class/misc/device-mapper  (should show files. If not, install this: )
 sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
 ~~~
 
@@ -130,7 +130,7 @@ At this point, your CentOS-7 Chef Workstation is ready to run chef cookbooks, in
 INSTALL JENKINS
 ===============
 
-Last, run:
+Converge this cookbook to deploy Jenkins into a CentOS 6.8 VM:
 
 ~~~
 cd SESACOM/utils/jenkins-chef
