@@ -4,21 +4,10 @@
 #
 # Copyright (c) 2016 The Authors, All Rights Reserved.
 
-# NOTES:
-#
-# 1. Dispose of SetupWizard 
-# The Jenkins SetupWizard is a new thing requiring manual steps. It is disabled in 
-# this project's attribute file. Disabling the SetupWizard also disables security during 
-# installation for a short period. The attribute to disable the SetupWizard is boolean 
-# and the implemented as a Java property option passed in to the JVM command line. 
-#
-# node.set.jenkins.master['jvm_options'] = '-Djenkins.install.runSetupWizard=false'
-# 
-
 run_context = node['virtualization']['system']
 puts "Run context is: [#{run_context}]"
 
-
+# update OS
 if run_context.match(/docker|vbox/)
    execute "update_os" do
       live_stream true
@@ -26,6 +15,7 @@ if run_context.match(/docker|vbox/)
    end
 end
 
+# install MySQL
 mysql_service 'local' do
   version '5.7'
   bind_address '0.0.0.0'
@@ -35,6 +25,7 @@ mysql_service 'local' do
   action [:create, :start]
 end
 
+# configure test DBs
 template "/var/lib/mysql-files/create_mysql_tables.sql" do
    source 'create_mysql_tables.erb'
    mode '0644'
@@ -45,17 +36,21 @@ execute 'Create Databases' do
    command "mysql -h 127.0.0.1 -u root --password=#{node['passwords']['mysql']} < /var/lib/mysql-files/create_mysql_tables.sql"
 end
 
+# rebuild Git to very new version. Jenkins and Maven use very new features.
+# Git 1.8.0 =< features > Git 1.71
 template "/tmp/upgrade_git.sh" do
    source "upgrade_git.erb"
    mode '0744'
 end
 
+# TODO: build guards into this
 execute 'Upgrade Git' do
    live_stream true
-   command 'bin/sh /tmp/upgrade_git.sh'
-#not if ~/temp/
+   # git build script - Idempotent but inefficient
+   command 'bin/sh /tmp/upgrade_git.sh' 
 end
 
+# run java, maven, jenkins installs in sequence
 include_recipe 'java' 
 include_recipe 'maven' 
 include_recipe 'jenkins::master'
@@ -66,6 +61,8 @@ execute 'Pause for Jenkins Bootup' do
    command "sleep 20"
 end
 
+# TODO move these to sesame-api project space. They might have to be checked-in.
+# copy maven build scripts for sesame-api
 template '/var/lib/jenkins/jobs/sesame.properties' do
    source 'sesame.properties'
    mode '0644'
@@ -83,9 +80,8 @@ template '/var/lib/jenkins/jobs/manual_build.sh' do
 end    
 
 ###
-### Stuff OK to put on before modules are installed
+### Other Stuff that is OK to put on before modules are installed
 ###
-
 
 # install git global config settings the old-fashioned way
 template '/var/lib/jenkins/hudson.plugins.git.GitTool.xml' do
@@ -98,11 +94,6 @@ template '/var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml' do
    source 'jenkins.model.JenkinsLocationConfiguration.xml'
    mode '0644'
 end
-
-
-
-
-
 
 
 #################
@@ -140,101 +131,13 @@ end
 # restart Jenkins to ensure all modules finish install
 jenkins_command 'safe-restart'
 
-
-=begin
-# extract secret from credentials in xml file.
-# based on : 
-# docker-plugin at http://www.programcreek.com/java-api-examples/index.php?source_dir=docker-plugin-master/docker-plugin/src/main/java/com/nirima/jenkins/plugins/docker/client/ClientConfigBuilderForPlugin.java
-
-jenkins_script 'Extract Secret from Credentials' do
-  command <<-EOH.gsub(/^ {4}/, '')
-import com.cloudbees.plugins.credentials.Credentials; 
-import com.cloudbees.plugins.credentials.common.CertificateCredentials; 
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials; 
-import com.cloudbees.plugins.credentials.domains.DomainRequirement; 
-import hudson.security.ACL; 
-import jenkins.model.Jenkins; 
- 
-import javax.annotation.Nullable; 
-import java.net.URI; 
-import java.util.Collections; 
-import java.util.logging.Level; 
-import java.util.logging.Logger; 
- 
-import static com.cloudbees.plugins.credentials.CredentialsMatchers.firstOrNull; 
-import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId; 
-import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials; 
-import static org.apache.commons.lang.StringUtils.isNotBlank; 
-
-private static Credentials lookupSystemCredentials(String credentialsId) 
-   {
-   return firstOrNull (
-      lookupCredentials (
-         Credentials.class,
-         Jenkins.getInstance(),
-         ACL.SYSTEM,
-         Collections.<DomainRequirement>emptyList()
-         ),
-      withId(credentialsId)
-      );
-   }
-
-import hudson.model.*;
-
-creds = lookupSystemCredentials("b6da4a9d-31d6-48dd-98c2-064af651294f");
-sstring = creds.getSecret().toString();
-println "EXTRACTED SYSTEM CREDS:"
-println sstring;
-
-pv = new StringParameterValue("GIT_PASS", sstring);
-pa = new ParametersAction ([ pv ]);
-//Thread.currentThread().executable.addAction(pa);
-
-
-def kreds = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(
-      com.cloudbees.plugins.credentials.common.StandardUsernameCredentials.class,
-      Jenkins.instance,
-      null,
-      null
-  );
-
-println kreds.size;
-
-for (c in kreds) {
-       println(c.id + ":" + c.description + ":" )
-  };
-
-
-println "FOO:"
-
-def credentials_store = jenkins.model.Jenkins.instance.getExtensionList(
-        'com.cloudbees.plugins.credentials.SystemCredentialsProvider'
-        )
-
-println "credentials_store: ${credentials_store}"
-credentials_store.each {  println "credentials_store.each: ${it}" }
-
-credentials_store[0].credentials.each { it ->
-    println "credentials: -> ${it}"
-    if (it instanceof com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl) {
-        println "XXX: username: ${it.username} password: ${it.password} description: ${it.description}"
-    }
-}
-
-   EOH
-end
-
-=end
-
-
-
-
 # github plugin config
 template '/var/lib/jenkins/github-plugin-configuration.xml' do
    source 'github-plugin-configuration.xml'
    mode '0644'
 end
 
+# TODO: not sure we need this
 # Ivy configuration 
 template '/var/lib/jenkins/hudson.ivy.IvyBuildTrigger.xml' do
    source 'hudson.ivy.IvyBuildTrigger.xml'
@@ -253,9 +156,16 @@ template '/var/lib/jenkins/hudson.plugins.git.GitSCM.xml' do
    mode '0644'
 end
 
+# TODO not sure we need this
 # Mailer
 template '/var/lib/jenkins/hudson.tasks.Mailer.xml' do
    source 'hudson.tasks.Mailer.xml'
+   mode '0644'
+end
+
+# Extended E-mail
+template '/var/lib/jenkins/hudson.plugins.emailext.ExtendedEmailPublisher.xml' do
+   source 'hudson.plugins.emailext.ExtendedEmailPublisher.xml'
    mode '0644'
 end
 
@@ -277,18 +187,7 @@ template '/var/lib/jenkins/jenkins.model.ArtifactManagerConfiguration.xml' do
    mode '0644'
 end
 
-# Gobal Jenkins location config
-template '/var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml' do
-   source 'jenkins.model.JenkinsLocationConfiguration.xml'
-   mode '0644'
-end
-
-# Slave config
-template '/var/lib/jenkins/org.jenkinsci.plugins.slave_setup.SetupConfig.xml' do
-   source 'org.jenkinsci.plugins.slave_setup.SetupConfig.xml'
-   mode '0644'
-end
-
+# TODO: not sure we need this
 # (unknown)
 template '/var/lib/jenkins/org.jenkinsci.plugins.zapper.ZapRunner.xml' do
    source 'org.jenkinsci.plugins.zapper.ZapRunner.xml'
@@ -301,9 +200,11 @@ template '/var/lib/jenkins/org.jfrog.hudson.ArtifactoryBuilder.xml' do
    mode '0644'
 end
 
-# Extended E-mail
-template '/var/lib/jenkins/hudson.plugins.emailext.ExtendedEmailPublisher.xml' do
-   source 'hudson.plugins.emailext.ExtendedEmailPublisher.xml'
+
+# TODO Slaves in general need to be added and configured
+# Slave config
+template '/var/lib/jenkins/org.jenkinsci.plugins.slave_setup.SetupConfig.xml' do
+   source 'org.jenkinsci.plugins.slave_setup.SetupConfig.xml'
    mode '0644'
 end
 
@@ -312,11 +213,6 @@ template '/var/lib/jenkins/slave-status.xml' do
    source 'slave-status.xml'
    mode '0644'
 end
-
-
-##
-## Create api-dev job
-##
 
 # restart Jenkins to ensure all modules finish installing
 jenkins_command 'safe-restart'
@@ -327,12 +223,18 @@ execute 'Pause for Jenkins Bootup' do
    command "sleep 20"
 end
 
+
+##
+## Create api-dev job
+##
+
 # copy over the job definition file 
 template '/tmp/config.xml' do
    source 'jobconfig.xml'
    mode '0644'
 end
 
+# TODO: replace password and IP address with attributes
 # connect into Jenkins JVM to install job just as if we were doing it remotely
 if run_context.match(/docker|vbox/)
    execute "add_job" do
@@ -344,6 +246,15 @@ end
 # restart Jenkins to ensure all modules finish install
 jenkins_command 'safe-restart'
 
+# wait 20 seconds for jenkins to boot
+execute 'Pause for Jenkins Bootup' do
+   live_stream true
+   command "sleep 20"
+end
+
+##
+## FINISH GLOBAL CONFIGURATION
+##
 
 # global tools configuration
 jenkins_script 'Configure Global Tools' do
@@ -365,7 +276,8 @@ if (b.size == 0)
 
 // Set properties in Global Tools Locations entry for local JDK installation
 // (idempotent function)
-// JDK is not accessible as an extension, but has its own classes built-in
+// JDK is not accessible as an extension, but has its own support classes built-in to Jenkins
+
 hudson_functions = new hudson.Functions();
 jdk_descriptor = hudson_functions.getJDKDescriptor();
 jdk_installations = jdk_descriptor.getInstallations();
@@ -378,6 +290,10 @@ if (jdk_installations.size() == 0)
    }
    EOH
 end
+
+##
+## Enable OAUTH security, which will lock out further automatic configuration 
+## 
 
 
 jenkins_script 'Setup Oauth Authentication' do

@@ -14,4 +14,4 @@ depends 'maven', '~> 2.2.0'
 depends 'git', '~> 4.3'
 depends 'jenkins', '~> 2.5.0'
 depends 'mysql', '~> 7.0'
-#depends 'chef-sugar'
+
