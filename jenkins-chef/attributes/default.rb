@@ -14,6 +14,7 @@ default['passwords']['mysql'] = 'sesame'
 ## each row is :   [ shortname , version (or nil for latest), restart server after install T or F ]
 
 node.default.jenkins.module.list = [
+[ 'github-api', '1.76', true ],
    [ 'structs', '1.2', false ],
    [ 'git-client', nil, true ],
    [ 'bouncycastle-api', '1.648.3', false ],
@@ -42,7 +43,6 @@ node.default.jenkins.module.list = [
 [ 'git', '2.5.2', true ],
 [ 'git-server', '1.7', false ],
 [ 'github', '1.20.0', false ],
-[ 'github-api', '1.76', true ],
    [ 'github-oauth', nil, true ],
    [ 'versionnumber', nil, false ],
    [ 'credentials', nil, true ],

@@ -139,10 +139,10 @@ end
 
 # TODO: not sure we need this
 # Ivy configuration 
-template '/var/lib/jenkins/hudson.ivy.IvyBuildTrigger.xml' do
-   source 'hudson.ivy.IvyBuildTrigger.xml'
-   mode '0644'
-end
+#template '/var/lib/jenkins/hudson.ivy.IvyBuildTrigger.xml' do
+#   source 'hudson.ivy.IvyBuildTrigger.xml'
+#   mode '0644'
+#end
 
 # MavenModuleSet
 template '/var/lib/jenkins/hudson.maven.MavenModuleSet.xml' do 
@@ -189,10 +189,10 @@ end
 
 # TODO: not sure we need this
 # (unknown)
-template '/var/lib/jenkins/org.jenkinsci.plugins.zapper.ZapRunner.xml' do
-   source 'org.jenkinsci.plugins.zapper.ZapRunner.xml'
-   mode '0644'
-end
+#template '/var/lib/jenkins/org.jenkinsci.plugins.zapper.ZapRunner.xml' do
+#   source 'org.jenkinsci.plugins.zapper.ZapRunner.xml'
+#   mode '0644'
+#end
 
 # Artifacory Builder
 template '/var/lib/jenkins/org.jfrog.hudson.ArtifactoryBuilder.xml' do
