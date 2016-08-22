@@ -87,8 +87,8 @@ Once CentOS 7 is on, you will need to install the Chef Development Kit.
 rpm -e chefdk
 
 # obtain and install a new chef archive
-wget https://packages.chef.io/stable/el/7/chefdk-0.15.16-1.el7.x86_64.rpm
-rpm -ivh chefdk-0.15.16-1.el7.x86_64.rpm
+wget https://packages.chef.io/stable/el/7/chefdk-0.17.17-1.el7.x86_64.rpm
+rpm -ivh chefdk-0.17.17-1.el7.x86_64.rpm
 
 # run this, but also add it afterwards to .bash-profile for proper future build environment settings
 eval "$(chef shell-init bash)"
@@ -97,6 +97,13 @@ eval "$(chef shell-init bash)"
 which ruby
 /opt/chefdk/embedded/bin/ruby --version
 chef-client --version
+~~~
+
+Install development tools group (required for Bundler to run in newer
+installations)
+
+~~~
+sudo yum group install "Development Tools" 
 ~~~
 
 Next, run Ruby Bundler. 
