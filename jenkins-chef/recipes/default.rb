@@ -103,7 +103,8 @@ end
 # reads each row of an attribute array and just does the "jenkins_plugin" command with optional 
 # version specification and trigger restart commands (both specified in the input row)
 
-installers = node.default.jenkins.module.list
+
+installers = node.jenkins['module']['list']
 
 installers.each do |installer|
    nam, ver, trigger_restart = installer
