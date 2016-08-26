@@ -1,6 +1,8 @@
 import boto.ec2
 import boto.ec2.elb
 import boto.sns
+import json
+import httplib
 import smtplib
 import time as timer
 from time import time
@@ -8,86 +10,116 @@ from time import time
 aws_key = 'REPLACE_ME'
 aws_secret = 'REPLACE_ME'
 
-tc1_priority1 = { "i-b3cdd8d8" : "test-cluster-1-nas-01",
-"i-c8726bab" : "test-cluster-1-nas-02",
-"i-2cd7987f" :	"test-cluster-1-nasEnctest-03",
-"i-c80ddbe3" :  "test-cluster-1-nasEnctest-04",
-"i-45308425" : "test-cluster-1-jump",
-"i-35c4ae58" : "test-cluster-1-nat-01",
-"i-26a8db45" : "test-cluster-1-nat-02",
-"i-f6e65e93" : "test-cluster-1-chef",
-"i-b0fc1ad3" : "test-cluster-1-db1"}
+tc1_priority1 = { 
+    "i-b3cdd8d8" : "test-cluster-1-nas-01",
+    "i-c8726bab" : "test-cluster-1-nas-02",
+    "i-2cd7987f" : "test-cluster-1-nasEnctest-03",
+    "i-c80ddbe3" : "test-cluster-1-nasEnctest-04",
+    "i-45308425" : "test-cluster-1-jump",
+    "i-35c4ae58" : "test-cluster-1-nat-01",
+    "i-26a8db45" : "test-cluster-1-nat-02",
+    "i-f6e65e93" : "test-cluster-1-chef",
+    "i-b0fc1ad3" : "test-cluster-1-db1"
+}
 
-tc1_priority2 = { "i-f12f9c91" : "test-cluster-1-smtp",
-"i-984155b9" : "test-cluster-1-sendng",
-"i-7e4ff712" : "test-cluster-1-web-01",
-"i-6d889b0d" : "test-cluster-1-web-02",
-"i-c74e5277" : "test-cluster-1-lb-web-01",
-"i-9e542628" : "test-cluster-1-lb-web-02",
-"i-fe5b3a92" : "test-cluster-1-facts",
-"i-fafd1b99" : "test-cluster-1-send",
-"i-b92f9cd9" : "test-cluster-1-sendcb-01",
-"i-8a756ce9" : "test-cluster-1-sendcb-02",
-"i-c0391e73" : "test-cluster-1-sendcb-processor-01",
-"i-3fdcd154" : "test-cluster-1-logs",
-"i-868ecb36" : "test-cluster-1-payments-01",
-"i-7afd1b19" : "test-cluster-1-pmsup",
-"i-365b3a5a" : "test-cluster-1-imageup",
-"i-4a5d3c26" : "test-cluster-1-memcache-01",
-"i-0f8e9d6f" : "test-cluster-1-memcache-02",
-"i-b70da7dd" : "test-cluster-1-charts",
-"i-898eb064" : "test-cluster-1-stats-01",
-"i-cc5d3ca0" : "test-cluster-1-status",
-"i-c7cdd8ac" : "test-cluster-1-migration",
-"i-17cdd87c" : "test-cluster-1-etl" }
+tc1_priority2 = { 
+    "i-f12f9c91" : "test-cluster-1-smtp",
+    "i-984155b9" : "test-cluster-1-sendng",
+    "i-7e4ff712" : "test-cluster-1-web-01",
+    "i-6d889b0d" : "test-cluster-1-web-02",
+    "i-c74e5277" : "test-cluster-1-lb-web-01",
+    "i-9e542628" : "test-cluster-1-lb-web-02",
+    "i-fe5b3a92" : "test-cluster-1-facts",
+    "i-fafd1b99" : "test-cluster-1-send",
+    "i-b92f9cd9" : "test-cluster-1-sendcb-01",
+    "i-8a756ce9" : "test-cluster-1-sendcb-02",
+    "i-c0391e73" : "test-cluster-1-sendcb-processor-01",
+    "i-3fdcd154" : "test-cluster-1-logs",
+    "i-868ecb36" : "test-cluster-1-payments-01",
+    "i-7afd1b19" : "test-cluster-1-pmsup",
+    "i-365b3a5a" : "test-cluster-1-imageup",
+    "i-4a5d3c26" : "test-cluster-1-memcache-01",
+    "i-0f8e9d6f" : "test-cluster-1-memcache-02",
+    "i-b70da7dd" : "test-cluster-1-charts",
+    "i-898eb064" : "test-cluster-1-stats-01",
+    "i-cc5d3ca0" : "test-cluster-1-status",
+    "i-c7cdd8ac" : "test-cluster-1-migration",
+    "i-17cdd87c" : "test-cluster-1-etl",
+    "i-510898cb" : "test-cluster-1-sapi1" 
+}
 
-tc2_priority1 = {"i-6b40f087" : "test-cluster-2-nas-01",
-"i-e583ad0f" : "test-cluster-2-nas-02",
-"i-822943e7" : "test-cluster-2-nat-01",
-"i-43ffb421" : "test-cluster-2-nat-02",
-"i-d82aedb4" : "test-cluster-2-db1",
-"i-c03de3ab" : "test-cluster-2-jump",
-"i-38d4c85b" : "test-cluster-2-chef"}
+tc1_sapi_min_priority1 = { 
+    "i-45308425" : "test-cluster-1-jump",
+    "i-b0fc1ad3" : "test-cluster-1-db1"
+}
 
-tc2_priority2 = {"i-c79375aa" : "test-cluster-2-janitor",
-"i-39833f5b" : "test-cluster-2-charts",
-"i-e461e685" : "test-cluster-2-etl",
-"i-1661e677" : "test-cluster-2-facts",
-"i-af0bf9c2" : "test-cluster-2-sendcb-01",
-"i-490b2cfa" : "test-cluster-2-sendcb-processor-01",
-"i-59a99131" : "test-cluster-2-logs",
-"i-1c697975" : "test-cluster-2-web-02",
-"i-8a8fb167" : "test-cluster-2-stats-01",
-"i-223de349" : "test-cluster-2-web-01",
-"i-50b2ad3c" : "test-cluster-2-memcache-02",
-"i-7260e713" : "test-cluster-2-memcache-01",
-"i-d13f66be" : "test-cluster-2-sendcb-02",
-"i-a7b78fcf" : "test-cluster-2-send",
-"i-690bf904" : "test-cluster-2-status",
-"i-4bb68e23" : "test-cluster-2-migration",
-"i-7d9ea607" : "test-cluster-2-sendng",
-"i-1b823e79" : "test-cluster-2-smtp",
-"i-35b68e5d" : "test-cluster-2-imageup",
-"i-928acf22" : "test-cluster-2-payments-01",
-"i-5a6dea3b" : "test-cluster-2-pmsup"}
+tc1_sapi_min_priority2 = { 
+    "i-510898cb" : "test-cluster-1-sapi1" 
+}
 
-tc1_elbs = { "test-clus-ElasticL-1IBE4F4X6W9XI": "i-7afd1b19",
-"test-clus-ElasticL-1U7DQ9RODD396": "i-6d889b0d,i-7e4ff712",
-"test-clus-ElasticL-RA6HTRYY9ZF3": "i-6d889b0d,i-7e4ff712",
-"test-clus-ElasticL-1E2UGD1BP2C97": "i-6d889b0d,i-7e4ff712",
-"test-clus-ElasticL-BHLKAB8EHRSZ": "i-7afd1b19",
-"test-clus-ElasticL-1MBRV1I03PHDO": "i-8a756ce9,i-b92f9cd9",
-"test-clus-ElasticL-13FZ3WKQF4EB9": "i-365b3a5a",
-"test-clus-ElasticL-1EYBGWGPJPUSG": "i-365b3a5a" }
 
-tc2_elbs = { "test-clus-ElasticL-1HBKGRLPGMNOG": "i-5a6dea3b",
-"test-clus-ElasticL-1NQYD52SKC5CG": "i-1c697975,i-223de349",
-"test-clus-ElasticL-1R0GSN9T4TYE9": "i-1c697975,i-223de349",
-"test-clus-ElasticL-1VC7NM94RRPXC": "i-5a6dea3b",
-"test-clus-ElasticL-1WXBSUU7OZYD0": "i-1c697975,i-223de349",
-"test-clus-ElasticL-1XLEAMD4UO6BY": "i-35b68e5d",
-"test-clus-ElasticL-8ZCJHCSL9KXZ": "i-35b68e5d",
-"test-clus-ElasticL-9KTXUHX6QKZY": "i-af0bf9c2,i-d13f66be" }
+tc2_priority1 = {
+    "i-6b40f087" : "test-cluster-2-nas-01",
+    "i-e583ad0f" : "test-cluster-2-nas-02",
+    "i-822943e7" : "test-cluster-2-nat-01",
+    "i-43ffb421" : "test-cluster-2-nat-02",
+    "i-d82aedb4" : "test-cluster-2-db1",
+    "i-c03de3ab" : "test-cluster-2-jump",
+    "i-38d4c85b" : "test-cluster-2-chef"
+}
+
+tc2_priority2 = {
+    "i-c79375aa" : "test-cluster-2-janitor",
+    "i-39833f5b" : "test-cluster-2-charts",
+    "i-e461e685" : "test-cluster-2-etl",
+    "i-1661e677" : "test-cluster-2-facts",
+    "i-af0bf9c2" : "test-cluster-2-sendcb-01",
+    "i-490b2cfa" : "test-cluster-2-sendcb-processor-01",
+    "i-59a99131" : "test-cluster-2-logs",
+    "i-1c697975" : "test-cluster-2-web-02",
+    "i-8a8fb167" : "test-cluster-2-stats-01",
+    "i-223de349" : "test-cluster-2-web-01",
+    "i-50b2ad3c" : "test-cluster-2-memcache-02",
+    "i-7260e713" : "test-cluster-2-memcache-01",
+    "i-d13f66be" : "test-cluster-2-sendcb-02",
+    "i-a7b78fcf" : "test-cluster-2-send",
+    "i-690bf904" : "test-cluster-2-status",
+    "i-4bb68e23" : "test-cluster-2-migration",
+    "i-7d9ea607" : "test-cluster-2-sendng",
+    "i-1b823e79" : "test-cluster-2-smtp",
+    "i-35b68e5d" : "test-cluster-2-imageup",
+    "i-928acf22" : "test-cluster-2-payments-01",
+    "i-5a6dea3b" : "test-cluster-2-pmsup"
+}
+
+tc1_elbs = { 
+    "test-clus-ElasticL-1IBE4F4X6W9XI": "i-7afd1b19",
+    "test-clus-ElasticL-1U7DQ9RODD396": "i-6d889b0d,i-7e4ff712",
+    "test-clus-ElasticL-RA6HTRYY9ZF3": "i-6d889b0d,i-7e4ff712",
+    "test-clus-ElasticL-1E2UGD1BP2C97": "i-6d889b0d,i-7e4ff712",
+    "test-clus-ElasticL-BHLKAB8EHRSZ": "i-7afd1b19",
+    "test-clus-ElasticL-1MBRV1I03PHDO": "i-8a756ce9,i-b92f9cd9",
+    "test-clus-ElasticL-13FZ3WKQF4EB9": "i-365b3a5a",
+    "test-clus-ElasticL-1EYBGWGPJPUSG": "i-365b3a5a",
+    "test-clus-sapi1": "i-510898cb" 
+}
+
+tc2_elbs = { 
+    "test-clus-ElasticL-1HBKGRLPGMNOG": "i-5a6dea3b",
+    "test-clus-ElasticL-1NQYD52SKC5CG": "i-1c697975,i-223de349",
+    "test-clus-ElasticL-1R0GSN9T4TYE9": "i-1c697975,i-223de349",
+    "test-clus-ElasticL-1VC7NM94RRPXC": "i-5a6dea3b",
+    "test-clus-ElasticL-1WXBSUU7OZYD0": "i-1c697975,i-223de349",
+    "test-clus-ElasticL-1XLEAMD4UO6BY": "i-35b68e5d",
+    "test-clus-ElasticL-8ZCJHCSL9KXZ": "i-35b68e5d",
+    "test-clus-ElasticL-9KTXUHX6QKZY": "i-af0bf9c2,i-d13f66be" 
+}
+
+
+tc1_sapi_min_elbs = { 
+    "test-clus-sapi1": "i-510898cb"
+}
+
 
 ec2_conn = boto.ec2.connect_to_region("us-east-1",
                         aws_access_key_id=aws_key,
@@ -103,6 +135,7 @@ sns_conn = boto.sns.connect_to_region('us-east-1',
 
 # arn:aws:sns:us-east-1:207752054332:test-cluster-status-TEST for testing
 sns_topic = "arn:aws:sns:us-east-1:207752054332:test-cluster-status"
+glip_webhook_url = "https://hooks.glip.com/webhook/8b127fc0-b7a5-4b39-b381-c4500e3aada8"
 
 def getStatus(instance_list):
     for instanceId in instance_list:
@@ -184,9 +217,26 @@ def stopInstances(instance_list):
 
     return message
 
+def send_notifications(message, subject):
+    send_mail(message, subject)
+    send_glip_message(subject)
+
 def send_mail(message, subject):
     sns_conn.publish(topic=sns_topic, message=message, subject=subject)
-    
+
+def send_glip_message(message):
+    headers = {"Content-type": "application/json"}
+    postbody = {
+        "activity":"Test Cluster Status Update", 
+        "body": message
+    }
+    con = httplib.HTTPSConnection("hooks.glip.com")
+    con.request("POST", "/webhook/8b127fc0-b7a5-4b39-b381-c4500e3aada8", json.dumps(postbody), headers)
+    response = con.getresponse()
+    if response.status != 200:
+        responseText = response.read()
+        print "\nWARNING: Posting to glip webhook failed. Http Status: " + str(response.status) + " Response text: " + responseText + "\n\n"
+
     
 def start_tc1():
 
@@ -210,7 +260,7 @@ def start_tc1():
     elapsed = time() - start
     message += "\n\n Took " + str(elapsed) + " ms to start all instances and reset load balancers"
     
-    send_mail(message, "Test Cluster 1 Started")
+    send_notifications(message, "Test Cluster 1 Started")
 
 def start_tc2():
 
@@ -234,7 +284,32 @@ def start_tc2():
     elapsed = time() - start
     message += "\n\n Took " + str(elapsed) + " ms to start all instances and reset load balancers"
     
-    send_mail(message, "Test Cluster 2 Started")
+    send_notifications(message, "Test Cluster 2 Started")
+
+def start_tc1_sapi_min():
+
+    print "\n\n *** Starting Minimal Sesame API Priority 1 Instances in TC1 *** "
+    message = "\n\n *** Starting Minimal Sesame API Priority 1 Instances in TC1 *** "
+
+    start = time()
+    message += startInstances(tc1_sapi_min_priority1)
+
+    print "\n\n *** Starting Minimal Sesame API Priority 2 Instances in TC1 *** "
+    message += "\n\n *** Starting Minimal Sesame API Priority 2 Instances in TC1 *** "
+    message += startInstances(tc1_sapi_min_priority2)
+
+    print "\n\n *** Resetting Elastic Load Balancers for TC1 Minimal Sesame API ****"
+    message += "\n\n *** Resetting Elastic Load Balancers for TC1 Minimal Sesame API ****"
+    message += resetELBs(tc1_sapi_min_elbs)
+
+    print "TC1 Minimal Sesame API Started."
+    message +=  "TC1 Minimal Sesame API Started."
+
+    elapsed = time() - start
+    message += "\n\n Took " + str(elapsed) + " ms to start all instances and reset load balancers"
+    
+    send_notifications(message, "Test Cluster 1 Sesame API Minimal - Started")
+
 
 def stop_tc1():
     message = "Stopping TC1"
@@ -245,7 +320,7 @@ def stop_tc1():
     elapsed = time() - start
 
     message += "\n\n Took " + str(elapsed) + " ms to initiate stop for all instances."
-    send_mail(message, "Test Cluster 1 Stopped")
+    send_notifications(message, "Test Cluster 1 Stopped")
 
 def stop_tc2():
     message = "Stopping TC2"
@@ -256,4 +331,4 @@ def stop_tc2():
     elapsed = time() - start
     message += "\n\n Took " + str(elapsed) + " ms to initiate stop for all instances."
     
-    send_mail(message, "Test Cluster 2 Stopped")
+    send_notifications(message, "Test Cluster 2 Stopped")
