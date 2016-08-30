@@ -50,6 +50,8 @@ tc1_priority2 = {
 
 tc1_sapi_min_priority1 = { 
     "i-45308425" : "test-cluster-1-jump",
+    "i-35c4ae58" : "test-cluster-1-nat-01",
+    "i-26a8db45" : "test-cluster-1-nat-02",
     "i-b0fc1ad3" : "test-cluster-1-db1"
 }
 
