@@ -102,7 +102,7 @@ tc1_elbs = {
     "test-clus-ElasticL-BHLKAB8EHRSZ": "i-7afd1b19",
     "test-clus-ElasticL-1MBRV1I03PHDO": "i-8a756ce9,i-b92f9cd9",
     "test-clus-ElasticL-13FZ3WKQF4EB9": "i-365b3a5a",
-    "test-clus-ElasticL-1EYBGWGPJPUSG": "i-365b3a5a",
+    "test-clus-ElasticL-imguprep": "i-365b3a5a",
     "test-clus-sapi1": "i-510898cb" 
 }
 
