@@ -27,8 +27,6 @@ tc1_priority2 = {
     "i-984155b9" : "test-cluster-1-sendng",
     "i-7e4ff712" : "test-cluster-1-web-01",
     "i-6d889b0d" : "test-cluster-1-web-02",
-    "i-c74e5277" : "test-cluster-1-lb-web-01",
-    "i-9e542628" : "test-cluster-1-lb-web-02",
     "i-fe5b3a92" : "test-cluster-1-facts",
     "i-fafd1b99" : "test-cluster-1-send",
     "i-b92f9cd9" : "test-cluster-1-sendcb-01",
