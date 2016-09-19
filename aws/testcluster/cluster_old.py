@@ -7,6 +7,11 @@ import smtplib
 import time as timer
 from time import time
 
+#
+# UPDATE THIS VARIABLE WHEN MODIFYING THE SCRIPT
+#
+script_version = '2016-09-19'
+
 aws_key = 'REPLACE_ME'
 aws_secret = 'REPLACE_ME'
 
@@ -222,12 +227,13 @@ def send_notifications(message, subject):
     send_glip_message(subject)
 
 def send_mail(message, subject):
+    message += "\n\n Script Version: " + script_version    
     sns_conn.publish(topic=sns_topic, message=message, subject=subject)
 
 def send_glip_message(message):
     headers = {"Content-type": "application/json"}
     postbody = {
-        "activity":"Test Cluster Status Update", 
+        "activity":"Test Cluster Status Update [Ver: " + script_version + "]", 
         "body": message
     }
     con = httplib.HTTPSConnection("hooks.glip.com")
