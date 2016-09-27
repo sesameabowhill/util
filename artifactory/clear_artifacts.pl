@@ -82,7 +82,7 @@ sub group_by_verion {
 sub search {
     my ($logger, $repository, $group_id, $version) = @_;
 
-    my $result = api_call("http://artifactory.sesamecom.com/artifactory/api/search/gavc?g=".$group_id."&repos=".$repository.(defined $version ? "&v=". $version : ""));
+    my $result = api_call("http://artifacts.sesamecom.com/api/search/gavc?g=".$group_id."&repos=".$repository.(defined $version ? "&v=". $version : ""));
 
     $result //= { 'results' => [] };
     $result = [ map {$_->{'uri'}} @{ $result->{'results'} } ];
@@ -145,7 +145,7 @@ sub api_call {
 sub get_user_agent {
 
 	my $ua = LWP::UserAgent->new();
-	$ua->default_header("Authorization", "Basic ZGVwbG95OmQzcGwweQ==");
+	$ua->default_header("X-JFrog-Art-Api", "AKCp2V6Tbm7V7qAmDQyWxNSmyFeWc5HdAfWPN8n99gkPp6YVwCuxRnYsKUCLrtxiSBunXoNJ4");
 	$ua->timeout(300);
 	return $ua;
 }
