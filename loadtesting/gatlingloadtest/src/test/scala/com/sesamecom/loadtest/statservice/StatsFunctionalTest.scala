@@ -96,6 +96,21 @@ class StatsFunctionalTest extends Simulation {
           "&toDate=2016-10-01" +
           "&topN=5"))
 
+    // Util
+    .exec(
+      http("util-update-member")
+        .get("/util/updateMemberStats?userName=" + memberUsername))
+    .exec(
+      http("util-extract-for-member")
+        .get("/util/extractSamuraiMemberStats" +
+          "?userName=" + memberUsername +
+          "&year=2016" +
+          "&month=09"))
+    .exec(
+      http("util-extract-all-members")
+        .get("/util/extractSamuraiStats" +
+          "?year=2016" +
+          "&month=09"))
 
   setUp(scn.inject(atOnceUsers(1)).protocols(httpProtocol))
 }
