@@ -1,8 +1,6 @@
 import io.gatling.app.Gatling
 import io.gatling.core.config.GatlingPropertiesBuilder
 
-
-// Provided by the gatling maven archetype. Used to run gatling from the IDE.
 object Engine extends App {
 
 	val props = new GatlingPropertiesBuilder

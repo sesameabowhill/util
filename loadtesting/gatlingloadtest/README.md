@@ -15,17 +15,35 @@ Tests are placed in the `com.sesamecom.loadtest` package.
 
 ## Running Tests from the Command Line
 
-#### Example:
+### Send-CB-Listener Tests:
+#### Functional Smoke Screen Test
 ```
-mvn gatling:execute  -Dgatling.simulationClass=com.sesamecom.loadtest.sendcallbacklistener.ListenerFunctionalTest -DtargetBaseUrl=http://localhost:9997
+mvn gatling:test
+    -Dgatling.simulationClass=com.sesamecom.loadtest.sendcallbacklistener.ListenerFunctionalTest
+    -DtargetBaseUrl=http://localhost:9997
+```
+#### Load Test
+```
+mvn gatling:test
+    -Dgatling.simulationClass=com.sesamecom.loadtest.sendcallbacklistener.ListenerStressTest
+    -DtargetBaseUrl=http://localhost:9997
 ```
 #### Command Line Parameters
 
 Parameter | Description
 ----------|------------
-gatling:execute | maven goal which invokes Gatling to run a test
+gatling:test | maven goal which invokes Gatling to run a test
 gatling.simulationClass | Class name of the test to run. This is required when multiple tests are found.
 targetBaseUrl | Sesame specific property which sets the target base URL for the test.
+
+
+### Stats Service Functional Smokescreen Test:
+```
+mvn gatling:test 
+    -Dgatling.simulationClass=com.sesamecom.loadtest.statservice.StatsFunctionalTest 
+    -DstatsUrl=http://localhost:9998
+```
+
 
 
 ## Working on systems with both Java 6 and 8
@@ -49,4 +67,4 @@ OS name: "windows 7", version: "6.1", arch: "amd64", family: "dos"
 
 ## References
 * Gatling Framework: http://gatling.io
-* Gatling Maven Plugin: http://gatling.io/docs/2.0.3/extensions/maven_archetype.html
+* Gatling Maven Plugin: http://gatling.io/docs/2.2.2/extensions/maven_archetype.html
