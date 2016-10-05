@@ -10,7 +10,7 @@ from time import time
 #
 # UPDATE THIS VARIABLE WHEN MODIFYING THE SCRIPT
 #
-script_version = '2016-09-19'
+script_version = '2016-10-05'
 
 aws_key = 'REPLACE_ME'
 aws_secret = 'REPLACE_ME'
@@ -48,7 +48,7 @@ tc1_priority2 = {
     "i-cc5d3ca0" : "test-cluster-1-status",
     "i-c7cdd8ac" : "test-cluster-1-migration",
     "i-17cdd87c" : "test-cluster-1-etl",
-    "i-510898cb" : "test-cluster-1-sapi1" 
+    "i-ca680353" : "test-cluster-1-sapi2" 
 }
 
 tc1_sapi_min_priority1 = { 
