@@ -10,7 +10,7 @@ from time import time
 #
 # UPDATE THIS VARIABLE WHEN MODIFYING THE SCRIPT
 #
-script_version = '2016-10-05'
+script_version = '2016-10-13'
 
 aws_key = 'REPLACE_ME'
 aws_secret = 'REPLACE_ME'
@@ -59,7 +59,7 @@ tc1_sapi_min_priority1 = {
 }
 
 tc1_sapi_min_priority2 = { 
-    "i-510898cb" : "test-cluster-1-sapi1" 
+    "i-ca680353" : "test-cluster-1-sapi2" 
 }
 
 
@@ -106,7 +106,7 @@ tc1_elbs = {
     "test-clus-ElasticL-1MBRV1I03PHDO": "i-8a756ce9,i-b92f9cd9",
     "test-clus-ElasticL-13FZ3WKQF4EB9": "i-365b3a5a",
     "test-clus-ElasticL-imguprep": "i-365b3a5a",
-    "test-clus-sapi1": "i-510898cb" 
+    "test-clus-sapi1": "i-ca680353" 
 }
 
 tc2_elbs = { 
@@ -122,7 +122,7 @@ tc2_elbs = {
 
 
 tc1_sapi_min_elbs = { 
-    "test-clus-sapi1": "i-510898cb"
+    "test-clus-sapi1": "i-ca680353"
 }
 
 
