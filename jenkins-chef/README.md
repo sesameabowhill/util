@@ -46,7 +46,8 @@ Other software you choose to install won't matter.
 
 Once your CentOS-7 host is prepared on a fresh physical machine or fresh VirtualBox machine, update your packages: 
 ~~~
-sudo yum update
+sudo yum makecache fast
+sudo yum -y update
 ~~~
 
 It may also be worthwhile to open a firewall:
@@ -87,8 +88,8 @@ Once CentOS 7 is on, you will need to install the Chef Development Kit.
 rpm -e chefdk
 
 # obtain and install a new chef archive
-wget https://packages.chef.io/stable/el/7/chefdk-0.17.17-1.el7.x86_64.rpm
-rpm -ivh chefdk-0.17.17-1.el7.x86_64.rpm
+wget https://packages.chef.io/stable/el/6/chefdk-0.19.6-1.el6.x86_64.rpm
+rpm -ivh chefdk-0.19.6-1.el6.x86_64.rpm
 
 # run this, but also add it afterwards to .bash-profile for proper future build environment settings
 eval "$(chef shell-init bash)"
@@ -103,7 +104,8 @@ Install development tools group (required for Bundler to run in newer
 installations)
 
 ~~~
-sudo yum group install "Development Tools" 
+sudo yum grouplist
+sudo yum groupinstall "Development Tools" 
 ~~~
 
 Next, run Ruby Bundler. 
@@ -122,7 +124,7 @@ The next step is to install Docker.
 
 Verify requisite dependencies are installed:
 ~~~
-ls -l /sys/class/misc/device-mapper  (should show files. If not, install this: )
+ls -l /sys/class/misc/device-mapper # should show files. If not, install this
 sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
 ~~~
 
