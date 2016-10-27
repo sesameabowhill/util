@@ -240,7 +240,10 @@ end
 if run_context.match(/docker|vbox/)
    execute "add_job" do
       live_stream true
-      command 'curl -X POST -H "Content-Type:application/xml" -d @/tmp/config.xml sesameabowhill:7e26fb3e9cd207a5ccc85f399f8502167e6c762d@172.17.0.2:8080/createItem?name=sesame-api'
+      command 'curl -X POST -H "Content-Type:application/xml" -d @/tmp/config.xml sesameabowhill:7e26fb3e9cd207a5ccc85f399f8502167e6c762d' +
+         node['passwords']['jenkins'] + '@' +
+         node.jenkins['master']['ipaddress']  + ':' + node.jenkins['master']['port'] +
+         '/createItem?name=sesame-api'
    end
 end
 
@@ -304,6 +307,8 @@ import org.jenkinsci.plugins.GithubSecurityRealm
 import jenkins.model.Jenkins
 String githubWebUri = 'https://github.com'
 String githubApiUri = 'https://api.github.com'
+// String clientID = #{node['passwords']['oauth']['clientid']}
+// String clientSecret = #{node['passwords']['oauth']['clientsecret']}
 String clientID = '84389e1a195eee676128'
 String clientSecret = '4773bd184883cec9b4bd2bf7074d427758054fb4'
 String oauthScopes = 'read:org'
@@ -326,6 +331,7 @@ import jenkins.model.Jenkins
 
 //permissions are ordered similar to web UI
 //Admin User Names
+// String adminUserNames = #{node.jenkins['master']['admin_user_names']}
 String adminUserNames = 'sesameabowhill, thunter, astighall'
 //Participant in Organization
 String organizationNames = 'sesacom*Development'

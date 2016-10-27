@@ -152,4 +152,3 @@ The installation and configuration takes about 10-30 minutes, you should be able
 - You can dispose of the whole installation by issuing a ```kitchen destroy```. 
 - You can login to the virtual machine running Jenkins using ```kitchen login``` or ssh as kitchen to the machine address with the password ```kitchen```.
 - You can test the installation by building the inluded mock job of the sesame-api project. Click 'sesame-api' then 'build now'. This is a special demo/test branch.
-
