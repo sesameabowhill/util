@@ -26,7 +26,7 @@ GetOptions(
 	'group-id=s' => \$group_id,
 );
 
-$repository //= 'libs-release-local';
+$repository //= 'libs-snapshot-local';
 $group_id //= 'com.sesamecom';
 
 my @versions = @ARGV;
