@@ -82,7 +82,7 @@ sub group_by_verion {
 sub search {
     my ($logger, $repository, $group_id, $version) = @_;
 
-    my $result = api_call("http://artifacts.sesamecom.com/api/search/gavc?g=".$group_id."&repos=".$repository.(defined $version ? "&v=". $version : ""));
+    my $result = api_call("https://artifacts.sesamecom.com/api/search/gavc?g=".$group_id."&repos=".$repository.(defined $version ? "&v=". $version : ""));
 
     $result //= { 'results' => [] };
     $result = [ map {$_->{'uri'}} @{ $result->{'results'} } ];
