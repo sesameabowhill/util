@@ -10,7 +10,7 @@ from time import time
 #
 # UPDATE THIS VARIABLE WHEN MODIFYING THE SCRIPT
 #
-script_version = '2016-10-13'
+script_version = '2017-01-19'
 
 aws_key = 'REPLACE_ME'
 aws_secret = 'REPLACE_ME'
