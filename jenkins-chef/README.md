@@ -5,6 +5,8 @@ An up-to-date Chef workstation is required to run it.
 INSTALLATION
 ============
 
+Kill off any other docker instances running. 
+
 From the top directory of this project, run:
 ~~~
 bundle install

@@ -75,7 +75,7 @@ include_recipe 'maven'
 include_recipe 'jenkins::master'
 
 # wait 20 seconds for jenkins to boot
-execute 'Pause for Jenkins Bootup' do
+execute 'Pause for Jenkins Bootup #1' do
    live_stream true
    command "sleep 20"
 end
@@ -123,7 +123,7 @@ end
 # version specification and trigger restart commands (both specified in the input row)
 
 
-installers = node.jenkins['module']['list']
+installers = node["jenkins"]["module"]["list"]
 
 installers.each do |installer|
    nam, ver, trigger_restart = installer
@@ -148,8 +148,9 @@ template '/var/lib/jenkins/credentials.xml' do
    mode '0644'
 end
 
+# TODO: maybe can do without this. 
 # restart Jenkins to ensure all modules finish install
-jenkins_command 'safe-restart'
+#jenkins_command 'safe-restart'
 
 # github plugin config
 template '/var/lib/jenkins/github-plugin-configuration.xml' do
@@ -234,15 +235,16 @@ template '/var/lib/jenkins/slave-status.xml' do
    mode '0644'
 end
 
+=begin
 # restart Jenkins to ensure all modules finish installing
 jenkins_command 'safe-restart'
 
 # wait 20 seconds for jenkins to boot
-execute 'Pause for Jenkins Bootup' do
+execute 'Pause for Jenkins Bootup #2' do
    live_stream true
    command "sleep 20"
 end
-
+=end
 
 ##
 ## Create api-dev job
@@ -272,7 +274,7 @@ end
 jenkins_command 'safe-restart'
 
 # wait 20 seconds for jenkins to boot
-execute 'Pause for Jenkins Bootup' do
+execute 'Pause for Jenkins Bootup #3' do
    live_stream true
    command "sleep 20"
 end
@@ -352,7 +354,7 @@ import jenkins.model.Jenkins
 
 //permissions are ordered similar to web UI
 //Admin User Names
-// String adminUserNames = #{node.jenkins['master']['admin_user_names']}
+// String adminUserNames = #{node["jenkins"]["master"]["admin_user_names"]}
 String adminUserNames = 'sesameabowhill, thunter, astighall'
 //Participant in Organization
 String organizationNames = 'sesacom*Development'
