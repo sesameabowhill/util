@@ -7,6 +7,24 @@
 run_context = node['virtualization']['system']
 puts "Run context is: [#{run_context}]"
 
+# Add Jenkins repo in 3 steps (1/3)
+execute 'Add Jenkins Repo' do
+   live_stream true
+   command 'yum install -y wget'
+end
+
+# (2/3)
+execute 'Add Jenkins Repo2' do
+   live_stream true
+   command 'wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat/jenkins.repo'
+end
+
+# (3/3)
+execute 'Add Jenkins Repo3' do
+   live_stream true
+   command 'rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key'
+end
+
 # update OS
 if run_context.match(/docker|vbox/)
    execute "update_os" do
@@ -14,6 +32,7 @@ if run_context.match(/docker|vbox/)
       command "yum -y update"
    end
 end
+
 
 # install MySQL
 mysql_service 'local' do
@@ -235,6 +254,7 @@ template '/tmp/config.xml' do
    mode '0644'
 end
 
+=begin
 # TODO: replace password and IP address with attributes
 # connect into Jenkins JVM to install job just as if we were doing it remotely
 if run_context.match(/docker|vbox/)
@@ -246,6 +266,7 @@ if run_context.match(/docker|vbox/)
          '/createItem?name=sesame-api'
    end
 end
+=end
 
 # restart Jenkins to ensure all modules finish install
 jenkins_command 'safe-restart'
