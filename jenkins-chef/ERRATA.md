@@ -107,3 +107,5 @@ sudo systemctl start mariadb
 sudo systemctl enable mariadb
 sudo mysql_secure_installation
 ~~~
+
+ERRATA modified
