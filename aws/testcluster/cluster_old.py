@@ -10,12 +10,12 @@ from time import time
 #
 # UPDATE THIS VARIABLE WHEN MODIFYING THE SCRIPT
 #
-script_version = '2017-01-19'
+script_version = '2017-05-16'
 
 aws_key = 'REPLACE_ME'
 aws_secret = 'REPLACE_ME'
 
-tc1_priority1 = { 
+tc1_priority1 = {
     "i-b3cdd8d8" : "test-cluster-1-nas-01",
     "i-c8726bab" : "test-cluster-1-nas-02",
     "i-2cd7987f" : "test-cluster-1-nasEnctest-03",
@@ -27,7 +27,7 @@ tc1_priority1 = {
     "i-b0fc1ad3" : "test-cluster-1-db1"
 }
 
-tc1_priority2 = { 
+tc1_priority2 = {
     "i-f12f9c91" : "test-cluster-1-smtp",
     "i-984155b9" : "test-cluster-1-sendng",
     "i-7e4ff712" : "test-cluster-1-web-01",
@@ -44,22 +44,21 @@ tc1_priority2 = {
     "i-4a5d3c26" : "test-cluster-1-memcache-01",
     "i-0f8e9d6f" : "test-cluster-1-memcache-02",
     "i-b70da7dd" : "test-cluster-1-charts",
-    "i-898eb064" : "test-cluster-1-stats-01",
     "i-cc5d3ca0" : "test-cluster-1-status",
     "i-c7cdd8ac" : "test-cluster-1-migration",
     "i-17cdd87c" : "test-cluster-1-etl",
-    "i-ca680353" : "test-cluster-1-sapi2" 
+    "i-ca680353" : "test-cluster-1-sapi2"
 }
 
-tc1_sapi_min_priority1 = { 
+tc1_sapi_min_priority1 = {
     "i-45308425" : "test-cluster-1-jump",
     "i-35c4ae58" : "test-cluster-1-nat-01",
     "i-26a8db45" : "test-cluster-1-nat-02",
     "i-b0fc1ad3" : "test-cluster-1-db1"
 }
 
-tc1_sapi_min_priority2 = { 
-    "i-ca680353" : "test-cluster-1-sapi2" 
+tc1_sapi_min_priority2 = {
+    "i-ca680353" : "test-cluster-1-sapi2"
 }
 
 
@@ -97,7 +96,7 @@ tc2_priority2 = {
     "i-5a6dea3b" : "test-cluster-2-pmsup"
 }
 
-tc1_elbs = { 
+tc1_elbs = {
     "test-clus-ElasticL-1IBE4F4X6W9XI": "i-7afd1b19",
     "test-clus-ElasticL-1U7DQ9RODD396": "i-6d889b0d,i-7e4ff712",
     "test-clus-ElasticL-RA6HTRYY9ZF3": "i-6d889b0d,i-7e4ff712",
@@ -106,10 +105,10 @@ tc1_elbs = {
     "test-clus-ElasticL-1MBRV1I03PHDO": "i-8a756ce9,i-b92f9cd9",
     "test-clus-ElasticL-13FZ3WKQF4EB9": "i-365b3a5a",
     "test-clus-ElasticL-imguprep": "i-365b3a5a",
-    "test-clus-sapi1": "i-ca680353" 
+    "test-clus-sapi1": "i-ca680353"
 }
 
-tc2_elbs = { 
+tc2_elbs = {
     "test-clus-ElasticL-1HBKGRLPGMNOG": "i-5a6dea3b",
     "test-clus-ElasticL-1NQYD52SKC5CG": "i-1c697975,i-223de349",
     "test-clus-ElasticL-1R0GSN9T4TYE9": "i-1c697975,i-223de349",
@@ -117,11 +116,11 @@ tc2_elbs = {
     "test-clus-ElasticL-1WXBSUU7OZYD0": "i-1c697975,i-223de349",
     "test-clus-ElasticL-1XLEAMD4UO6BY": "i-35b68e5d",
     "test-clus-ElasticL-8ZCJHCSL9KXZ": "i-35b68e5d",
-    "test-clus-ElasticL-9KTXUHX6QKZY": "i-af0bf9c2,i-d13f66be" 
+    "test-clus-ElasticL-9KTXUHX6QKZY": "i-af0bf9c2,i-d13f66be"
 }
 
 
-tc1_sapi_min_elbs = { 
+tc1_sapi_min_elbs = {
     "test-clus-sapi1": "i-ca680353"
 }
 
@@ -145,7 +144,7 @@ glip_webhook_url = "https://hooks.glip.com/webhook/8b127fc0-b7a5-4b39-b381-c4500
 def getStatus(instance_list):
     for instanceId in instance_list:
         instance = ec2_conn.get_only_instances(instance_ids=[instanceId])
-        print instance_list[instanceId] + " (" + instanceId + "} = " + instance[0].state                          
+        print instance_list[instanceId] + " (" + instanceId + "} = " + instance[0].state
 
 
 def resetELBs(elb_dict):
@@ -153,7 +152,7 @@ def resetELBs(elb_dict):
     message = "\n\n"
     elbs = elb_conn.get_all_load_balancers(load_balancer_names=elb_dict.keys())
 
-    for elb in elbs:        
+    for elb in elbs:
         message += str(elb.get_instance_health()) + "\n\n"
         for instanceState in elb.get_instance_health():
             if instanceState.state != "InService":
@@ -174,14 +173,14 @@ def resetELBs(elb_dict):
 
 def startInstances(instance_list):
 
-    message = ""    
+    message = ""
     instances = ec2_conn.get_only_instances(instance_ids=instance_list.keys())
     for instance in instances :
         if (instance.state not in 'running'):
             print "Starting " + (str(instance)).partition(":")[2]
             instance.start()
 
-    for instance in instances: 
+    for instance in instances:
         while instance.state not in ('running'):
             print "Waiting on " + (str(instance)).partition(":")[2]
             timer.sleep(5)
@@ -195,25 +194,25 @@ def startInstances(instance_list):
 
 def stopInstances(instance_list):
 
-    message = ""    
+    message = ""
     instances = ec2_conn.get_only_instances(instance_ids=instance_list.keys())
 
     for instance, name in instance_list.items() :
         print instance + " ( " + name + " )"
-        
+
     shutdown = raw_input("\n\n Confirm Shutdown > (yes to continue, else abort) ")
-    
-    if shutdown == 'yes':    
+
+    if shutdown == 'yes':
         for instance in instances :
             if instance.state in ('running'):
                  instance.stop()
 
-        for instance in instances :                       
+        for instance in instances :
             while instance.state not in ('stopping') and instance.state not in ('stopped'):
                  print "Waiting on " + (str(instance)).partition(":")[2]
                  timer.sleep(3)
                  instance.update()
-                 
+
             instanceId = (str(instance)).partition(":")[2]
             print "\n\n" + instance_list[instanceId] + " (" + instanceId + "} = " + instance.state
             message += "\n\n" + instance_list[instanceId] + " (" + instanceId + "} = " + instance.state
@@ -227,13 +226,13 @@ def send_notifications(message, subject):
     send_glip_message(subject)
 
 def send_mail(message, subject):
-    message += "\n\n Script Version: " + script_version    
+    message += "\n\n Script Version: " + script_version
     sns_conn.publish(topic=sns_topic, message=message, subject=subject)
 
 def send_glip_message(message):
     headers = {"Content-type": "application/json"}
     postbody = {
-        "activity":"Test Cluster Status Update [Ver: " + script_version + "]", 
+        "activity":"Test Cluster Status Update [Ver: " + script_version + "]",
         "body": message
     }
     con = httplib.HTTPSConnection("hooks.glip.com")
@@ -243,7 +242,7 @@ def send_glip_message(message):
         responseText = response.read()
         print "\nWARNING: Posting to glip webhook failed. Http Status: " + str(response.status) + " Response text: " + responseText + "\n\n"
 
-    
+
 def start_tc1():
 
     print "\n\n *** Starting Priority 1 Instances in TC1 *** "
@@ -265,7 +264,7 @@ def start_tc1():
 
     elapsed = time() - start
     message += "\n\n Took " + str(elapsed) + " ms to start all instances and reset load balancers"
-    
+
     send_notifications(message, "Test Cluster 1 Started")
 
 def start_tc2():
@@ -289,7 +288,7 @@ def start_tc2():
 
     elapsed = time() - start
     message += "\n\n Took " + str(elapsed) + " ms to start all instances and reset load balancers"
-    
+
     send_notifications(message, "Test Cluster 2 Started")
 
 def start_tc1_sapi_min():
@@ -313,14 +312,14 @@ def start_tc1_sapi_min():
 
     elapsed = time() - start
     message += "\n\n Took " + str(elapsed) + " ms to start all instances and reset load balancers"
-    
+
     send_notifications(message, "Test Cluster 1 Sesame API Minimal - Started")
 
 
 def stop_tc1():
     message = "Stopping TC1"
     start = time()
-    
+
     message += stopInstances(dict(tc1_priority1.items() + tc1_priority2.items()))
 
     elapsed = time() - start
@@ -331,10 +330,10 @@ def stop_tc1():
 def stop_tc2():
     message = "Stopping TC2"
     start = time()
-    
+
     message += stopInstances(dict(tc2_priority1.items() + tc2_priority2.items()))
-    
+
     elapsed = time() - start
     message += "\n\n Took " + str(elapsed) + " ms to initiate stop for all instances."
-    
+
     send_notifications(message, "Test Cluster 2 Stopped")
