@@ -44,7 +44,13 @@ mvn gatling:test
     -DstatsUrl=http://localhost:9998
 ```
 
-
+### Basic Polr Test
+```
+mvn gatling:test
+    -Dgatling.simulationClass=com.sesamecom.loadtest.polr.PolrTest
+    -DpolrBaseUrl=http://127.0.0.1
+    -DpolrAccessToken=7ea1a53c2e05e0683608d07ac840ad
+```
 
 ## Working on systems with both Java 6 and 8
 Gatling requires Java 8. Maven primarily uses the JAVA_HOME environmental variable to determine which version to use. Also be weary of compiler targets in the core settings.xml file.
