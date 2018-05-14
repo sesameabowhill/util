@@ -7,10 +7,13 @@ import java.util.concurrent.atomic.AtomicInteger
 import scala.concurrent.duration._
 import scala.util.Random
 
+// beware: you need to import the jdbc module
+import io.gatling.jdbc.Predef._
+
 /**
   * Smoke screen test of stats service urls
   */
-class ExperimentalTest extends Simulation {
+class ClickThroughTest extends Simulation {
 
   // https://stackoverflow.com/a/1269279
   implicit def toInt(in:Integer) = in.intValue()
@@ -26,39 +29,41 @@ class ExperimentalTest extends Simulation {
   // Fetch access token
   val polrAccessToken = System.getProperty(POLR_ACCESS_TOKEN)
 
+  val feeder = jdbcFeeder("jdbc:mysql://localhost:3308/polr", "root", "sesame", "SELECT short_url FROM links").random
+
+/*
   // build our own feeder to generate urls
   val feeder = 
     Iterator.continually(
       Map(
         "urx" -> (
-          "https://sesamecom.com/" + Random.alphanumeric.take(20).mkString
+          jdbcFeeder("jdbc:mysql://localhost:3308/polr", "root", "sesame", "SELECT short_url FROM links limit 1").random
           )
         ) 
       )
+*/
 
   // set base url without browser caching
-  val httpConf = http.baseURL(targetHostBaseUrl).disableCaching
+  val httpConf = http.baseURL(targetHostBaseUrl).disableFollowRedirect
+  //.disableCaching
+  //.disableFollowRedirect
 
   // create a scenario where we ask to shorten a random url
   val myscenario = 
-    scenario("ExperimentalTest")
+    scenario("ClickThroughTest")
       .feed(feeder)
+//      .exec { session =>
+//        println(session)
+//        println("${short_url}")
+//        println(s"/api/v2/action/lookup?key=$polrAccessToken&url_ending=${short_url}")
+//        session
+//        }
       .pause(1)
-      .exec { session =>
-        println(session)
-        println( 
-          s"""/api/v2/action/shorten?key=$polrAccessToken
-          |&url=${session("urx").as[String]}"""
-        .stripMargin.replaceAll("\n", " ")
-        )
-        session
-        }
-      .pause(1)
-      .exec( http("ShortenUrl")
+      .exec( http("lookupURL")
         .get( session =>
         // https://alvinalexander.com/scala/how-to-create-multiline-strings-heredoc-in-scala-cookbook
-        s"""/api/v2/action/shorten?key=$polrAccessToken
-        |&url=${session("urx").as[String]}"""
+        s"""/api/v2/action/lookup?key=$polrAccessToken
+        |&url_ending=${session("short_url").as[String]}"""
         .stripMargin.replaceAll("\n", " ")
         )
       )
@@ -69,7 +74,7 @@ class ExperimentalTest extends Simulation {
       nothingFor(4 seconds),
       atOnceUsers(1),
       //rampUsers(60) over (60 seconds),
-      constantUsersPerSec(15) during (240 seconds),
+      constantUsersPerSec(1) during (2 seconds),
       )
     .protocols(httpConf)
   )

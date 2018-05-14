@@ -65,11 +65,11 @@ class ShortTest extends Simulation {
   // run scenario against target
   setUp(
     scn.inject(
-      nothingFor(4 seconds),
-      atOnceUsers(10),
-      rampUsers(10) over (5 seconds),
-      constantUsersPerSec(20) during (15 seconds),
-      constantUsersPerSec(20) during (15 seconds) randomized,
+      nothingFor(1 seconds),
+      atOnceUsers(1),
+      rampUsers(1) over (5 seconds),
+//      constantUsersPerSec(20) during (15 seconds),
+//      constantUsersPerSec(20) during (15 seconds) randomized,
       )
     .protocols(httpProtocol)
   )
