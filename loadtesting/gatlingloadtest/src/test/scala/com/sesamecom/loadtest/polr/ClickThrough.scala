@@ -21,8 +21,6 @@ class ClickThroughTest extends Simulation {
   val POLR_BASE_PROPERTY = "polrBaseUrl"
   val POLR_ACCESS_TOKEN = "polrAccessToken"
 
-  val offset = new AtomicInteger()
-
   // Setup Scenario target
   val targetHostBaseUrl = System.getProperty(POLR_BASE_PROPERTY)
 
@@ -31,33 +29,22 @@ class ClickThroughTest extends Simulation {
 
   val feeder = jdbcFeeder("jdbc:mysql://localhost:3308/polr", "root", "sesame", "SELECT short_url FROM links").random
 
-/*
-  // build our own feeder to generate urls
-  val feeder = 
-    Iterator.continually(
-      Map(
-        "urx" -> (
-          jdbcFeeder("jdbc:mysql://localhost:3308/polr", "root", "sesame", "SELECT short_url FROM links limit 1").random
-          )
-        ) 
-      )
-*/
-
-  // set base url without browser caching
+  // set base url without browser caching: .disableCaching
   val httpConf = http.baseURL(targetHostBaseUrl).disableFollowRedirect
-  //.disableCaching
-  //.disableFollowRedirect
 
   // create a scenario where we ask to shorten a random url
   val myscenario = 
     scenario("ClickThroughTest")
       .feed(feeder)
-//      .exec { session =>
+      .exec { session =>
 //        println(session)
-//        println("${short_url}")
-//        println(s"/api/v2/action/lookup?key=$polrAccessToken&url_ending=${short_url}")
-//        session
-//        }
+        println (
+          s"""/api/v2/action/lookup?key=$polrAccessToken
+          |&url_ending=${session("short_url").as[String]}"""
+          .stripMargin.replaceAll("\n", " ")
+          )
+        session
+        }
       .pause(1)
       .exec( http("lookupURL")
         .get( session =>
@@ -73,8 +60,7 @@ class ClickThroughTest extends Simulation {
     myscenario.inject(
       nothingFor(4 seconds),
       atOnceUsers(1),
-      //rampUsers(60) over (60 seconds),
-      constantUsersPerSec(1) during (2 seconds),
+      constantUsersPerSec(20) during (240 seconds),
       )
     .protocols(httpConf)
   )
