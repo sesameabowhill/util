@@ -66,3 +66,5 @@ class ClickThroughTest extends Simulation {
   )
 
 }
+
+// mvn gatling:test -Dgatling.simulationClass=com.sesamecom.loadtest.polr.ClickThroughTest -DpolrBaseUrl=http://127.0.0.1:8080 -DpolrAccessToken=e3cea37097877464d4cb7f65cce215
