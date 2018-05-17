@@ -10,7 +10,7 @@ import scala.util.Random
 /**
   * Smoke screen test of stats service urls
   */
-class ExperimentalTest extends Simulation {
+class ConvertLongToShort extends Simulation {
 
   // https://stackoverflow.com/a/1269279
   implicit def toInt(in:Integer) = in.intValue()
@@ -41,7 +41,7 @@ class ExperimentalTest extends Simulation {
 
   // create a scenario where we ask to shorten a random url
   val myscenario = 
-    scenario("ExperimentalTest")
+    scenario("ConvertLongToShort")
       .feed(feeder)
       .pause(1)
       .exec { session =>
